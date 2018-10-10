@@ -1,0 +1,6 @@
+*.log
+dist
+dest
+dest-es
+node_modules
+coverage
