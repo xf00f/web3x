@@ -803,6 +803,10 @@ acorn@^6.0.1:
   version "6.0.2"
   resolved "https://registry.npmjs.org/acorn/-/acorn-6.0.2.tgz#6a459041c320ab17592c6317abbfdf4bbaa98ca4"
 
+aes-js@3.0.0:
+  version "3.0.0"
+  resolved "https://registry.npmjs.org/aes-js/-/aes-js-3.0.0.tgz#e21df10ad6c2053295bcbb8dab40b09dbea87e4d"
+
 ajv-errors@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/ajv-errors/-/ajv-errors-1.0.0.tgz#ecf021fa108fd17dfb5e6b383f2dd233e31ffc59"
@@ -1159,7 +1163,7 @@ bluebird@^3.5.1:
   version "3.5.2"
   resolved "https://registry.npmjs.org/bluebird/-/bluebird-3.5.2.tgz#1be0908e054a751754549c270489c1505d4ab15a"
 
-bn.js@^4.0.0, bn.js@^4.1.0, bn.js@^4.1.1, bn.js@^4.4.0:
+bn.js@^4.0.0, bn.js@^4.1.0, bn.js@^4.1.1, bn.js@^4.11.8, bn.js@^4.4.0:
   version "4.11.8"
   resolved "https://registry.npmjs.org/bn.js/-/bn.js-4.11.8.tgz#2cde09eb5ee341f484746bb0309b3253b1b1442f"
 
@@ -1237,7 +1241,7 @@ browser-resolve@^1.11.3:
   dependencies:
     resolve "1.1.7"
 
-browserify-aes@^1.0.0, browserify-aes@^1.0.4:
+browserify-aes@^1.0.0, browserify-aes@^1.0.4, browserify-aes@^1.2.0:
   version "1.2.0"
   resolved "http://registry.npmjs.org/browserify-aes/-/browserify-aes-1.2.0.tgz#326734642f403dabc3003209853bb70ad428ef48"
   dependencies:
@@ -1997,7 +2001,16 @@ electron-to-chromium@^1.3.73:
   version "1.3.77"
   resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.3.77.tgz#9207a874a21a8fcb665bb4ff1675a11ba65517f4"
 
-elliptic@^6.0.0:
+elliptic@6.3.3:
+  version "6.3.3"
+  resolved "https://registry.npmjs.org/elliptic/-/elliptic-6.3.3.tgz#5482d9646d54bcb89fd7d994fc9e2e9568876e3f"
+  dependencies:
+    bn.js "^4.4.0"
+    brorand "^1.0.1"
+    hash.js "^1.0.0"
+    inherits "^2.0.1"
+
+elliptic@^6.0.0, elliptic@^6.4.0:
   version "6.4.1"
   resolved "https://registry.npmjs.org/elliptic/-/elliptic-6.4.1.tgz#c2d0b7776911b86722c632c3c06c60f2f819939a"
   dependencies:
@@ -2120,6 +2133,21 @@ esutils@^2.0.2:
 etag@~1.8.1:
   version "1.8.1"
   resolved "https://registry.npmjs.org/etag/-/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
+
+ethers@^3.0.29:
+  version "3.0.29"
+  resolved "https://registry.npmjs.org/ethers/-/ethers-3.0.29.tgz#ce8139955b4ed44456eb6764b089bb117c86775d"
+  dependencies:
+    aes-js "3.0.0"
+    bn.js "^4.4.0"
+    elliptic "6.3.3"
+    hash.js "^1.0.0"
+    inherits "2.0.1"
+    js-sha3 "0.5.7"
+    scrypt-js "2.0.3"
+    setimmediate "1.0.4"
+    uuid "2.0.1"
+    xmlhttprequest "1.8.0"
 
 eventemitter3@^3.0.0:
   version "3.1.0"
@@ -3155,6 +3183,10 @@ isobject@^3.0.0, isobject@^3.0.1:
   version "3.0.1"
   resolved "https://registry.npmjs.org/isobject/-/isobject-3.0.1.tgz#4e431e92b11a9731636aa1f9c8d1ccbcfdab78df"
 
+isomorphic-ws@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.npmjs.org/isomorphic-ws/-/isomorphic-ws-4.0.1.tgz#55fd4cd6c5e6491e76dc125938dd863f5cd4f2dc"
+
 isstream@~0.1.2:
   version "0.1.2"
   resolved "https://registry.npmjs.org/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
@@ -3515,6 +3547,10 @@ jest@^23.5.0:
 js-levenshtein@^1.1.3:
   version "1.1.4"
   resolved "https://registry.npmjs.org/js-levenshtein/-/js-levenshtein-1.1.4.tgz#3a56e3cbf589ca0081eb22cd9ba0b1290a16d26e"
+
+js-sha3@0.5.7:
+  version "0.5.7"
+  resolved "https://registry.npmjs.org/js-sha3/-/js-sha3-0.5.7.tgz#0d4ffd8002d5333aabaf4a23eed2f6374c9f28e7"
 
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"
@@ -4135,6 +4171,10 @@ node-forge@0.7.5:
   version "0.7.5"
   resolved "https://registry.npmjs.org/node-forge/-/node-forge-0.7.5.tgz#6c152c345ce11c52f465c2abd957e8639cd674df"
 
+node-http-xhr@^1.3.4:
+  version "1.3.4"
+  resolved "https://registry.npmjs.org/node-http-xhr/-/node-http-xhr-1.3.4.tgz#0dbf827c2858f40c57a79375fc4be07c8ff46f55"
+
 node-int64@^0.4.0:
   version "0.4.0"
   resolved "https://registry.npmjs.org/node-int64/-/node-int64-0.4.0.tgz#87a9065cdb355d3182d8f94ce11188b825c68a3b"
@@ -4543,7 +4583,7 @@ path-type@^1.0.0:
     pify "^2.0.0"
     pinkie-promise "^2.0.0"
 
-pbkdf2@^3.0.3:
+pbkdf2@^3.0.17, pbkdf2@^3.0.3:
   version "3.0.17"
   resolved "https://registry.npmjs.org/pbkdf2/-/pbkdf2-3.0.17.tgz#976c206530617b14ebb32114239f7b09336e93a6"
   dependencies:
@@ -4737,7 +4777,7 @@ randomatic@^3.0.0:
     kind-of "^6.0.0"
     math-random "^1.0.1"
 
-randombytes@^2.0.0, randombytes@^2.0.1, randombytes@^2.0.5:
+randombytes@^2.0.0, randombytes@^2.0.1, randombytes@^2.0.5, randombytes@^2.0.6:
   version "2.0.6"
   resolved "https://registry.npmjs.org/randombytes/-/randombytes-2.0.6.tgz#d302c522948588848a8d300c932b44c24231da80"
   dependencies:
@@ -5069,6 +5109,10 @@ schema-utils@^1.0.0:
     ajv-errors "^1.0.0"
     ajv-keywords "^3.1.0"
 
+scrypt-js@2.0.3:
+  version "2.0.3"
+  resolved "http://registry.npmjs.org/scrypt-js/-/scrypt-js-2.0.3.tgz#bb0040be03043da9a012a2cea9fc9f852cfc87d4"
+
 select-hose@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
@@ -5147,6 +5191,10 @@ set-value@^2.0.0:
     is-extendable "^0.1.1"
     is-plain-object "^2.0.3"
     split-string "^3.0.1"
+
+setimmediate@1.0.4:
+  version "1.0.4"
+  resolved "https://registry.npmjs.org/setimmediate/-/setimmediate-1.0.4.tgz#20e81de622d4a02588ce0c8da8973cbcf1d3138f"
 
 setimmediate@^1.0.4:
   version "1.0.5"
@@ -5805,6 +5853,10 @@ use@^3.1.0:
   version "3.1.1"
   resolved "https://registry.npmjs.org/use/-/use-3.1.1.tgz#d50c8cac79a19fbc20f2911f56eb973f4e10070f"
 
+utf8@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.npmjs.org/utf8/-/utf8-3.0.0.tgz#f052eed1364d696e769ef058b183df88c87f69d1"
+
 util-deprecate@~1.0.1:
   version "1.0.2"
   resolved "https://registry.npmjs.org/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
@@ -5835,6 +5887,10 @@ utila@^0.4.0, utila@~0.4:
 utils-merge@1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
+
+uuid@2.0.1:
+  version "2.0.1"
+  resolved "http://registry.npmjs.org/uuid/-/uuid-2.0.1.tgz#c2a30dedb3e535d72ccf82e343941a50ba8533ac"
 
 uuid@^3.0.1, uuid@^3.3.2:
   version "3.3.2"
@@ -5901,6 +5957,20 @@ wbuf@^1.1.0, wbuf@^1.7.2:
   resolved "https://registry.npmjs.org/wbuf/-/wbuf-1.7.3.tgz#c1d8d149316d3ea852848895cb6a0bfe887b87df"
   dependencies:
     minimalistic-assert "^1.0.0"
+
+web3x-es@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/web3x-es/-/web3x-es-1.0.2.tgz#c8451617095ed699ba64628685455a38508e646b"
+  dependencies:
+    bn.js "^4.11.8"
+    browserify-aes "^1.2.0"
+    elliptic "^6.4.0"
+    ethers "^3.0.29"
+    isomorphic-ws "^4.0.1"
+    node-http-xhr "^1.3.4"
+    pbkdf2 "^3.0.17"
+    randombytes "^2.0.6"
+    utf8 "^3.0.0"
 
 webidl-conversions@^4.0.2:
   version "4.0.2"
@@ -6101,6 +6171,10 @@ ws@^5.2.0:
 xml-name-validator@^3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/xml-name-validator/-/xml-name-validator-3.0.0.tgz#6ae73e06de4d8c6e47f9fb181f78d648ad457c6a"
+
+xmlhttprequest@1.8.0:
+  version "1.8.0"
+  resolved "https://registry.npmjs.org/xmlhttprequest/-/xmlhttprequest-1.8.0.tgz#67fe075c5c24fef39f9d65f5f7b7fe75171968fc"
 
 xregexp@4.0.0:
   version "4.0.0"

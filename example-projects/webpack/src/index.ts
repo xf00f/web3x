@@ -1,4 +1,4 @@
-import { Web3 } from 'web3.ts';
+import { Web3 } from 'web3x-es';
 import { getBalance } from './balance-fetcher';
 
 async function main() {

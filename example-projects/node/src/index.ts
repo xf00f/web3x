@@ -1,6 +1,6 @@
-import { Web3 } from 'web3.ts';
-import { sign, recover, fromWei } from 'web3.ts/dest/utils';
-import { Account, Wallet } from 'web3.ts/dest/eth/accounts';
+import { Web3 } from 'web3x';
+import { sign, recover, fromWei } from 'web3x/utils';
+import { Account, Wallet } from 'web3x/eth/accounts';
 import { getBalance } from './balance-fetcher';
 const abi = require('human-standard-token-abi');
 
