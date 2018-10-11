@@ -14,5 +14,6 @@
     "downlevelIteration": true,
     "inlineSourceMap": true
   },
-  "exclude": ["src/**/*.test.ts", "dest", "dest-es"]
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
 }

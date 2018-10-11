@@ -1,19 +1,17 @@
 import { isString } from 'util';
 import { Account } from './account';
 import { KeyStore, decrypt } from '../../utils/encryption';
-import { Eth } from '..';
-
-export interface IWallet {
-  remove(account: string | number): any;
-  save(password: string, keyname?: string): string;
-  load(password: string, keyname: string): any;
-  clear(): any;
-}
 
 export class Wallet {
   public static defaultKeyName = 'web3js_wallet';
   public length: number = 0;
   public accounts: Account[] = [];
+
+  static async fromKeystores(encryptedWallet: KeyStore[], password: string) {
+    const wallet = new Wallet();
+    await wallet.decrypt(encryptedWallet, password);
+    return wallet;
+  }
 
   private findSafeIndex(pointer: number = 0) {
     while (this.accounts[pointer]) {

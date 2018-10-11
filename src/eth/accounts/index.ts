@@ -21,4 +21,5 @@
  */
 
 export * from './accounts';
-export { KeyStore, encrypt, decrypt } from '../../utils/encryption';
+export * from './account';
+export * from './wallet';

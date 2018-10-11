@@ -20,7 +20,7 @@
  * @date 2017
  */
 
-import { encrypt, decrypt, KeyStore } from '../../utils';
+import { KeyStore } from '../../utils';
 import { Tx } from '../types';
 import { Wallet } from './wallet';
 import { sign, recover } from '../../utils/sign';
@@ -28,8 +28,6 @@ import { Account } from './account';
 import { recoverTransaction, signTransaction } from './sign-transaction';
 import { Signature } from '../../types';
 import { Eth } from '..';
-
-export { Account };
 
 export class Accounts {
   public wallet: Wallet;
@@ -66,11 +64,10 @@ export class Accounts {
   }
 
   async decrypt(v3Keystore: KeyStore | string, password: string, nonStrict: boolean = false) {
-    return this.privateKeyToAccount(await decrypt(v3Keystore, password, nonStrict));
+    return await Account.fromKeystore(v3Keystore, password, nonStrict);
   }
 
   async encrypt(privateKey: string, password: string, options?: any) {
-    const account = this.privateKeyToAccount(privateKey);
-    return encrypt(privateKey, account.address, password, options);
+    return Account.fromPrivate(privateKey).encrypt(password, options);
   }
 }

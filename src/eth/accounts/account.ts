@@ -1,6 +1,6 @@
 import { Tx } from '../types';
 import { create, fromPrivate } from '../../eth-lib/account';
-import { randomHex, encrypt } from '../../utils';
+import { randomHex, encrypt, KeyStore, decrypt } from '../../utils';
 import { sign } from '../../utils/sign';
 import { signTransaction } from './sign-transaction';
 import { Eth } from '..';
@@ -16,6 +16,10 @@ export class Account {
   static fromPrivate(privateKey: string) {
     const { address, publicKey } = fromPrivate(privateKey);
     return new Account(address, privateKey, publicKey);
+  }
+
+  static async fromKeystore(v3Keystore: KeyStore | string, password: string, nonStrict = false) {
+    return Account.fromPrivate(await decrypt(v3Keystore, password, nonStrict));
   }
 
   signTransaction(tx: Tx, eth: Eth) {

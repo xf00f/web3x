@@ -1,10 +1,55 @@
 {
   "name": "web3.ts",
   "version": "1.0.0",
+  "license": "LGPL-3.0",
+  "description": "Typescript port of web3.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xf00f/web3.ts.git"
+  },
+  "homepage": "https://github.com/xf00f/web3.ts",
+  "bugs": {
+    "url": "https://github.com/xf00f/web3.ts/issues"
+  },
+  "keywords": [
+    "Ethereum",
+    "TypeScript",
+    "API"
+  ],
+  "contributors": [
+    {
+      "name": "xf00f",
+      "email": "xf00f@protonmail.com",
+      "url": "https://github.com/xf00f"
+    },
+    {
+      "name": "Fabian Vogelsteller",
+      "email": "fabian@ethereum.org",
+      "url": "http://frozeman.de"
+    },
+    {
+      "name": "Marek Kotewicz",
+      "email": "marek@parity.io",
+      "url": "https://github.com/debris"
+    },
+    {
+      "name": "Marian Oancea",
+      "url": "https://github.com/cubedro"
+    },
+    {
+      "name": "Gav Wood",
+      "email": "g@parity.io",
+      "url": "http://gavwood.com"
+    },
+    {
+      "name": "Jeffery Wilcke",
+      "email": "jeffrey.wilcke@ethereum.org",
+      "url": "https://github.com/obscuren"
+    }
+  ],
   "main": "dest/index.js",
   "module": "dest-es/index.js",
   "types": "dest-es/index.d.ts",
-  "license": "MIT",
   "sideEffects": false,
   "scripts": {
     "build": "tsc -p tsconfig.cjs.json && tsc -p tsconfig.es.json",
@@ -27,6 +72,10 @@
       "jest-dot-reporter"
     ]
   },
+  "files": [
+    "/dest",
+    "/dest-es"
+  ],
   "dependencies": {
     "bn.js": "^4.11.8",
     "browserify-aes": "^1.2.0",

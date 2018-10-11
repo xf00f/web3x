@@ -44,9 +44,11 @@ describe('eth', function() {
         });
 
         it('recover signature using a string', function() {
-          const address = recoverFromSigString(test.data, test.signature);
+          const address1 = recoverFromSigString(test.data, test.signature);
+          const address2 = recover(test.data, test.signature);
 
-          expect(address).toBe(test.address);
+          expect(address1).toBe(test.address);
+          expect(address2).toBe(test.address);
         });
 
         it('recover signature using a string and preFixed', function() {
@@ -92,10 +94,8 @@ describe('eth', function() {
         it('recover signature using a hash and r s v values', function() {
           const sig = sign(test.data, test.privateKey);
           const address1 = recoverFromVRS(test.data, sig.v, sig.r, sig.s);
-          const address2 = recover(test.data, sig.v, sig.r, sig.s);
 
           expect(address1).toBe(test.address);
-          expect(address2).toBe(test.address);
         });
       });
     });

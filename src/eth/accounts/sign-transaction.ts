@@ -1,6 +1,6 @@
 import { Tx } from '../types';
 import { formatters } from '../../core-helpers';
-import { numberToHex, hexToNumber, isAddress } from '../../utils';
+import { numberToHex } from '../../utils';
 import RLP from '../../eth-lib/rlp';
 import Bytes from '../../eth-lib/bytes';
 import Hash from '../../eth-lib/hash';
