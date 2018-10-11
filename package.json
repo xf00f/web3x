@@ -1,6 +1,6 @@
 {
-  "name": "web3.ts",
-  "version": "1.0.0",
+  "name": "web3x",
+  "version": "1.0.1",
   "license": "LGPL-3.0",
   "description": "Typescript port of web3.js",
   "repository": {
@@ -47,13 +47,13 @@
       "url": "https://github.com/obscuren"
     }
   ],
-  "main": "dest/index.js",
-  "module": "dest-es/index.js",
-  "types": "dest-es/index.d.ts",
+  "main": "./index.js",
+  "types": "./index.d.ts",
   "sideEffects": false,
   "scripts": {
     "build": "tsc -p tsconfig.cjs.json && tsc -p tsconfig.es.json",
-    "test": "jest"
+    "test": "jest",
+    "deploy": "yarn build && yarn test && yarn version --patch && node ./package.js && yarn publish dest && yarn publish dest-es"
   },
   "jest": {
     "transform": {
@@ -70,12 +70,9 @@
     ],
     "reporters": [
       "jest-dot-reporter"
-    ]
+    ],
+    "rootDir": "./src"
   },
-  "files": [
-    "/dest",
-    "/dest-es"
-  ],
   "dependencies": {
     "bn.js": "^4.11.8",
     "browserify-aes": "^1.2.0",
