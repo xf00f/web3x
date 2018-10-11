@@ -53,7 +53,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.cjs.json && tsc -p tsconfig.es.json",
     "test": "jest",
-    "deploy": "yarn build && yarn test && yarn version --patch && node ./package.js && yarn publish dest && yarn publish dest-es"
+    "deploy": "yarn build && yarn test && yarn version --patch && node ./package.js && npm publish dest && npm publish dest-es"
   },
   "jest": {
     "transform": {
