@@ -1,0 +1,54 @@
+# web3.ts
+TypeScript port of web3.js
+
+## Why?
+web3.js is a very popular Ethereum library, but there are a few issues.
+
+* The Typescript typings are distributed separately and are not perfect.
+* It has not been fully ported to use ES6 modules, making it harder for bundlers to tree-shake dead code.
+* It has a package structure that leads to duplication of external libraries such as bn.js being included multiple times.
+* The code contains side effects, circular dependencies, and is not as immutable or functional as it could be, making it difficult to respond to and resolve issues.
+
+web3.ts attempts to solve all the above issues.
+
+* It is pure TypeScript.
+* It uses jest for testing.
+* It attempts to reduce dependencies on external libraries.
+* It compiles to both commonjs and ES6 module versions for node.js and ES6 aware web bundlers such as webpack.
+* It strives for functional, immutable, reusable components.
+
+In a small example that prints an Eth balance compiled with webpack, web3.js produced an output file of 858k, web3.ts produced a file of 369k. That's a 57% reduction. It's likely this can be improved further.
+
+## Usage
+Example usage.
+```
+import { Web3 } from 'web3.ts';
+import { fromWei } from 'web3.ts/dest-es/utils';
+
+async function main() {
+  const web3 = new Web3('ws://localhost:7545');
+  const balance = await web3.eth.getBalance('0x0000000000000000000000000000000000000000');
+  console.log(`Balance of 0 address ETH: ${fromWei(balance, 'ether')}`);
+  web3.close();
+}
+
+main().catch(console.error);
+```
+
+See example projects for more complex examples.
+
+## Differences
+This is not a drop in replacement for web3.js, certain things have changed. However it is very close to the original API and porting an application to use it shouldn't be too challenging.
+* Callbacks for request/response style calls no longer supported, promises only.
+* Functions that don't depend on surrounding class state have been moved to utils (e.g. `sign`, `recover`).
+* Explicitly import parts of the library rather then accessing them via web3 object. (e.g. `web3.utils` no longer available.)
+* Sanitize some hybrid types. e.g. access wallet accounts via `wallet.get(0)` rather than `wallet[0]`.
+
+## Example projects
+Two example TypeScript projects are included, one for webpack and one for node.js. They are configured to work with jest for testing. Adapting them to pure JavaScript if you don't want to use TypeScript should be trivial.
+
+## Missing functionality
+The current features have not yet been ported.
+* ssh
+* bzz
+* ens
