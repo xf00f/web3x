@@ -44,9 +44,53 @@ import {
   outputLogFormatter,
 } from '../core-helpers/formatters';
 import { isString, isFunction } from 'util';
-import { BlockHeader, Transaction, LogsSubscriptionOptions, Tx, BlockType, Block, BlockHash, TxHash } from './types';
-import { Callback, Log, Data, Address, Quantity, TransactionReceipt, EncodedTransaction } from '../types';
+import {
+  BlockHeader,
+  EncodedTransaction,
+  Transaction,
+  Tx,
+  BlockType,
+  Block,
+  BlockHash,
+  TransactionHash,
+} from '../types';
+import { Callback, Data, Address, Quantity } from '../types';
 import { PromiEvent } from '../core-promievent';
+import { EventLog } from './contract/decode-event-abi';
+
+export interface TransactionReceipt {
+  transactionHash: string;
+  transactionIndex: number;
+  blockHash: string;
+  blockNumber: number;
+  from: string;
+  to: string;
+  contractAddress: string;
+  cumulativeGasUsed: number;
+  gasUsed: number;
+  logs?: Log[];
+  events?: {
+    [eventName: string]: EventLog;
+  };
+  status: string;
+}
+
+export interface Log {
+  address: string;
+  data: string;
+  topics: string[];
+  logIndex: number;
+  transactionHash: string;
+  transactionIndex: number;
+  blockHash: string;
+  blockNumber: number;
+}
+
+export interface LogsSubscriptionOptions {
+  fromBlock?: number;
+  address?: string;
+  topics?: Array<string | string[]>;
+}
 
 export class Eth {
   public accounts: Accounts;
@@ -203,7 +247,7 @@ export class Eth {
       params: 2,
       inputFormatter: [inputAddressFormatter, inputDefaultBlockNumberFormatter],
       outputFormatter: outputBigNumberFormatter,
-      defaultBlock,
+      defaultBlock: defaultBlock || this.defaultBlock,
       requestManager: this.requestManager,
     }).createFunction();
 
@@ -216,7 +260,7 @@ export class Eth {
       call: 'eth_getStorageAt',
       params: 3,
       inputFormatter: [inputAddressFormatter, numberToHex, inputDefaultBlockNumberFormatter],
-      defaultBlock,
+      defaultBlock: defaultBlock || this.defaultBlock,
       requestManager: this.requestManager,
     }).createFunction();
 
@@ -229,7 +273,7 @@ export class Eth {
       call: 'eth_getCode',
       params: 2,
       inputFormatter: [inputAddressFormatter, inputDefaultBlockNumberFormatter],
-      defaultBlock,
+      defaultBlock: defaultBlock || this.defaultBlock,
       requestManager: this.requestManager,
     }).createFunction();
 
@@ -311,7 +355,7 @@ export class Eth {
     return method(blockRef);
   }
 
-  getTransaction(hash: TxHash): Promise<Transaction> {
+  getTransaction(hash: TransactionHash): Promise<Transaction> {
     const method = new Method({
       name: 'getTransaction',
       call: 'eth_getTransactionByHash',
@@ -342,7 +386,7 @@ export class Eth {
     return method(blockRef, index);
   }
 
-  getTransactionReceipt(hash: TxHash): Promise<TransactionReceipt> {
+  getTransactionReceipt(hash: TransactionHash): Promise<TransactionReceipt> {
     const method = new Method({
       name: 'getTransactionReceipt',
       call: 'eth_getTransactionReceipt',
@@ -362,7 +406,7 @@ export class Eth {
       params: 2,
       inputFormatter: [inputAddressFormatter, inputDefaultBlockNumberFormatter],
       outputFormatter: hexToNumber,
-      defaultBlock,
+      defaultBlock: defaultBlock || this.defaultBlock,
       requestManager: this.requestManager,
     }).createFunction();
 
@@ -427,7 +471,7 @@ export class Eth {
       call: 'eth_call',
       params: 2,
       inputFormatter: [inputCallFormatter, inputDefaultBlockNumberFormatter],
-      defaultBlock,
+      defaultBlock: defaultBlock || this.defaultBlock,
       requestManager: this.requestManager,
     }).createFunction();
 

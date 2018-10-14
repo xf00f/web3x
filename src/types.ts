@@ -2,43 +2,63 @@ export type Callback<T> = (error: Error, result: T) => void;
 
 export type Address = string;
 export type TransactionHash = string;
-export type Quantity = string;
+export type Quantity = string | number;
 export type Data = string;
 
-export interface EventEmitter {
-  on(type: 'data', handler: (event: EventLog) => void): EventEmitter;
-  on(type: 'changed', handler: (receipt: EventLog) => void): EventEmitter;
-  on(type: 'error', handler: (error: Error) => void): EventEmitter;
-  on(type: 'error' | 'data' | 'changed', handler: (error: Error | TransactionReceipt | string) => void): EventEmitter;
+export interface Tx {
+  nonce?: string | number;
+  chainId?: string | number;
+  from?: string;
+  to?: string;
+  data?: string;
+  value?: string | number;
+  gas?: string | number;
+  gasPrice?: string | number;
 }
 
-export interface EventLog {
-  event: string;
-  address: string;
-  returnValues: any;
-  logIndex: number;
-  transactionIndex: number;
-  transactionHash: string;
-  blockHash: string;
-  blockNumber: number;
-  raw?: { data: string; topics: string[] };
+export type BlockType = 'latest' | 'pending' | 'genesis' | number;
+export type BlockHash = string;
+
+export interface BlockHeader {
+  number: number;
+  hash: string;
+  parentHash: string;
+  nonce: string;
+  sha3Uncles: string;
+  logsBloom: string;
+  transactionRoot: string;
+  stateRoot: string;
+  receiptRoot: string;
+  miner: string;
+  extraData: string;
+  gasLimit: number;
+  gasUsed: number;
+  timestamp: number;
 }
 
-export interface TransactionReceipt {
-  transactionHash: string;
-  transactionIndex: number;
+export interface Block extends BlockHeader {
+  transactions: Transaction[];
+  size: number;
+  difficulty: number;
+  totalDifficulty: number;
+  uncles: string[];
+}
+
+export interface Transaction {
+  hash: string;
+  nonce: number;
   blockHash: string;
   blockNumber: number;
+  transactionIndex: number;
   from: string;
   to: string;
-  contractAddress: string;
-  cumulativeGasUsed: number;
-  gasUsed: number;
-  logs?: Log[];
-  events?: {
-    [eventName: string]: EventLog;
-  };
-  status: string;
+  value: string;
+  gasPrice: string;
+  gas: number;
+  input: string;
+  v?: string;
+  r?: string;
+  s?: string;
 }
 
 export interface EncodedTransaction {
@@ -56,41 +76,3 @@ export interface EncodedTransaction {
     hash: string;
   };
 }
-
-export interface Signature {
-  message: string;
-  messageHash: string;
-  r: string;
-  s: string;
-  v: string;
-  signature: string;
-}
-
-export interface Logs {
-  fromBlock?: number;
-  address?: string;
-  topics?: Array<string | string[]>;
-}
-export interface Log {
-  address: string;
-  data: string;
-  topics: string[];
-  logIndex: number;
-  transactionHash: string;
-  transactionIndex: number;
-  blockHash: string;
-  blockNumber: number;
-}
-export interface Subscribe<T> {
-  subscription: {
-    id: string;
-    subscribe(callback?: Callback<Subscribe<T>>): Subscribe<T>;
-    unsubscribe(callback?: Callback<boolean>): void | boolean;
-    arguments: object;
-  };
-  on(type: 'data' | 'changed', handler: (data: T) => void): void;
-  on(type: 'error', handler: (data: Error) => void): void;
-}
-
-export class Shh {} // TODO: Type
-export class Bzz {} // TODO: Type

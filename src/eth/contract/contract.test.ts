@@ -1232,7 +1232,8 @@ describe('contract', function() {
     });
 
     it('getPastEvents should get past events and format them correctly', async () => {
-      const signature = 'testArr(int[])';
+      //const signature = 'testArr(int[])';
+      const signature = 'Changed(address,uint256,uint256,uint256)';
 
       const topic1 = [
         sha3(signature),
@@ -1293,7 +1294,7 @@ describe('contract', function() {
       expect(result).toEqual([
         {
           event: 'Changed',
-          signature: '0xc00c1c37cc8b83163fb4fddc06c74d1d5c00d74648e7cb28c0ebada3e32fd62c',
+          signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
           id: 'log_9ff24cb4',
           address: address,
           blockNumber: 3,
@@ -1320,7 +1321,7 @@ describe('contract', function() {
         },
         {
           event: 'Changed',
-          signature: '0xc00c1c37cc8b83163fb4fddc06c74d1d5c00d74648e7cb28c0ebada3e32fd62c',
+          signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
           id: 'log_29c93e15',
           address: address,
           blockNumber: 4,
@@ -1534,8 +1535,8 @@ describe('contract', function() {
           expect(address).toBe(receipt.contractAddress);
           expect(contract.address).toBeUndefined();
         })
-        .then((newContract: Contract) => {
-          expect(newContract.address).toBe(address);
+        .then(contract => {
+          expect(contract.address).toBe(address);
           done();
         });
     });

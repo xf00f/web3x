@@ -1,10 +1,9 @@
 import { isBoolean } from 'util';
 import { errors, formatters } from '../../core-helpers';
 import { Method } from '../../core-method';
-import { AbiDefinition } from '.';
-import { promiEvent } from '../../core-promievent';
+import { AbiDefinition, Contract } from '.';
+import { promiEvent, PromiEvent } from '../../core-promievent';
 import * as utils from '../../utils';
-import { decodeEventABI } from './decode-event-abi';
 import { abi } from '../abi';
 import { IRequestManager } from '../../core-request-manager';
 import { toChecksumAddress } from '../../utils';
@@ -76,7 +75,7 @@ export class TxDeploy {
     return estimateGas(methodOptions);
   }
 
-  public send(options: SendOptions) {
+  public send(options: SendOptions): PromiEvent<Contract> {
     const methodOptions = {
       from: options.from ? toChecksumAddress(inputAddressFormatter(options.from)) : this.defaultOptions.from,
       gasPrice: options.gasPrice || this.defaultOptions.gasPrice,

@@ -20,13 +20,11 @@
  * @date 2017
  */
 
-import { KeyStore } from '../../utils';
-import { Tx } from '../types';
+import { KeyStore, sign, recover, Signature } from '../../utils';
+import { Tx } from '../../types';
 import { Wallet } from './wallet';
-import { sign, recover } from '../../utils/sign';
 import { Account } from './account';
 import { recoverTransaction, signTransaction } from './sign-transaction';
-import { Signature } from '../../types';
 import { Eth } from '..';
 
 export class Accounts {

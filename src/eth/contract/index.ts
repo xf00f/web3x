@@ -27,5 +27,5 @@
  * @date 2017
  */
 
-export { AbiDefinition, ContractAbi } from './contract-abi';
-export { Contract, ContractOptions } from './contract';
+export * from './contract-abi';
+export * from './contract';

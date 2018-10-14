@@ -7,7 +7,7 @@ describe('eth', () => {
       it('decodeEventABI should return the decoded event object with topics', () => {
         const address = '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe';
         const signature = 'Changed(address,uint256,uint256,uint256)';
-        const result = decodeEventABI.call(
+        const result = decodeEventABI(
           {
             signature: sha3(signature),
             name: 'Changed',
@@ -52,7 +52,7 @@ describe('eth', () => {
       const address = '0xffddb67890123456789012345678901234567890';
       const resultAddress = '0xffdDb67890123456789012345678901234567890';
 
-      var tests = [
+      const tests: any = [
         {
           abi: {
             name: name,
@@ -279,7 +279,7 @@ describe('eth', () => {
 
       tests.forEach((test, index) => {
         it('test no: ' + index, () => {
-          const result = decodeEventABI.call(test.abi, test.data);
+          const result = decodeEventABI(test.abi, test.data);
           expect(result).toEqual(test.expected);
         });
       });

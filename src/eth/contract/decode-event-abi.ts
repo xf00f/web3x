@@ -1,48 +1,58 @@
-import { formatters } from '../../core-helpers';
 import { abi } from '../abi';
+import { AbiDefinition, ContractAbi } from './contract-abi';
+import { outputLogFormatter, UnformattedLog } from '../../core-helpers/formatters/output-log-formatter';
+
+export interface EventLog {
+  id: string | null;
+  removed?: boolean;
+  event?: string;
+  address: string;
+  returnValues: any;
+  logIndex: number | null;
+  transactionIndex: number | null;
+  transactionHash: string | null;
+  blockHash: string | null;
+  blockNumber: number | null;
+  raw: { data: string; topics: string[] };
+  signature: string | null;
+}
+
+export function decodeAnyEvent(contractAbi: ContractAbi, data: UnformattedLog) {
+  const anonymousEvent: AbiDefinition = {
+    type: 'event',
+    anonymous: true,
+    inputs: [],
+  };
+  const event = contractAbi.find(abiDef => abiDef.signature === data.topics[0]) || anonymousEvent;
+  return decodeEventABI(event, data);
+}
 
 /**
  * Should be used to decode indexed params and options
  *
  * @method _decodeEventABI
- * @param {Object} data
+ * @param {Object} input
  * @return {Object} result object with decoded indexed && not indexed params
  */
-export function decodeEventABI(data) {
-  var event = this;
+export function decodeEventABI(event: AbiDefinition, input: UnformattedLog): EventLog {
+  input.data = input.data || '';
+  input.topics = input.topics || [];
 
-  data.data = data.data || '';
-  data.topics = data.topics || [];
-  var result = formatters.outputLogFormatter(data);
+  const argTopics = event.anonymous ? input.topics : input.topics.slice(1);
+  const returnValues = abi.decodeLog(event.inputs, input.data, argTopics);
+  delete returnValues.__length__;
 
-  // if allEvents get the right event
-  if (event.name === 'ALLEVENTS') {
-    event = event.jsonInterface.find(function(intf) {
-      return intf.signature === data.topics[0];
-    }) || { anonymous: true };
-  }
+  const { data, topics, ...formattedLog } = outputLogFormatter(input);
+  console.log(formattedLog);
 
-  // create empty inputs if none are present (e.g. anonymous events on allEvents)
-  event.inputs = event.inputs || [];
-
-  var argTopics = event.anonymous ? data.topics : data.topics.slice(1);
-
-  result.returnValues = abi.decodeLog(event.inputs, data.data, argTopics);
-  delete result.returnValues.__length__;
-
-  // add name
-  result.event = event.name;
-
-  // add signature
-  result.signature = event.anonymous || !data.topics[0] ? null : data.topics[0];
-
-  // move the data and topics to "raw"
-  result.raw = {
-    data: result.data,
-    topics: result.topics,
+  return {
+    ...formattedLog,
+    event: event.name,
+    returnValues,
+    signature: event.anonymous || !input.topics[0] ? null : input.topics[0],
+    raw: {
+      data,
+      topics,
+    },
   };
-  delete result.data;
-  delete result.topics;
-
-  return result;
 }

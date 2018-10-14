@@ -1,6 +1,14 @@
 import { hashMessage } from './hash-message';
 import { sign as ethLibSign, recover as ethLibRecover, encodeSignature, decodeSignature } from '../eth-lib/account';
-import { Signature } from '../types';
+
+export interface Signature {
+  message: string;
+  messageHash: string;
+  r: string;
+  s: string;
+  v: string;
+  signature: string;
+}
 
 export function sign(data: string, privateKey: string): Signature {
   var messageHash = hashMessage(data);

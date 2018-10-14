@@ -21,7 +21,6 @@
  */
 
 import { EventEmitter } from 'events';
-import { TransactionReceipt } from '../types';
 
 /*
 type PromiEventType = 'transactionHash' | 'receipt' | 'confirmation' | 'error';
@@ -63,13 +62,13 @@ export class PromiEvent<T> implements Promise<T>, EventEmitter {
 
   then<TResult1 = T, TResult2 = never>(
     onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | null | undefined,
-    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined,
   ) {
     return new PromiEvent(this.promise.then(onfulfilled, onrejected), this.emitter);
   }
 
   catch<TResult = never>(
-    onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null
+    onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null,
   ): PromiEvent<T | TResult> {
     return new PromiEvent(this.promise.catch(onrejected), this.emitter);
   }

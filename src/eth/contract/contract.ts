@@ -33,15 +33,15 @@ import { Subscription } from '../../core-subscriptions';
 import { formatters, errors } from '../../core-helpers';
 import { abi, jsonInterfaceMethodToString } from '../abi';
 import { Tx, TxFactory } from './tx';
-import { decodeEventABI } from './decode-event-abi';
+import { decodeAnyEvent, EventLog } from './decode-event-abi';
 import { IRequestManager } from '../../core-request-manager';
 import { inputAddressFormatter } from '../../core-helpers/formatters';
 import { toChecksumAddress, isAddress } from '../../utils';
 import { Accounts } from '../accounts';
 import { TxDeploy } from './tx-deploy';
 import { ContractAbi, AbiDefinition } from './contract-abi';
-import { Address, Data, EventLog } from '../../types';
-import { BlockType } from '../types';
+import { Address, Data } from '../../types';
+import { BlockType } from '../../types';
 
 export interface ContractOptions {
   from?: string;
@@ -160,14 +160,14 @@ export class Contract {
       topics?: string[];
     },
   ): Promise<EventLog[]> {
-    var subOptions = this.generateEventOptions.apply(this, arguments);
+    var subOptions = this.generateEventOptions(event, options);
 
     var getPastLogs: any = new Method({
       name: 'getPastLogs',
       call: 'eth_getLogs',
       params: 1,
       inputFormatter: [formatters.inputLogFormatter],
-      outputFormatter: decodeEventABI.bind(subOptions.event),
+      outputFormatter: log => decodeAnyEvent(this.jsonInterface, log),
       requestManager: this.requestManager,
     });
     var call = getPastLogs.buildCall();
@@ -355,7 +355,7 @@ export class Contract {
    * @param {Function} callback
    * @return {Object} the event options object
    */
-  private generateEventOptions(eventName: string = 'allevents', options, callback) {
+  private generateEventOptions(eventName: string = 'allevents', options, callback?) {
     let event: any =
       eventName.toLowerCase() === 'allevents'
         ? {
@@ -394,7 +394,7 @@ export class Contract {
    * @return {Object} the event subscription
    */
   private on(event, options, callback) {
-    var subOptions = this.generateEventOptions.apply(this, arguments);
+    var subOptions = this.generateEventOptions(event, options, callback);
 
     // prevent the event "newListener" and "removeListener" from being overwritten
     this.checkListener('newListener', subOptions.event.name);
@@ -407,7 +407,7 @@ export class Contract {
       subscription: {
         params: 1,
         inputFormatter: [formatters.inputLogFormatter],
-        outputFormatter: decodeEventABI.bind(subOptions.event),
+        outputFormatter: log => decodeAnyEvent(this.jsonInterface, log),
         // DUBLICATE, also in web3-eth
         subscriptionHandler: function(output) {
           if (output.removed) {
@@ -437,15 +437,8 @@ export class Contract {
   private receiptFormatter = receipt => {
     if (isArray(receipt.logs)) {
       // decode logs
-      var events = receipt.logs.map(log => {
-        return decodeEventABI.call(
-          {
-            name: 'ALLEVENTS',
-            jsonInterface: this.jsonInterface,
-          },
-          log,
-        );
-      });
+      const events = receipt.logs.map(log => decodeAnyEvent(this.jsonInterface, log));
+      //const events = receipt.logs.map(log => (log.id !== undefined ? log : decodeAnyEvent(this.jsonInterface, log)));
 
       // make log names keys
       receipt.events = {};

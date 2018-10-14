@@ -27,7 +27,7 @@ import { call } from './call';
 import { PromiEvent } from '../core-promievent';
 import { IRequestManager } from '../core-request-manager';
 import { Accounts } from '../eth/accounts';
-import { BlockType } from '../eth/types';
+import { BlockType } from '../types';
 import { Address } from '../types';
 
 interface Call {

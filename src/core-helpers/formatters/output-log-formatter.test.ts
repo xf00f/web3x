@@ -14,7 +14,7 @@ describe('core-helpers', function() {
             data: '0x7b2274657374223a2274657374227',
             address: '0x11f4d0a3c12e86b4b5f39b213f7e19d048276dae', // lowercase address
             topics: ['0x68656c6c6f', '0x6d79746f70696373'],
-          })
+          }),
         ).toEqual({
           transactionIndex: 1000,
           logIndex: 1000,
@@ -37,7 +37,8 @@ describe('core-helpers', function() {
             blockHash: null,
             data: '0x7b2274657374223a2274657374227',
             topics: ['0x68656c6c6f', '0x6d79746f70696373'],
-          })
+            address: '0x11f4d0a3c12e86b4b5f39b213f7e19d048276dae', // lowercase address
+          }),
         ).toEqual({
           transactionIndex: null,
           logIndex: null,
@@ -47,6 +48,7 @@ describe('core-helpers', function() {
           id: null,
           data: '0x7b2274657374223a2274657374227',
           topics: ['0x68656c6c6f', '0x6d79746f70696373'],
+          address: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe', // checksum address
         });
       });
     });

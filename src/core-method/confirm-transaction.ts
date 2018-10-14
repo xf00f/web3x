@@ -204,6 +204,7 @@ export async function confirmTransaction(defer, result, payload, requestManager:
           })
           // time out the transaction if not mined after 50 blocks
           .catch(function(err) {
+            console.log(err);
             timeoutCount++;
 
             // check to see if we are http polling

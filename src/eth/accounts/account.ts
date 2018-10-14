@@ -1,4 +1,4 @@
-import { Tx } from '../types';
+import { Tx } from '../../types';
 import { create, fromPrivate } from '../../eth-lib/account';
 import { randomHex, encrypt, KeyStore, decrypt } from '../../utils';
 import { sign } from '../../utils/sign';

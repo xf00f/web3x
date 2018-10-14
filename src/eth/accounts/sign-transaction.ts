@@ -1,4 +1,4 @@
-import { Tx } from '../types';
+import { Tx } from '../../types';
 import { formatters } from '../../core-helpers';
 import { numberToHex } from '../../utils';
 import RLP from '../../eth-lib/rlp';
@@ -19,93 +19,10 @@ export interface SignedTx {
   nonce?: number;
 }
 
-var isNot = function(value) {
-  return value === undefined || value === null;
-};
-
-var trimLeadingZero = function(hex) {
-  while (hex && hex.startsWith('0x0')) {
-    hex = '0x' + hex.slice(3);
-  }
-  return hex;
-};
-
-var makeEven = function(hex) {
-  if (hex.length % 2 === 1) {
-    hex = hex.replace('0x', '0x0');
-  }
-  return hex;
-};
-
 export async function signTransaction(tx: Tx, privateKey: string, eth: Eth): Promise<SignedTx> {
-  let result;
-  let error: Error;
-
-  function signed(tx) {
-    if (!tx.gas && !tx.gasLimit) {
-      error = new Error('"gas" is missing');
-    }
-
-    if (tx.nonce < 0 || tx.gas < 0 || tx.gasPrice < 0 || tx.chainId < 0) {
-      error = new Error('Gas, gasPrice, nonce or chainId is lower than 0');
-    }
-
-    if (error) {
-      throw error;
-    }
-
-    tx = formatters.inputCallFormatter(tx);
-
-    var transaction = tx;
-    transaction.to = tx.to || '0x';
-    transaction.data = tx.data || '0x';
-    transaction.value = tx.value || '0x';
-    transaction.chainId = numberToHex(tx.chainId);
-
-    var rlpEncoded = RLP.encode([
-      Bytes.fromNat(transaction.nonce),
-      Bytes.fromNat(transaction.gasPrice),
-      Bytes.fromNat(transaction.gas),
-      transaction.to.toLowerCase(),
-      Bytes.fromNat(transaction.value),
-      transaction.data,
-      Bytes.fromNat(transaction.chainId || '0x1'),
-      '0x',
-      '0x',
-    ]);
-
-    var hash = Hash.keccak256(rlpEncoded);
-
-    var signature = Account.makeSigner(Nat.toNumber(transaction.chainId || '0x1') * 2 + 35)(
-      Hash.keccak256(rlpEncoded),
-      privateKey,
-    );
-
-    var rawTx = RLP.decode(rlpEncoded)
-      .slice(0, 6)
-      .concat(Account.decodeSignature(signature));
-
-    rawTx[6] = makeEven(trimLeadingZero(rawTx[6]));
-    rawTx[7] = makeEven(trimLeadingZero(rawTx[7]));
-    rawTx[8] = makeEven(trimLeadingZero(rawTx[8]));
-
-    var rawTransaction = RLP.encode(rawTx);
-
-    var values = RLP.decode(rawTransaction);
-    result = {
-      messageHash: hash,
-      v: trimLeadingZero(values[6]),
-      r: trimLeadingZero(values[7]),
-      s: trimLeadingZero(values[8]),
-      rawTransaction: rawTransaction,
-    };
-
-    return result;
-  }
-
   // Resolve immediately if nonce, chainId and price are provided
   if (tx.nonce !== undefined && tx.chainId !== undefined && tx.gasPrice !== undefined) {
-    return signed(tx);
+    return signed(tx, privateKey);
   }
 
   // Otherwise, get the missing info from the Ethereum Node
@@ -121,7 +38,7 @@ export async function signTransaction(tx: Tx, privateKey: string, eth: Eth): Pro
     throw new Error('One of the values "chainId", "gasPrice", or "nonce" couldn\'t be fetched');
   }
 
-  return signed(Object.assign(tx, { chainId, gasPrice, nonce }));
+  return signed(Object.assign(tx, { chainId, gasPrice, nonce }), privateKey);
 }
 
 export function recoverTransaction(rawTx: string): string {
@@ -132,4 +49,79 @@ export function recoverTransaction(rawTx: string): string {
   var signingData = values.slice(0, 6).concat(extraData);
   var signingDataHex = RLP.encode(signingData);
   return Account.recover(Hash.keccak256(signingDataHex), signature);
+}
+
+function signed(tx, privateKey: string): SignedTx {
+  if (!tx.gas && !tx.gasLimit) {
+    throw new Error('"gas" is missing');
+  }
+
+  if (tx.nonce < 0 || tx.gas < 0 || tx.gasPrice < 0 || tx.chainId < 0) {
+    throw new Error('Gas, gasPrice, nonce or chainId is lower than 0');
+  }
+
+  tx = formatters.inputCallFormatter(tx);
+
+  const transaction = tx;
+  transaction.to = tx.to || '0x';
+  transaction.data = tx.data || '0x';
+  transaction.value = tx.value || '0x';
+  transaction.chainId = numberToHex(tx.chainId);
+
+  const rlpEncoded = RLP.encode([
+    Bytes.fromNat(transaction.nonce),
+    Bytes.fromNat(transaction.gasPrice),
+    Bytes.fromNat(transaction.gas),
+    transaction.to.toLowerCase(),
+    Bytes.fromNat(transaction.value),
+    transaction.data,
+    Bytes.fromNat(transaction.chainId || '0x1'),
+    '0x',
+    '0x',
+  ]);
+
+  const messageHash = Hash.keccak256(rlpEncoded);
+
+  const signature = Account.makeSigner(Nat.toNumber(transaction.chainId || '0x1') * 2 + 35)(
+    Hash.keccak256(rlpEncoded),
+    privateKey,
+  );
+
+  const rawTx = RLP.decode(rlpEncoded)
+    .slice(0, 6)
+    .concat(Account.decodeSignature(signature));
+
+  rawTx[6] = makeEven(trimLeadingZero(rawTx[6]));
+  rawTx[7] = makeEven(trimLeadingZero(rawTx[7]));
+  rawTx[8] = makeEven(trimLeadingZero(rawTx[8]));
+
+  const rawTransaction = RLP.encode(rawTx);
+
+  const values = RLP.decode(rawTransaction);
+
+  return {
+    messageHash,
+    v: trimLeadingZero(values[6]),
+    r: trimLeadingZero(values[7]),
+    s: trimLeadingZero(values[8]),
+    rawTransaction,
+  };
+}
+
+function isNot(value) {
+  return value === undefined || value === null;
+}
+
+function trimLeadingZero(hex) {
+  while (hex && hex.startsWith('0x0')) {
+    hex = '0x' + hex.slice(3);
+  }
+  return hex;
+}
+
+function makeEven(hex) {
+  if (hex.length % 2 === 1) {
+    hex = hex.replace('0x', '0x0');
+  }
+  return hex;
 }

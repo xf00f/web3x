@@ -24,7 +24,7 @@ import { Method } from '../../core-method';
 import { IRequestManager } from '../../core-request-manager';
 import { toChecksumAddress } from '../../utils';
 import { inputAddressFormatter, inputTransactionFormatter, inputSignFormatter } from '../../core-helpers/formatters';
-import { BlockType } from '../types';
+import { BlockType } from '../../types';
 
 type Address = string;
 type TransactionHash = string;
