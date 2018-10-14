@@ -99,39 +99,28 @@ export class RequestManager {
    *
    * @method sendAsync
    * @param {Object} data
-   * @param {Function} callback
    */
-  async send(data, callback?): Promise<any> {
+  async send(data): Promise<any> {
     return new Promise((resolve, reject) => {
-      callback = callback || function() {};
-
-      if (!this.provider) {
-        const err = errors.InvalidProvider();
-        callback(err);
-        reject(err);
-        return;
-      }
-
       const payload = Jsonrpc.toPayload(data.method, data.params);
       this.provider.send(payload, function(err, result) {
-        if (!result) {
-          err = new Error('No result.');
+        if (err) {
+          return reject(err);
+        } else if (!result) {
+          return reject(new Error('No result.'));
         } else if (result.id && payload.id !== result.id) {
-          err = new Error(
-            'Wrong response id "' + result.id + '" (expected: "' + payload.id + '") in ' + JSON.stringify(payload),
+          return reject(
+            new Error(
+              'Wrong response id "' + result.id + '" (expected: "' + payload.id + '") in ' + JSON.stringify(payload),
+            ),
           );
         } else if (result.error) {
-          err = errors.ErrorResponse(result);
+          return reject(errors.ErrorResponse(result));
         } else if (!Jsonrpc.isValidResponse(result)) {
-          err = errors.InvalidResponse(result);
-        } else {
-          callback(null, result.result);
-          resolve(result.result);
+          return reject(errors.InvalidResponse(result));
         }
 
-        callback(err);
-        reject(err);
-        return;
+        resolve(result.result);
       });
     });
   }
@@ -141,24 +130,21 @@ export class RequestManager {
    *
    * @method sendBatch
    * @param {Array} batch data
-   * @param {Function} callback
    */
-  sendBatch(data, callback) {
-    if (!this.provider) {
-      return callback(errors.InvalidProvider());
-    }
+  sendBatch(data): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const payload = Jsonrpc.toBatchPayload(data);
+      this.provider.send(payload, function(err, results) {
+        if (err) {
+          return reject(err);
+        }
 
-    var payload = Jsonrpc.toBatchPayload(data);
-    this.provider.send(payload, function(err, results) {
-      if (err) {
-        return callback(err);
-      }
+        if (!isArray(results)) {
+          return reject(errors.InvalidResponse(results));
+        }
 
-      if (!isArray(results)) {
-        return callback(errors.InvalidResponse(results));
-      }
-
-      callback(null, results);
+        resolve(results);
+      });
     });
   }
 
@@ -190,17 +176,14 @@ export class RequestManager {
    * @param {String} id           the subscription id
    * @param {Function} callback   fired once the subscription is removed
    */
-  removeSubscription(id, callback?) {
+  removeSubscription(id) {
     var _this = this;
 
     if (this.subscriptions[id]) {
-      this.send(
-        {
-          method: this.subscriptions[id].type + '_unsubscribe',
-          params: [id],
-        },
-        callback,
-      );
+      this.send({
+        method: this.subscriptions[id].type + '_unsubscribe',
+        params: [id],
+      });
 
       // remove subscription
       delete _this.subscriptions[id];
