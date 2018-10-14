@@ -7,7 +7,7 @@ import {
 import { MockRequestManager } from '../core-request-manager/mock-request-manager';
 
 describe('core-method', () => {
-  describe('buildCall', () => {
+  describe('createFunction', () => {
     const contractAddress = '0x1234567890123456789012345678901234567891';
     let mockRequestManager: MockRequestManager;
 
@@ -24,7 +24,7 @@ describe('core-method', () => {
         requestManager: mockRequestManager,
       });
 
-      var send = method.buildCall();
+      var send = method.createFunction();
 
       mockRequestManager.send.mockResolvedValue('0x1234567453543456321456321');
 
@@ -46,7 +46,7 @@ describe('core-method', () => {
         requestManager: mockRequestManager,
       });
 
-      var send = method.buildCall();
+      var send = method.createFunction();
 
       mockRequestManager.send.mockRejectedValue({
         message: 'Wrong!',
@@ -77,7 +77,7 @@ describe('core-method', () => {
         requestManager: mockRequestManager,
       });
 
-      var send = method.buildCall();
+      var send = method.createFunction();
 
       mockRequestManager.send.mockResolvedValue('0x1234567453543456321456321');
 
@@ -102,7 +102,7 @@ describe('core-method', () => {
         requestManager: mockRequestManager,
       });
 
-      var send = method.buildCall();
+      var send = method.createFunction();
 
       mockRequestManager.send.mockResolvedValue('0x1234567453543456321456321');
 
@@ -124,7 +124,7 @@ describe('core-method', () => {
         requestManager: mockRequestManager,
       });
 
-      var send = method.buildCall();
+      var send = method.createFunction();
 
       // eth_gasPrice
       mockRequestManager.send.mockResolvedValueOnce('0xffffdddd');
@@ -204,7 +204,7 @@ describe('core-method', () => {
         params: 1,
         inputFormatter: [inputTransactionFormatter],
         requestManager: mockRequestManager,
-      }).buildCall();
+      }).createFunction();
     };
 
     it('should use promise when subscribing and checking for receipt', async () => {
@@ -401,7 +401,7 @@ describe('core-method', () => {
         params: 1,
         inputFormatter: [inputTransactionFormatter],
         requestManager: mockRequestManager,
-      }).buildCall();
+      }).createFunction();
     };
 
     it('should fail with promise after no receipt after 50 blocks', async () => {
@@ -478,7 +478,7 @@ describe('core-method', () => {
         params: 1,
         inputFormatter: [inputTransactionFormatter],
         requestManager: mockRequestManager,
-      }).buildCall();
+      }).createFunction();
 
       let countConf = 0;
 

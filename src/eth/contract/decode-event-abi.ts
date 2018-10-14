@@ -17,6 +17,13 @@ export interface EventLog {
   signature: string | null;
 }
 
+/**
+ * Decodes any event log response and its return values.
+ *
+ * @param contractAbi Abi definition of the contract to which the event belongs.
+ * @param log The log response to decode.
+ * @returns The decoded event log.
+ */
 export function decodeAnyEvent(contractAbi: ContractAbi, data: UnformattedLog) {
   const anonymousEvent: AbiDefinition = {
     type: 'event',
@@ -24,32 +31,32 @@ export function decodeAnyEvent(contractAbi: ContractAbi, data: UnformattedLog) {
     inputs: [],
   };
   const event = contractAbi.find(abiDef => abiDef.signature === data.topics[0]) || anonymousEvent;
-  return decodeEventABI(event, data);
+  return decodeEvent(event, data);
 }
 
 /**
- * Should be used to decode indexed params and options
+ * Decodes an event log response and its return values.
  *
- * @method _decodeEventABI
- * @param {Object} input
- * @return {Object} result object with decoded indexed && not indexed params
+ * @param event Abi definition of event.
+ * @param log The log response to decode.
+ * @returns The decoded event log.
  */
-export function decodeEventABI(event: AbiDefinition, input: UnformattedLog): EventLog {
-  input.data = input.data || '';
-  input.topics = input.topics || [];
+export function decodeEvent(event: AbiDefinition, log: UnformattedLog): EventLog {
+  log.data = log.data || '';
+  log.topics = log.topics || [];
 
-  const argTopics = event.anonymous ? input.topics : input.topics.slice(1);
-  const returnValues = abi.decodeLog(event.inputs, input.data, argTopics);
+  const argTopics = event.anonymous ? log.topics : log.topics.slice(1);
+  const returnValues = abi.decodeLog(event.inputs, log.data, argTopics);
   delete returnValues.__length__;
 
-  const { data, topics, ...formattedLog } = outputLogFormatter(input);
+  const { data, topics, ...formattedLog } = outputLogFormatter(log);
   console.log(formattedLog);
 
   return {
     ...formattedLog,
     event: event.name,
     returnValues,
-    signature: event.anonymous || !input.topics[0] ? null : input.topics[0],
+    signature: event.anonymous || !log.topics[0] ? null : log.topics[0],
     raw: {
       data,
       topics,

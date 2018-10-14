@@ -82,78 +82,7 @@ export class Method {
     this.defaultAccount = options.defaultAccount || null;
   }
 
-  setRequestManager(requestManager, accounts?) {
-    this.requestManager = requestManager;
-
-    // reference to eth.accounts
-    if (accounts) {
-      this.accounts = accounts;
-    }
-  }
-
-  createFunction(requestManager?, accounts?) {
-    var func = this.buildCall();
-    func.call = this.call;
-
-    this.setRequestManager(requestManager || this.requestManager, accounts || this.accounts);
-
-    return func;
-  }
-
-  attachToObject(obj) {
-    var func = this.buildCall();
-    func.call = this.call;
-    var name = this.name.split('.');
-    if (name.length > 1) {
-      obj[name[0]] = obj[name[0]] || {};
-      obj[name[0]][name[1]] = func;
-    } else {
-      obj[name[0]] = func;
-    }
-  }
-
-  /**
-   * Should be used to determine name of the jsonrpc method based on arguments
-   *
-   * @method getCall
-   * @param {Array} arguments
-   * @return {String} name of jsonrpc method
-   */
-  getCall(args?) {
-    return isFunction(this.call) ? this.call(args) : this.call;
-  }
-
-  /**
-   * Should be called to check if the number of arguments is correct
-   *
-   * @method validateArgs
-   * @param {Array} arguments
-   * @throws {Error} if it is not
-   */
-  validateArgs(args) {
-    if (args.length !== this.params) {
-      throw errors.InvalidNumberOfParams(args.length, this.params, this.name);
-    }
-  }
-
-  /**
-   * Should be called to format output(result) of method
-   *
-   * @method formatOutput
-   * @param {Object}
-   * @return {Object}
-   */
-  formatOutput(result) {
-    if (isArray(result)) {
-      return result.map(res => {
-        return this.outputFormatter && res ? this.outputFormatter(res) : res;
-      });
-    } else {
-      return this.outputFormatter && result ? this.outputFormatter(result) : result;
-    }
-  }
-
-  buildCall() {
+  createFunction() {
     const sendFunc = <Call>((...args: any[]) => {
       const payload = this.toPayload(...args);
       return call(this.call, payload, this.accounts, this.requestManager, this.outputFormatter, this.extraFormatters);
@@ -168,19 +97,60 @@ export class Method {
   }
 
   /**
+   * Should be called to create the pure JSONRPC request which can be used in a batch request
+   *
+   * @method request
+   * @return {Object} jsonrpc request
+   */
+  request(...args: any[]) {
+    const payload: any = this.toPayload(...args);
+    payload.format = this.formatOutput.bind(this);
+    return payload;
+  }
+
+  /**
+   * Should be called to check if the number of arguments is correct
+   *
+   * @method validateArgs
+   * @param {Array} arguments
+   * @throws {Error} if it is not
+   */
+  private validateArgs(args) {
+    if (args.length !== this.params) {
+      throw errors.InvalidNumberOfParams(args.length, this.params, this.name);
+    }
+  }
+
+  /**
+   * Should be called to format output(result) of method
+   *
+   * @method formatOutput
+   * @param {Object}
+   * @return {Object}
+   */
+  private formatOutput(result) {
+    if (isArray(result)) {
+      return result.map(res => {
+        return this.outputFormatter && res ? this.outputFormatter(res) : res;
+      });
+    } else {
+      return this.outputFormatter && result ? this.outputFormatter(result) : result;
+    }
+  }
+
+  /**
    * Should create payload from given input args
    *
    * @method toPayload
    * @param {Array} args
    * @return {Object}
    */
-  toPayload(...args: any[]) {
-    var call = this.getCall(args);
+  private toPayload(...args: any[]) {
     var params = this.formatInput(args);
     this.validateArgs(params);
 
     var payload = {
-      method: call,
+      method: this.call,
       params: params,
     };
 
@@ -198,7 +168,7 @@ export class Method {
    * @param {Array}
    * @return {Array}
    */
-  formatInput(args) {
+  private formatInput(args) {
     if (!this.inputFormatter) {
       return args;
     }
@@ -207,17 +177,5 @@ export class Method {
       // bind this for defaultBlock, and defaultAccount
       return formatter ? formatter.call(this, args[index]) : args[index];
     });
-  }
-
-  /**
-   * Should be called to create the pure JSONRPC request which can be used in a batch request
-   *
-   * @method request
-   * @return {Object} jsonrpc request
-   */
-  request(...args: any[]) {
-    const payload: any = this.toPayload(...args);
-    payload.format = this.formatOutput.bind(this);
-    return payload;
   }
 }

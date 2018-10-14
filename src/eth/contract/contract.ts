@@ -160,21 +160,18 @@ export class Contract {
       topics?: string[];
     },
   ): Promise<EventLog[]> {
-    var subOptions = this.generateEventOptions(event, options);
+    const subOptions = this.generateEventOptions(event, options);
 
-    var getPastLogs: any = new Method({
+    const getPastLogs = new Method({
       name: 'getPastLogs',
       call: 'eth_getLogs',
       params: 1,
       inputFormatter: [formatters.inputLogFormatter],
       outputFormatter: log => decodeAnyEvent(this.jsonInterface, log),
       requestManager: this.requestManager,
-    });
-    var call = getPastLogs.buildCall();
+    }).createFunction();
 
-    getPastLogs = null;
-
-    return call(subOptions.params, subOptions.callback);
+    return getPastLogs(subOptions.params, subOptions.callback);
   }
 
   private executorFactory(definition: AbiDefinition, nextOverload?: TxFactory): TxFactory {
