@@ -1,11 +1,25 @@
+/*
+  This file is part of web3x.
+
+  web3x is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  web3x is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public License
+  along with web3x.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 import { isBoolean } from 'util';
-import { formatters } from '../../core-helpers';
-import { Method } from '../../core-method';
 import { AbiDefinition } from '.';
 import { promiEvent } from '../../core-promievent';
-import * as utils from '../../utils';
+import { fireError, isAddress } from '../../utils';
 import { abi } from '../abi';
-import { IRequestManager } from '../../core-request-manager';
 import { toChecksumAddress } from '../../utils';
 import { inputAddressFormatter } from '../../core-helpers/formatters';
 import { Eth } from '..';
@@ -52,7 +66,6 @@ export class Tx {
     private contractAddress: string,
     private args: any[] = [],
     private defaultOptions: DefaultOptions = {},
-    private ethAccounts?: any,
     private extraFormatters?: any,
   ) {
     if (this.definition.type !== 'function') {
@@ -85,9 +98,9 @@ export class Tx {
     const tx = this.getTx(options);
 
     // return error, if no "from" is specified
-    if (!utils.isAddress(tx.from)) {
+    if (!isAddress(tx.from)) {
       const defer = promiEvent();
-      return utils.fireError(
+      return fireError(
         new Error('No "from" address specified in neither the given options, nor the default options.'),
         defer.eventEmitter,
         defer.reject,
@@ -96,7 +109,7 @@ export class Tx {
 
     if (isBoolean(this.definition.payable) && !this.definition.payable && tx.value && tx.value > 0) {
       const defer = promiEvent();
-      return utils.fireError(
+      return fireError(
         new Error('Can not send value to non-payable contract method or constructor'),
         defer.eventEmitter,
         defer.reject,

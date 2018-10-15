@@ -1,3 +1,20 @@
+/*
+  This file is part of web3x.
+
+  web3x is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  web3x is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public License
+  along with web3x.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 import { pbkdf2 } from './pbkdf2';
 
 const MAX_VALUE = 0x7fffffff;
@@ -146,7 +163,7 @@ export function scrypt(password, salt, N, r, p, dkLen, callback?: (progress: num
     var limit = Math.trunc(1000 / r);
 
     // Trick from scrypt-async; if there is a setImmediate shim in place, use it
-    var nextTick = typeof setImmediate !== 'undefined' ? setImmediate : setTimeout;
+    var nextTick: any = typeof setImmediate !== 'undefined' ? setImmediate : setTimeout;
 
     // This is really all I changed; making scryptsy a state machine so we occasionally
     // stop and give other evnts on the evnt loop a chance to run. ~RicMoo

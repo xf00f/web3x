@@ -1,5 +1,24 @@
+/*
+  This file is part of web3x.
+
+  web3x is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  web3x is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public License
+  along with web3x.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 import { RequestManager } from '../../core-request-manager';
 import { Contract, AbiDefinition } from '.';
+import { MockRequestManager } from '../../../dest/core-request-manager/mock-request-manager';
+import { Eth } from '../eth';
 
 const abi: AbiDefinition[] = [
   {
@@ -31,10 +50,11 @@ describe('eth', function() {
   describe('contract', function() {
     describe('encodeABI', function() {
       const contractAddress = '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe';
-      let requestManager: RequestManager;
+      const mockRequestManager = new MockRequestManager();
+      const eth = new Eth(mockRequestManager);
 
       it('should handle bytes32 arrays that only contain 1 byte', function() {
-        const contract = new Contract(requestManager, abi, contractAddress);
+        const contract = new Contract(eth, abi, contractAddress);
 
         const result = contract.methods
           .takesTwoBytes32('0x'.concat('a'.repeat(2)), '0x'.concat('b'.repeat(2)))
@@ -50,7 +70,7 @@ describe('eth', function() {
       });
 
       it('should handle bytes32 arrays that are short 1 byte', function() {
-        const contract = new Contract(requestManager, abi, contractAddress);
+        const contract = new Contract(eth, abi, contractAddress);
 
         const result = contract.methods
           .takesTwoBytes32('0x'.concat('a'.repeat(62)), '0x'.concat('b'.repeat(62)))
@@ -66,7 +86,7 @@ describe('eth', function() {
       });
 
       it('should throw an exception on bytes32 arrays that have an invalid length', function() {
-        const contract = new Contract(requestManager, abi, contractAddress);
+        const contract = new Contract(eth, abi, contractAddress);
 
         const test = () =>
           contract.methods.takesTwoBytes32('0x'.concat('a'.repeat(63)), '0x'.concat('b'.repeat(63))).encodeABI();
@@ -75,7 +95,7 @@ describe('eth', function() {
       });
 
       it('should handle bytes32 arrays that are full', function() {
-        const contract = new Contract(requestManager, abi, contractAddress);
+        const contract = new Contract(eth, abi, contractAddress);
 
         const result = contract.methods
           .takesTwoBytes32('0x'.concat('a'.repeat(64)), '0x'.concat('b'.repeat(64)))
@@ -91,7 +111,7 @@ describe('eth', function() {
       });
 
       it('should throw an exception on bytes32 arrays that are too long', function() {
-        const contract = new Contract(requestManager, abi, contractAddress);
+        const contract = new Contract(eth, abi, contractAddress);
 
         const test = () =>
           contract.methods.takesTwoBytes32('0x'.concat('a'.repeat(66)), '0x'.concat('b'.repeat(66))).encodeABI();

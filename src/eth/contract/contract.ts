@@ -1,31 +1,19 @@
 /*
-    This file is part of web3.js.
+  This file is part of web3x.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+  web3x is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
+  web3x is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
+  You should have received a copy of the GNU Lesser General Public License
+  along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
-/**
- * @file contract.js
- *
- * To initialize a contract use:
- *
- *  var Contract = require('web3-eth-contract');
- *  Contract.setProvider('ws://localhost:8546');
- *  var contract = new Contract(abi, address, ...);
- *
- * @author Fabian Vogelsteller <fabian@ethereum.org>
- * @date 2017
- */
 
 import { isArray, isFunction } from 'util';
 import { Subscription } from '../../core-subscriptions';
@@ -170,7 +158,7 @@ export class Contract {
         }
         throw errors.InvalidNumberOfParams(args.length, definition.inputs.length, definition.name);
       }
-      return new Tx(this.eth, definition, this.address, args, this.options, this.ethAccounts, this.extraFormatters);
+      return new Tx(this.eth, definition, this.address, args, this.options, this.extraFormatters);
     };
   }
 
@@ -293,7 +281,7 @@ export class Contract {
               return null;
             }
 
-            // TODO: https://github.com/ethereum/web3.js/issues/344
+            // TODO: https://github.com/ethereum/web3x/issues/344
             // TODO: deal properly with components
 
             if (isArray(value)) {

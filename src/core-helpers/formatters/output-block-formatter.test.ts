@@ -1,3 +1,20 @@
+/*
+  This file is part of web3x.
+
+  web3x is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  web3x is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public License
+  along with web3x.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 import { outputBlockFormatter } from './output-block-formatter';
 
 describe('core-helpers', function() {
@@ -21,7 +38,7 @@ describe('core-helpers', function() {
             extraData: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
             nonce: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
             size: '0x3e8',
-          })
+          }),
         ).toEqual({
           hash: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
           parentHash: '0x83ffb245cfced97ccc5c75253d6960376d6c6dea93647397a543a72fdaea5265',
@@ -58,7 +75,7 @@ describe('core-helpers', function() {
             extraData: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
             nonce: null,
             size: '0x3e8',
-          })
+          }),
         ).toEqual({
           hash: null,
           parentHash: '0x83ffb245cfced97ccc5c75253d6960376d6c6dea93647397a543a72fdaea5265',
