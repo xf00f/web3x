@@ -57,7 +57,7 @@ describe('contract', function() {
 
     it('should fail on invalid address as options.from', function() {
       var test = () =>
-        new Contract(eth, abi, address, undefined, {
+        new Contract(eth, abi, address, {
           from: '0x11F4D0A3c12e86B4b5F39B213F7E19D048276DAe',
         });
       expect(test).toThrow();

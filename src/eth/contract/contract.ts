@@ -22,7 +22,6 @@ import { Tx, TxFactory } from './tx';
 import { decodeAnyEvent } from './decode-event-abi';
 import { inputAddressFormatter, EventLog, inputBlockNumberFormatter, inputLogFormatter } from '../../formatters';
 import { toChecksumAddress, isAddress } from '../../utils';
-import { Accounts } from '../accounts';
 import { TxDeploy } from './tx-deploy';
 import { ContractAbi, AbiDefinition } from './contract-abi';
 import { Address, Data } from '../../types';
@@ -60,7 +59,6 @@ export class Contract {
     private eth: Eth,
     private jsonInterface: ContractAbi,
     public address?: string,
-    private ethAccounts?: Accounts,
     defaultOptions: ContractOptions = {},
   ) {
     this.setAbiDefinition(jsonInterface);

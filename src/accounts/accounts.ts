@@ -15,12 +15,12 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { KeyStore, sign, recover, Signature } from '../../utils';
-import { Tx } from '../../types';
+import { KeyStore, sign, recover, Signature } from '../utils';
+import { Tx } from '../types';
 import { Wallet } from './wallet';
 import { Account } from './account';
 import { recoverTransaction, signTransaction } from './sign-transaction';
-import { Eth } from '..';
+import { Eth } from '../eth';
 
 export class Accounts {
   public wallet: Wallet;

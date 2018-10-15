@@ -426,8 +426,8 @@ var tests = [
   },
 ];
 
-describe('eth', function() {
-  describe('accounts', function() {
+describe('accounts', function() {
+  describe('sign-transaction', function() {
     let mockEthereum;
 
     beforeEach(() => {

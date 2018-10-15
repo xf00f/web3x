@@ -19,7 +19,7 @@ import { Subscription } from '../subscriptions';
 import { Net } from '../net';
 import { Personal } from '../personal';
 import { Contract, ContractAbi, ContractOptions } from './contract';
-import { Accounts } from './accounts';
+import { Accounts } from '../accounts';
 import { IRequestManager, BatchManager } from '../request-manager';
 import { toChecksumAddress, fireError } from '../utils';
 import {
@@ -88,7 +88,7 @@ export class Eth {
     const self = this;
     this.Contract = class extends Contract {
       constructor(abi: ContractAbi, address?: string, options?: ContractOptions) {
-        super(self, abi, address, accounts, options);
+        super(self, abi, address, options);
       }
     };
 

@@ -15,12 +15,12 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Tx } from '../../types';
-import { create, fromPrivate } from '../../eth-lib/account';
-import { randomHex, encrypt, KeyStore, decrypt } from '../../utils';
-import { sign } from '../../utils/sign';
+import { Tx } from '../types';
+import { create, fromPrivate } from '../eth-lib/account';
+import { randomHex, encrypt, KeyStore, decrypt } from '../utils';
+import { sign } from '../utils/sign';
 import { signTransaction } from './sign-transaction';
-import { Eth } from '..';
+import { Eth } from '../eth';
 
 export class Account {
   constructor(public address: string, public privateKey: string, public publicKey) {}

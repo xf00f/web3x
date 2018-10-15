@@ -17,7 +17,7 @@
 
 import { isString } from 'util';
 import { Account } from './account';
-import { KeyStore, decrypt } from '../../utils/encryption';
+import { KeyStore, decrypt } from '../utils/encryption';
 
 export class Wallet {
   public static defaultKeyName = 'web3js_wallet';

@@ -16,9 +16,9 @@
 */
 
 import { Account } from './account';
-import { checkAddressChecksum } from '../../utils';
+import { checkAddressChecksum } from '../utils';
 
-describe('eth', function() {
+describe('accounts', function() {
   describe('account', function() {
     it('create account from private key', function() {
       const privateKey = '7a28b5ba57c53603b0b07b56bba752f7784bf506fa95edc395f5cf6c7514fe9d';

@@ -15,15 +15,15 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Tx } from '../../types';
-import { numberToHex } from '../../utils';
-import RLP from '../../eth-lib/rlp';
-import Bytes from '../../eth-lib/bytes';
-import Hash from '../../eth-lib/hash';
-import Nat from '../../eth-lib/nat';
-import Account from '../../eth-lib/account';
-import { Eth } from '..';
-import { inputCallFormatter } from '../../formatters';
+import { Tx } from '../types';
+import { numberToHex } from '../utils';
+import RLP from '../eth-lib/rlp';
+import Bytes from '../eth-lib/bytes';
+import Hash from '../eth-lib/hash';
+import Nat from '../eth-lib/nat';
+import Account from '../eth-lib/account';
+import { Eth } from '../eth';
+import { inputCallFormatter } from '../formatters';
 
 export interface SignedTx {
   messageHash: string;

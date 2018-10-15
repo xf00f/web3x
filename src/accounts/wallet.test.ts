@@ -16,7 +16,7 @@
 */
 
 import { Wallet } from './wallet';
-import { isAddress } from '../../utils';
+import { isAddress } from '../utils';
 import { Account } from './account';
 
 const tests = [
@@ -38,8 +38,8 @@ const tests = [
   },
 ];
 
-describe('eth', function() {
-  describe('accounts.wallet', function() {
+describe('accounts', function() {
+  describe('wallet', function() {
     tests.forEach(function(test, i) {
       it('creates the right number of wallets', function() {
         const wallet = new Wallet();
