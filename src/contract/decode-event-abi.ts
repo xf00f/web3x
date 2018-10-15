@@ -15,10 +15,10 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { abi } from '../abi';
+import { abi } from './abi';
 import { AbiDefinition, ContractAbi } from './contract-abi';
-import { Log } from '../../formatters/output-log-formatter';
-import { EventLog } from '../../formatters';
+import { Log } from '../formatters/output-log-formatter';
+import { EventLog } from '../formatters';
 
 /**
  * Decodes any event log response and its return values.

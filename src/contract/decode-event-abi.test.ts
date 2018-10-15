@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { sha3 } from '../../utils';
+import { sha3 } from '../utils';
 import { decodeEvent } from './decode-event-abi';
 
 describe('eth', () => {

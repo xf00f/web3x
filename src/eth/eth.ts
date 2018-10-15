@@ -18,7 +18,7 @@
 import { Subscription } from '../subscriptions';
 import { Net } from '../net';
 import { Personal } from '../personal';
-import { Contract, ContractAbi, ContractOptions } from './contract';
+import { Contract, ContractAbi, ContractOptions } from '../contract';
 import { Accounts } from '../accounts';
 import { IRequestManager, BatchManager } from '../request-manager';
 import { toChecksumAddress, fireError } from '../utils';

@@ -17,9 +17,9 @@
 
 import { Contract } from '.';
 import { abi } from './fixtures/abi';
-import { MockRequestManager } from '../../request-manager/mock-request-manager';
-import { sha3 } from '../../utils';
-import { Eth } from '../eth';
+import { MockRequestManager } from '../request-manager/mock-request-manager';
+import { sha3 } from '../utils';
+import { Eth } from '../eth/eth';
 
 const address = '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe';
 const addressLowercase = '0x11f4d0a3c12e86b4b5f39b213f7e19d048276dae';

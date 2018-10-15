@@ -19,8 +19,6 @@ import { isArray, isObject } from 'util';
 import { sha3 } from '../../utils';
 import EthersAbi from 'ethers/utils/abi-coder';
 
-function Result() {}
-
 /**
  * ABICoder prototype should be used to encode/decode solidity params of any type
  */
@@ -131,7 +129,7 @@ export class ABICoder {
     }
 
     const res = this.ethersAbiCoder.decode(this.mapTypes(outputs), '0x' + bytes.replace(/0x/i, ''));
-    const returnValue = new Result();
+    const returnValue: any = {};
     returnValue.__length__ = 0;
 
     outputs.forEach(function(output, i) {
@@ -186,7 +184,7 @@ export class ABICoder {
     const nonIndexedData = data;
     const notIndexedParams = nonIndexedData ? this.decodeParameters(notIndexedInputs, nonIndexedData) : [];
 
-    const returnValue = new Result();
+    const returnValue: any = {};
     returnValue.__length__ = 0;
 
     inputs.forEach(function(res, i) {

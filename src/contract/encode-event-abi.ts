@@ -15,8 +15,8 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { abi } from '../abi';
-import { inputBlockNumberFormatter } from '../../formatters';
+import { abi } from './abi';
+import { inputBlockNumberFormatter } from '../formatters';
 import { isArray } from 'util';
 
 /**

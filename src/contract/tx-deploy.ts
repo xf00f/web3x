@@ -17,12 +17,12 @@
 
 import { isBoolean } from 'util';
 import { AbiDefinition } from '.';
-import { promiEvent, PromiEvent } from '../../promievent';
-import * as utils from '../../utils';
-import { abi } from '../abi';
-import { toChecksumAddress } from '../../utils';
-import { inputAddressFormatter } from '../../formatters';
-import { Eth } from '..';
+import { promiEvent, PromiEvent } from '../promievent';
+import * as utils from '../utils';
+import { abi } from './abi';
+import { toChecksumAddress } from '../utils';
+import { inputAddressFormatter } from '../formatters';
+import { Eth } from '../eth';
 
 interface SendOptions {
   from: string;

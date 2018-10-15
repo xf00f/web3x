@@ -16,18 +16,18 @@
 */
 
 import { isArray, isFunction } from 'util';
-import { Subscription } from '../../subscriptions';
-import { abi, jsonInterfaceMethodToString } from '../abi';
+import { Subscription } from '../subscriptions';
+import { abi, jsonInterfaceMethodToString } from './abi';
 import { Tx, TxFactory } from './tx';
 import { decodeAnyEvent } from './decode-event-abi';
-import { inputAddressFormatter, EventLog, inputBlockNumberFormatter, inputLogFormatter } from '../../formatters';
-import { toChecksumAddress, isAddress } from '../../utils';
+import { inputAddressFormatter, EventLog, inputBlockNumberFormatter, inputLogFormatter } from '../formatters';
+import { toChecksumAddress, isAddress } from '../utils';
 import { TxDeploy } from './tx-deploy';
 import { ContractAbi, AbiDefinition } from './contract-abi';
-import { Address, Data } from '../../types';
-import { BlockType } from '../../types';
-import { Eth } from '..';
-import { InvalidNumberOfParams } from '../../errors';
+import { Address, Data } from '../types';
+import { BlockType } from '../types';
+import { Eth } from '../eth';
+import { InvalidNumberOfParams } from '../errors';
 
 export interface ContractOptions {
   from?: string;

@@ -16,10 +16,10 @@
 */
 
 import { Tx } from './tx';
-import { sha3 } from '../../utils';
+import { sha3 } from '../utils';
 import { AbiDefinition } from '.';
-import { MockRequestManager } from '../../request-manager/mock-request-manager';
-import { Eth } from '..';
+import { MockRequestManager } from '../request-manager/mock-request-manager';
+import { Eth } from '../eth';
 
 describe('eth', () => {
   describe('contract', () => {

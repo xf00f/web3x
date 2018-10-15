@@ -17,13 +17,13 @@
 
 import { isBoolean } from 'util';
 import { AbiDefinition } from '.';
-import { promiEvent } from '../../promievent';
-import { fireError, isAddress } from '../../utils';
-import { abi } from '../abi';
-import { toChecksumAddress } from '../../utils';
-import { inputAddressFormatter } from '../../formatters';
-import { Eth } from '..';
-import { BlockType } from '../../types';
+import { promiEvent } from '../promievent';
+import { fireError, isAddress } from '../utils';
+import { abi } from './abi';
+import { toChecksumAddress } from '../utils';
+import { inputAddressFormatter } from '../formatters';
+import { Eth } from '../eth';
+import { BlockType } from '../types';
 
 export type TxFactory = (...args: any[]) => Tx;
 

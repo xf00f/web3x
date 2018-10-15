@@ -16,8 +16,8 @@
 */
 
 import { Contract, AbiDefinition } from '.';
-import { MockRequestManager } from '../../request-manager/mock-request-manager';
-import { Eth } from '../eth';
+import { MockRequestManager } from '../request-manager/mock-request-manager';
+import { Eth } from '../eth/eth';
 
 const abi: AbiDefinition[] = [
   {
