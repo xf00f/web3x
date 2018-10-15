@@ -106,13 +106,11 @@ const tests = [
   },
 ];
 
-describe('core-helpers', () => {
-  describe('formatters', () => {
-    describe('inputTransactionFormatter', function() {
-      tests.forEach(function(test) {
-        it('should return the correct value', function() {
-          expect(inputTransactionFormatter(test.input)).toEqual(test.result);
-        });
+describe('formatters', () => {
+  describe('inputTransactionFormatter', function() {
+    tests.forEach(function(test) {
+      it('should return the correct value', function() {
+        expect(inputTransactionFormatter(test.input)).toEqual(test.result);
       });
     });
   });

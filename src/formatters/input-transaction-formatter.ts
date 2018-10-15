@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { numberToHex, isHex } from '../../utils';
+import { numberToHex, isHex } from '../utils';
 import { isNumber, isObject } from 'util';
 import { inputAddressFormatter } from './input-address-formatter';
 

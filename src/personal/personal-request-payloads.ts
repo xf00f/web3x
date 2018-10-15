@@ -16,7 +16,7 @@
 */
 
 import { toChecksumAddress } from '../utils';
-import { inputAddressFormatter, inputTransactionFormatter, inputSignFormatter } from '../core-helpers/formatters';
+import { inputAddressFormatter, inputTransactionFormatter, inputSignFormatter } from '../formatters';
 import { Address, Quantity, Data } from '../types';
 import { Transaction } from './personal';
 

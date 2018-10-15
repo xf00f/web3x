@@ -15,15 +15,27 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { utf8ToHex, isHexStrict } from '../../utils';
+import { hexToNumber } from '../utils';
 
-/**
- * Hex encodes the data passed to eth_sign and personal_sign
- *
- * @method inputSignFormatter
- * @param {String} data
- * @returns {String}
- */
-export function inputSignFormatter(data) {
-  return isHexStrict(data) ? data : utf8ToHex(data);
+export interface Sync {
+  startingBlock: number;
+  currentBlock: number;
+  highestBlock: number;
+  knownStates: number;
+  pulledStated: number;
+}
+
+export function outputSyncingFormatter(result): Sync | boolean {
+  if (result === false) {
+    return false;
+  }
+  result.startingBlock = hexToNumber(result.startingBlock);
+  result.currentBlock = hexToNumber(result.currentBlock);
+  result.highestBlock = hexToNumber(result.highestBlock);
+  if (result.knownStates) {
+    result.knownStates = hexToNumber(result.knownStates);
+    result.pulledStates = hexToNumber(result.pulledStates);
+  }
+
+  return result;
 }

@@ -16,8 +16,8 @@
 */
 
 import { Provider } from '.';
-import { errors } from '../core-helpers';
 import XMLHttpRequest from 'node-http-xhr';
+import { InvalidResponse, ConnectionTimeout, InvalidConnection } from '../errors';
 //import http, { Agent as HttpAgent } from 'http';
 //import https, { Agent as HttpsAgent } from 'https';
 
@@ -88,7 +88,7 @@ export class HttpProvider implements Provider {
         try {
           result = JSON.parse(result);
         } catch (e) {
-          error = errors.InvalidResponse(request.responseText);
+          error = InvalidResponse(request.responseText);
         }
 
         _this.connected = true;
@@ -98,14 +98,14 @@ export class HttpProvider implements Provider {
 
     request.ontimeout = function() {
       _this.connected = false;
-      callback(errors.ConnectionTimeout(this.timeout));
+      callback(ConnectionTimeout(this.timeout));
     };
 
     try {
       request.send(JSON.stringify(payload));
     } catch (error) {
       this.connected = false;
-      callback(errors.InvalidConnection(this.host));
+      callback(InvalidConnection(this.host));
     }
   }
 

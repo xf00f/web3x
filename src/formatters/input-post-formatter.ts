@@ -15,33 +15,32 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { hexToNumber, hexToUtf8 } from '../../utils';
+import { numberToHex, utf8ToHex } from '../utils';
+import { isArray } from 'util';
 
 /**
- * Formats the output of a received post message
+ * Formats the input of a whisper post and converts all values to HEX
  *
- * @method outputPostFormatter
- * @param {Object}
+ * @method inputPostFormatter
+ * @param {Object} transaction object
  * @returns {Object}
  */
-export function outputPostFormatter(post) {
-  post.expiry = hexToNumber(post.expiry);
-  post.sent = hexToNumber(post.sent);
-  post.ttl = hexToNumber(post.ttl);
-  post.workProved = hexToNumber(post.workProved);
-  // post.payloadRaw = post.payload;
-  // post.payload = utils.hexToAscii(post.payload);
+export function inputPostFormatter(post) {
+  // post.payload = utils.toHex(post.payload);
 
-  // if (utils.isJson(post.payload)) {
-  //     post.payload = JSON.parse(post.payload);
-  // }
+  if (post.ttl) post.ttl = numberToHex(post.ttl);
+  if (post.workToProve) post.workToProve = numberToHex(post.workToProve);
+  if (post.priority) post.priority = numberToHex(post.priority);
+
+  // fallback
+  if (!isArray(post.topics)) {
+    post.topics = post.topics ? [post.topics] : [];
+  }
 
   // format the following options
-  if (!post.topics) {
-    post.topics = [];
-  }
   post.topics = post.topics.map(function(topic) {
-    return hexToUtf8(topic);
+    // convert only if not hex
+    return topic.indexOf('0x') === 0 ? topic : utf8ToHex(topic);
   });
 
   return post;

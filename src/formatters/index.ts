@@ -15,20 +15,17 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { isHexStrict, numberToHex } from '../../utils';
-import { isString } from 'util';
-
-export function inputBlockNumberFormatter(blockNumber) {
-  if (blockNumber === undefined) {
-    return undefined;
-  } else if (blockNumber === 'genesis' || blockNumber === 'earliest') {
-    return '0x0';
-  } else if (blockNumber === 'latest' || blockNumber === 'pending') {
-    return blockNumber;
-  }
-  return isHexStrict(blockNumber)
-    ? isString(blockNumber)
-      ? blockNumber.toLowerCase()
-      : blockNumber
-    : numberToHex(blockNumber);
-}
+export * from './input-address-formatter';
+export * from './input-block-number-formatter';
+export * from './input-default-block-number-formatter';
+export * from './input-log-formatter';
+export * from './input-post-formatter';
+export * from './input-sign-formatter';
+export * from './input-transaction-formatter';
+export * from './output-big-number-formatter';
+export * from './output-block-formatter';
+export * from './output-log-formatter';
+export * from './output-post-formatter';
+export * from './output-syncing-formatter';
+export * from './output-transaction-formatter';
+export * from './output-transaction-receipt-formatter';

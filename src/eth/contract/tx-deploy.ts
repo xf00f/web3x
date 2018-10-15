@@ -21,7 +21,7 @@ import { promiEvent, PromiEvent } from '../../core-promievent';
 import * as utils from '../../utils';
 import { abi } from '../abi';
 import { toChecksumAddress } from '../../utils';
-import { inputAddressFormatter } from '../../core-helpers/formatters';
+import { inputAddressFormatter } from '../../formatters';
 import { Eth } from '..';
 
 interface SendOptions {

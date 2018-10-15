@@ -19,7 +19,7 @@ import { fireError } from '../utils';
 import { isObject } from 'util';
 import { Eth } from '.';
 import { Subscriptions } from '../core-subscriptions';
-import { outputBlockFormatter } from '../core-helpers/formatters';
+import { outputBlockFormatter } from '../formatters';
 
 const TIMEOUTBLOCK = 50;
 const POLLINGTIMEOUT = 15 * TIMEOUTBLOCK; // ~average block time (seconds) * TIMEOUTBLOCK

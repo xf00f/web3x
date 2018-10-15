@@ -17,8 +17,8 @@
 
 import { abi } from '../abi';
 import { AbiDefinition, ContractAbi } from './contract-abi';
-import { Log } from '../../core-helpers/formatters/output-log-formatter';
-import { EventLog } from '../../core-helpers/formatters';
+import { Log } from '../../formatters/output-log-formatter';
+import { EventLog } from '../../formatters';
 
 /**
  * Decodes any event log response and its return values.

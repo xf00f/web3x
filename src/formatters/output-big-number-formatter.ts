@@ -15,7 +15,15 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import * as errors from './errors';
-import * as formatters from './formatters';
+import { toBN } from '../utils';
 
-export { errors, formatters };
+/**
+ * Should the format output to a big number
+ *
+ * @method outputBigNumberFormatter
+ * @param {String|Number|BigNumber} number
+ * @returns {BigNumber} object
+ */
+export function outputBigNumberFormatter(number) {
+  return toBN(number).toString(10);
+}

@@ -15,15 +15,20 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { toBN } from '../../utils';
+import { isHexStrict, numberToHex } from '../utils';
+import { isString } from 'util';
 
-/**
- * Should the format output to a big number
- *
- * @method outputBigNumberFormatter
- * @param {String|Number|BigNumber} number
- * @returns {BigNumber} object
- */
-export function outputBigNumberFormatter(number) {
-  return toBN(number).toString(10);
+export function inputBlockNumberFormatter(blockNumber) {
+  if (blockNumber === undefined) {
+    return undefined;
+  } else if (blockNumber === 'genesis' || blockNumber === 'earliest') {
+    return '0x0';
+  } else if (blockNumber === 'latest' || blockNumber === 'pending') {
+    return blockNumber;
+  }
+  return isHexStrict(blockNumber)
+    ? isString(blockNumber)
+      ? blockNumber.toLowerCase()
+      : blockNumber
+    : numberToHex(blockNumber);
 }

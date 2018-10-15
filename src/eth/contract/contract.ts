@@ -17,11 +17,10 @@
 
 import { isArray, isFunction } from 'util';
 import { Subscription } from '../../core-subscriptions';
-import { formatters, errors } from '../../core-helpers';
 import { abi, jsonInterfaceMethodToString } from '../abi';
 import { Tx, TxFactory } from './tx';
 import { decodeAnyEvent } from './decode-event-abi';
-import { inputAddressFormatter, EventLog } from '../../core-helpers/formatters';
+import { inputAddressFormatter, EventLog, inputBlockNumberFormatter, inputLogFormatter } from '../../formatters';
 import { toChecksumAddress, isAddress } from '../../utils';
 import { Accounts } from '../accounts';
 import { TxDeploy } from './tx-deploy';
@@ -29,6 +28,7 @@ import { ContractAbi, AbiDefinition } from './contract-abi';
 import { Address, Data } from '../../types';
 import { BlockType } from '../../types';
 import { Eth } from '..';
+import { InvalidNumberOfParams } from '../../errors';
 
 export interface ContractOptions {
   from?: string;
@@ -156,7 +156,7 @@ export class Contract {
         if (nextOverload) {
           return nextOverload(...args);
         }
-        throw errors.InvalidNumberOfParams(args.length, definition.inputs.length, definition.name);
+        throw InvalidNumberOfParams(args.length, definition.inputs.length, definition.name);
       }
       return new Tx(this.eth, definition, this.address, args, this.options, this.extraFormatters);
     };
@@ -253,7 +253,7 @@ export class Contract {
         return options[f] !== undefined;
       })
       .forEach(f => {
-        result[f] = formatters.inputBlockNumberFormatter(options[f]);
+        result[f] = inputBlockNumberFormatter(options[f]);
       });
 
     // use given topics
@@ -365,7 +365,7 @@ export class Contract {
     var subscription = new Subscription({
       subscription: {
         params: 1,
-        inputFormatter: [formatters.inputLogFormatter],
+        inputFormatter: [inputLogFormatter],
         outputFormatter: log => decodeAnyEvent(this.jsonInterface, log),
         // DUBLICATE, also in web3-eth
         subscriptionHandler: function(output) {

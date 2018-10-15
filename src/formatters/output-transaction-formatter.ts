@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { toChecksumAddress, isAddress, hexToNumber } from '../../utils';
+import { toChecksumAddress, isAddress, hexToNumber } from '../utils';
 import { outputBigNumberFormatter } from './output-big-number-formatter';
 
 export interface UnformattedTransaction {

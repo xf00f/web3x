@@ -16,9 +16,9 @@
 */
 
 import { isFunction, isObject, isArray } from 'util';
-import { errors } from '../core-helpers';
 import { EventEmitter } from 'events';
 import { Callback } from '../types';
+import { InvalidNumberOfParams } from '../errors';
 
 export class Subscription<Result> extends EventEmitter {
   public id: any;
@@ -73,7 +73,7 @@ export class Subscription<Result> extends EventEmitter {
     if (!subscription.params) subscription.params = 0;
 
     if (args.length !== subscription.params) {
-      throw errors.InvalidNumberOfParams(args.length, subscription.params + 1, args[0]);
+      throw InvalidNumberOfParams(args.length, subscription.params + 1, args[0]);
     }
   }
 

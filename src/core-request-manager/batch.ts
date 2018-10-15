@@ -16,8 +16,8 @@
 */
 
 import * as Jsonrpc from './jsonrpc';
-import { errors } from '../core-helpers';
 import { IRequestManager } from '.';
+import { ErrorResponse, InvalidResponse } from '../errors';
 
 export class BatchManager {
   requests: any[] = [];
@@ -49,11 +49,11 @@ export class BatchManager {
         .forEach(function(result, index) {
           if (requests[index].callback) {
             if (result && result.error) {
-              return requests[index].callback(errors.ErrorResponse(result));
+              return requests[index].callback(ErrorResponse(result));
             }
 
             if (!Jsonrpc.isValidResponse(result)) {
-              return requests[index].callback(errors.InvalidResponse(result));
+              return requests[index].callback(InvalidResponse(result));
             }
 
             try {

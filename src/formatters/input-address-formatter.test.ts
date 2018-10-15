@@ -42,21 +42,19 @@ var errorTests = [
   '',
 ];
 
-describe('core-helpers', function() {
-  describe('formatters', function() {
-    describe('inputAddressFormatter correct addresses', function() {
-      tests.forEach(function(test) {
-        it('should return the correct value', function() {
-          expect(inputAddressFormatter(test.input)).toBe(test.result);
-        });
+describe('formatters', function() {
+  describe('inputAddressFormatter correct addresses', function() {
+    tests.forEach(function(test) {
+      it('should return the correct value', function() {
+        expect(inputAddressFormatter(test.input)).toBe(test.result);
       });
     });
+  });
 
-    describe('inputAddressFormatter wrong addresses', function() {
-      errorTests.forEach(function(test) {
-        it('should throw an exception', function() {
-          expect(() => inputAddressFormatter(test)).toThrow();
-        });
+  describe('inputAddressFormatter wrong addresses', function() {
+    errorTests.forEach(function(test) {
+      it('should throw an exception', function() {
+        expect(() => inputAddressFormatter(test)).toThrow();
       });
     });
   });

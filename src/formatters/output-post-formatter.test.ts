@@ -15,24 +15,27 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { inputBlockNumberFormatter } from '../formatters';
+import { outputPostFormatter } from './output-post-formatter';
 
-const tests = [
-  { value: 'genesis', expected: '0x0' },
-  { value: 'latest', expected: 'latest' },
-  { value: 'pending', expected: 'pending' },
-  { value: 'earliest', expected: '0x0' },
-  { value: 1, expected: '0x1' },
-  { value: '0x1', expected: '0x1' },
-];
-
-describe('core-helpers', () => {
-  describe('formatters', () => {
-    describe('inputDefaultBlockNumberFormatter', function() {
-      tests.forEach(function(test) {
-        it('should turn ' + test.value + ' to ' + test.expected, function() {
-          expect(inputBlockNumberFormatter(test.value)).toBe(test.expected);
-        });
+describe('formatters', function() {
+  describe('outputPostFormatter', function() {
+    it('should return the correct value', function() {
+      expect(
+        outputPostFormatter({
+          expiry: '0x3e8',
+          sent: '0x3e8',
+          ttl: '0x3e8',
+          workProved: '0x3e8',
+          payload: '0x7b2274657374223a2274657374227d',
+          topics: ['0x68656c6c6f', '0x6d79746f70696373'],
+        }),
+      ).toEqual({
+        expiry: 1000,
+        sent: 1000,
+        ttl: 1000,
+        workProved: 1000,
+        payload: '0x7b2274657374223a2274657374227d',
+        topics: ['hello', 'mytopics'],
       });
     });
   });

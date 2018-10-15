@@ -16,9 +16,9 @@
 */
 
 import { isArray, isFunction } from 'util';
-import { errors } from '../core-helpers';
 import { Provider } from '.';
 import netLib from 'net';
+import { InvalidResponse, InvalidConnection } from '../errors';
 
 export class IpcProvider implements Provider {
   private responseCallbacks: any;
@@ -130,7 +130,7 @@ export class IpcProvider implements Provider {
         clearTimeout(this.lastChunkTimeout);
         this.lastChunkTimeout = setTimeout(() => {
           this._timeout();
-          throw errors.InvalidResponse(data);
+          throw InvalidResponse(data);
         }, 1000 * 15);
 
         return;
@@ -168,7 +168,7 @@ Timeout all requests when the end/error event is fired
   private _timeout() {
     for (var key in this.responseCallbacks) {
       if (this.responseCallbacks.hasOwnProperty(key)) {
-        this.responseCallbacks[key](errors.InvalidConnection('on IPC'));
+        this.responseCallbacks[key](InvalidConnection('on IPC'));
         delete this.responseCallbacks[key];
       }
     }

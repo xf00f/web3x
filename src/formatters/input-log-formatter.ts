@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { utf8ToHex } from '../../utils';
+import { utf8ToHex } from '../utils';
 import { inputBlockNumberFormatter } from './input-block-number-formatter';
 import { isArray } from 'util';
 import { inputAddressFormatter } from './input-address-formatter';

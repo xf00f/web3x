@@ -16,7 +16,6 @@
 */
 
 import { Tx } from '../../types';
-import { formatters } from '../../core-helpers';
 import { numberToHex } from '../../utils';
 import RLP from '../../eth-lib/rlp';
 import Bytes from '../../eth-lib/bytes';
@@ -24,6 +23,7 @@ import Hash from '../../eth-lib/hash';
 import Nat from '../../eth-lib/nat';
 import Account from '../../eth-lib/account';
 import { Eth } from '..';
+import { inputCallFormatter } from '../../formatters';
 
 export interface SignedTx {
   messageHash: string;
@@ -77,7 +77,7 @@ function sign(tx: Tx, privateKey: string): SignedTx {
     throw new Error('Gas, gasPrice, nonce or chainId is lower than 0');
   }
 
-  tx = formatters.inputCallFormatter(tx);
+  tx = inputCallFormatter(tx);
 
   const transaction = tx;
   transaction.to = tx.to || '0x';

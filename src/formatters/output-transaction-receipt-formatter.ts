@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { toChecksumAddress, hexToNumber } from '../../utils';
+import { toChecksumAddress, hexToNumber } from '../utils';
 import { outputLogFormatter, Log } from './output-log-formatter';
 import { isArray } from 'util';
 

@@ -15,8 +15,8 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { sha3, toChecksumAddress, hexToNumber } from '../../utils';
-import { TransactionHash, Address, Data } from '../../types';
+import { sha3, toChecksumAddress, hexToNumber } from '../utils';
+import { TransactionHash, Address, Data } from '../types';
 
 export interface UnformattedLog {
   removed?: boolean;

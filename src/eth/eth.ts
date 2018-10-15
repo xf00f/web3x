@@ -32,7 +32,7 @@ import {
   Transaction,
   TransactionReceipt,
   Log,
-} from '../core-helpers/formatters';
+} from '../formatters';
 import { isFunction } from 'util';
 import { Tx, BlockType, BlockHash, TransactionHash } from '../types';
 import { Callback, Data, Address, Quantity } from '../types';

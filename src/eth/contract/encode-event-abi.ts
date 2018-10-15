@@ -16,7 +16,7 @@
 */
 
 import { abi } from '../abi';
-import { inputBlockNumberFormatter } from '../../core-helpers/formatters';
+import { inputBlockNumberFormatter } from '../../formatters';
 import { isArray } from 'util';
 
 /**

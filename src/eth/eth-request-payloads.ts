@@ -29,7 +29,7 @@ import {
   inputCallFormatter,
   inputLogFormatter,
   outputLogFormatter,
-} from '../core-helpers/formatters';
+} from '../formatters';
 import { isString } from 'util';
 import { Tx, BlockType, BlockHash, TransactionHash } from '../types';
 import { Data, Address } from '../types';

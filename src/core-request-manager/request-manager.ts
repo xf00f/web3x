@@ -16,10 +16,10 @@
 */
 
 import { isString, isArray } from 'util';
-import { errors } from '../core-helpers';
 import * as Jsonrpc from './jsonrpc';
 import { givenProvider } from './givenProvider';
 import { WebsocketProvider, HttpProvider, IpcProvider, Provider } from '../providers';
+import { ErrorResponse, InvalidResponse } from '../errors';
 
 export interface IRequestManager {
   send(data, callback?): Promise<any>;
@@ -111,9 +111,9 @@ export class RequestManager {
             ),
           );
         } else if (result.error) {
-          return reject(errors.ErrorResponse(result));
+          return reject(ErrorResponse(result));
         } else if (!Jsonrpc.isValidResponse(result)) {
-          return reject(errors.InvalidResponse(result));
+          return reject(InvalidResponse(result));
         }
 
         resolve(result.result);
@@ -136,7 +136,7 @@ export class RequestManager {
         }
 
         if (!isArray(results)) {
-          return reject(errors.InvalidResponse(results));
+          return reject(InvalidResponse(results));
         }
 
         resolve(results);

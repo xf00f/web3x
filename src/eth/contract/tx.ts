@@ -21,7 +21,7 @@ import { promiEvent } from '../../core-promievent';
 import { fireError, isAddress } from '../../utils';
 import { abi } from '../abi';
 import { toChecksumAddress } from '../../utils';
-import { inputAddressFormatter } from '../../core-helpers/formatters';
+import { inputAddressFormatter } from '../../formatters';
 import { Eth } from '..';
 import { BlockType } from '../../types';
 
