@@ -1,21 +1,7 @@
 import { abi } from '../abi';
 import { AbiDefinition, ContractAbi } from './contract-abi';
-import { outputLogFormatter, UnformattedLog } from '../../core-helpers/formatters/output-log-formatter';
-
-export interface EventLog {
-  id: string | null;
-  removed?: boolean;
-  event?: string;
-  address: string;
-  returnValues: any;
-  logIndex: number | null;
-  transactionIndex: number | null;
-  transactionHash: string | null;
-  blockHash: string | null;
-  blockNumber: number | null;
-  raw: { data: string; topics: string[] };
-  signature: string | null;
-}
+import { Log } from '../../core-helpers/formatters/output-log-formatter';
+import { EventLog } from '../../core-helpers/formatters';
 
 /**
  * Decodes any event log response and its return values.
@@ -24,14 +10,14 @@ export interface EventLog {
  * @param log The log response to decode.
  * @returns The decoded event log.
  */
-export function decodeAnyEvent(contractAbi: ContractAbi, data: UnformattedLog) {
+export function decodeAnyEvent(contractAbi: ContractAbi, log: Log) {
   const anonymousEvent: AbiDefinition = {
     type: 'event',
     anonymous: true,
     inputs: [],
   };
-  const event = contractAbi.find(abiDef => abiDef.signature === data.topics[0]) || anonymousEvent;
-  return decodeEvent(event, data);
+  const event = contractAbi.find(abiDef => abiDef.signature === log.topics[0]) || anonymousEvent;
+  return decodeEvent(event, log);
 }
 
 /**
@@ -41,7 +27,7 @@ export function decodeAnyEvent(contractAbi: ContractAbi, data: UnformattedLog) {
  * @param log The log response to decode.
  * @returns The decoded event log.
  */
-export function decodeEvent(event: AbiDefinition, log: UnformattedLog): EventLog {
+export function decodeEvent(event: AbiDefinition, log: Log): EventLog {
   log.data = log.data || '';
   log.topics = log.topics || [];
 
@@ -49,8 +35,7 @@ export function decodeEvent(event: AbiDefinition, log: UnformattedLog): EventLog
   const returnValues = abi.decodeLog(event.inputs, log.data, argTopics);
   delete returnValues.__length__;
 
-  const { data, topics, ...formattedLog } = outputLogFormatter(log);
-  console.log(formattedLog);
+  const { data, topics, ...formattedLog } = log;
 
   return {
     ...formattedLog,

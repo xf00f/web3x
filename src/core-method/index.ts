@@ -115,7 +115,7 @@ export class Method {
    * @param {Array} arguments
    * @throws {Error} if it is not
    */
-  private validateArgs(args) {
+  validateArgs(args) {
     if (args.length !== this.params) {
       throw errors.InvalidNumberOfParams(args.length, this.params, this.name);
     }
@@ -128,7 +128,7 @@ export class Method {
    * @param {Object}
    * @return {Object}
    */
-  private formatOutput(result) {
+  formatOutput(result) {
     if (isArray(result)) {
       return result.map(res => {
         return this.outputFormatter && res ? this.outputFormatter(res) : res;
@@ -145,7 +145,7 @@ export class Method {
    * @param {Array} args
    * @return {Object}
    */
-  private toPayload(...args: any[]) {
+  toPayload(...args: any[]) {
     var params = this.formatInput(args);
     this.validateArgs(params);
 
@@ -168,7 +168,7 @@ export class Method {
    * @param {Array}
    * @return {Array}
    */
-  private formatInput(args) {
+  formatInput(args) {
     if (!this.inputFormatter) {
       return args;
     }

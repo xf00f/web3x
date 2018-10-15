@@ -8,6 +8,8 @@ import { abi } from '../abi';
 import { IRequestManager } from '../../core-request-manager';
 import { toChecksumAddress } from '../../utils';
 import { inputAddressFormatter } from '../../core-helpers/formatters';
+import { Eth } from '..';
+import { BlockType } from '../../types';
 
 export type TxFactory = (...args: any[]) => Tx;
 
@@ -44,11 +46,8 @@ type DefaultOptions = {
  * @returns {Object} an object with functions to call the methods
  */
 export class Tx {
-  private defaultAccount: any;
-  private defaultBlock: any;
-
   constructor(
-    private requestManager: IRequestManager,
+    private eth: Eth,
     private definition: AbiDefinition,
     private contractAddress: string,
     private args: any[] = [],
@@ -56,100 +55,37 @@ export class Tx {
     private ethAccounts?: any,
     private extraFormatters?: any,
   ) {
+    if (this.definition.type !== 'function') {
+      throw new Error('Tx should only be used with functions.');
+    }
+
     if (this.defaultOptions.from) {
       this.defaultOptions.from = toChecksumAddress(inputAddressFormatter(this.defaultOptions.from));
     }
   }
 
-  public estimateGas(options: EstimateOptions = {}) {
-    var estimateGas = new Method({
-      name: 'estimateGas',
-      call: 'eth_estimateGas',
-      params: 1,
-      inputFormatter: [formatters.inputCallFormatter],
-      outputFormatter: utils.hexToNumber,
-      requestManager: this.requestManager,
-      accounts: this.ethAccounts,
-      defaultAccount: this.defaultAccount,
-      defaultBlock: this.defaultBlock,
-    }).createFunction();
-
-    const methodOptions = {
-      to: this.contractAddress,
-      from: options.from ? toChecksumAddress(inputAddressFormatter(options.from)) : this.defaultOptions.from,
-      gas: options.gas || this.defaultOptions.gas,
-      gasPrice: options.gasPrice || this.defaultOptions.gasPrice,
-      value: options.value,
-      data: this.encodeABI(),
-    };
-
-    return estimateGas(methodOptions);
+  public async estimateGas(options: EstimateOptions = {}) {
+    return await this.eth.estimateGas(this.getTx(options));
   }
 
-  public call(options: CallOptions = {}, defaultBlock?: number) {
-    if (this.definition.type !== 'function') {
-      throw new Error('Call can only called on functions.');
-    }
-
-    const call = new Method({
-      name: 'call',
-      call: 'eth_call',
-      params: 2,
-      inputFormatter: [formatters.inputCallFormatter, formatters.inputDefaultBlockNumberFormatter],
-      // add output formatter for decoding
-      outputFormatter: result => this.decodeMethodReturn(this.definition.outputs, result),
-      requestManager: this.requestManager,
-      accounts: this.ethAccounts,
-      defaultAccount: this.defaultAccount,
-      defaultBlock: this.defaultBlock,
-    }).createFunction();
-
-    const methodOptions = {
-      to: this.contractAddress,
-      from: options.from ? toChecksumAddress(inputAddressFormatter(options.from)) : this.defaultOptions.from,
-      gasPrice: options.gasPrice || this.defaultOptions.gasPrice,
-      gas: options.gas || this.defaultOptions.gas,
-      data: this.encodeABI(),
-    };
-
-    return call(methodOptions, defaultBlock);
+  public async call(options: CallOptions = {}, block?: BlockType) {
+    const result = await this.eth.call(this.getTx(options), block);
+    return this.decodeMethodReturn(this.definition.outputs, result);
   }
 
-  public getCallRequestPayload(options: CallOptions, defaultBlock?: number) {
-    if (this.definition.type !== 'function') {
-      throw new Error('Call can only called on functions.');
-    }
-
-    const methodOptions = {
-      to: this.contractAddress,
-      from: options.from ? toChecksumAddress(inputAddressFormatter(options.from)) : this.defaultOptions.from,
-      gasPrice: options.gasPrice || this.defaultOptions.gasPrice,
-      gas: options.gas || this.defaultOptions.gas,
-      data: this.encodeABI(),
+  public getCallRequestPayload(options: CallOptions, block?: number) {
+    const result = this.eth.request.call(this.getTx(options), block);
+    return {
+      ...result,
+      format: result => this.decodeMethodReturn(this.definition.outputs, result),
     };
-
-    const payload: any = {
-      params: [formatters.inputCallFormatter({ from: this.defaultAccount, methodOptions })],
-    };
-    payload.params.push(formatters.inputDefaultBlockNumberFormatter.call(defaultBlock || this.defaultBlock));
-    payload.method = 'eth_call';
-    payload.format = this.decodeMethodReturn.bind(null, this.definition.outputs);
-
-    return payload;
   }
 
   public send(options: SendOptions) {
-    const methodOptions = {
-      to: this.contractAddress,
-      from: options.from ? toChecksumAddress(inputAddressFormatter(options.from)) : this.defaultOptions.from,
-      gasPrice: options.gasPrice || this.defaultOptions.gasPrice,
-      gas: options.gas || this.defaultOptions.gas,
-      value: options.value,
-      data: this.encodeABI(),
-    };
+    const tx = this.getTx(options);
 
     // return error, if no "from" is specified
-    if (!utils.isAddress(methodOptions.from)) {
+    if (!utils.isAddress(tx.from)) {
       const defer = promiEvent();
       return utils.fireError(
         new Error('No "from" address specified in neither the given options, nor the default options.'),
@@ -158,12 +94,7 @@ export class Tx {
       );
     }
 
-    if (
-      isBoolean(this.definition.payable) &&
-      !this.definition.payable &&
-      methodOptions.value &&
-      methodOptions.value > 0
-    ) {
+    if (isBoolean(this.definition.payable) && !this.definition.payable && tx.value && tx.value > 0) {
       const defer = promiEvent();
       return utils.fireError(
         new Error('Can not send value to non-payable contract method or constructor'),
@@ -172,23 +103,15 @@ export class Tx {
       );
     }
 
-    const sendTransaction = new Method({
-      name: 'sendTransaction',
-      call: 'eth_sendTransaction',
-      params: 1,
-      inputFormatter: [formatters.inputTransactionFormatter],
-      requestManager: this.requestManager,
-      accounts: this.ethAccounts,
-      defaultAccount: this.defaultAccount,
-      defaultBlock: this.defaultBlock,
-      extraFormatters: this.extraFormatters,
-    }).createFunction();
-
-    return sendTransaction(methodOptions);
+    return this.eth.sendTransaction(tx, this.extraFormatters);
   }
 
   public getSendRequestPayload(options: SendOptions) {
-    const methodOptions = {
+    return this.eth.request.sendTransaction(this.getTx(options));
+  }
+
+  private getTx(options) {
+    return {
       to: this.contractAddress,
       from: options.from ? toChecksumAddress(inputAddressFormatter(options.from)) : this.defaultOptions.from,
       gasPrice: options.gasPrice || this.defaultOptions.gasPrice,
@@ -196,12 +119,6 @@ export class Tx {
       value: options.value,
       data: this.encodeABI(),
     };
-
-    var payload: any = {
-      params: [formatters.inputCallFormatter({ from: this.defaultAccount, methodOptions })],
-    };
-    payload.method = 'eth_sendTransaction';
-    return payload;
   }
 
   /**

@@ -28,20 +28,19 @@
  */
 
 import { isArray, isFunction } from 'util';
-import { Method } from '../../core-method';
 import { Subscription } from '../../core-subscriptions';
 import { formatters, errors } from '../../core-helpers';
 import { abi, jsonInterfaceMethodToString } from '../abi';
 import { Tx, TxFactory } from './tx';
-import { decodeAnyEvent, EventLog } from './decode-event-abi';
-import { IRequestManager } from '../../core-request-manager';
-import { inputAddressFormatter } from '../../core-helpers/formatters';
+import { decodeAnyEvent } from './decode-event-abi';
+import { inputAddressFormatter, EventLog } from '../../core-helpers/formatters';
 import { toChecksumAddress, isAddress } from '../../utils';
 import { Accounts } from '../accounts';
 import { TxDeploy } from './tx-deploy';
 import { ContractAbi, AbiDefinition } from './contract-abi';
 import { Address, Data } from '../../types';
 import { BlockType } from '../../types';
+import { Eth } from '..';
 
 export interface ContractOptions {
   from?: string;
@@ -70,7 +69,7 @@ export class Contract {
   private extraFormatters;
 
   constructor(
-    private requestManager: IRequestManager,
+    private eth: Eth,
     private jsonInterface: ContractAbi,
     public address?: string,
     private ethAccounts?: Accounts,
@@ -107,15 +106,7 @@ export class Contract {
     };
     constructor.signature = 'constructor';
 
-    return new TxDeploy(
-      this.requestManager,
-      constructor,
-      data,
-      args,
-      this.options,
-      this.ethAccounts,
-      this.extraFormatters,
-    );
+    return new TxDeploy(this.eth, constructor, data, args, this.options, this.extraFormatters);
   }
 
   /**
@@ -151,27 +142,18 @@ export class Contract {
    * @param {Function} callback
    * @return {Object} the promievent
    */
-  getPastEvents(
+  async getPastEvents(
     event: string,
-    options?: {
+    options: {
       filter?: object;
       fromBlock?: BlockType;
       toBlock?: BlockType;
       topics?: string[];
-    },
+    } = {},
   ): Promise<EventLog[]> {
     const subOptions = this.generateEventOptions(event, options);
-
-    const getPastLogs = new Method({
-      name: 'getPastLogs',
-      call: 'eth_getLogs',
-      params: 1,
-      inputFormatter: [formatters.inputLogFormatter],
-      outputFormatter: log => decodeAnyEvent(this.jsonInterface, log),
-      requestManager: this.requestManager,
-    }).createFunction();
-
-    return getPastLogs(subOptions.params, subOptions.callback);
+    const result = await this.eth.getPastLogs(subOptions.params);
+    return result.map(log => decodeAnyEvent(this.jsonInterface, log));
   }
 
   private executorFactory(definition: AbiDefinition, nextOverload?: TxFactory): TxFactory {
@@ -188,15 +170,7 @@ export class Contract {
         }
         throw errors.InvalidNumberOfParams(args.length, definition.inputs.length, definition.name);
       }
-      return new Tx(
-        this.requestManager,
-        definition,
-        this.address,
-        args,
-        this.options,
-        this.ethAccounts,
-        this.extraFormatters,
-      );
+      return new Tx(this.eth, definition, this.address, args, this.options, this.ethAccounts, this.extraFormatters);
     };
   }
 
@@ -419,7 +393,7 @@ export class Contract {
         },
       },
       type: 'eth',
-      requestManager: this.requestManager,
+      requestManager: this.eth.requestManager,
     });
     subscription.subscribe('logs', subOptions.params, subOptions.callback || function() {});
 

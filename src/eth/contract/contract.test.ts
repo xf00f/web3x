@@ -2,6 +2,7 @@ import { Contract } from '.';
 import { abi } from './fixtures/abi';
 import { MockRequestManager } from '../../core-request-manager/mock-request-manager';
 import { sha3 } from '../../utils';
+import { Eth } from '../eth';
 
 const address = '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe';
 const addressLowercase = '0x11f4d0a3c12e86b4b5f39b213f7e19d048276dae';
@@ -13,31 +14,33 @@ describe('contract', function() {
     privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
   };
 
+  let eth: Eth;
   let mockRequestManager: MockRequestManager;
 
   beforeEach(() => {
     mockRequestManager = new MockRequestManager();
+    eth = new Eth(mockRequestManager);
   });
 
   describe('instantiation', function() {
     it('should transform address from checksum addressess', function() {
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
       expect(contract.address).toBe(address);
     });
 
     it('should transform address to checksum address', function() {
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
       expect(contract.address).toBe(address);
     });
 
     it('should fail on invalid address', function() {
-      const test = () => new Contract(mockRequestManager, abi, '0x11F4D0A3c12e86B4b5F39B213F7E19D048276DAe');
+      const test = () => new Contract(eth, abi, '0x11F4D0A3c12e86B4b5F39B213F7E19D048276DAe');
       expect(test).toThrow();
     });
 
     it('should fail on invalid address as options.from', function() {
       var test = () =>
-        new Contract(mockRequestManager, abi, address, undefined, {
+        new Contract(eth, abi, address, undefined, {
           from: '0x11F4D0A3c12e86B4b5F39B213F7E19D048276DAe',
         });
       expect(test).toThrow();
@@ -85,7 +88,7 @@ describe('contract', function() {
     it('should create event subscription', function(done) {
       mockEthSubscribe();
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       contract.events.Changed({ filter: { from: address } }, function(err, result, sub) {
         expect(result.returnValues.from).toBe(address);
@@ -100,7 +103,7 @@ describe('contract', function() {
     it('should create event from the events object using a signature and callback', function(done) {
       mockEthSubscribe();
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       var event = contract.events['0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651'](
         { filter: { from: address } },
@@ -119,7 +122,7 @@ describe('contract', function() {
     it('should create event from the events object using event name and parameters', function(done) {
       mockEthSubscribe();
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       var event = contract.events[signature]({ filter: { from: address } }, function(err, result) {
         expect(result.returnValues.from).toBe(address);
@@ -168,7 +171,7 @@ describe('contract', function() {
 
       mockEthSubscribe();
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
       let count = 0;
 
       let event = contract.events.Changed({ fromBlock: 0, filter: { from: address } }).on('data', result => {
@@ -203,7 +206,7 @@ describe('contract', function() {
 
       let count = 0;
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       await new Promise(resolve => {
         contract.once('Changed', { filter: { from: address } }, function(err, result, sub) {
@@ -225,7 +228,7 @@ describe('contract', function() {
       emitData(200, { removed: true });
 
       let count = 1;
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       contract.events
         .Changed({ filter: { from: address } })
@@ -261,7 +264,7 @@ describe('contract', function() {
         return '0x123';
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       let count = 0;
       let event = contract.events.allEvents({}, function(_, result) {
@@ -289,7 +292,7 @@ describe('contract', function() {
     const signature = 'balance(address)';
 
     it('should encode a function call', function() {
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       const result = contract.methods.balance(address).encodeABI();
 
@@ -299,7 +302,7 @@ describe('contract', function() {
     });
 
     it('should encode a constructor call with data', function() {
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       var result = contract.deploy('0x1234', address, 10).encodeABI();
 
@@ -323,7 +326,7 @@ describe('contract', function() {
         return '0x0000000000000000000000000000000000000000000000000000000000000032';
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       const res = await contract.methods.balance(address).estimateGas();
       expect(res).toBe(50);
@@ -343,7 +346,7 @@ describe('contract', function() {
         return '0x000000000000000000000000000000000000000000000000000000000000000a';
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       const res = await contract.deploy('0x1234', address, 50).estimateGas();
       expect(res).toBe(10);
@@ -363,7 +366,7 @@ describe('contract', function() {
         return '0x000000000000000000000000' + addressLowercase.replace('0x', '');
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       const res = await contract.methods
         .hasALotOfParams('0x24545345', '0xff24545345', ['0xff24545345', '0x5345', '0x4545', '0x453345'])
@@ -384,7 +387,7 @@ describe('contract', function() {
         return '0x0000000000000000000000000000000000000000000000000000000000000005';
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
       const res = await contract.methods.overloadedFunction().call();
       expect(res).toBe('5');
     });
@@ -402,7 +405,7 @@ describe('contract', function() {
         return '0x0000000000000000000000000000000000000000000000000000000000000006';
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       const res = await contract.methods.overloadedFunction(6).call();
       expect(res).toBe('6');
@@ -421,7 +424,7 @@ describe('contract', function() {
         return '0x0000000000000000000000000000000000000000000000000000000000000032';
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       const res = await contract.methods.balance(address).call();
       expect(res).toBe('50');
@@ -440,7 +443,7 @@ describe('contract', function() {
         return '0x0000000000000000000000000000000000000000000000000000000000000032';
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       const res = await contract.methods.balance(address).call({}, 11);
       expect(res).toBe('50');
@@ -484,7 +487,7 @@ describe('contract', function() {
         return '0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000848656c6c6f212521000000000000000000000000000000000000000000000000';
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       const [m1, m2, m3] = await Promise.all([
         contract.methods.balance(address).call(),
@@ -500,7 +503,7 @@ describe('contract', function() {
     it('should return an error when returned string is 0x', async () => {
       const signature = 'getStr()';
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       mockRequestManager.send.mockImplementationOnce(async payload => {
         expect(payload.method).toBe('eth_call');
@@ -534,7 +537,7 @@ describe('contract', function() {
         return '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000';
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       const result = await contract.methods.getStr().call({ from: address2 });
       expect(result).toBe('');
@@ -593,7 +596,7 @@ describe('contract', function() {
         ],
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       contract.methods
         .mySend(address, 10)
@@ -721,7 +724,7 @@ describe('contract', function() {
         ],
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       contract.methods
         .mySend(address, 10)
@@ -839,7 +842,7 @@ describe('contract', function() {
         });
       }, 200);
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       var count = 0;
       contract.methods
@@ -876,7 +879,8 @@ describe('contract', function() {
             expect(confirmationNumber).toBe(1);
             done();
           }
-        });
+        })
+        .on('error', done);
     });
 
     it('should sendTransaction to contract function', async () => {
@@ -901,13 +905,13 @@ describe('contract', function() {
         blockHash: '0x1234',
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       await contract.methods.mySend(address, 17).send({ from: address, gasPrice: '234564321234' });
     });
 
     it('should throw error when trying to send ether to a non payable contract function', async () => {
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       await expect(
         contract.methods.myDisallowedSend(address, 17).send({ from: address, value: 123 }),
@@ -944,7 +948,7 @@ describe('contract', function() {
         logs: [],
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       await contract.methods.myDisallowedSend(address, 17).send({ from: address, gasPrice: '23456787654321' });
     });
@@ -960,28 +964,30 @@ describe('contract', function() {
         blockHash: '0x1234',
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       await contract.methods['mySend(address,uint256)'](address, 17).send({
         from: address,
         gasPrice: '23456787654321',
       });
 
-      expect(mockRequestManager.send).toHaveBeenCalledWith({
-        method: 'eth_sendTransaction',
-        params: [
-          {
-            data:
-              signature +
-              '000000000000000000000000' +
-              addressLowercase.replace('0x', '') +
-              '0000000000000000000000000000000000000000000000000000000000000011',
-            from: addressLowercase,
-            to: addressLowercase,
-            gasPrice: '0x1555757ee6b1',
-          },
-        ],
-      });
+      expect(mockRequestManager.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'eth_sendTransaction',
+          params: [
+            {
+              data:
+                signature +
+                '000000000000000000000000' +
+                addressLowercase.replace('0x', '') +
+                '0000000000000000000000000000000000000000000000000000000000000011',
+              from: addressLowercase,
+              to: addressLowercase,
+              gasPrice: '0x1555757ee6b1',
+            },
+          ],
+        }),
+      );
     });
 
     it('should sendTransaction to contract function using the signature', async () => {
@@ -995,29 +1001,31 @@ describe('contract', function() {
         blockHash: '0x1234',
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       await contract.methods[signature](address, 17).send({ from: address, gasPrice: '1230000000' });
 
-      expect(mockRequestManager.send).toHaveBeenCalledWith({
-        method: 'eth_sendTransaction',
-        params: [
-          {
-            data:
-              signature +
-              '000000000000000000000000' +
-              addressLowercase.replace('0x', '') +
-              '0000000000000000000000000000000000000000000000000000000000000011',
-            from: addressLowercase,
-            to: addressLowercase,
-            gasPrice: '0x49504f80',
-          },
-        ],
-      });
+      expect(mockRequestManager.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'eth_sendTransaction',
+          params: [
+            {
+              data:
+                signature +
+                '000000000000000000000000' +
+                addressLowercase.replace('0x', '') +
+                '0000000000000000000000000000000000000000000000000000000000000011',
+              from: addressLowercase,
+              to: addressLowercase,
+              gasPrice: '0x49504f80',
+            },
+          ],
+        }),
+      );
     });
 
     it('should throw when trying to create a tx object and wrong amount of params', () => {
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
       expect(() => contract.methods.mySend(address)).toThrowError(/Invalid number of parameters/);
     });
 
@@ -1042,7 +1050,7 @@ describe('contract', function() {
         return '0x0000000000000000000000000000000000000000000000000000000000000032';
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       contract.methods
         .balance(address)
@@ -1070,7 +1078,7 @@ describe('contract', function() {
         return '0x0000000000000000000000000000000000000000000000000000000000000032';
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       contract.methods
         .balance(address)
@@ -1098,7 +1106,7 @@ describe('contract', function() {
         return '0x0000000000000000000000000000000000000000000000000000000000000032';
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       contract.methods
         .balance(address)
@@ -1133,7 +1141,7 @@ describe('contract', function() {
         blockHash: '0x1234',
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       await contract.methods.mySend(address, 17).send({ from: address, gas: 50000, gasPrice: 3000, value: 10000 });
     });
@@ -1141,7 +1149,6 @@ describe('contract', function() {
     it('should sendTransaction and fill in default gasPrice', async () => {
       mockRequestManager.send.mockImplementationOnce(async payload => {
         expect(payload.method).toBe('eth_gasPrice');
-        expect(payload.params).toEqual([]);
         return '0x45656456456456';
       });
 
@@ -1166,7 +1173,7 @@ describe('contract', function() {
         blockHash: '0x1234',
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       await contract.methods.mySend(address, 17).send({ from: address });
     });
@@ -1195,7 +1202,7 @@ describe('contract', function() {
         blockHash: '0x1234',
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       await contract.methods.mySend(address, 17).send({ from: address, gas: 50000, gasPrice: 3000, value: 10000 });
     });
@@ -1224,7 +1231,7 @@ describe('contract', function() {
         blockHash: '0x1234',
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       await contract.methods
         .mySend(address, 17)
@@ -1287,7 +1294,7 @@ describe('contract', function() {
         ];
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       const result = await contract.getPastEvents('Changed', { filter: { from: address2 } });
 
@@ -1373,7 +1380,7 @@ describe('contract', function() {
         blockHash: '0x1234',
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       contract.methods
         .testArr([3])
@@ -1404,7 +1411,7 @@ describe('contract', function() {
         blockHash: '0x1234',
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       const result = await contract.methods.owner().call();
       expect(result).toBe(address);
@@ -1423,7 +1430,7 @@ describe('contract', function() {
         return '0x0000000000000000000000000000000000000000000000000000000000000001';
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       contract.methods
         .listOfNestedStructs('0x9CC9a2c777605Af16872E0997b3Aeb91d96D5D8c')
@@ -1457,7 +1464,7 @@ describe('contract', function() {
         blockHash: '0x1234',
       });
 
-      const contract = new Contract(mockRequestManager, abi, address);
+      const contract = new Contract(eth, abi, address);
 
       await contract.methods.addStruct({ status: true }).send({
         from: address,
@@ -1519,7 +1526,7 @@ describe('contract', function() {
         return '0x321';
       });
 
-      const contract = new Contract(mockRequestManager, abi);
+      const contract = new Contract(eth, abi);
 
       contract
         .deploy('0x1234567', address, 200)

@@ -8,7 +8,7 @@ export class MockRequestManager implements IRequestManager {
   public removeSubscription = jest.fn();
   public clearSubscriptions = jest.fn();
   public close = jest.fn();
-  public provider = new EventEmitter();
+  readonly provider = new EventEmitter();
 
   constructor() {
     this.addSubscription.mockImplementation((id, name, type, callback) => {
@@ -29,5 +29,9 @@ export class MockRequestManager implements IRequestManager {
     this.clearSubscriptions.mockImplementation(id => {
       this.provider.removeAllListeners();
     });
+  }
+
+  supportsSubscriptions() {
+    return true;
   }
 }

@@ -13,7 +13,7 @@ export interface UnformattedLog {
   topics: string[];
 }
 
-export interface FormattedLog {
+export interface Log {
   id: string | null;
   removed?: boolean;
   logIndex: number | null;
@@ -33,7 +33,7 @@ export interface FormattedLog {
  * @param {Object} log object
  * @returns {Object} log
  */
-export function outputLogFormatter(log: UnformattedLog | FormattedLog): FormattedLog {
+export function outputLogFormatter(log: UnformattedLog | Log): Log {
   let id: string | null = log['id'] || null;
 
   // generate a custom log id

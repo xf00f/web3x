@@ -2,6 +2,7 @@ import { Tx } from './tx';
 import { sha3 } from '../../utils';
 import { AbiDefinition } from '.';
 import { MockRequestManager } from '../../core-request-manager/mock-request-manager';
+import { Eth } from '..';
 
 describe('eth', () => {
   describe('contract', () => {
@@ -9,7 +10,7 @@ describe('eth', () => {
       const contractAddress = '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe';
       const contractAddressLowercase = contractAddress.toLowerCase();
       const from = '0x5555567890123456789012345678901234567891';
-      let mockRequestManager;
+      let mockRequestManager: MockRequestManager;
 
       beforeEach(() => {
         mockRequestManager = new MockRequestManager();
@@ -66,7 +67,7 @@ describe('eth', () => {
         });
 
         const args = [contractAddress, 10];
-        const tx = new Tx(mockRequestManager, methodAbi, contractAddress, args);
+        const tx = new Tx(new Eth(mockRequestManager), methodAbi, contractAddress, args);
 
         tx.send({ from: from, gasPrice: '100000000000000' })
           .on('transactionHash', result => {
@@ -121,7 +122,7 @@ describe('eth', () => {
         });
 
         const args = [contractAddress];
-        const tx = new Tx(mockRequestManager, methodAbi, contractAddress, args);
+        const tx = new Tx(new Eth(mockRequestManager), methodAbi, contractAddress, args);
 
         const result = await tx.call({ from });
         expect(result).toBe('10');

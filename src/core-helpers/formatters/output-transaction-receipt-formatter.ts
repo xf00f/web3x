@@ -1,6 +1,38 @@
 import { toChecksumAddress, hexToNumber } from '../../utils';
-import { outputLogFormatter } from './output-log-formatter';
+import { outputLogFormatter, Log } from './output-log-formatter';
 import { isArray } from 'util';
+
+export interface TransactionReceipt {
+  transactionHash: string;
+  transactionIndex: number;
+  blockHash: string;
+  blockNumber: number;
+  from: string;
+  to: string;
+  contractAddress: string;
+  cumulativeGasUsed: number;
+  gasUsed: number;
+  logs?: Log[];
+  events?: {
+    [eventName: string]: EventLog;
+  };
+  status: string;
+}
+
+export interface EventLog {
+  id: string | null;
+  removed?: boolean;
+  event?: string;
+  address: string;
+  returnValues: any;
+  logIndex: number | null;
+  transactionIndex: number | null;
+  transactionHash: string | null;
+  blockHash: string | null;
+  blockNumber: number | null;
+  raw: { data: string; topics: string[] };
+  signature: string | null;
+}
 
 /**
  * Formats the output of a transaction receipt to its proper values

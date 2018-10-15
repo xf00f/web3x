@@ -21,17 +21,17 @@
  * @date 2017
  */
 
-export { inputAddressFormatter } from './formatters/input-address-formatter';
-export { isPredefinedBlockNumber, inputBlockNumberFormatter } from './formatters/input-block-number-formatter';
-export { inputDefaultBlockNumberFormatter } from './formatters/input-default-block-number-formatter';
-export { inputLogFormatter } from './formatters/input-log-formatter';
-export { inputPostFormatter } from './formatters/input-post-formatter';
-export { inputSignFormatter } from './formatters/input-sign-formatter';
-export { inputTransactionFormatter, inputCallFormatter } from './formatters/input-transaction-formatter';
-export { outputBigNumberFormatter } from './formatters/output-big-number-formatter';
-export { outputBlockFormatter } from './formatters/output-block-formatter';
-export { outputLogFormatter } from './formatters/output-log-formatter';
-export { outputPostFormatter } from './formatters/output-post-formatter';
-export { outputSyncingFormatter } from './formatters/output-syncing-formatter';
-export { outputTransactionFormatter } from './formatters/output-transaction-formatter';
-export { outputTransactionReceiptFormatter } from './formatters/output-transaction-receipt-formatter';
+export * from './formatters/input-address-formatter';
+export * from './formatters/input-block-number-formatter';
+export * from './formatters/input-default-block-number-formatter';
+export * from './formatters/input-log-formatter';
+export * from './formatters/input-post-formatter';
+export * from './formatters/input-sign-formatter';
+export * from './formatters/input-transaction-formatter';
+export * from './formatters/output-big-number-formatter';
+export * from './formatters/output-block-formatter';
+export * from './formatters/output-log-formatter';
+export * from './formatters/output-post-formatter';
+export * from './formatters/output-syncing-formatter';
+export * from './formatters/output-transaction-formatter';
+export * from './formatters/output-transaction-receipt-formatter';

@@ -20,28 +20,24 @@ describe('eth', () => {
             ],
           },
           {
+            id: '',
             address: address,
             topics: [
               sha3(signature),
               '0x000000000000000000000000' + address.replace('0x', ''),
               '0x0000000000000000000000000000000000000000000000000000000000000001',
             ],
-            blockNumber: '0x3',
+            blockNumber: 3,
             transactionHash: '0x1234',
             blockHash: '0x1345',
-            transactionIndex: '0x0',
-            logIndex: '0x4',
+            transactionIndex: 0,
+            logIndex: 4,
             data:
               '0x0000000000000000000000000000000000000000000000000000000000000001' +
               '0000000000000000000000000000000000000000000000000000000000000008',
           },
         );
 
-        expect(result.blockNumber).toBe(3);
-        expect(result.blockHash).toBe('0x1345');
-        expect(result.logIndex).toBe(4);
-        expect(result.id).toBe('log_9ff24cb4');
-        expect(result.transactionIndex).toBe(0);
         expect(result.returnValues.from).toBe(address);
         expect(result.returnValues.amount).toBe('1');
         expect(result.returnValues.t1).toBe('1');
@@ -49,8 +45,7 @@ describe('eth', () => {
       });
 
       const name = 'event1';
-      const address = '0xffddb67890123456789012345678901234567890';
-      const resultAddress = '0xffdDb67890123456789012345678901234567890';
+      const address = '0xffdDb67890123456789012345678901234567890';
 
       const tests: any = [
         {
@@ -60,12 +55,13 @@ describe('eth', () => {
             inputs: [],
           },
           data: {
-            logIndex: '0x1',
-            transactionIndex: '0x10',
+            logIndex: 1,
+            transactionIndex: 16,
             transactionHash: '0x1234567890',
-            address: address,
+            address,
             blockHash: '0x1234567890',
-            blockNumber: '0x1',
+            blockNumber: 1,
+            id: 'log_c71f2e84',
           },
           expected: {
             event: name,
@@ -74,7 +70,7 @@ describe('eth', () => {
             logIndex: 1,
             transactionIndex: 16,
             transactionHash: '0x1234567890',
-            address: resultAddress,
+            address,
             blockHash: '0x1234567890',
             blockNumber: 1,
             id: 'log_c71f2e84',
@@ -96,12 +92,13 @@ describe('eth', () => {
             ],
           },
           data: {
-            logIndex: '0x1',
-            transactionIndex: '0x10',
+            logIndex: 1,
+            transactionIndex: 16,
             transactionHash: '0x1234567890',
-            address: address,
+            address,
             blockHash: '0x1234567890',
-            blockNumber: '0x1',
+            blockNumber: 1,
+            id: 'log_c71f2e84',
             data: '0x0000000000000000000000000000000000000000000000000000000000000001',
           },
           expected: {
@@ -114,7 +111,7 @@ describe('eth', () => {
             logIndex: 1,
             transactionIndex: 16,
             transactionHash: '0x1234567890',
-            address: resultAddress,
+            address,
             blockHash: '0x1234567890',
             blockNumber: 1,
             id: 'log_c71f2e84',
@@ -151,12 +148,13 @@ describe('eth', () => {
             ],
           },
           data: {
-            logIndex: '0x1',
-            transactionIndex: '0x10',
+            logIndex: 1,
+            transactionIndex: 16,
             transactionHash: '0x1234567890',
-            address: address,
+            address,
             blockHash: '0x1234567890',
-            blockNumber: '0x1',
+            blockNumber: 1,
+            id: 'log_c71f2e84',
             data:
               '0x' +
               '0000000000000000000000000000000000000000000000000000000000000001' +
@@ -183,7 +181,7 @@ describe('eth', () => {
             logIndex: 1,
             transactionIndex: 16,
             transactionHash: '0x1234567890',
-            address: resultAddress,
+            address,
             blockHash: '0x1234567890',
             blockNumber: 1,
             id: 'log_c71f2e84',
@@ -228,12 +226,13 @@ describe('eth', () => {
             ],
           },
           data: {
-            logIndex: '0x1',
-            transactionIndex: '0x10',
+            logIndex: 1,
+            transactionIndex: 16,
             transactionHash: '0x1234567890',
-            address: resultAddress,
+            address,
             blockHash: '0x1234567890',
-            blockNumber: '0x1',
+            blockNumber: 1,
+            id: 'log_c71f2e84',
             data:
               '0x' +
               '0000000000000000000000000000000000000000000000000000000000000001' +
@@ -259,7 +258,7 @@ describe('eth', () => {
             logIndex: 1,
             transactionIndex: 16,
             transactionHash: '0x1234567890',
-            address: resultAddress,
+            address,
             blockHash: '0x1234567890',
             blockNumber: 1,
             id: 'log_c71f2e84',

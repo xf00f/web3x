@@ -16,7 +16,11 @@ describe('core-helpers', function() {
             transactionIndex: '0x1',
             blockNumber: '0x3e8',
             blockHash: '0xc9b9cdc2092a9d6589d96662b1fd6949611163fb3910cf8a173cd060f17702f9',
-          })
+            hash: '0xd9b9cdc2092a9d6589d96662b1fd6949611163fb3910cf8a173cd060f17702f9',
+            v: 'v',
+            r: 'r',
+            s: 's',
+          }),
         ).toEqual({
           input: '0x3454645634534',
           from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
@@ -28,6 +32,10 @@ describe('core-helpers', function() {
           blockNumber: 1000,
           blockHash: '0xc9b9cdc2092a9d6589d96662b1fd6949611163fb3910cf8a173cd060f17702f9',
           transactionIndex: 1,
+          hash: '0xd9b9cdc2092a9d6589d96662b1fd6949611163fb3910cf8a173cd060f17702f9',
+          v: 'v',
+          r: 'r',
+          s: 's',
         });
       });
 
@@ -44,7 +52,11 @@ describe('core-helpers', function() {
             transactionIndex: null,
             blockNumber: null,
             blockHash: null,
-          })
+            hash: '0xd9b9cdc2092a9d6589d96662b1fd6949611163fb3910cf8a173cd060f17702f9',
+            v: 'v',
+            r: 'r',
+            s: 's',
+          }),
         ).toEqual({
           input: '0x3454645634534',
           from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
@@ -56,6 +68,10 @@ describe('core-helpers', function() {
           blockNumber: null,
           blockHash: null,
           transactionIndex: null,
+          hash: '0xd9b9cdc2092a9d6589d96662b1fd6949611163fb3910cf8a173cd060f17702f9',
+          v: 'v',
+          r: 'r',
+          s: 's',
         });
       });
     });

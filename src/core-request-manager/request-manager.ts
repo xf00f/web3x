@@ -29,6 +29,7 @@ import { WebsocketProvider, HttpProvider, IpcProvider, Provider } from '../provi
 export interface IRequestManager {
   send(data, callback?): Promise<any>;
   sendBatch(data, callback);
+  supportsSubscriptions(): boolean;
   addSubscription(id, name, type, callback);
   removeSubscription(id, callback?);
   clearSubscriptions(keepIsSyncing: boolean);
@@ -209,5 +210,9 @@ export class RequestManager {
 
   close() {
     this.provider.disconnect();
+  }
+
+  supportsSubscriptions() {
+    return !!this.provider.on;
   }
 }
