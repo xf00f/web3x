@@ -17,7 +17,7 @@
 
 import { Subscription } from '../core-subscriptions';
 import { Net } from '../net';
-import { Personal } from './personal';
+import { Personal } from '../personal';
 import { Contract, ContractAbi, ContractOptions } from './contract';
 import { Accounts } from './accounts';
 import { IRequestManager, BatchManager } from '../core-request-manager';
@@ -34,16 +34,33 @@ import {
   Log,
 } from '../core-helpers/formatters';
 import { isFunction } from 'util';
-import { BlockHeader, EncodedTransaction, Tx, BlockType, Block, BlockHash, TransactionHash } from '../types';
+import { Tx, BlockType, BlockHash, TransactionHash } from '../types';
 import { Callback, Data, Address, Quantity } from '../types';
 import { PromiEvent, promiEvent } from '../core-promievent';
 import { confirmTransaction } from './confirm-transaction';
 import { EthRequestPayloads } from './eth-request-payloads';
+import { Block, BlockHeader } from './block';
 
 export interface LogsSubscriptionOptions {
   fromBlock?: number;
   address?: string;
   topics?: Array<string | string[]>;
+}
+
+export interface SignedTransaction {
+  raw: string;
+  tx: {
+    nonce: string;
+    gasPrice: string;
+    gas: string;
+    to: string;
+    value: string;
+    input: string;
+    v: string;
+    r: string;
+    s: string;
+    hash: string;
+  };
 }
 
 export class Eth {
@@ -65,7 +82,7 @@ export class Eth {
     const accounts = new Accounts(this);
     this.accounts = accounts;
     this.net = new Net(this);
-    this.personal = new Personal(this.requestManager, this.defaultAccount, this.defaultBlock);
+    this.personal = new Personal(this.requestManager);
     this.request = new EthRequestPayloads(defaultBlock);
 
     const self = this;
@@ -191,7 +208,7 @@ export class Eth {
     return payload.format(await this.requestManager.send(payload))!;
   }
 
-  async signTransaction(tx: Tx): Promise<EncodedTransaction> {
+  async signTransaction(tx: Tx): Promise<SignedTransaction> {
     const payload = this.request.signTransaction(tx);
     return payload.format(await this.requestManager.send(payload))!;
   }

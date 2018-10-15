@@ -15,4 +15,4 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export * from './net';
+export * from './personal';

@@ -39,7 +39,7 @@ export interface SignedTx {
 export async function signTransaction(tx: Tx, privateKey: string, eth: Eth): Promise<SignedTx> {
   // Resolve immediately if nonce, chainId and price are provided
   if (tx.nonce !== undefined && tx.chainId !== undefined && tx.gasPrice !== undefined) {
-    return signed(tx, privateKey);
+    return sign(tx, privateKey);
   }
 
   // Otherwise, get the missing info from the Ethereum Node
@@ -55,7 +55,7 @@ export async function signTransaction(tx: Tx, privateKey: string, eth: Eth): Pro
     throw new Error('One of the values "chainId", "gasPrice", or "nonce" couldn\'t be fetched');
   }
 
-  return signed(Object.assign(tx, { chainId, gasPrice, nonce }), privateKey);
+  return sign(Object.assign(tx, { chainId, gasPrice, nonce }), privateKey);
 }
 
 export function recoverTransaction(rawTx: string): string {
@@ -68,12 +68,12 @@ export function recoverTransaction(rawTx: string): string {
   return Account.recover(Hash.keccak256(signingDataHex), signature);
 }
 
-function signed(tx, privateKey: string): SignedTx {
-  if (!tx.gas && !tx.gasLimit) {
+function sign(tx: Tx, privateKey: string): SignedTx {
+  if (!tx.gas) {
     throw new Error('"gas" is missing');
   }
 
-  if (tx.nonce < 0 || tx.gas < 0 || tx.gasPrice < 0 || tx.chainId < 0) {
+  if (tx.nonce! < 0 || tx.gas < 0 || tx.gasPrice! < 0 || tx.chainId! < 0) {
     throw new Error('Gas, gasPrice, nonce or chainId is lower than 0');
   }
 

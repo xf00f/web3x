@@ -15,4 +15,29 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export * from './net';
+import { hexToNumber } from '../utils';
+
+const identity = result => result;
+
+export class NetRequestPayloads {
+  getId() {
+    return {
+      method: 'net_version',
+      format: hexToNumber,
+    };
+  }
+
+  isListening() {
+    return {
+      method: 'net_listening',
+      format: identity,
+    };
+  }
+
+  getPeerCount() {
+    return {
+      method: 'net_peerCount',
+      format: hexToNumber,
+    };
+  }
+}
