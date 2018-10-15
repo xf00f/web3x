@@ -16,7 +16,7 @@
  */
 /**
  * @file index.js
- * @author Fabian Vogelsteller <fabian@ethereum.org>
+ * @author xf00f <xf00f@protonmail.com>
  * @date 2017
  */
 
@@ -117,7 +117,7 @@ export class EthRequestPayloads {
   getBalance(address: Address, block?: BlockType) {
     return {
       method: 'eth_getBalance',
-      params: [inputAddressFormatter(address), inputBlockNumberFormatter(block || this.defaultBlock)],
+      params: [inputAddressFormatter(address), inputBlockNumberFormatter(this.resolveBlock(block))],
       format: outputBigNumberFormatter,
     };
   }
@@ -128,7 +128,7 @@ export class EthRequestPayloads {
       params: [
         inputAddressFormatter(address),
         numberToHex(position),
-        inputBlockNumberFormatter(block || this.defaultBlock),
+        inputBlockNumberFormatter(this.resolveBlock(block)),
       ],
       format: identity,
     };
@@ -137,7 +137,7 @@ export class EthRequestPayloads {
   getCode(address: Address, block?: BlockType) {
     return {
       method: 'eth_getCode',
-      params: [inputAddressFormatter(address), inputBlockNumberFormatter(block || this.defaultBlock)],
+      params: [inputAddressFormatter(address), inputBlockNumberFormatter(this.resolveBlock(block))],
       format: identity,
     };
   }
@@ -145,7 +145,7 @@ export class EthRequestPayloads {
   getBlock(block: BlockType | BlockHash, returnTransactionObjects: boolean = false) {
     return {
       method: isString(block) && isHexStrict(block) ? 'eth_getBlockByHash' : 'eth_getBlockByNumber',
-      params: [inputBlockNumberFormatter(block || this.defaultBlock), returnTransactionObjects],
+      params: [inputBlockNumberFormatter(this.resolveBlock(block)), returnTransactionObjects],
       format: outputBlockFormatter,
     };
   }
@@ -154,11 +154,7 @@ export class EthRequestPayloads {
     return {
       method:
         isString(block) && isHexStrict(block) ? 'eth_getUncleByBlockHashAndIndex' : 'eth_getUncleByBlockNumberAndIndex',
-      params: [
-        inputBlockNumberFormatter(block || this.defaultBlock),
-        numberToHex(uncleIndex),
-        returnTransactionObjects,
-      ],
+      params: [inputBlockNumberFormatter(this.resolveBlock(block)), numberToHex(uncleIndex), returnTransactionObjects],
       format: outputBlockFormatter,
     };
   }
@@ -169,7 +165,7 @@ export class EthRequestPayloads {
         isString(block) && isHexStrict(block)
           ? 'eth_getBlockTransactionCountByHash'
           : 'eth_getBlockTransactionCountByNumber',
-      params: inputBlockNumberFormatter(block || this.defaultBlock),
+      params: inputBlockNumberFormatter(this.resolveBlock(block)),
       format: hexToNumber,
     };
   }
@@ -177,7 +173,7 @@ export class EthRequestPayloads {
   getBlockUncleCount(block: BlockType | BlockHash) {
     return {
       method: isString(block) && isHexStrict(block) ? 'eth_getUncleCountByBlockHash' : 'eth_getUncleCountByBlockNumber',
-      params: inputBlockNumberFormatter(block || this.defaultBlock),
+      params: inputBlockNumberFormatter(this.resolveBlock(block)),
       format: hexToNumber,
     };
   }
@@ -212,7 +208,7 @@ export class EthRequestPayloads {
   getTransactionCount(address: Address, block?: BlockType) {
     return {
       method: 'eth_getTransactionCount',
-      params: [inputAddressFormatter(address), inputBlockNumberFormatter(block || this.defaultBlock)],
+      params: [inputAddressFormatter(address), inputBlockNumberFormatter(this.resolveBlock(block))],
       format: hexToNumber,
     };
   }
@@ -252,7 +248,7 @@ export class EthRequestPayloads {
   call(callObject: Tx, block?: BlockType, outputFormatter = result => result) {
     return {
       method: 'eth_call',
-      params: [inputCallFormatter(callObject), inputBlockNumberFormatter(block || this.defaultBlock)],
+      params: [inputCallFormatter(callObject), inputBlockNumberFormatter(this.resolveBlock(block))],
       format: outputFormatter,
     };
   }
@@ -291,5 +287,9 @@ export class EthRequestPayloads {
       params: [inputLogFormatter(options)],
       format: result => result.map(outputLogFormatter),
     };
+  }
+
+  private resolveBlock(block?: BlockType | BlockHash) {
+    return block === undefined ? this.defaultBlock : block;
   }
 }
