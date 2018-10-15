@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { IRequestManager } from '../core-request-manager';
+import { IRequestManager } from '../request-manager';
 import { PersonalRequestPayloads } from './personal-request-payloads';
 import { Address, Quantity, Data, TransactionHash } from '../types';
 

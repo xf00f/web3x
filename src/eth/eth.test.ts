@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { MockRequestManager } from '../core-request-manager/mock-request-manager';
+import { MockRequestManager } from '../request-manager/mock-request-manager';
 import { Eth } from './eth';
 
 describe('eth', () => {

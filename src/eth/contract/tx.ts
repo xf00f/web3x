@@ -17,7 +17,7 @@
 
 import { isBoolean } from 'util';
 import { AbiDefinition } from '.';
-import { promiEvent } from '../../core-promievent';
+import { promiEvent } from '../../promievent';
 import { fireError, isAddress } from '../../utils';
 import { abi } from '../abi';
 import { toChecksumAddress } from '../../utils';

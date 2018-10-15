@@ -15,12 +15,12 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Subscription } from '../core-subscriptions';
+import { Subscription } from '../subscriptions';
 import { Net } from '../net';
 import { Personal } from '../personal';
 import { Contract, ContractAbi, ContractOptions } from './contract';
 import { Accounts } from './accounts';
-import { IRequestManager, BatchManager } from '../core-request-manager';
+import { IRequestManager, BatchManager } from '../request-manager';
 import { toChecksumAddress, fireError } from '../utils';
 import {
   inputAddressFormatter,
@@ -36,7 +36,7 @@ import {
 import { isFunction } from 'util';
 import { Tx, BlockType, BlockHash, TransactionHash } from '../types';
 import { Callback, Data, Address, Quantity } from '../types';
-import { PromiEvent, promiEvent } from '../core-promievent';
+import { PromiEvent, promiEvent } from '../promievent';
 import { confirmTransaction } from './confirm-transaction';
 import { EthRequestPayloads } from './eth-request-payloads';
 import { Block, BlockHeader } from './block';

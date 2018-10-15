@@ -17,8 +17,8 @@
 
 import { Provider } from './providers';
 import { Eth } from './eth';
-import { RequestManager } from './core-request-manager';
-import { BatchManager } from './core-request-manager';
+import { RequestManager } from './request-manager';
+import { BatchManager } from './request-manager';
 
 export class Web3 {
   private requestManager: RequestManager;

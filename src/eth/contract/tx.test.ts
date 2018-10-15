@@ -18,7 +18,7 @@
 import { Tx } from './tx';
 import { sha3 } from '../../utils';
 import { AbiDefinition } from '.';
-import { MockRequestManager } from '../../core-request-manager/mock-request-manager';
+import { MockRequestManager } from '../../request-manager/mock-request-manager';
 import { Eth } from '..';
 
 describe('eth', () => {

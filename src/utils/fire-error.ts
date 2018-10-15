@@ -16,7 +16,7 @@
 */
 
 import { isObject, isArray, isString, isFunction } from 'util';
-import { PromiEvent } from '../core-promievent';
+import { PromiEvent } from '../promievent';
 
 /**
  * Fires an error in an event emitter and callback and returns the eventemitter

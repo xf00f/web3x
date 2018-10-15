@@ -16,7 +16,7 @@
 */
 
 import { isArray, isFunction } from 'util';
-import { Subscription } from '../../core-subscriptions';
+import { Subscription } from '../../subscriptions';
 import { abi, jsonInterfaceMethodToString } from '../abi';
 import { Tx, TxFactory } from './tx';
 import { decodeAnyEvent } from './decode-event-abi';

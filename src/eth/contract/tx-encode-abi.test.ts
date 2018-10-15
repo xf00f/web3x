@@ -15,9 +15,8 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { RequestManager } from '../../core-request-manager';
 import { Contract, AbiDefinition } from '.';
-import { MockRequestManager } from '../../../dest/core-request-manager/mock-request-manager';
+import { MockRequestManager } from '../../request-manager/mock-request-manager';
 import { Eth } from '../eth';
 
 const abi: AbiDefinition[] = [

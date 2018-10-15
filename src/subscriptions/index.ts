@@ -16,7 +16,7 @@
 */
 
 import { Subscription } from './subscription';
-import { RequestManager } from '../core-request-manager';
+import { RequestManager } from '../request-manager';
 
 export { Subscription };
 

@@ -17,7 +17,7 @@
 
 import { Contract } from '.';
 import { abi } from './fixtures/abi';
-import { MockRequestManager } from '../../core-request-manager/mock-request-manager';
+import { MockRequestManager } from '../../request-manager/mock-request-manager';
 import { sha3 } from '../../utils';
 import { Eth } from '../eth';
 

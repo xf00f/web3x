@@ -18,7 +18,7 @@
 import { fireError } from '../utils';
 import { isObject } from 'util';
 import { Eth } from '.';
-import { Subscriptions } from '../core-subscriptions';
+import { Subscriptions } from '../subscriptions';
 import { outputBlockFormatter } from '../formatters';
 
 const TIMEOUTBLOCK = 50;
