@@ -15,9 +15,9 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import * as utils from '../../utils';
+import * as utils from '../utils';
 import BigNumber from 'bn.js';
-import { Address } from '../../types';
+import { Address } from '../types';
 
 var leftPad = function(string, bytes) {
   var result = string;

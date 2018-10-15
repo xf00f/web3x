@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Iban } from '../eth/iban';
+import { Iban } from '../iban';
 import { isAddress } from '../utils';
 
 export function inputAddressFormatter(address) {
