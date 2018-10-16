@@ -17,7 +17,6 @@
 
 export * from './input-address-formatter';
 export * from './input-block-number-formatter';
-export * from './input-default-block-number-formatter';
 export * from './input-log-formatter';
 export * from './input-post-formatter';
 export * from './input-sign-formatter';
