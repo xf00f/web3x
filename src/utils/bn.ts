@@ -8,9 +8,9 @@ import { numberToBN } from './number-to-bn';
  * @param {Object} object
  * @return {Boolean}
  */
-export var isBN = function(object) {
+export function isBN(object) {
   return object instanceof BN || (object && object.constructor && object.constructor.name === 'BN');
-};
+}
 
 /**
  * Takes an input and transforms it into an BN
@@ -19,13 +19,13 @@ export var isBN = function(object) {
  * @param {Number|String|BN} number, string, HEX string or BN
  * @return {BN} BN
  */
-export var toBN = function(number: number | string | BN) {
+export function toBN(number: number | string | BN) {
   try {
-    return numberToBN.apply(null, arguments);
+    return numberToBN(number);
   } catch (e) {
     throw new Error(e + ' Given value: "' + number + '"');
   }
-};
+}
 
 /**
  * Takes and input transforms it into BN and if it is negative value, into two's complement
@@ -34,11 +34,11 @@ export var toBN = function(number: number | string | BN) {
  * @param {Number|String|BN} number
  * @return {String}
  */
-export var toTwosComplement = function(number: number | string | BN) {
+export function toTwosComplement(number: number | string | BN) {
   return (
     '0x' +
     toBN(number)
       .toTwos(256)
       .toString(16, 64)
   );
-};
+}

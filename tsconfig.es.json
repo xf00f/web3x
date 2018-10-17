@@ -12,8 +12,9 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "downlevelIteration": true,
-    "inlineSourceMap": true
+    "inlineSourceMap": true,
+    "importHelpers": true
   },
   "include": ["src"],
-  "exclude": ["src/**/*.test.ts"]
+  "exclude": ["src/**/*.test.ts", "src/**/mock-*.ts"]
 }
