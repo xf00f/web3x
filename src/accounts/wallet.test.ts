@@ -40,9 +40,11 @@ const tests = [
 
 describe('accounts', function() {
   describe('wallet', function() {
+    let mockEth: any;
+
     tests.forEach(function(test, i) {
       it('creates the right number of wallets', function() {
-        const wallet = new Wallet();
+        const wallet = new Wallet(mockEth);
         expect(wallet.length).toBe(0);
 
         wallet.create(2, '542342f!@#$$');
@@ -56,7 +58,7 @@ describe('accounts', function() {
       });
 
       it('add wallet using a privatekey', function() {
-        const wallet = new Wallet();
+        const wallet = new Wallet(mockEth);
 
         const account = wallet.add(test.privateKey);
 
@@ -71,9 +73,9 @@ describe('accounts', function() {
       });
 
       it('add wallet using an account', function() {
-        const wallet = new Wallet();
+        const wallet = new Wallet(mockEth);
 
-        const account = Account.fromPrivate(test.privateKey);
+        const account = Account.fromPrivate(mockEth, test.privateKey);
         wallet.add(account);
 
         expect(account.address).toBe(test.address);
@@ -87,9 +89,9 @@ describe('accounts', function() {
       });
 
       it('should not add wallet twice work', function() {
-        const wallet = new Wallet();
+        const wallet = new Wallet(mockEth);
 
-        const account = Account.fromPrivate(test.privateKey);
+        const account = Account.fromPrivate(mockEth, test.privateKey);
         wallet.add(account);
         wallet.add(account);
 
@@ -104,7 +106,7 @@ describe('accounts', function() {
       });
 
       it('remove wallet using an index', function() {
-        const wallet = new Wallet();
+        const wallet = new Wallet(mockEth);
 
         wallet.add(test.privateKey);
         expect(wallet.length).toBe(1);
@@ -117,7 +119,7 @@ describe('accounts', function() {
       });
 
       it('remove wallet using an address', function() {
-        const wallet = new Wallet();
+        const wallet = new Wallet(mockEth);
 
         wallet.add(test.privateKey);
         expect(wallet.length).toBe(1);
@@ -127,7 +129,7 @@ describe('accounts', function() {
       });
 
       it('remove wallet using an lowercase address', function() {
-        const wallet = new Wallet();
+        const wallet = new Wallet(mockEth);
 
         wallet.add(test.privateKey);
         expect(wallet.length).toBe(1);
@@ -138,7 +140,7 @@ describe('accounts', function() {
 
       it('create 5 wallets, remove two, create two more and check for overwrites', function() {
         const count = 5;
-        const wallet = new Wallet();
+        const wallet = new Wallet(mockEth);
         expect(wallet.length).toBe(0);
 
         wallet.create(count);
@@ -177,7 +179,7 @@ describe('accounts', function() {
 
       it('clear wallet', function() {
         const count = 10;
-        const wallet = new Wallet();
+        const wallet = new Wallet(mockEth);
 
         wallet.create(count);
         expect(wallet.length).toBe(10);
@@ -191,7 +193,7 @@ describe('accounts', function() {
       });
 
       it('encrypt then decrypt wallet', async () => {
-        const wallet = new Wallet();
+        const wallet = new Wallet(mockEth);
         const password = 'qwerty';
 
         wallet.create(5);

@@ -25,20 +25,20 @@ import { Eth } from '../eth';
 export class Accounts {
   public wallet: Wallet;
 
-  constructor(private eth?: Eth) {
-    this.wallet = new Wallet();
+  constructor(private eth: Eth) {
+    this.wallet = new Wallet(eth);
   }
 
   create(entropy?: string): Account {
-    return Account.create(entropy);
+    return Account.create(this.eth, entropy);
   }
 
   privateKeyToAccount(privateKey: string): Account {
-    return Account.fromPrivate(privateKey);
+    return Account.fromPrivate(this.eth, privateKey);
   }
 
   signTransaction(tx: Tx, privateKey: string) {
-    return signTransaction(tx, privateKey, this.eth!);
+    return signTransaction(tx, privateKey, this.eth);
   }
 
   recoverTransaction(rawTx: string): string {
@@ -57,10 +57,10 @@ export class Accounts {
   }
 
   async decrypt(v3Keystore: KeyStore | string, password: string, nonStrict: boolean = false) {
-    return await Account.fromKeystore(v3Keystore, password, nonStrict);
+    return await Account.fromKeystore(this.eth, v3Keystore, password, nonStrict);
   }
 
   async encrypt(privateKey: string, password: string, options?: any) {
-    return Account.fromPrivate(privateKey).encrypt(password, options);
+    return Account.fromPrivate(this.eth, privateKey).encrypt(password, options);
   }
 }

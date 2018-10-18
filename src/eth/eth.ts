@@ -16,8 +16,6 @@
 */
 
 import { Subscription } from '../subscriptions';
-import { Net } from '../net';
-import { Personal } from '../personal';
 import { Contract, ContractAbi, ContractOptions } from '../contract';
 import { Accounts } from '../accounts';
 import { IRequestManager, BatchManager } from '../request-manager';
@@ -36,10 +34,14 @@ import {
 import { isFunction } from 'util';
 import { Tx, BlockType, BlockHash, TransactionHash } from '../types';
 import { Callback, Data, Address, Quantity } from '../types';
-import { PromiEvent, promiEvent } from '../promievent';
+import { PromiEvent, promiEvent, PromiEventResult } from '../promievent';
 import { confirmTransaction } from './confirm-transaction';
 import { EthRequestPayloads } from './eth-request-payloads';
 import { Block, BlockHeader } from './block';
+import { RequestManager } from '../request-manager';
+import { Provider } from '../providers';
+import { Personal } from '../personal';
+import { Net } from '../net';
 
 export interface LogsSubscriptionOptions {
   fromBlock?: number;
@@ -64,39 +66,28 @@ export interface SignedTransaction {
 }
 
 export class Eth {
-  readonly accounts: Accounts;
-  readonly personal: Personal;
-  readonly Contract: new (abi: ContractAbi, address?: string, options?: ContractOptions) => Contract;
-  readonly net: Net;
-  readonly BatchRequest: new () => BatchManager;
   readonly request: EthRequestPayloads;
+
+  // Following are injected by Web3 for api backwards compatability, but gross.
+  public accounts?: Accounts;
+  public personal!: Personal;
+  public net!: Net;
+  public Contract!: new (abi: ContractAbi, address?: string, options?: ContractOptions) => Contract;
+  public BatchRequest!: new () => BatchManager;
 
   constructor(
     readonly requestManager: IRequestManager,
-    readonly defaultAccount?,
+    readonly defaultAccount?: Address,
     readonly defaultBlock: BlockType = 'latest',
   ) {
     if (this.defaultAccount) {
       this.defaultAccount = toChecksumAddress(inputAddressFormatter(this.defaultAccount));
     }
-    const accounts = new Accounts(this);
-    this.accounts = accounts;
-    this.net = new Net(this);
-    this.personal = new Personal(this.requestManager);
     this.request = new EthRequestPayloads(defaultBlock);
+  }
 
-    const self = this;
-    this.Contract = class extends Contract {
-      constructor(abi: ContractAbi, address?: string, options?: ContractOptions) {
-        super(self, abi, address, options);
-      }
-    };
-
-    this.BatchRequest = class extends BatchManager {
-      constructor() {
-        super(requestManager);
-      }
-    };
+  static fromProvider(provider: Provider) {
+    return new Eth(new RequestManager(provider));
   }
 
   async getId(): Promise<number> {
@@ -213,8 +204,12 @@ export class Eth {
     return payload.format(await this.requestManager.send(payload))!;
   }
 
-  sendSignedTransaction(data: Data, extraFormatters?: any): PromiEvent<TransactionReceipt> {
-    const defer = promiEvent<TransactionReceipt>();
+  sendSignedTransaction(
+    data: Data,
+    extraFormatters?: any,
+    defer?: PromiEventResult<TransactionReceipt>,
+  ): PromiEvent<TransactionReceipt> {
+    defer = defer || promiEvent<TransactionReceipt>();
     const payload = this.request.sendSignedTransaction(data);
     this.sendTransactionAndWaitForConfirmation(defer, payload, extraFormatters);
     return defer.eventEmitter;
@@ -228,8 +223,15 @@ export class Eth {
     return defer.eventEmitter;
   }
 
+  private getAccount(address?: string) {
+    address = address || this.defaultAccount;
+    if (this.accounts && address) {
+      return this.accounts.wallet.get(address);
+    }
+  }
+
   private async sendTransactionAsync(defer, tx: Tx, extraFormatters) {
-    const account = this.accounts.wallet.get(tx.from || this.defaultAccount);
+    const account = this.getAccount(tx.from);
 
     if (!tx.gasPrice) {
       tx.gasPrice = await this.getGasPrice();
@@ -240,14 +242,14 @@ export class Eth {
       payload = this.request.sendTransaction(tx);
     } else {
       const { from, ...fromlessTx } = tx;
-      const signedTx = await account.signTransaction(fromlessTx, this);
+      const signedTx = await account.signTransaction(fromlessTx);
       payload = this.request.sendSignedTransaction(signedTx.rawTransaction);
     }
 
     this.sendTransactionAndWaitForConfirmation(defer, payload, extraFormatters);
   }
 
-  private async sendTransactionAndWaitForConfirmation(defer, payload, extraFormatters) {
+  private async sendTransactionAndWaitForConfirmation(defer, payload, extraFormatters?) {
     try {
       const result = await this.requestManager.send(payload);
       defer.eventEmitter.emit('transactionHash', result);
@@ -258,7 +260,7 @@ export class Eth {
   }
 
   async sign(address: Address, dataToSign: Data): Promise<Data> {
-    const account = this.accounts.wallet.get(address || this.defaultAccount);
+    const account = this.getAccount(address);
 
     if (!account) {
       const payload = this.request.sign(address, dataToSign);

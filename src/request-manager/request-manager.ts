@@ -15,10 +15,10 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { isString, isArray } from 'util';
+import { isArray } from 'util';
 import * as Jsonrpc from './jsonrpc';
 import { givenProvider } from './givenProvider';
-import { WebsocketProvider, HttpProvider, IpcProvider, Provider } from '../providers';
+import { Provider } from '../providers';
 import { ErrorResponse, InvalidResponse } from '../errors';
 
 export interface IRequestManager {
@@ -38,43 +38,10 @@ export interface IRequestManager {
  * Singleton
  */
 export class RequestManager {
-  public provider!: Provider;
   private subscriptions: any;
-  public static providers = {
-    WebsocketProvider,
-    HttpProvider,
-    IpcProvider,
-  };
   public static givenProvider = givenProvider;
 
-  constructor(provider: Provider | string) {
-    this.setProvider(provider);
-    this.subscriptions = {};
-  }
-
-  /**
-   * Should be used to set provider of request manager
-   *
-   * @method setProvider
-   * @param {Object} p
-   */
-  private setProvider(p: Provider | string, net?: any) {
-    // autodetect provider
-    // HTTP
-    if (isString(p)) {
-      if (/^http(s)?:\/\//i.test(p)) {
-        this.provider = new HttpProvider(p);
-      } else if (/^ws(s)?:\/\//i.test(p)) {
-        this.provider = new WebsocketProvider(p);
-      } else if (p && typeof net.connect === 'function') {
-        this.provider = new IpcProvider(p, net);
-      } else if (p) {
-        throw new Error('Can\'t autodetect provider for "' + p + '"');
-      }
-    } else {
-      this.provider = p;
-    }
-
+  constructor(public provider: Provider) {
     // listen to incoming notifications
     if (this.provider && this.provider.on) {
       this.provider.on('data', result => {
@@ -88,6 +55,8 @@ export class RequestManager {
         }
       });
     }
+
+    this.subscriptions = {};
   }
 
   /**

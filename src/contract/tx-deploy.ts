@@ -23,6 +23,7 @@ import { abi } from './abi';
 import { toChecksumAddress } from '../utils';
 import { inputAddressFormatter } from '../formatters';
 import { Eth } from '../eth';
+import { Wallet } from '../accounts';
 
 interface SendOptions {
   from: string;
@@ -56,6 +57,7 @@ export class TxDeploy {
     private deployData: string,
     private args: any[] = [],
     private defaultOptions: DefaultOptions = {},
+    private wallet?: Wallet,
     private extraFormatters?: any,
   ) {
     if (this.defaultOptions.from) {
@@ -79,11 +81,24 @@ export class TxDeploy {
       );
     }
 
-    return this.eth.sendTransaction(tx, this.extraFormatters);
+    const account = this.getAccount(tx.from);
+
+    if (account) {
+      return account.sendTransaction(tx, this.extraFormatters);
+    } else {
+      return this.eth.sendTransaction(tx, this.extraFormatters);
+    }
   }
 
   public getRequestPayload(options: SendOptions) {
     return this.eth.request.sendTransaction(this.getTx(options));
+  }
+
+  private getAccount(address?: string) {
+    address = address || this.defaultOptions.from;
+    if (this.wallet && address) {
+      return this.wallet.get(address);
+    }
   }
 
   private getTx(options) {

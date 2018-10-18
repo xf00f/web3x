@@ -21,26 +21,36 @@ import { randomHex, encrypt, KeyStore, decrypt } from '../utils';
 import { sign } from '../utils/sign';
 import { signTransaction } from './sign-transaction';
 import { Eth } from '../eth';
+import { PromiEvent, promiEvent } from '../promievent';
+import { TransactionReceipt } from '../formatters';
 
 export class Account {
-  constructor(public address: string, public privateKey: string, public publicKey) {}
+  constructor(private eth: Eth, public address: string, public privateKey: string, public publicKey) {}
 
-  static create(entropy: string = randomHex(32)) {
+  static create(eth: Eth, entropy: string = randomHex(32)) {
     const { privateKey, address, publicKey } = create(entropy);
-    return new Account(address, privateKey, publicKey);
+    return new Account(eth, address, privateKey, publicKey);
   }
 
-  static fromPrivate(privateKey: string) {
+  static fromPrivate(eth: Eth, privateKey: string) {
     const { address, publicKey } = fromPrivate(privateKey);
-    return new Account(address, privateKey, publicKey);
+    return new Account(eth, address, privateKey, publicKey);
   }
 
-  static async fromKeystore(v3Keystore: KeyStore | string, password: string, nonStrict = false) {
-    return Account.fromPrivate(await decrypt(v3Keystore, password, nonStrict));
+  static async fromKeystore(eth: Eth, v3Keystore: KeyStore | string, password: string, nonStrict = false) {
+    return Account.fromPrivate(eth, await decrypt(v3Keystore, password, nonStrict));
   }
 
-  signTransaction(tx: Tx, eth: Eth) {
-    return signTransaction(tx, this.privateKey, eth);
+  sendTransaction(tx: Tx, extraformatters?: any): PromiEvent<TransactionReceipt> {
+    const defer = promiEvent<TransactionReceipt>();
+    this.signTransaction(tx).then(signedTx => {
+      this.eth.sendSignedTransaction(signedTx.rawTransaction, extraformatters, defer);
+    });
+    return defer.eventEmitter;
+  }
+
+  signTransaction(tx: Tx) {
+    return signTransaction(tx, this.privateKey, this.eth);
   }
 
   sign(data: string) {

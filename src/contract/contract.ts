@@ -28,6 +28,7 @@ import { Address, Data } from '../types';
 import { BlockType } from '../types';
 import { Eth } from '../eth';
 import { InvalidNumberOfParams } from '../errors';
+import { Wallet } from '../accounts';
 
 export interface ContractOptions {
   from?: string;
@@ -60,6 +61,7 @@ export class Contract {
     private jsonInterface: ContractAbi,
     public address?: string,
     defaultOptions: ContractOptions = {},
+    private wallet?: Wallet,
   ) {
     this.setAbiDefinition(jsonInterface);
 
@@ -92,7 +94,7 @@ export class Contract {
     };
     constructor.signature = 'constructor';
 
-    return new TxDeploy(this.eth, constructor, data, args, this.options, this.extraFormatters);
+    return new TxDeploy(this.eth, constructor, data, args, this.options, this.wallet, this.extraFormatters);
   }
 
   /**
@@ -156,7 +158,7 @@ export class Contract {
         }
         throw InvalidNumberOfParams(args.length, definition.inputs.length, definition.name);
       }
-      return new Tx(this.eth, definition, this.address, args, this.options, this.extraFormatters);
+      return new Tx(this.eth, definition, this.address, args, this.options, this.wallet, this.extraFormatters);
     };
   }
 

@@ -17,7 +17,6 @@
 
 import { isArray, isFunction } from 'util';
 import { Provider } from '.';
-import netLib from 'net';
 import { InvalidResponse, InvalidConnection } from '../errors';
 
 export class IpcProvider implements Provider {
@@ -28,7 +27,7 @@ export class IpcProvider implements Provider {
   private lastChunk: any;
   private lastChunkTimeout: any;
 
-  constructor(private path: string, net: any = netLib) {
+  constructor(private path: string, net: any) {
     this.responseCallbacks = {};
     this.notificationCallbacks = [];
     this.path = path;

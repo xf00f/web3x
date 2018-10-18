@@ -18,14 +18,17 @@
 import { isString } from 'util';
 import { Account } from './account';
 import { KeyStore, decrypt } from '../utils/encryption';
+import { Eth } from '../eth';
 
 export class Wallet {
   public static defaultKeyName = 'web3js_wallet';
   public length: number = 0;
   public accounts: Account[] = [];
 
-  static async fromKeystores(encryptedWallet: KeyStore[], password: string) {
-    const wallet = new Wallet();
+  constructor(private eth: Eth) {}
+
+  static async fromKeystores(eth: Eth, encryptedWallet: KeyStore[], password: string) {
+    const wallet = new Wallet(eth);
     await wallet.decrypt(encryptedWallet, password);
     return wallet;
   }
@@ -44,7 +47,7 @@ export class Wallet {
 
   create(numberOfAccounts: number, entropy?: string): Account[] {
     for (var i = 0; i < numberOfAccounts; ++i) {
-      this.add(Account.create(entropy).privateKey);
+      this.add(Account.create(this.eth, entropy).privateKey);
     }
     return this.accounts;
   }
@@ -67,9 +70,9 @@ export class Wallet {
   add(account: Account): Account;
   add(account: string | Account): Account {
     if (isString(account)) {
-      account = Account.fromPrivate(account);
+      account = Account.fromPrivate(this.eth, account);
     } else {
-      account = Account.fromPrivate(account.privateKey);
+      account = Account.fromPrivate(this.eth, account.privateKey);
     }
 
     const existing = this.get(account.address);

@@ -94,7 +94,7 @@ export function fromWei(number: number | string, unit: keyof typeof unitMap) {
  * @param {String} unit the unit to convert from, default ether
  * @return {String|Object} When given a BN object it returns one as well, otherwise a number
  */
-export function toWei(number: number | string, unit: keyof typeof unitMap) {
+export function toWei(number: number | string | BN, unit: keyof typeof unitMap) {
   unit = getUnitValue(unit);
 
   if (!isBN(number) && !isString(number)) {
