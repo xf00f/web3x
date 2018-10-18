@@ -19,11 +19,12 @@ web3x attempts to solve all the above issues.
 - It compiles to both commonjs and ES6 module versions for node.js and ES6 aware web bundlers such as webpack.
 - It strives for functional, immutable, reusable components.
 
-In a small example that prints an Eth balance compiled with webpack, web3.js produced an output file of 858k, web3x produced a file of 369k. That's a 57% reduction. It's likely this can be improved further.
+In a small example that prints an Eth balance compiled with webpack, web3.js produced an output file of 858k, web3x produced a file of 119k. That's an 86% reduction. It's likely this can be improved further.
 
 ## Usage
 
 There are two builds of the library. `web3x` uses commonjs style imports and is best used for node.js backends. `web3x-es` uses ES6 imports and is best used for ES6 aware tools like webpack.
+You can use web3x much like you would web3.js, requiring minimal changes necessary to an existing codebase. However, this will possibly result in larger than necessary builds.
 Example usage:
 
 ```
@@ -33,8 +34,26 @@ import { fromWei } from 'web3x-es/utils';
 async function main() {
   const web3 = new Web3('ws://localhost:7545');
   const balance = await web3.eth.getBalance('0x0000000000000000000000000000000000000000');
-  console.log(`Balance of 0 address ETH: ${fromWei(balance, 'ether')}`);
+  document.body.innerText = `Balance of 0 address ETH: ${fromWei(balance, 'ether')}`;
   web3.close();
+}
+
+main().catch(console.error);
+```
+
+A minimal implementation of the above would look like:
+
+```
+import { WebsocketProvider } from 'web3x-es/providers';
+import { Eth } from 'web3x-es/eth';
+import { fromWei } from 'web3x-es/utils';
+
+async function main() {
+  const provider = new WebsocketProvider('wss://mainnet.infura.io/ws');
+  const eth = Eth.fromProvider(provider);
+  const balance = await eth.getBalance('0x0000000000000000000000000000000000000000');
+  document.body.innerText = `Balance of 0 address ETH: ${fromWei(balance, 'ether')}`;
+  provider.disconnect();
 }
 
 main().catch(console.error);

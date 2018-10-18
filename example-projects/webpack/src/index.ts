@@ -1,4 +1,4 @@
-import { WebsocketProvider } from 'web3x-es/providers/ws';
+import { WebsocketProvider } from 'web3x-es/providers';
 import { Eth } from 'web3x-es/eth';
 import { fromWei } from 'web3x-es/utils';
 import { Wallet } from 'web3x-es/accounts';
