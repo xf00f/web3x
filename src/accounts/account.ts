@@ -20,8 +20,8 @@ import { create, fromPrivate } from '../eth-lib/account';
 import { randomHex, encrypt, KeyStore, decrypt } from '../utils';
 import { sign } from '../utils/sign';
 import { signTransaction } from './sign-transaction';
-import { Eth } from '../eth';
-import { PromiEvent, promiEvent } from '../promievent';
+import { Eth, SendTxPromiEvent } from '../eth';
+import { promiEvent } from '../promievent';
 import { TransactionReceipt } from '../formatters';
 
 export class Account {
@@ -41,7 +41,7 @@ export class Account {
     return Account.fromPrivate(eth, await decrypt(v3Keystore, password, nonStrict));
   }
 
-  sendTransaction(tx: Tx, extraformatters?: any): PromiEvent<TransactionReceipt> {
+  sendTransaction(tx: Tx, extraformatters?: any): SendTxPromiEvent {
     const defer = promiEvent<TransactionReceipt>();
     this.signTransaction(tx).then(signedTx => {
       this.eth.sendSignedTransaction(signedTx.rawTransaction, extraformatters, defer);

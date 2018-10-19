@@ -22,7 +22,7 @@ import * as utils from '../utils';
 import { abi } from './abi';
 import { toChecksumAddress } from '../utils';
 import { inputAddressFormatter } from '../formatters';
-import { Eth } from '../eth';
+import { Eth, SendTxPromiEvent } from '../eth';
 import { Wallet } from '../accounts';
 
 interface SendOptions {
@@ -69,7 +69,7 @@ export class TxDeploy {
     return await this.eth.estimateGas(this.getTx(options));
   }
 
-  public send(options: SendOptions): PromiEvent<any> {
+  public send(options: SendOptions): SendTxPromiEvent {
     const tx = this.getTx(options);
 
     if (isBoolean(this.definition.payable) && !this.definition.payable && tx.value && tx.value > 0) {

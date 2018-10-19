@@ -390,7 +390,7 @@ export class Contract {
 
   private contractDeployFormatter = receipt => {
     this.setAddress(receipt.contractAddress);
-    return this;
+    return receipt;
   };
 
   private receiptFormatter = receipt => {

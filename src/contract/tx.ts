@@ -22,7 +22,7 @@ import { fireError, isAddress } from '../utils';
 import { abi } from './abi';
 import { toChecksumAddress } from '../utils';
 import { inputAddressFormatter } from '../formatters';
-import { Eth } from '../eth';
+import { Eth, SendTxPromiEvent } from '../eth';
 import { BlockType } from '../types';
 import { Wallet } from '../accounts';
 
@@ -96,7 +96,7 @@ export class Tx {
     };
   }
 
-  public send(options: SendOptions) {
+  public send(options: SendOptions): SendTxPromiEvent {
     const tx = this.getTx(options);
 
     // return error, if no "from" is specified

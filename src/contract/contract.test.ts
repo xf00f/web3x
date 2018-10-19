@@ -618,7 +618,7 @@ describe('contract', function() {
       contract.methods
         .mySend(address, 10)
         .send({ from: address2, gasPrice: '21345678654321' })
-        .on('receipt', function(receipt) {
+        .on('receipt', receipt => {
           expect(receipt).toEqual({
             contractAddress: null,
             cumulativeGasUsed: 10,
@@ -1559,7 +1559,7 @@ describe('contract', function() {
           expect(address).toBe(receipt.contractAddress);
           expect(contract.address).toBeUndefined();
         })
-        .then(contract => {
+        .then(_ => {
           expect(contract.address).toBe(address);
           done();
         });

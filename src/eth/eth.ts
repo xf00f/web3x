@@ -64,6 +64,17 @@ export interface SignedTransaction {
   };
 }
 
+export interface SendTxPromiEvent extends PromiEvent<TransactionReceipt> {
+  once(type: 'transactionHash', handler: (transactionHash: string) => void): this;
+  once(type: 'receipt', handler: (receipt: TransactionReceipt) => void): this;
+  once(type: 'confirmation', handler: (confNumber: number, receipt: TransactionReceipt) => void): this;
+  once(type: 'error', handler: (error: Error) => void): this;
+  on(type: 'transactionHash', handler: (transactionHash: string) => void): this;
+  on(type: 'receipt', handler: (receipt: TransactionReceipt) => void): this;
+  on(type: 'confirmation', handler: (confNumber: number, receipt: TransactionReceipt) => void): this;
+  on(type: 'error', handler: (error: Error) => void): this;
+}
+
 export class Eth {
   readonly request: EthRequestPayloads;
 
@@ -201,14 +212,14 @@ export class Eth {
     data: Data,
     extraFormatters?: any,
     defer?: PromiEventResult<TransactionReceipt>,
-  ): PromiEvent<TransactionReceipt> {
+  ): SendTxPromiEvent {
     defer = defer || promiEvent<TransactionReceipt>();
     const payload = this.request.sendSignedTransaction(data);
     this.sendTransactionAndWaitForConfirmation(defer, payload, extraFormatters);
     return defer.eventEmitter;
   }
 
-  sendTransaction(tx: Tx, extraFormatters?: any): PromiEvent<TransactionReceipt> {
+  sendTransaction(tx: Tx, extraFormatters?: any): SendTxPromiEvent {
     // TODO: Can we remove extraFormatters, which is basically exposing contract internals here, and instead
     // wrap the returned PromiEvent in another PromiEvent that does the translations upstream?
     const defer = promiEvent<TransactionReceipt>();

@@ -3,7 +3,6 @@ import { Eth } from 'web3x-es/eth';
 import { fromWei, toWei } from 'web3x-es/utils';
 import { Wallet } from 'web3x-es/accounts';
 import { Contract } from 'web3x-es/contract';
-import { TransactionReceipt } from 'web3x-es/formatters';
 import { Net } from 'web3x-es/net';
 import { Address } from 'web3x-es/types';
 
@@ -104,13 +103,13 @@ async function send(eth: Eth, from: Address, to: Address) {
       gas: 50000,
     })
     .on('transactionHash', txHash => addMessage(`Sent transaction ${txHash}`))
-    .on('receipt', async (receipt: TransactionReceipt) => {
+    .on('receipt', async receipt => {
       addMessage(`Transaction complete for ${receipt.transactionHash}.`);
       addMessage(`New 'from' balance: ${fromWei(await eth.getBalance(from), 'ether')}`);
       addMessage(`New 'to' balance: ${fromWei(await eth.getBalance(to), 'ether')}`);
       addBr();
     })
-    .on('error', addMessage);
+    .on('error', err => addMessage(err.message));
 }
 
 async function addDaiBalance(eth: Eth) {
