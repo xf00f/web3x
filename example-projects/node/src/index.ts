@@ -12,6 +12,8 @@ async function main() {
 
   try {
     console.log(`Connected to network: ${await web3.eth.net.getNetworkType()}`);
+    console.log(`Network Id: ${await web3.eth.getId()}`);
+    console.log(`Node info: ${await web3.eth.getNodeInfo()}`);
 
     const balance = await getBalance(web3, ZERO_ADDRESS);
     console.log(`Balance of 0 address ETH: ${balance}`);

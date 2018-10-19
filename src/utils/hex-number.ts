@@ -1,7 +1,23 @@
+/*
+  This file is part of web3x.
+
+  web3x is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  web3x is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public License
+  along with web3x.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 import BN from 'bn.js';
 import { toBN } from './bn';
 import { isHexStrict } from './hex';
-import { isNull, isUndefined } from 'util';
 
 /**
  * Converts value to it's number representation
@@ -10,11 +26,10 @@ import { isNull, isUndefined } from 'util';
  * @param {String|Number|BN} value
  * @return {String}
  */
-export function hexToNumber(value: string | number) {
-  if (!value) {
-    return value;
+export function hexToNumber(value: string | number): number | null {
+  if (value === undefined || value === null) {
+    return null;
   }
-
   return toBN(value).toNumber();
 }
 
@@ -25,9 +40,10 @@ export function hexToNumber(value: string | number) {
  * @param {String|Number|BN} value
  * @return {String}
  */
-export function hexToNumberString(value: string | number) {
-  if (!value) return value;
-
+export function hexToNumberString(value: string | number | undefined): string | null {
+  if (value === undefined || value === null) {
+    return null;
+  }
   return toBN(value).toString(10);
 }
 
@@ -38,11 +54,7 @@ export function hexToNumberString(value: string | number) {
  * @param {String|Number|BN} value
  * @return {String}
  */
-export function numberToHex(value) {
-  if (isNull(value) || isUndefined(value)) {
-    return value;
-  }
-
+export function numberToHex(value): string {
   if (!isFinite(value) && !isHexStrict(value)) {
     throw new Error('Given input "' + value + '" is not a number.');
   }

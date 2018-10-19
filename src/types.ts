@@ -1,3 +1,20 @@
+/*
+  This file is part of web3x.
+
+  web3x is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  web3x is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public License
+  along with web3x.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 export type Callback<T> = (error: Error, result: T) => void;
 
 export type Address = string;
@@ -5,92 +22,16 @@ export type TransactionHash = string;
 export type Quantity = string;
 export type Data = string;
 
-export interface EventEmitter {
-  on(type: 'data', handler: (event: EventLog) => void): EventEmitter;
-  on(type: 'changed', handler: (receipt: EventLog) => void): EventEmitter;
-  on(type: 'error', handler: (error: Error) => void): EventEmitter;
-  on(type: 'error' | 'data' | 'changed', handler: (error: Error | TransactionReceipt | string) => void): EventEmitter;
+export interface Tx {
+  nonce?: string | number;
+  chainId?: string | number;
+  from?: string;
+  to?: string;
+  data?: string;
+  value?: string | number;
+  gas?: string | number;
+  gasPrice?: string | number;
 }
 
-export interface EventLog {
-  event: string;
-  address: string;
-  returnValues: any;
-  logIndex: number;
-  transactionIndex: number;
-  transactionHash: string;
-  blockHash: string;
-  blockNumber: number;
-  raw?: { data: string; topics: string[] };
-}
-
-export interface TransactionReceipt {
-  transactionHash: string;
-  transactionIndex: number;
-  blockHash: string;
-  blockNumber: number;
-  from: string;
-  to: string;
-  contractAddress: string;
-  cumulativeGasUsed: number;
-  gasUsed: number;
-  logs?: Log[];
-  events?: {
-    [eventName: string]: EventLog;
-  };
-  status: string;
-}
-
-export interface EncodedTransaction {
-  raw: string;
-  tx: {
-    nonce: string;
-    gasPrice: string;
-    gas: string;
-    to: string;
-    value: string;
-    input: string;
-    v: string;
-    r: string;
-    s: string;
-    hash: string;
-  };
-}
-
-export interface Signature {
-  message: string;
-  messageHash: string;
-  r: string;
-  s: string;
-  v: string;
-  signature: string;
-}
-
-export interface Logs {
-  fromBlock?: number;
-  address?: string;
-  topics?: Array<string | string[]>;
-}
-export interface Log {
-  address: string;
-  data: string;
-  topics: string[];
-  logIndex: number;
-  transactionHash: string;
-  transactionIndex: number;
-  blockHash: string;
-  blockNumber: number;
-}
-export interface Subscribe<T> {
-  subscription: {
-    id: string;
-    subscribe(callback?: Callback<Subscribe<T>>): Subscribe<T>;
-    unsubscribe(callback?: Callback<boolean>): void | boolean;
-    arguments: object;
-  };
-  on(type: 'data' | 'changed', handler: (data: T) => void): void;
-  on(type: 'error', handler: (data: Error) => void): void;
-}
-
-export class Shh {} // TODO: Type
-export class Bzz {} // TODO: Type
+export type BlockType = 'latest' | 'pending' | 'genesis' | number;
+export type BlockHash = string;

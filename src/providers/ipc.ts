@@ -1,29 +1,23 @@
 /*
-    This file is part of web3.js.
+  This file is part of web3x.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+  web3x is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
+  web3x is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
+  You should have received a copy of the GNU Lesser General Public License
+  along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
-/** @file index.js
- * @authors:
- *   Fabian Vogelsteller <fabian@ethereum.org>
- * @date 2017
- */
 
 import { isArray, isFunction } from 'util';
-import { errors } from '../core-helpers';
 import { Provider } from '.';
-import netLib from 'net';
+import { InvalidResponse, InvalidConnection } from '../errors';
 
 export class IpcProvider implements Provider {
   private responseCallbacks: any;
@@ -33,7 +27,7 @@ export class IpcProvider implements Provider {
   private lastChunk: any;
   private lastChunkTimeout: any;
 
-  constructor(private path: string, net: any = netLib) {
+  constructor(private path: string, net: any) {
     this.responseCallbacks = {};
     this.notificationCallbacks = [];
     this.path = path;
@@ -135,7 +129,7 @@ export class IpcProvider implements Provider {
         clearTimeout(this.lastChunkTimeout);
         this.lastChunkTimeout = setTimeout(() => {
           this._timeout();
-          throw errors.InvalidResponse(data);
+          throw InvalidResponse(data);
         }, 1000 * 15);
 
         return;
@@ -173,7 +167,7 @@ Timeout all requests when the end/error event is fired
   private _timeout() {
     for (var key in this.responseCallbacks) {
       if (this.responseCallbacks.hasOwnProperty(key)) {
-        this.responseCallbacks[key](errors.InvalidConnection('on IPC'));
+        this.responseCallbacks[key](InvalidConnection('on IPC'));
         delete this.responseCallbacks[key];
       }
     }

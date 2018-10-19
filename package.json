@@ -5,16 +5,17 @@
   "description": "Typescript port of web3.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/xf00f/web3.ts.git"
+    "url": "https://github.com/xf00f/web3x.git"
   },
-  "homepage": "https://github.com/xf00f/web3.ts",
+  "homepage": "https://github.com/xf00f/web3x",
   "bugs": {
-    "url": "https://github.com/xf00f/web3.ts/issues"
+    "url": "https://github.com/xf00f/web3x/issues"
   },
   "keywords": [
     "Ethereum",
     "TypeScript",
-    "API"
+    "API",
+    "Web3"
   ],
   "contributors": [
     {
