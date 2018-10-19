@@ -9,17 +9,13 @@ import { Address } from 'web3x-es/types';
 
 declare const web3: any;
 
-const abi = require('human-standard-token-abi');
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-const DAI_CONTRACT_ADDRESS = '0xc4375b7de8af5a38a93548eb8453a498222c4ff2';
-
 /*
   Demonstrates how to create a minimally sized build. If you only need to provide access to Ethereum calls over a
   websocket connection, with no local accounts (e.g. interfacing with Metamask or a remote node with accounts),
   then it makes no sense to bundle all the crypto/provider/accounts code with your app. Construct only
   the components you need and keep things lean.
 
-  Notice as we use increasingly large amounts of the library, the size of build increases.
+  Notice as we use increasingly large amounts of the library, the size of the build increases.
 */
 async function main() {
   const eth = Eth.fromProvider(web3.currentProvider || new WebsocketProvider('ws://localhost:8546'));
@@ -51,13 +47,13 @@ async function main() {
   }
 
   // Minimal code for sending to yourself.
-  // Webpack output: ~162kb
+  // Webpack output: ~123kb
   addMessage('The following button will send ETH from provider account to itself.');
   addSendTo(eth, providerAddress, providerAddress);
   addBr();
 
   // Work with a contract.
-  // Webpack output: ~159kb
+  // Webpack output: ~162kb
   await addDaiBalance(eth);
 
   // Assuming you want some local accounts to work with, construct them yourself.
@@ -118,6 +114,10 @@ async function send(eth: Eth, from: Address, to: Address) {
 }
 
 async function addDaiBalance(eth: Eth) {
+  const abi = require('human-standard-token-abi');
+  const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+  const DAI_CONTRACT_ADDRESS = '0xc4375b7de8af5a38a93548eb8453a498222c4ff2';
+
   try {
     const contract = new Contract(eth, abi, DAI_CONTRACT_ADDRESS, { from: eth.request.getDefaultAccount() });
     const daiBalance = await contract.methods.balanceOf(ZERO_ADDRESS).call();
