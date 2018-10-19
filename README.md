@@ -82,7 +82,7 @@ Two example TypeScript projects are included, one for webpack and one for node.j
 
 API documentation has not yet been ported from web3.js. For now the recommended approach for familiarising yourself with the library would be the following, in preferential order:
 
-- Read the web3.js documentation at https://web3js.readthedocs.io/en/1.0/ to familiarise yourself with it's API. web3x is almost identical if you don't care about minimising build sizes.
+- Read the web3.js documentation at https://web3js.readthedocs.io/en/1.0/ to familiarise yourself with its API. web3x is almost identical if you don't care about minimising build sizes.
 - Take a look at the [webpack example](example-projects/webpack/src/index.ts) to get an idea of how to structure components to minimise builds.
 - Rely on your IDE and TypeScript to provide insight into the API.
 - Delve into the code. It's significantly easier to follow and understand than web3.js.
