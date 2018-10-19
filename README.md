@@ -78,6 +78,15 @@ It is recommended however that you look at an example project to understand the 
 
 Two example TypeScript projects are included, one for webpack and one for node.js. They are configured to work with jest for testing. Adapting them to pure JavaScript if you don't want to use TypeScript should be trivial.
 
+## Documentation
+
+API documentation has not yet been ported from web3.js. For now the recommended approach for familiarising yourself with the library would be the following, in preferential order:
+
+- Read the web3.js documentation at https://web3js.readthedocs.io/en/1.0/ to familiarise yourself with it's API. web3x is almost identical if you don't care about minimising build sizes.
+- Take a look at the [webpack example project](example-projects/webpack/index.ts) to get an idea of how to structure component initialisation to minimise builds.
+- Rely on your IDE and TypeScript to provide insight into the API.
+- Delve into the code. It's significantly easier to follow and understand than web3.js.
+
 ## Missing functionality
 
 The current features have not yet been ported.
