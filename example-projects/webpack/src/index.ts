@@ -59,7 +59,7 @@ async function main() {
   // Work with a contract.
   // Webpack output: ~159kb
   await addDaiBalance(eth);
-  /*
+
   // Assuming you want some local accounts to work with, construct them yourself.
   // Webpack output: ~338kb
   const wallet = (await Wallet.fromLocalStorage(eth, 'my_password')) || new Wallet(eth);
@@ -83,7 +83,6 @@ async function main() {
   addMessage('The following button will send ETH from local account to provider account.');
   addSendTo(eth, walletAccount.address, providerAddress);
   addBr();
-  */
 }
 
 async function addSendTo(eth: Eth, from: Address, to: Address) {
