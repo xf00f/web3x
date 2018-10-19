@@ -17,11 +17,10 @@
 
 import { Subscription } from '../subscriptions';
 import { Contract, ContractAbi, ContractOptions } from '../contract';
-import { Accounts } from '../accounts';
+import { Accounts, Wallet } from '../accounts';
 import { IRequestManager, BatchManager } from '../request-manager';
-import { toChecksumAddress, fireError } from '../utils';
+import { fireError } from '../utils';
 import {
-  inputAddressFormatter,
   outputSyncingFormatter,
   outputBlockFormatter,
   inputLogFormatter,
@@ -69,21 +68,15 @@ export class Eth {
   readonly request: EthRequestPayloads;
 
   // Following are injected by Web3 for api backwards compatability, but gross.
-  public accounts?: Accounts;
+  public accounts!: Accounts;
+  public wallet?: Wallet;
   public personal!: Personal;
   public net!: Net;
   public Contract!: new (abi: ContractAbi, address?: string, options?: ContractOptions) => Contract;
   public BatchRequest!: new () => BatchManager;
 
-  constructor(
-    readonly requestManager: IRequestManager,
-    readonly defaultAccount?: Address,
-    readonly defaultBlock: BlockType = 'latest',
-  ) {
-    if (this.defaultAccount) {
-      this.defaultAccount = toChecksumAddress(inputAddressFormatter(this.defaultAccount));
-    }
-    this.request = new EthRequestPayloads(defaultBlock);
+  constructor(readonly requestManager: IRequestManager) {
+    this.request = new EthRequestPayloads(undefined, 'latest');
   }
 
   static fromProvider(provider: Provider) {
@@ -224,9 +217,9 @@ export class Eth {
   }
 
   private getAccount(address?: string) {
-    address = address || this.defaultAccount;
-    if (this.accounts && address) {
-      return this.accounts.wallet.get(address);
+    address = address || this.request.getDefaultAccount();
+    if (this.wallet && address) {
+      return this.wallet.get(address);
     }
   }
 

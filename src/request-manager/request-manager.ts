@@ -44,7 +44,9 @@ export class RequestManager {
   constructor(public provider: Provider) {
     // listen to incoming notifications
     if (this.provider && this.provider.on) {
-      this.provider.on('data', result => {
+      this.provider.on('data', (result, deprecatedResult) => {
+        result = result || deprecatedResult;
+
         // check for result.method, to prevent old providers errors to pass as result
         if (
           result.method &&

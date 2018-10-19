@@ -31,7 +31,7 @@ export interface JsonRPCResponse {
   error?: string;
 }
 
-export type NotificationCallback = (result: any) => void;
+export type NotificationCallback = (result: any, deprecatedResult?: any) => void;
 
 export interface Provider {
   send(payload: JsonRPCRequest, callback: Callback): any;

@@ -37,7 +37,23 @@ import { Data, Address } from '../types';
 const identity = result => result;
 
 export class EthRequestPayloads {
-  constructor(private defaultBlock: BlockType) {}
+  constructor(private defaultAccount?: Address, private defaultBlock: BlockType = 'latest') {}
+
+  getDefaultAccount() {
+    return this.defaultAccount;
+  }
+
+  setDefaultAccount(address?: Address) {
+    this.defaultAccount = address ? toChecksumAddress(inputAddressFormatter(address)) : undefined;
+  }
+
+  getDefaultBlock() {
+    return this.defaultBlock;
+  }
+
+  setDefaultBlock(block: BlockType) {
+    this.defaultBlock = block;
+  }
 
   getId() {
     return {
@@ -209,6 +225,7 @@ export class EthRequestPayloads {
   }
 
   signTransaction(tx: Tx) {
+    tx.from = tx.from || this.defaultAccount;
     return {
       method: 'eth_signTransaction',
       params: [inputTransactionFormatter(tx)],
@@ -225,6 +242,7 @@ export class EthRequestPayloads {
   }
 
   sendTransaction(tx: Tx) {
+    tx.from = tx.from || this.defaultAccount;
     return {
       method: 'eth_sendTransaction',
       params: [inputTransactionFormatter(tx)],
@@ -249,6 +267,7 @@ export class EthRequestPayloads {
   }
 
   estimateGas(tx: Tx) {
+    tx.from = tx.from || this.defaultAccount;
     return {
       method: 'eth_estimateGas',
       params: [inputCallFormatter(tx)],

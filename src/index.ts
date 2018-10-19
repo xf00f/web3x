@@ -22,7 +22,7 @@ import { BatchManager } from './request-manager';
 import { Personal } from './personal';
 import { Net } from './net';
 import { Contract, ContractAbi, ContractOptions } from './contract';
-import { Accounts } from './accounts';
+import { Accounts, Wallet } from './accounts';
 import { isString } from 'util';
 
 /*
@@ -43,6 +43,7 @@ export class Web3 {
     eth.net = new Net(eth);
     eth.personal = new Personal(this.requestManager);
     eth.accounts = new Accounts(eth);
+    eth.wallet = eth.accounts.wallet = new Wallet(eth);
     eth.Contract = class extends Contract {
       constructor(abi: ContractAbi, address?: string, options?: ContractOptions) {
         super(eth, abi, address, options, eth.accounts!.wallet);

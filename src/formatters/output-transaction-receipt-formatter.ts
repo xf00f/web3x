@@ -59,6 +59,9 @@ export interface EventLog {
  * @returns {Object}
  */
 export function outputTransactionReceiptFormatter(receipt) {
+  if (!receipt) {
+    return null;
+  }
   if (typeof receipt !== 'object') {
     throw new Error('Received receipt is invalid: ' + receipt);
   }

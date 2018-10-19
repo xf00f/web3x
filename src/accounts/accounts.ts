@@ -23,11 +23,9 @@ import { recoverTransaction, signTransaction } from './sign-transaction';
 import { Eth } from '../eth';
 
 export class Accounts {
-  public wallet: Wallet;
+  public wallet!: Wallet;
 
-  constructor(private eth: Eth) {
-    this.wallet = new Wallet(eth);
-  }
+  constructor(private eth: Eth) {}
 
   create(entropy?: string): Account {
     return Account.create(this.eth, entropy);

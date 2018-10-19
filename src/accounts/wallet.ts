@@ -33,6 +33,24 @@ export class Wallet {
     return wallet;
   }
 
+  static async fromLocalStorage(eth: Eth, password: string, keyName: string = this.defaultKeyName) {
+    if (!localStorage) {
+      return new Wallet(eth);
+    }
+
+    const keystoreStr = localStorage.getItem(keyName);
+
+    if (!keystoreStr) {
+      return new Wallet(eth);
+    }
+
+    try {
+      return Wallet.fromKeystores(eth, JSON.parse(keystoreStr), password);
+    } catch (e) {
+      return new Wallet(eth);
+    }
+  }
+
   private findSafeIndex(pointer: number = 0) {
     while (this.accounts[pointer]) {
       ++pointer;
@@ -126,30 +144,13 @@ export class Wallet {
     return this.accounts;
   }
 
-  save(password: string, keyName: string = Wallet.defaultKeyName) {
+  async save(password: string, keyName: string = Wallet.defaultKeyName) {
     if (!localStorage) {
       return false;
     }
 
-    localStorage.setItem(keyName, JSON.stringify(this.encrypt(password)));
+    localStorage.setItem(keyName, JSON.stringify(await this.encrypt(password)));
 
     return true;
-  }
-
-  load(password: string, keyName: string = Wallet.defaultKeyName) {
-    if (!localStorage) {
-      return [];
-    }
-
-    const keystoreStr = localStorage.getItem(keyName);
-    let keystore: KeyStore[] = [];
-
-    if (keystoreStr) {
-      try {
-        keystore = JSON.parse(keystoreStr);
-      } catch (e) {}
-    }
-
-    return this.decrypt(keystore, password);
   }
 }

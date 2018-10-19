@@ -17,9 +17,12 @@ web3x attempts to solve all the above issues.
 - It uses jest for testing.
 - It attempts to reduce dependencies on external libraries.
 - It compiles to both commonjs and ES6 module versions for node.js and ES6 aware web bundlers such as webpack.
-- It strives for functional, immutable, reusable components.
+- It strives for functional, immutable, reusable components, allowing the developer to only use, and therefore build, exactly what's necessary.
 
-In a small example that prints an Eth balance compiled with webpack, web3.js produced an output file of 858k, web3x produced a file of 119k. That's an 86% reduction. It's likely this can be improved further.
+In a small example that prints an Eth balance compiled with webpack, web3.js produced an output file of 858k, web3x produced a file of 119k. That's an 86% reduction.
+Working with contracts increased the build size to 159k, and working with local accounts in localStorage increased it to 338k. The majority of Dapps are probably expecting
+a user to be using a provider like MetaMask for account handling, so they can reliably work with a minimum build of ~160k uncompressed (46k compressed).
+It's also likely this can be improved further.
 
 ## Usage
 
@@ -41,7 +44,7 @@ async function main() {
 main().catch(console.error);
 ```
 
-A minimal implementation of the above would look like:
+A minimal (~119k) implementation of the above would look like:
 
 ```
 import { WebsocketProvider } from 'web3x-es/providers';
@@ -63,7 +66,8 @@ See example projects for more complex examples.
 
 ## Differences
 
-This is not a drop in replacement for web3.js, certain things have changed. However it is very close to the original API and porting an application to use it shouldn't be too challenging.
+This is not a perfect drop in replacement for web3.js, certain things have changed. However it is very close to the original API and porting an application to use it shouldn't be too challenging.
+It is recommended however that you look at an example project to understand the best way to initialise components to minimise build sizes.
 
 - Callbacks for request/response style calls no longer supported, promises only.
 - Functions that don't depend on surrounding class state have been moved to utils (e.g. `sign`, `recover`).
