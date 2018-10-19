@@ -1,6 +1,6 @@
 {
   "name": "web3x",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "license": "LGPL-3.0",
   "description": "Typescript port of web3.js",
   "repository": {
@@ -54,7 +54,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.cjs.json && tsc -p tsconfig.es.json",
     "test": "jest",
-    "deploy": "yarn build && yarn test && yarn version --patch && node ./package.js && npm publish dest && npm publish dest-es"
+    "deploy": "yarn build && yarn test && node ./package.js && npm publish dest && npm publish dest-es",
+    "deploy_patch": "yarn build && yarn test && yarn version --patch && node ./package.js && npm publish dest && npm publish dest-es"
   },
   "jest": {
     "transform": {
