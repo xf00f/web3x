@@ -1,8 +1,8 @@
 # web3x
 
 [![Version](https://img.shields.io/npm/v/web3x.svg)](https://www.npmjs.com/package/web3x)
-[![Downloads](https://img.shields.io/npm/dw/web3x-es.svg)](https://www.npmjs.com/package/web3x-es)
 [![Downloads](https://img.shields.io/npm/dw/web3x.svg)](https://www.npmjs.com/package/web3x)
+[![Downloads](https://img.shields.io/npm/dw/web3x-es.svg)](https://www.npmjs.com/package/web3x-es)
 [![GitHub Repo Size](https://img.shields.io/github/repo-size/xf00f/web3x.svg)](https://github.com/xf00f/web3x)
 [![GitHub Stars](https://img.shields.io/github/stars/xf00f/web3x.svg)](https://github.com/xf00f/web3x/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/xf00f/web3x.svg)](https://github.com/xf00f/web3x/issues)
@@ -13,8 +13,8 @@ TypeScript port of web3.js.
 
 ## Packages
 
-- [ES6](https://www.npmjs.com/package/web3x-es) (for ES6 aware tools such as Webpack)
-- [CommonJS](https://www.npmjs.com/package/web3x) (for Node.js)
+- [web3x](https://www.npmjs.com/package/web3x) (CommonJS modules for Node.js)
+- [web3x-es](https://www.npmjs.com/package/web3x-es) (ES6 modules for tools such as Webpack)
 
 ## Why?
 
