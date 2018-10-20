@@ -90,7 +90,7 @@ It is recommended however that you look at an example project to understand the 
 
 ## Example projects
 
-Two example TypeScript projects are included, one for webpack and one for node.js. They are configured to work with jest for testing. Adapting them to pure JavaScript if you don't want to use TypeScript should be trivial.
+Two example TypeScript projects are included, one for [webpack](example-projects/webpack) and one for [node.js](example-projects/node). They are configured to work with jest for testing. Adapting them to pure JavaScript if you don't want to use TypeScript should be trivial.
 
 ## Documentation
 
