@@ -1,5 +1,14 @@
 # web3x
 
+[![Version](https://img.shields.io/npm/v/web3x.svg)](https://www.npmjs.com/package/web3x)
+[![Downloads](https://img.shields.io/npm/dw/web3x.svg)](https://www.npmjs.com/package/web3x)
+[![Downloads](https://img.shields.io/npm/dw/web3x-es.svg)](https://www.npmjs.com/package/web3x-es)
+[![GitHub Repo Size](https://img.shields.io/github/repo-size/xf00f/web3x.svg)](https://github.com/xf00f/web3x)
+[![GitHub Stars](https://img.shields.io/github/stars/xf00f/web3x.svg)](https://github.com/IgorAntun/node-chat/stargazers)
+[![GitHub Issues](https://img.shields.io/github/issues/xf00f/web3x.svg)](https://github.com/xf00f/web3x/issues)
+[![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://github.com/xf00f/web3x/blob/master/LICENSE)
+
+
 TypeScript port of web3.js.
 
 ## Why?
@@ -30,7 +39,7 @@ There are two builds of the library. `web3x` uses commonjs style imports and is 
 You can use web3x much like you would web3.js, requiring minimal changes necessary to an existing codebase. However, this will possibly result in larger than necessary builds.
 Example usage:
 
-```
+```typescript
 import { Web3 } from 'web3x-es';
 import { fromWei } from 'web3x-es/utils';
 
@@ -46,7 +55,7 @@ main().catch(console.error);
 
 A minimal (~119k) implementation of the above would look like:
 
-```
+```typescript
 import { WebsocketProvider } from 'web3x-es/providers';
 import { Eth } from 'web3x-es/eth';
 import { fromWei } from 'web3x-es/utils';
