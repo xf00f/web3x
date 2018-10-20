@@ -1,7 +1,7 @@
-import { Web3 } from 'web3x';
 import { fromWei } from 'web3x/utils';
+import { Eth } from 'web3x/eth';
 
-export async function getBalance(web3: Web3, address: string) {
-  const balance = await web3.eth.getBalance(address);
+export async function getBalance(eth: Eth, address: string) {
+  const balance = await eth.getBalance(address);
   return fromWei(balance, 'ether');
 }

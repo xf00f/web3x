@@ -1,38 +1,43 @@
-import { Web3 } from 'web3x';
 import { sign, recover, fromWei } from 'web3x/utils';
-import { Account, Wallet } from 'web3x/eth/accounts';
+import { Account, Wallet } from 'web3x/accounts';
 import { getBalance } from './balance-fetcher';
+import { WebsocketProvider } from 'web3x/providers';
+import { Net } from 'web3x/net';
+import { Eth } from 'web3x/eth';
+import { Contract } from 'web3x/contract';
 const abi = require('human-standard-token-abi');
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 const DAI_CONTRACT_ADDRESS = '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359';
 
 async function main() {
-  const web3 = new Web3('wss://mainnet.infura.io/ws');
+  const provider = new WebsocketProvider('wss://mainnet.infura.io/ws');
+  const eth = Eth.fromProvider(provider);
+  const net = new Net(eth);
 
   try {
-    console.log(`Connected to network: ${await web3.eth.net.getNetworkType()}`);
-    console.log(`Network Id: ${await web3.eth.getId()}`);
-    console.log(`Node info: ${await web3.eth.getNodeInfo()}`);
+    console.log(`Connected to network: ${await net.getNetworkType()}`);
+    console.log(`Network Id: ${await eth.getId()}`);
+    console.log(`Node info: ${await eth.getNodeInfo()}`);
 
-    const balance = await getBalance(web3, ZERO_ADDRESS);
+    const balance = await getBalance(eth, ZERO_ADDRESS);
     console.log(`Balance of 0 address ETH: ${balance}`);
 
-    const contract = new web3.eth.Contract(abi, DAI_CONTRACT_ADDRESS);
+    const contract = new Contract(eth, abi, DAI_CONTRACT_ADDRESS);
     const daiBalance = await contract.methods.balanceOf(ZERO_ADDRESS).call();
     console.log(`Balance of 0 address DAI: ${fromWei(daiBalance, 'ether')}`);
 
     const password = 'mypassword';
-    const account = Account.create();
+    const account = Account.create(eth);
     const keystore = await account.encrypt(password);
-    const decryptedAccount = await Account.fromKeystore(keystore, password);
+    const decryptedAccount = await Account.fromKeystore(eth, keystore, password);
 
-    const wallet = new Wallet();
+    const wallet = new Wallet(eth);
     wallet.add(decryptedAccount);
     wallet.create(2);
 
     const encryptedWallet = await wallet.encrypt(password);
-    const decryptedWallet = await Wallet.fromKeystores(encryptedWallet, password);
+    const decryptedWallet = await Wallet.fromKeystores(eth, encryptedWallet, password);
 
     console.log(`Decrypted wallet has ${decryptedWallet.length} accounts.`);
     const signingAccount = decryptedWallet.get(2)!;
@@ -49,7 +54,7 @@ async function main() {
       console.error('Incorrect signature for message.');
     }
   } finally {
-    web3.close();
+    provider.disconnect();
   }
 }
 
