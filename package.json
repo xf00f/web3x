@@ -22,38 +22,15 @@
       "name": "xf00f",
       "email": "xf00f@protonmail.com",
       "url": "https://github.com/xf00f"
-    },
-    {
-      "name": "Fabian Vogelsteller",
-      "email": "fabian@ethereum.org",
-      "url": "http://frozeman.de"
-    },
-    {
-      "name": "Marek Kotewicz",
-      "email": "marek@parity.io",
-      "url": "https://github.com/debris"
-    },
-    {
-      "name": "Marian Oancea",
-      "url": "https://github.com/cubedro"
-    },
-    {
-      "name": "Gav Wood",
-      "email": "g@parity.io",
-      "url": "http://gavwood.com"
-    },
-    {
-      "name": "Jeffery Wilcke",
-      "email": "jeffrey.wilcke@ethereum.org",
-      "url": "https://github.com/obscuren"
     }
   ],
   "main": "./index.js",
   "types": "./index.d.ts",
   "sideEffects": false,
   "scripts": {
-    "build": "tsc -p tsconfig.cjs.json && tsc -p tsconfig.es.json",
+    "build": "yarn clean && tsc -p tsconfig.cjs.json && tsc -p tsconfig.es.json",
     "test": "jest",
+    "clean": "rm -rf ./dest ./dest-es",
     "deploy": "yarn build && yarn test && node ./package.js && npm publish dest && npm publish dest-es",
     "deploy_patch": "yarn build && yarn test && yarn version --patch && node ./package.js && npm publish dest && npm publish dest-es"
   },
@@ -82,7 +59,6 @@
     "bn.js": "^4.11.8",
     "browserify-aes": "^1.2.0",
     "elliptic": "^6.4.0",
-    "ethers": "^3.0.29",
     "isomorphic-ws": "^4.0.1",
     "node-http-xhr": "^1.3.4",
     "pbkdf2": "^3.0.17",
@@ -94,7 +70,6 @@
   "devDependencies": {
     "@types/jest": "^23.3.2",
     "@types/utf8": "^2.1.6",
-    "ethjs-signer": "^0.1.1",
     "jest": "^23.6.0",
     "jest-dot-reporter": "^1.0.7",
     "ts-jest": "^23.10.1",

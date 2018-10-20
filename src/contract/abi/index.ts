@@ -17,7 +17,7 @@
 
 import { isArray, isObject } from 'util';
 import { sha3 } from '../../utils';
-import EthersAbi from 'ethers/utils/abi-coder';
+import { AbiCoder as EthersAbi } from '../../ethers/abi-coder';
 
 /**
  * ABICoder prototype should be used to encode/decode solidity params of any type

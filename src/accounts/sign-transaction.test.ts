@@ -16,7 +16,6 @@
 */
 
 import { recoverTransaction } from './sign-transaction';
-import ethjsSigner from 'ethjs-signer';
 import { Account } from './account';
 
 var clone = function(object) {
@@ -510,11 +509,6 @@ describe('accounts', function() {
           const testAccount = Account.fromPrivate(mockEthereum, test.privateKey);
           const tx = await testAccount.signTransaction(test.transaction);
           expect(recoverTransaction(tx.rawTransaction)).toBe(test.address);
-        });
-
-        it('recoverTransaction, must also recover old signature from eth-signer', () => {
-          const oldSignature = ethjsSigner.sign(test.transaction, test.privateKey);
-          expect(recoverTransaction(oldSignature)).toBe(test.address);
         });
       }
     });
