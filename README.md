@@ -4,12 +4,17 @@
 [![Downloads](https://img.shields.io/npm/dw/web3x.svg)](https://www.npmjs.com/package/web3x)
 [![Downloads](https://img.shields.io/npm/dw/web3x-es.svg)](https://www.npmjs.com/package/web3x-es)
 [![GitHub Repo Size](https://img.shields.io/github/repo-size/xf00f/web3x.svg)](https://github.com/xf00f/web3x)
-[![GitHub Stars](https://img.shields.io/github/stars/xf00f/web3x.svg)](https://github.com/IgorAntun/node-chat/stargazers)
+[![GitHub Stars](https://img.shields.io/github/stars/xf00f/web3x.svg)](https://github.com/xf00f/web3x/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/xf00f/web3x.svg)](https://github.com/xf00f/web3x/issues)
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://github.com/xf00f/web3x/blob/master/LICENSE)
 
 
 TypeScript port of web3.js.
+
+## Packages
+
+- [ES6](https://www.npmjs.com/package/web3x-es) (for ES6 aware tools such as Webpack)
+- [CommonJS](https://www.npmjs.com/package/web3x) (for Node.js)
 
 ## Why?
 
