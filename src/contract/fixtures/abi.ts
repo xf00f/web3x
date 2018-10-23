@@ -16,6 +16,30 @@
 */
 
 import { AbiDefinition } from '..';
+import { Address } from '../../types';
+
+export interface FixtureDefinition {
+  methods: {
+    addStruct(nestedStruct: { status: boolean }): void;
+    listOfNestedStructs(address: string): { status: boolean };
+    balance(who: Address): number;
+    hasALotOfParams(_var1: string, _var2: string, _var3: string[]): string;
+    getStr(): string;
+    owner(): Address;
+    mySend(to: Address, value: number): void;
+    myDisallowedSend(to: Address, value: number): void;
+    testArr(value: number[]): number;
+    overloadedFunction(a?: number): number;
+  };
+  events: {
+    Changed: {
+      from: Address;
+      amount: string;
+      t1: string;
+      t2: string;
+    }[];
+  };
+}
 
 export const abi: AbiDefinition[] = [
   {

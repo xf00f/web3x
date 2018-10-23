@@ -17,3 +17,4 @@
 
 export * from './contract-abi';
 export * from './contract';
+export { SendOptions, CallOptions } from './tx';
