@@ -20,7 +20,13 @@ import { Subscription } from '../subscriptions';
 import { abi, abiMethodToString } from './abi';
 import { Tx, TxFactory, TxSend, TxCall } from './tx';
 import { decodeAnyEvent } from './decode-event-abi';
-import { inputAddressFormatter, EventLog, inputBlockNumberFormatter, inputLogFormatter } from '../formatters';
+import {
+  inputAddressFormatter,
+  EventLog,
+  inputBlockNumberFormatter,
+  inputLogFormatter,
+  TransactionReceipt,
+} from '../formatters';
 import { toChecksumAddress, isAddress } from '../utils';
 import { TxDeploy } from './tx-deploy';
 import { ContractAbi, AbiDefinition } from './contract-abi';
@@ -41,7 +47,7 @@ interface ContractDefinition {
   events?: any;
 }
 
-type EventSubscriptionFactory<Result = EventLog> = (
+type EventSubscriptionFactory<Result = EventLog<any>> = (
   options?: object,
   callback?: (err: Error, result: Result, subscription: Subscription<Result>) => void,
 ) => Subscription<any>;
@@ -49,7 +55,15 @@ type EventSubscriptionFactory<Result = EventLog> = (
 type GetReturnType<T extends Function> = T extends (...x: any[]) => infer Return ? Return : never;
 type GetArgumentType<T extends Function> = T extends (...x: infer Args) => any ? Args : never;
 
-type GetResponseEvents<Events> = { [P in keyof Events]: EventLog<Events[P]> };
+type Events<T extends ContractDefinition | void> = T extends ContractDefinition
+  ? Extract<keyof T['events'], string>
+  : string;
+
+type GetEventLog<T extends ContractDefinition | void, P extends Events<T>> = T extends ContractDefinition
+  ? EventLog<T['events'][P]>
+  : EventLog<any>;
+
+type GetResponseEvents<Events> = { [P in keyof Events]: EventLog<Events[P]>[] };
 
 type MethodType<T extends Function, Events> = ((
   ...args: GetArgumentType<T>
@@ -131,6 +145,15 @@ export class Contract<T extends ContractDefinition | void = void> {
     return new TxDeploy(this.eth, constructor, data, args, this.options, this.wallet, this.extraFormatters);
   }
 
+  once<Event extends Events<T>>(
+    event: Event,
+    options: {
+      filter?: object;
+      topics?: string[];
+    },
+    callback: (err, res: GetEventLog<T, Event>, sub) => void,
+  );
+
   /**
    * Adds event listeners and creates a subscription, and remove it once its fired.
    *
@@ -141,7 +164,7 @@ export class Contract<T extends ContractDefinition | void = void> {
    * @return {Object} the event subscription
    */
   once(
-    event: string,
+    event: Events<T>,
     options: {
       filter?: object;
       topics?: string[];
@@ -155,6 +178,16 @@ export class Contract<T extends ContractDefinition | void = void> {
     });
   }
 
+  getPastEvents<Event extends Events<T>>(
+    event: Event,
+    options: {
+      filter?: object;
+      fromBlock?: BlockType;
+      toBlock?: BlockType;
+      topics?: string[];
+    },
+  ): Promise<GetEventLog<T, Event>[]>;
+
   /**
    * Get past events from contracts
    *
@@ -165,14 +198,14 @@ export class Contract<T extends ContractDefinition | void = void> {
    * @return {Object} the promievent
    */
   async getPastEvents(
-    event: string,
+    event: Events<T>,
     options: {
       filter?: object;
       fromBlock?: BlockType;
       toBlock?: BlockType;
       topics?: string[];
     } = {},
-  ): Promise<EventLog[]> {
+  ): Promise<EventLog<any>[]> {
     const subOptions = this.generateEventOptions(event, options);
     const result = await this.eth.getPastLogs(subOptions.params);
     return result.map(log => decodeAnyEvent(this.jsonInterface, log));
@@ -252,7 +285,7 @@ export class Contract<T extends ContractDefinition | void = void> {
   }
 
   private getEnrichedAbiDefinition(contractDefinition: ContractAbi) {
-    return this.jsonInterface.map(method => {
+    return contractDefinition.map(method => {
       // make constant and payable backwards compatible
       const constant = method.stateMutability === 'view' || method.stateMutability === 'pure' || method.constant;
       const payable = method.stateMutability === 'payable' || method.payable;
@@ -452,37 +485,26 @@ export class Contract<T extends ContractDefinition | void = void> {
     return receipt;
   };
 
-  //private receiptFormatter = (receipt: TransactionReceipt<T extends ContractDefinition ? T['events'] : any>) => {
-  private receiptFormatter = (receipt: any) => {
+  private receiptFormatter = (receipt: TransactionReceipt) => {
     if (!isArray(receipt.logs)) {
       return receipt;
     }
 
     // decode logs
-    const events = receipt.logs.map(log => decodeAnyEvent(this.jsonInterface, log));
-    //const events = receipt.logs.map(log => (log.id !== undefined ? log : decodeAnyEvent(this.jsonInterface, log)));
+    const decodedEvents = receipt.logs.map(log => decodeAnyEvent(this.jsonInterface, log));
 
     // make log names keys
     receipt.events = {};
     var count = 0;
-    events.forEach(ev => {
+    for (let ev of decodedEvents) {
       if (ev.event) {
-        // if > 1 of the same event, don't overwrite any existing events
-        if (receipt.events[ev.event]) {
-          if (Array.isArray(receipt.events[ev.event])) {
-            receipt.events[ev.event].push(ev);
-          } else {
-            receipt.events[ev.event] = [receipt.events[ev.event], ev];
-          }
-        } else {
-          receipt.events[ev.event] = ev;
-        }
+        const events = receipt.events[ev.event] || [];
+        receipt.events[ev.event] = [...events, ev];
       } else {
         receipt.events[count] = ev;
         count++;
       }
-    });
-
+    }
     delete receipt.logs;
 
     return receipt;

@@ -635,63 +635,67 @@ describe('contract', function() {
             blockHash: '0x1234',
             gasUsed: 0,
             events: {
-              Unchanged: {
-                address: address,
-                blockNumber: 10,
-                transactionHash: '0x1234',
-                blockHash: '0x1345',
-                logIndex: 4,
-                id: 'log_9ff24cb4',
-                transactionIndex: 0,
-                returnValues: {
-                  0: '2',
-                  1: address,
-                  2: '5',
-                  value: '2',
-                  addressFrom: address,
-                  t1: '5',
+              Unchanged: [
+                {
+                  address: address,
+                  blockNumber: 10,
+                  transactionHash: '0x1234',
+                  blockHash: '0x1345',
+                  logIndex: 4,
+                  id: 'log_9ff24cb4',
+                  transactionIndex: 0,
+                  returnValues: {
+                    0: '2',
+                    1: address,
+                    2: '5',
+                    value: '2',
+                    addressFrom: address,
+                    t1: '5',
+                  },
+                  event: 'Unchanged',
+                  signature: '0xf359668f205d0b5cfdc20d11353e05f633f83322e96f15486cbb007d210d66e5',
+                  raw: {
+                    topics: [
+                      '0xf359668f205d0b5cfdc20d11353e05f633f83322e96f15486cbb007d210d66e5',
+                      '0x0000000000000000000000000000000000000000000000000000000000000002',
+                      '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
+                    ],
+                    data: '0x0000000000000000000000000000000000000000000000000000000000000005',
+                  },
                 },
-                event: 'Unchanged',
-                signature: '0xf359668f205d0b5cfdc20d11353e05f633f83322e96f15486cbb007d210d66e5',
-                raw: {
-                  topics: [
-                    '0xf359668f205d0b5cfdc20d11353e05f633f83322e96f15486cbb007d210d66e5',
-                    '0x0000000000000000000000000000000000000000000000000000000000000002',
-                    '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
-                  ],
-                  data: '0x0000000000000000000000000000000000000000000000000000000000000005',
+              ],
+              Changed: [
+                {
+                  address: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+                  blockNumber: 10,
+                  transactionHash: '0x1234',
+                  blockHash: '0x1345',
+                  logIndex: 4,
+                  id: 'log_9ff24cb4',
+                  transactionIndex: 0,
+                  returnValues: {
+                    0: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+                    1: '1',
+                    2: '1',
+                    3: '8',
+                    from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+                    amount: '1',
+                    t1: '1',
+                    t2: '8',
+                  },
+                  event: 'Changed',
+                  signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
+                  raw: {
+                    topics: [
+                      '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
+                      '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
+                      '0x0000000000000000000000000000000000000000000000000000000000000001',
+                    ],
+                    data:
+                      '0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000008',
+                  },
                 },
-              },
-              Changed: {
-                address: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-                blockNumber: 10,
-                transactionHash: '0x1234',
-                blockHash: '0x1345',
-                logIndex: 4,
-                id: 'log_9ff24cb4',
-                transactionIndex: 0,
-                returnValues: {
-                  0: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-                  1: '1',
-                  2: '1',
-                  3: '8',
-                  from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-                  amount: '1',
-                  t1: '1',
-                  t2: '8',
-                },
-                event: 'Changed',
-                signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
-                raw: {
-                  topics: [
-                    '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
-                    '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
-                    '0x0000000000000000000000000000000000000000000000000000000000000001',
-                  ],
-                  data:
-                    '0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000008',
-                },
-              },
+              ],
             },
           });
 
@@ -706,7 +710,7 @@ describe('contract', function() {
 
       const receipt = await contract.methods.mySend(address, 10).send({ from: address2, gasPrice: '21345678654321' });
 
-      expect(receipt.events!.Changed.returnValues).toEqual({
+      expect(receipt.events!.Changed[0].returnValues).toEqual({
         0: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
         1: '1',
         2: '1',
@@ -717,7 +721,7 @@ describe('contract', function() {
         t2: '8',
       });
 
-      expect(receipt.events!.Unchanged.returnValues).toEqual({
+      expect(receipt.events!.Unchanged[0].returnValues).toEqual({
         0: '2',
         1: address,
         2: '5',
@@ -1291,7 +1295,6 @@ describe('contract', function() {
     });
 
     it('getPastEvents should get past events and format them correctly', async () => {
-      //const signature = 'testArr(int[])';
       const signature = 'Changed(address,uint256,uint256,uint256)';
 
       const topic1 = [

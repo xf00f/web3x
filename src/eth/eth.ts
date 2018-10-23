@@ -64,7 +64,7 @@ export interface SignedTransaction {
   };
 }
 
-export interface SendTxPromiEvent<T = any> extends PromiEvent<TransactionReceipt<T>> {
+export interface SendTxPromiEvent<T = void> extends PromiEvent<TransactionReceipt<T>> {
   once(type: 'transactionHash', handler: (transactionHash: string) => void): this;
   once(type: 'receipt', handler: (receipt: TransactionReceipt<T>) => void): this;
   once(type: 'confirmation', handler: (confNumber: number, receipt: TransactionReceipt<T>) => void): this;
