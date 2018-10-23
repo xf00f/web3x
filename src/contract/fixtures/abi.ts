@@ -31,13 +31,20 @@ export interface FixtureDefinition {
     testArr(value: number[]): number;
     overloadedFunction(a?: number): number;
   };
-  events: {
-    Changed: {
-      from: Address;
-      amount: string;
-      t1: string;
-      t2: string;
-    }[];
+  events: FixtureEvents;
+}
+
+interface FixtureEvents {
+  Changed: {
+    from: Address;
+    amount: string;
+    t1: string;
+    t2: string;
+  };
+  Unchanged: {
+    value: string;
+    addrssFrom: Address;
+    t1: string;
   };
 }
 

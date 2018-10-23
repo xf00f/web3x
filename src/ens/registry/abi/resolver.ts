@@ -17,28 +17,30 @@ export interface ResolverDefinition {
     pubkey(node: string): { x: string; y: string };
     setPubkey(node: string, x: string, y: string): void;
   };
-  events: {
-    AddrChanged: {
-      node: string;
-      a: Address;
-    };
-    ContentChanged: {
-      node: string;
-      hash: string;
-    };
-    NameChanged: {
-      node: string;
-      name: string;
-    };
-    ABIChanged: {
-      node: string;
-      contentType: string;
-    };
-    PubkeyChanged: {
-      node: string;
-      x: string;
-      y: string;
-    };
+  events: ResolverEvents;
+}
+
+export interface ResolverEvents {
+  AddrChanged: {
+    node: string;
+    a: Address;
+  };
+  ContentChanged: {
+    node: string;
+    hash: string;
+  };
+  NameChanged: {
+    node: string;
+    name: string;
+  };
+  ABIChanged: {
+    node: string;
+    contentType: string;
+  };
+  PubkeyChanged: {
+    node: string;
+    x: string;
+    y: string;
   };
 }
 

@@ -61,8 +61,8 @@ export interface TxCall<T = any> {
   encodeABI();
 }
 
-export interface TxSend {
-  send(options?: SendOptions): SendTxPromiEvent;
+export interface TxSend<ResponseEvents = any> {
+  send(options?: SendOptions): SendTxPromiEvent<ResponseEvents>;
   getSendRequestPayload(options?: SendOptions);
   estimateGas(options?: EstimateOptions): Promise<number>;
   encodeABI();

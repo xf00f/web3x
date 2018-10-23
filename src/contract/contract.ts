@@ -29,7 +29,6 @@ import { BlockType } from '../types';
 import { Eth } from '../eth';
 import { InvalidNumberOfParams } from '../errors';
 import { Wallet } from '../accounts';
-import { TransactionReceipt } from '../formatters';
 
 export interface ContractOptions {
   from?: string;
@@ -42,27 +41,36 @@ interface ContractDefinition {
   events?: any;
 }
 
-type EventSubscriptionFactory = (
+type EventSubscriptionFactory<Result = EventLog> = (
   options?: object,
-  callback?: (err: Error, result: EventLog, subscription: Subscription<EventLog>) => void,
+  callback?: (err: Error, result: Result, subscription: Subscription<Result>) => void,
 ) => Subscription<any>;
 
 type GetReturnType<T extends Function> = T extends (...x: any[]) => infer Return ? Return : never;
 type GetArgumentType<T extends Function> = T extends (...x: infer Args) => any ? Args : never;
 
-type MethodType<T extends Function> = ((
-  ...args: GetArgumentType<T>
-) => GetReturnType<T> extends void ? TxSend : TxCall<GetReturnType<T>>);
+type GetResponseEvents<Events> = { [P in keyof Events]: EventLog<Events[P]> };
 
-type GetContractMethods<T> = { [P in keyof T]: MethodType<T[P] extends Function ? T[P] : never> };
-type GetContractEvents<T> = { [P in keyof T]: EventSubscriptionFactory } & { allEvents: EventSubscriptionFactory };
+type MethodType<T extends Function, Events> = ((
+  ...args: GetArgumentType<T>
+) => GetReturnType<T> extends void ? TxSend<GetResponseEvents<Events>> : TxCall<GetReturnType<T>>);
+
+type GetContractMethods<T extends ContractDefinition> = {
+  [P in keyof T['methods']]: MethodType<T['methods'][P] extends Function ? T['methods'][P] : never, T['events']>
+};
+
+type GetContractEvents<T extends ContractDefinition> = {
+  [P in keyof T['events']]: EventSubscriptionFactory<EventLog<T['events'][P]>>
+} & {
+  allEvents: EventSubscriptionFactory;
+};
 
 type ContractMethods<T> = T extends ContractDefinition
-  ? GetContractMethods<T['methods']>
+  ? GetContractMethods<T>
   : { [key: string]: (...args: any[]) => Tx };
 
 type ContractEvents<T> = T extends ContractDefinition
-  ? GetContractEvents<T['events']>
+  ? GetContractEvents<T>
   : { [key: string]: EventSubscriptionFactory };
 
 /**

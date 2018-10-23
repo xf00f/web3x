@@ -11,20 +11,22 @@ export interface RegistryDefinition {
     setResolver(node: string, resolver: Address): void;
     setTTL(node: string, ttl: number): void;
   };
-  events: {
-    Transfer: {
-      node: string;
-      owner: Address;
-    }[];
-    NewOwner: {
-      node: string;
-      label: string;
-      owner: Address;
-    }[];
-    NewTTL: {
-      node: string;
-      ttl: number;
-    }[];
+  events: RegistryEvents;
+}
+
+export interface RegistryEvents {
+  Transfer: {
+    node: string;
+    owner: Address;
+  };
+  NewOwner: {
+    node: string;
+    label: string;
+    owner: Address;
+  };
+  NewTTL: {
+    node: string;
+    ttl: number;
   };
 }
 

@@ -109,12 +109,13 @@ describe('contract', function() {
 
       const contract = new FixtureContract(eth, abi, address);
 
-      contract.events.Changed({ filter: { from: address } }, function(err, result, sub) {
+      const event = contract.events.Changed({ filter: { from: address } }, function(_, result) {
         expect(result.returnValues.from).toBe(address);
         expect(result.returnValues.amount).toBe('1');
         expect(result.returnValues.t1).toBe('1');
         expect(result.returnValues.t2).toBe('8');
 
+        event.unsubscribe();
         done();
       });
     });
@@ -124,7 +125,7 @@ describe('contract', function() {
 
       const contract = new FixtureContract(eth, abi, address);
 
-      var event = contract.events['0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651'](
+      const event = contract.events['0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651'](
         { filter: { from: address } },
         function(err, result) {
           expect(result.returnValues.from).toBe(address);
@@ -566,7 +567,7 @@ describe('contract', function() {
   describe('send', () => {
     const signature = sha3('mySend(address,uint256)').slice(0, 10);
 
-    it('should sendTransaction and check for receipts with formatted logs', function(done) {
+    function bootstrap() {
       // eth_sendTransaction
       mockRequestManager.send.mockResolvedValueOnce(
         '0x1234000000000000000000000000000000000000000000000000000000056789',
@@ -614,6 +615,10 @@ describe('contract', function() {
           },
         ],
       });
+    }
+
+    it('should sendTransaction and check for receipts with formatted logs', function(done) {
+      bootstrap();
 
       const contract = new FixtureContract(eth, abi, address);
 
@@ -692,6 +697,34 @@ describe('contract', function() {
 
           done();
         });
+    });
+
+    it('should sendTransaction and check returnValues on resolved receipt', async () => {
+      bootstrap();
+
+      const contract = new FixtureContract(eth, abi, address);
+
+      const receipt = await contract.methods.mySend(address, 10).send({ from: address2, gasPrice: '21345678654321' });
+
+      expect(receipt.events!.Changed.returnValues).toEqual({
+        0: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+        1: '1',
+        2: '1',
+        3: '8',
+        from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+        amount: '1',
+        t1: '1',
+        t2: '8',
+      });
+
+      expect(receipt.events!.Unchanged.returnValues).toEqual({
+        0: '2',
+        1: address,
+        2: '5',
+        value: '2',
+        addressFrom: address,
+        t1: '5',
+      });
     });
 
     it('should sendTransaction and check for receipts with formatted logs when multiple of same event', function(done) {
