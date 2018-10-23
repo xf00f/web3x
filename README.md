@@ -8,7 +8,6 @@
 [![GitHub Issues](https://img.shields.io/github/issues/xf00f/web3x.svg)](https://github.com/xf00f/web3x/issues)
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://github.com/xf00f/web3x/blob/master/LICENSE)
 
-
 TypeScript port of web3.js.
 
 ## Packages
@@ -21,16 +20,18 @@ TypeScript port of web3.js.
 web3.js is a very popular Ethereum library, but there are a few issues.
 
 - The Typescript typings are distributed separately and are not perfect.
-- It has not been fully ported to use ES6 modules, making it harder for bundlers to tree-shake dead code.
+- There's no way to to introduce type safety to contract code.
+- It's large. Having not been ported to ES6 modules, it's hard for bundlers to tree-shake dead code.
 - It has a package structure that leads to duplication of external libraries such as bn.js being included multiple times.
 - The code contains side effects, circular dependencies, and is not as immutable or functional as it could be, making it difficult to respond to and resolve issues.
 
 web3x attempts to solve all the above issues.
 
 - It is pure TypeScript.
-- It uses jest for testing.
-- It attempts to reduce dependencies on external libraries.
+- It allows augmentation of contract instances with interfaces for type safe contract interactions.
+- It significantly reduces dependencies on external libraries.
 - It compiles to both commonjs and ES6 module versions for node.js and ES6 aware web bundlers such as webpack.
+- It uses jest for testing.
 - It strives for functional, immutable, reusable components, allowing the developer to only use, and therefore build, exactly what's necessary.
 
 In a small example that prints an Eth balance compiled with webpack, web3.js produced an output file of 858k, web3x produced a file of 119k. That's an 86% reduction.
@@ -77,6 +78,56 @@ main().catch(console.error);
 ```
 
 See example projects for more complex examples.
+
+## Contract type safety
+
+Interacting with contracts without type safety is tedious at best, and dangerous at worst. By allowing the user to define a contracts interface and passing it to a contract instance, a developer
+can continue to use web3x as normal but with the additional type safety checks on method calls, return values and event logs. An example ABI plus interface and its usage is demonstrated below:
+
+```typescript
+interface MyContractDefinition {
+  methods: {
+    balance(who: Address): Quantity;
+    send(to: Address, value: Quantity): void;
+  };
+  events: {
+    Transfer: {
+      to: Address;
+      amount: Quantity;
+    };
+  };
+}
+
+const abi: ContractDefinition = [
+  {
+    name: 'balance',
+    type: 'function',
+    inputs: [{ name: 'who', type: 'address' }],
+    constant: true,
+    outputs: [{ name: 'value', type: 'uint256' }],
+  },
+  {
+    name: 'send',
+    type: 'function',
+    inputs: [{ name: 'to', type: 'address' }, { name: 'value', type: 'uint256' }],
+    outputs: [],
+    stateMutability: 'payable',
+  },
+  {
+    name: 'Transfer',
+    type: 'event',
+    inputs: [{ name: 'to', type: 'address', indexed: true }, { name: 'amount', type: 'uint256', indexed: true }],
+  },
+];
+
+async function sendFullBalanceFromTo(eth: Eth, contractAddress: Address, from: Address, to: Address) {
+  const contract = new Contract<MyContractDefinition>(eth, abi, contractAddress);
+  // The following code is fully type checked.
+  const balance = await contract.methods.balance(from).call({ from });
+  const receipt = await contract.methods.send(to, balance).send({ from });
+  console.log(`Sent ${receipt.events!.Transfer[0].amount} to ${receipt.events!.Transfer[0].to}.`);
+}
+```
 
 ## Differences
 
