@@ -634,6 +634,7 @@ describe('contract', function() {
             blockNumber: 10,
             blockHash: '0x1234',
             gasUsed: 0,
+            unnamedEvents: [],
             events: {
               Unchanged: [
                 {
@@ -795,6 +796,7 @@ describe('contract', function() {
             blockNumber: 10,
             blockHash: '0x1234',
             gasUsed: 0,
+            unnamedEvents: [],
             events: {
               Changed: [
                 {
@@ -915,6 +917,7 @@ describe('contract', function() {
               blockNumber: 10,
               blockHash: '0x1234',
               gasUsed: 0,
+              unnamedEvents: [],
               events: {},
             });
 
@@ -929,6 +932,7 @@ describe('contract', function() {
               blockNumber: 10,
               blockHash: '0x1234',
               gasUsed: 0,
+              unnamedEvents: [],
               events: {},
             });
 

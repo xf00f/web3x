@@ -31,6 +31,7 @@ export interface TransactionReceipt<Events = void> {
   gasUsed: number;
   logs?: Log[];
   events?: Events extends void ? { [eventName: string]: EventLog<any>[] } : Events;
+  unnamedEvents?: EventLog<any>[];
   status: string;
 }
 

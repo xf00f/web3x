@@ -44,7 +44,7 @@ export function decodeAnyEvent(contractAbi: ContractAbi, log: Log) {
  * @param log The log response to decode.
  * @returns The decoded event log.
  */
-export function decodeEvent(event: AbiDefinition, log: Log): EventLog {
+export function decodeEvent(event: AbiDefinition, log: Log): EventLog<any> {
   log.data = log.data || '';
   log.topics = log.topics || [];
 

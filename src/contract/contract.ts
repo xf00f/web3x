@@ -495,13 +495,14 @@ export class Contract<T extends ContractDefinition | void = void> {
 
     // make log names keys
     receipt.events = {};
+    receipt.unnamedEvents = [];
     var count = 0;
     for (let ev of decodedEvents) {
       if (ev.event) {
         const events = receipt.events[ev.event] || [];
         receipt.events[ev.event] = [...events, ev];
       } else {
-        receipt.events[count] = ev;
+        receipt.unnamedEvents = [...receipt.unnamedEvents, ev];
         count++;
       }
     }
