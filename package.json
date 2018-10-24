@@ -30,9 +30,10 @@
   "scripts": {
     "build": "yarn clean && tsc -p tsconfig.cjs.json && tsc -p tsconfig.es.json",
     "test": "jest",
+    "cover": "jest --coverage && cat coverage/lcov.info | node_modules/coveralls/bin/coveralls.js",
     "clean": "rm -rf ./dest ./dest-es",
-    "deploy": "yarn build && yarn test && node ./package.js && npm publish dest && npm publish dest-es",
-    "deploy_patch": "yarn build && yarn test && yarn version --patch && node ./package.js && npm publish dest && npm publish dest-es"
+    "deploy": "yarn build && yarn cover && node ./package.js && npm publish dest && npm publish dest-es",
+    "deploy_patch": "yarn build && yarn cover && yarn version --patch && node ./package.js && npm publish dest && npm publish dest-es"
   },
   "jest": {
     "transform": {
@@ -51,6 +52,7 @@
       "jest-dot-reporter"
     ],
     "rootDir": "./src",
+    "coverageDirectory": "../coverage",
     "coveragePathIgnorePatterns": [
       "./src/eth-lib",
       "./src/ethers"
@@ -75,6 +77,7 @@
   "devDependencies": {
     "@types/jest": "^23.3.2",
     "@types/utf8": "^2.1.6",
+    "coveralls": "^3.0.2",
     "jest": "^23.6.0",
     "jest-dot-reporter": "^1.0.7",
     "ts-jest": "^23.10.1",
