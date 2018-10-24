@@ -11,6 +11,15 @@
 
 TypeScript port of web3.js.
 
+- [Packages](#packages)
+- [Why?](#why)
+- [Usage](#usage)
+- [Contract type safety](#contract-type-safety)
+- [Differences](#differences)
+- [Example projects](#example-projects)
+- [Documentation](#documentation)
+- [Missing functionality](#missing-functionality)
+
 ## Packages
 
 - [web3x](https://www.npmjs.com/package/web3x) (CommonJS modules for Node.js)
