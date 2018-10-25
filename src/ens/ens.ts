@@ -4,6 +4,7 @@ import { Eth } from '../eth';
 import { namehash } from './registry/namehash';
 import { Address } from '../types';
 import { SendOptions } from '../contract';
+import { Net } from '../net';
 
 /**
  * Constructs a new instance of ENS
@@ -14,8 +15,11 @@ import { SendOptions } from '../contract';
  */
 export class ENS {
   private registry = new Registry(this);
+  private net: Net;
 
-  constructor(readonly eth: Eth) {}
+  constructor(readonly eth: Eth) {
+    this.net = new Net(eth);
+  }
 
   getRegistry() {
     return this.registry;
@@ -154,7 +158,7 @@ export class ENS {
     if (headAge > 3600) {
       throw new Error('Network not synced; last block was ' + headAge + ' seconds ago');
     }
-    const networkType = await this.eth.net.getNetworkType();
+    const networkType = await this.net.getNetworkType();
     const addr: string = config.addresses[networkType];
     if (typeof addr === 'undefined') {
       throw new Error('ENS is not supported on network ' + networkType);

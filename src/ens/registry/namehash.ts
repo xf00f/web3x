@@ -14,8 +14,8 @@ export function namehash(inputName) {
     var labels = name.split('.');
 
     for (var i = labels.length - 1; i >= 0; i--) {
-      var labelSha = sha3(labels[i]);
-      node = sha3(new Buffer(node + labelSha, 'hex'));
+      var labelSha = sha3(labels[i]).slice(2);
+      node = sha3(new Buffer(node + labelSha, 'hex')).slice(2);
     }
   }
 

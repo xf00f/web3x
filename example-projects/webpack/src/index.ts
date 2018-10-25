@@ -5,6 +5,7 @@ import { Wallet } from 'web3x-es/accounts';
 import { Contract } from 'web3x-es/contract';
 import { Net } from 'web3x-es/net';
 import { Address } from 'web3x-es/types';
+import { ENS } from 'web3x-es/ens';
 
 declare const web3: any;
 
@@ -28,6 +29,23 @@ async function main() {
   addMessage(`Network Id: ${await eth.getId()}`);
   addMessage(`Provider info: ${await eth.getNodeInfo()}`);
 
+  // Work with a contract.
+  // Webpack output: ~162kb
+  await addDaiBalance(eth);
+
+  if (network === 'main') {
+    addMessage('Join a testnet to test sending transactions.');
+    addBr();
+  } else {
+    await addSendingExamples(eth);
+  }
+
+  // Work with ENS.
+  // Webpack output: ~???kb
+  await addEnsExamples(eth);
+}
+
+async function addSendingExamples(eth: Eth) {
   const providerAddress = (await eth.getAccounts())[0];
 
   if (!providerAddress) {
@@ -40,20 +58,9 @@ async function main() {
   addMessage(`Balance of provider account: ${fromWei(providerBalance, 'ether')} ETH`);
   addBr();
 
-  if (network === 'main') {
-    addMessage('Join a testnet to test sending transactions.');
-    return;
-  }
-
-  // Minimal code for sending to yourself.
-  // Webpack output: ~123kb
   addMessage('The following button will send ETH from provider account to itself.');
   addSendTo(eth, providerAddress, providerAddress);
   addBr();
-
-  // Work with a contract.
-  // Webpack output: ~162kb
-  await addDaiBalance(eth);
 
   // Assuming you want some local accounts to work with, construct them yourself.
   // Webpack output: ~338kb
@@ -125,6 +132,17 @@ async function addDaiBalance(eth: Eth) {
   } catch (_) {
     addMessage('Failed to get DAI 0 address balance, probably not on kovan?');
     addBr();
+  }
+}
+
+async function addEnsExamples(eth: Eth) {
+  try {
+    const ens = new ENS(eth);
+    const address = await ens.getAddress('ethereum.eth');
+    addMessage(`The ENS address ethereum.eth resolves to ${address}`);
+    addBr();
+  } catch (err) {
+    addMessage(err.stack);
   }
 }
 
