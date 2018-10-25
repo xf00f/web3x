@@ -168,4 +168,3 @@ The current features have not yet been ported.
 
 - ssh
 - bzz
-- ens
