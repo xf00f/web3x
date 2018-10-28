@@ -427,6 +427,8 @@ export class Eth {
         return this.subscribeNewBlockHeaders(...args);
       case 'pendingTransactions':
         return this.subscribePendingTransactions(...args);
+      default:
+        throw new Error(`Unknown subscription type: ${type}`);
     }
   }
 

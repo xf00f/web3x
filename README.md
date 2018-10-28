@@ -3,7 +3,7 @@
 [![Version](https://img.shields.io/npm/v/web3x.svg)](https://www.npmjs.com/package/web3x)
 [![Downloads](https://img.shields.io/npm/dw/web3x.svg)](https://www.npmjs.com/package/web3x)
 [![Downloads](https://img.shields.io/npm/dw/web3x-es.svg)](https://www.npmjs.com/package/web3x-es)
-[![GitHub Repo Size](https://img.shields.io/github/repo-size/xf00f/web3x.svg)](https://github.com/xf00f/web3x)
+[![GitHub Code Size](https://img.shields.io/github/languages/code-size/xf00f/web3x.svg)](https://github.com/xf00f/web3x)
 [![GitHub Stars](https://img.shields.io/github/stars/xf00f/web3x.svg)](https://github.com/xf00f/web3x/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/xf00f/web3x.svg)](https://github.com/xf00f/web3x/issues)
 [![Coverage](https://img.shields.io/coveralls/github/xf00f/web3x/v1.2.0.svg)](https://coveralls.io/github/xf00f/web3x)

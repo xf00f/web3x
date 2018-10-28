@@ -227,19 +227,7 @@ export async function confirmTransaction(defer, result, payload, eth: Eth, extra
   const startWatching = (existingReceipt?) => {
     // if provider allows PUB/SUB
     if (eth.requestManager.supportsSubscriptions()) {
-      const subscribe = new Subscriptions({
-        name: 'subscribe',
-        type: 'eth',
-        subscriptions: {
-          newBlockHeaders: {
-            subscriptionName: 'newHeads', // replace subscription with this name
-            params: 0,
-            outputFormatter: outputBlockFormatter,
-          },
-        },
-        requestManager: eth.requestManager,
-      }).createFunction();
-      subscribe('newBlockHeaders', checkConfirmation.bind(null, existingReceipt, false));
+      eth.subscribe('newBlockHeaders', checkConfirmation.bind(null, existingReceipt, false));
     } else {
       intervalId = setInterval(checkConfirmation.bind(null, existingReceipt, true), 1000);
     }
