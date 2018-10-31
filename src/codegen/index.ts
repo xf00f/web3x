@@ -260,7 +260,14 @@ async function getContractAbi(abiLocation: string): Promise<ContractAbi> {
     const response = await got(abiLocation, { json: true });
     return response.body;
   } else {
-    return JSON.parse(fs.readFileSync(abiLocation).toString());
+    const json = JSON.parse(fs.readFileSync(abiLocation).toString());
+    if (Array.isArray(json)) {
+      return json;
+    } else if (json.abi && Array.isArray(json.abi)) {
+      return json.abi;
+    } else {
+      throw new Error(`Unable to extract ABI from json at ${abiLocation}`);
+    }
   }
 }
 
