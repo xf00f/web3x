@@ -382,7 +382,7 @@ export class Eth {
       type: 'eth',
     });
 
-    return subscription.subscribe('syncing', undefined, callback);
+    return subscription.subscribe('syncing', callback);
   }
 
   subscribeNewBlockHeaders(callback?: Callback<BlockHeader>): Subscription<BlockHeader> {
@@ -396,7 +396,7 @@ export class Eth {
       type: 'eth',
     });
 
-    return subscription.subscribe('newBlockHeaders', undefined, callback);
+    return subscription.subscribe('newBlockHeaders', callback);
   }
 
   subscribePendingTransactions(callback?: Callback<Transaction>): Subscription<Transaction> {
@@ -409,7 +409,7 @@ export class Eth {
       type: 'eth',
     });
 
-    return subscription.subscribe('pendingTransactions', undefined, callback);
+    return subscription.subscribe('pendingTransactions', callback);
   }
 
   // Deprecated
