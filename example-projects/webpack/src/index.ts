@@ -2,10 +2,10 @@ import { WebsocketProvider } from 'web3x-es/providers';
 import { Eth } from 'web3x-es/eth';
 import { fromWei, toWei } from 'web3x-es/utils';
 import { Wallet } from 'web3x-es/accounts';
-import { Contract } from 'web3x-es/contract';
 import { Net } from 'web3x-es/net';
 import { Address } from 'web3x-es/types';
 import { ENS } from 'web3x-es/ens';
+import { DaiContract } from './contracts/DaiContract';
 
 declare const web3: any;
 
@@ -15,7 +15,7 @@ declare const web3: any;
   then it makes no sense to bundle all the crypto/provider/accounts code with your app. Construct only
   the components you need and keep things lean.
 
-  Notice as we use increasingly large amounts of the library, the size of the build increases.
+  Demonstrates use of a code generated contract with full type safety.
 */
 async function main() {
   const eth = Eth.fromProvider(web3.currentProvider || new WebsocketProvider('ws://localhost:8546'));
@@ -29,8 +29,7 @@ async function main() {
   addMessage(`Network Id: ${await eth.getId()}`);
   addMessage(`Provider info: ${await eth.getNodeInfo()}`);
 
-  // Work with a contract.
-  // Webpack output: ~162kb
+  // Work with a code generated contract.
   await addDaiBalance(eth);
 
   if (network === 'main') {
@@ -41,7 +40,6 @@ async function main() {
   }
 
   // Work with ENS.
-  // Webpack output: ~???kb
   await addEnsExamples(eth);
 }
 
@@ -125,7 +123,7 @@ async function addDaiBalance(eth: Eth) {
   const DAI_CONTRACT_ADDRESS = '0xc4375b7de8af5a38a93548eb8453a498222c4ff2';
 
   try {
-    const contract = new Contract(eth, abi, DAI_CONTRACT_ADDRESS, { from: eth.request.getDefaultAccount() });
+    const contract = new DaiContract(eth, DAI_CONTRACT_ADDRESS, { from: eth.request.getDefaultAccount() });
     const daiBalance = await contract.methods.balanceOf(ZERO_ADDRESS).call();
     addMessage(`Balance of DAI 0 address: ${fromWei(daiBalance, 'ether')}`);
     addBr();
