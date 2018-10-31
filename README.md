@@ -90,8 +90,10 @@ See example projects for more complex examples.
 
 ## Contract type safety
 
-Interacting with contracts without type safety is tedious at best, and dangerous at worst. By allowing the user to define a contracts interface and passing it to a contract instance, a developer
-can continue to use web3x as normal but with the additional type safety checks on method calls, return values and event logs. An example ABI plus interface and its usage is demonstrated below:
+Interacting with contracts without type safety is tedious at best, and dangerous at worst. web3x provides either a manual way of introducing type safety to contracts, or an automatic way by introducing a code generation step into your build process. By defining a contracts interface and passing it to a contract instance, a developer can continue to use web3x as normal but with the additional type safety checks on method calls, return values and event logs.
+
+### Manual contract interfaces
+The preferred way of enabling contract type safety is to use the automated system, however it can be beneficial to understand the manual process to understand what the code generator does for you. An example contract ABI plus interface and its usage is demonstrated below:
 
 ```typescript
 interface MyContractDefinition {
@@ -136,6 +138,51 @@ async function sendFullBalanceFromTo(eth: Eth, contractAddress: Address, from: A
   const receipt = await contract.methods.send(to, balance).send({ from });
   console.log(`Sent ${receipt.events!.Transfer[0].amount} to ${receipt.events!.Transfer[0].to}.`);
 }
+```
+
+Given the contract ABI, the developer can specify an interface in TypeScript that outlines both the contracts methods, and events. This type is then passed as a type parameter to the `Contract` generic. This generic will ensure the type information is carried through to the appropriate methods calls and responses.
+
+### Automated contract interfaces
+
+The preferred approach is to use code generation to generate the contract interface from the ABI, and to wrap everything up in a derived contract class. Installing web3x includes a tool called `web3x-codegen` in your projects local `bin` folder. When run (e.g. `yarn web3x-codegen`) this will attempt to parse a file called `contracts.json`, will fetch the ABI's from the given locations (either local or remote), and will generate contract classes that conform to the same api as a standard untyped `Contract` instance, but with the additional type safety. An example `contracts.json` looks like:
+
+```json
+{
+  "outputPath": "./src/contracts",
+  "contracts": {
+    "DaiContract": "http://api.etherscan.io/api?module=contract&action=getabi&address=0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359&format=raw",
+    "MyContract": "../truffle-project/build/contracts/MyContract.json"
+  }
+}
+```
+
+This tells the generator download the ABI for the DAI token from the given location on etherscan, and to generate the interface at `./src/contracts/DaiContract.ts`. It also specifies a local ABI file and to generate its interface at `./src/contracts/MyContract.ts`. The json files output by truffle are not pure ABIs, but the code generator will detect it's a truffle output and will extract the ABI accordingly.
+
+For an example of the code generated, take a look at this [example](example-projects/node/src/contracts/DaiContract.ts). As you can see there are two exports, both the definition and the wrapper class. The easiest way to use it is with the class as in this example:
+
+```typescript
+import { fromWei } from 'web3x/utils';
+import { WebsocketProvider } from 'web3x/providers';
+import { Eth } from 'web3x/eth';
+import { DaiContract } from './contracts/DaiContract';
+
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+const DAI_CONTRACT_ADDRESS = '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359';
+
+async function main() {
+  const provider = new WebsocketProvider('wss://mainnet.infura.io/ws');
+  const eth = Eth.fromProvider(provider);
+
+  try {
+    const contract = new DaiContract(eth, DAI_CONTRACT_ADDRESS);
+    const daiBalance = await contract.methods.balanceOf(ZERO_ADDRESS).call();
+    console.log(`Balance of 0 address DAI: ${fromWei(daiBalance, 'ether')}`);
+  } finally {
+    provider.disconnect();
+  }
+}
+
+main().catch(console.error);
 ```
 
 ## Differences
