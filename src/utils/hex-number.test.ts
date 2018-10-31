@@ -16,6 +16,7 @@
 */
 
 import { numberToHex, hexToNumberString, hexToNumber } from './hex-number';
+import { toBN } from './bn';
 
 describe('utils', () => {
   describe('numberToHex', () => {
@@ -59,6 +60,7 @@ describe('utils', () => {
       { value: -0, expected: '0x0' },
       { value: '-0', expected: '0x0' },
       { value: '-0x0', expected: '0x0' },
+      { value: toBN(15), expected: '0xf' },
     ];
 
     tests.forEach(test => {
