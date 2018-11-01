@@ -11,18 +11,13 @@
 
 TypeScript port of web3.js.
 
-- [Packages](#packages)
 - [Why?](#why)
 - [Usage](#usage)
 - [Contract type safety](#contract-type-safety)
 - [Differences](#differences)
 - [Example projects](#example-projects)
 - [Documentation](#documentation)
-
-## Packages
-
-- [web3x](https://www.npmjs.com/package/web3x) (for Node.js)
-- [web3x-es](https://www.npmjs.com/package/web3x-es) (for ES6 aware tools such as Webpack)
+- [Packages](#packages)
 
 ## Why?
 
@@ -208,3 +203,8 @@ API documentation has not yet been ported from web3.js. For now the recommended 
 - Take a look at the [webpack example](example-projects/webpack/src/index.ts) to get an idea of how to structure components to minimise builds.
 - Rely on your IDE and TypeScript to provide insight into the API.
 - Delve into the code. It's significantly easier to follow and understand than web3.js.
+
+## Packages
+
+- [web3x](https://www.npmjs.com/package/web3x) (for Node.js)
+- [web3x-es](https://www.npmjs.com/package/web3x-es) (for ES6 aware tools such as Webpack)
