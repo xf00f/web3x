@@ -16,8 +16,8 @@
 */
 
 const package = require('./package.json');
-const { writeFileSync, copyFileSync, chmodSync, mkdirSync } = require('fs');
-const { mkdirp: mkdirpSync } = require('mkdirp');
+const { writeFileSync, copyFileSync, chmodSync } = require('fs');
+const mkdirp = require('mkdirp');
 
 const { jest, scripts, devDependencies, ...pkg } = package;
 writeFileSync('./dest/package.json', JSON.stringify(pkg, null, '  '));
@@ -25,5 +25,5 @@ writeFileSync('./dest-es/package.json', JSON.stringify({ ...pkg, name: `${pkg.na
 copyFileSync('README.md', './dest/README.md');
 copyFileSync('README.md', './dest-es/README.md');
 chmodSync('./dest/codegen/index.js', '755');
-mkdirpSync('./dest-es/codegen');
+mkdirp.sync('./dest-es/codegen');
 copyFileSync('./dest/codegen/index.js', './dest-es/codegen/index.js');
