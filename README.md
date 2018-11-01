@@ -21,8 +21,8 @@ TypeScript port of web3.js.
 
 ## Packages
 
-- [web3x](https://www.npmjs.com/package/web3x) (CommonJS modules for Node.js)
-- [web3x-es](https://www.npmjs.com/package/web3x-es) (ES6 modules for tools such as Webpack)
+- [web3x](https://www.npmjs.com/package/web3x) (for Node.js)
+- [web3x-es](https://www.npmjs.com/package/web3x-es) (for ES6 aware tools such as Webpack)
 
 ## Why?
 
@@ -93,6 +93,7 @@ See example projects for more complex examples.
 Interacting with contracts without type safety is tedious at best, and dangerous at worst. web3x provides either a manual way of introducing type safety to contracts, or an automatic way by introducing a code generation step into your build process. By defining a contracts interface and passing it to a contract instance, a developer can continue to use web3x as normal but with the additional type safety checks on method calls, return values and event logs.
 
 ### Manual contract interfaces
+
 The preferred way of enabling contract type safety is to use the automated system, however it can be beneficial to understand the manual process to understand what the code generator does for you. An example contract ABI plus interface and its usage is demonstrated below:
 
 ```typescript
