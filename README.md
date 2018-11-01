@@ -59,7 +59,7 @@ import { Web3 } from 'web3x-es';
 import { fromWei } from 'web3x-es/utils';
 
 async function main() {
-  const web3 = new Web3('ws://localhost:7545');
+  const web3 = new Web3('wss://mainnet.infura.io/ws');
   const balance = await web3.eth.getBalance('0x0000000000000000000000000000000000000000');
   document.body.innerText = `Balance of 0 address ETH: ${fromWei(balance, 'ether')}`;
   web3.close();
