@@ -136,7 +136,7 @@ async function sendFullBalanceFromTo(eth: Eth, contractAddress: Address, from: A
 }
 ```
 
-Given the contract ABI, the developer can specify an interface in TypeScript that outlines both the contracts methods, and events. This type is then passed as a type parameter to the `Contract` generic. This generic will ensure the type information is carried through to the appropriate methods calls and responses.
+Given the contract ABI, the developer can specify an interface in TypeScript that outlines both the contracts methods, and events. This type is then passed as a type parameter to the `Contract` generic. This generic will ensure the type information is carried through to the appropriate method calls and responses. One nuance to take note of, methods that result in transactions on the blockchain with `send` calls should explicitly return `void`. If a different or no type is given the method will only permit a readonly `call` which is usually used to return a value such as a balance in the example above.
 
 ### Automated contract interfaces
 
