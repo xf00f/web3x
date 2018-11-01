@@ -41,7 +41,7 @@ web3x attempts to solve all the above issues.
 - It significantly reduces dependencies on external libraries.
 - It compiles to both commonjs and ES6 module versions for node.js and ES6 aware web bundlers such as webpack.
 - It uses jest for testing.
-- It strives for functional, immutable, reusable components, allowing the developer to only use, and therefore build, exactly what's necessary.
+- It strives for functional, immutable, reusable components, allowing the developer to only use, and therefore bundle, exactly what's necessary.
 
 In a small example that prints an Eth balance compiled with webpack, web3.js produced an output file of 858k, web3x produced a file of 119k. That's an 86% reduction.
 Working with contracts increased the build size to 159k, and working with local accounts in localStorage increased it to 338k. The majority of Dapps are probably expecting
