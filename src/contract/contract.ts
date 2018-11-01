@@ -17,10 +17,16 @@
 
 import { isArray, isFunction } from 'util';
 import { Subscription } from '../subscriptions';
-import { abi, jsonInterfaceMethodToString } from './abi';
-import { Tx, TxFactory } from './tx';
+import { abi, abiMethodToString } from './abi';
+import { Tx, TxFactory, TxSend, TxCall } from './tx';
 import { decodeAnyEvent } from './decode-event-abi';
-import { inputAddressFormatter, EventLog, inputBlockNumberFormatter, inputLogFormatter } from '../formatters';
+import {
+  inputAddressFormatter,
+  EventLog,
+  inputBlockNumberFormatter,
+  inputLogFormatter,
+  TransactionReceipt,
+} from '../formatters';
 import { toChecksumAddress, isAddress } from '../utils';
 import { TxDeploy } from './tx-deploy';
 import { ContractAbi, AbiDefinition } from './contract-abi';
@@ -36,10 +42,50 @@ export interface ContractOptions {
   gas?: number;
 }
 
-type EventSubscriptionFactory = (
+interface ContractDefinition {
+  methods: any;
+  events?: any;
+}
+
+type EventSubscriptionFactory<Result = EventLog<any>> = (
   options?: object,
-  callback?: (err: Error, result: EventLog, subscription: Subscription<EventLog>) => void,
+  callback?: (err: Error, result: Result, subscription: Subscription<Result>) => void,
 ) => Subscription<any>;
+
+type GetReturnType<T extends Function> = T extends (...x: any[]) => infer Return ? Return : never;
+type GetArgumentType<T extends Function> = T extends (...x: infer Args) => any ? Args : never;
+
+type Events<T extends ContractDefinition | void> = T extends ContractDefinition
+  ? Extract<keyof T['events'], string>
+  : string;
+
+type GetEventLog<T extends ContractDefinition | void, P extends Events<T>> = T extends ContractDefinition
+  ? EventLog<T['events'][P]>
+  : EventLog<any>;
+
+type GetResponseEvents<Events> = { [P in keyof Events]: EventLog<Events[P]>[] };
+
+type MethodType<T extends Function, Events> = ((
+  ...args: GetArgumentType<T>
+) => GetReturnType<T> extends void ? TxSend<GetResponseEvents<Events>> : TxCall<GetReturnType<T>>);
+
+type GetContractMethods<T extends ContractDefinition> = {
+  [P in keyof T['methods']]: MethodType<T['methods'][P] extends Function ? T['methods'][P] : never, T['events']>
+};
+
+type GetContractEvents<T extends ContractDefinition> = {
+  [P in keyof T['events']]: EventSubscriptionFactory<EventLog<T['events'][P]>>
+} & {
+  allEvents: EventSubscriptionFactory;
+};
+
+type ContractMethods<T> = T extends ContractDefinition
+  ? GetContractMethods<T>
+  : { [key: string]: (...args: any[]) => Tx };
+
+type ContractEvents<T> = T extends ContractDefinition
+  ? GetContractEvents<T>
+  : { [key: string]: EventSubscriptionFactory };
 
 /**
  * Should be called to create new contract instance
@@ -50,9 +96,9 @@ type EventSubscriptionFactory = (
  * @param {String} address
  * @param {Object} options
  */
-export class Contract {
-  readonly methods: { [key: string]: TxFactory } = {};
-  readonly events: { [key: string]: EventSubscriptionFactory } = {};
+export class Contract<T extends ContractDefinition | void = void> {
+  readonly methods: ContractMethods<T>;
+  readonly events: ContractEvents<T>;
   private options: ContractOptions;
   private extraFormatters;
 
@@ -63,7 +109,9 @@ export class Contract {
     defaultOptions: ContractOptions = {},
     private wallet?: Wallet,
   ) {
-    this.setAbiDefinition(jsonInterface);
+    this.jsonInterface = this.getEnrichedAbiDefinition(jsonInterface);
+    this.methods = this.getMethods(this.jsonInterface);
+    this.events = this.getEvents(this.jsonInterface);
 
     const { gasPrice, from, gas } = defaultOptions;
     this.options = {
@@ -97,6 +145,15 @@ export class Contract {
     return new TxDeploy(this.eth, constructor, data, args, this.options, this.wallet, this.extraFormatters);
   }
 
+  once<Event extends Events<T>>(
+    event: Event,
+    options: {
+      filter?: object;
+      topics?: string[];
+    },
+    callback: (err, res: GetEventLog<T, Event>, sub) => void,
+  );
+
   /**
    * Adds event listeners and creates a subscription, and remove it once its fired.
    *
@@ -107,7 +164,7 @@ export class Contract {
    * @return {Object} the event subscription
    */
   once(
-    event: string,
+    event: Events<T>,
     options: {
       filter?: object;
       topics?: string[];
@@ -121,6 +178,16 @@ export class Contract {
     });
   }
 
+  getPastEvents<Event extends Events<T>>(
+    event: Event,
+    options: {
+      filter?: object;
+      fromBlock?: BlockType;
+      toBlock?: BlockType;
+      topics?: string[];
+    },
+  ): Promise<GetEventLog<T, Event>[]>;
+
   /**
    * Get past events from contracts
    *
@@ -131,14 +198,14 @@ export class Contract {
    * @return {Object} the promievent
    */
   async getPastEvents(
-    event: string,
+    event: Events<T>,
     options: {
       filter?: object;
       fromBlock?: BlockType;
       toBlock?: BlockType;
       topics?: string[];
     } = {},
-  ): Promise<EventLog[]> {
+  ): Promise<EventLog<any>[]> {
     const subOptions = this.generateEventOptions(event, options);
     const result = await this.eth.getPastLogs(subOptions.params);
     return result.map(log => decodeAnyEvent(this.jsonInterface, log));
@@ -166,59 +233,84 @@ export class Contract {
     this.address = toChecksumAddress(inputAddressFormatter(address));
   }
 
-  private setAbiDefinition(contractDefinition: ContractAbi) {
-    this.jsonInterface = contractDefinition.map(method => {
-      let func: TxFactory;
+  private getMethods(contractDefinition: ContractAbi) {
+    const methods: any = {};
 
+    contractDefinition.filter(method => method.type === 'function').forEach(method => {
+      const name = method.name!;
+      const funcName = abiMethodToString(method);
+      method.signature = abi.encodeFunctionSignature(funcName);
+      const func = this.executorFactory(method);
+
+      // add method only if not one already exists
+      if (!methods[name]) {
+        methods[name] = func;
+      } else {
+        const cascadeFunc = this.executorFactory(method, methods[name]);
+        methods[name] = cascadeFunc;
+      }
+
+      // definitely add the method based on its signature
+      methods[method.signature!] = func;
+
+      // add method by name
+      methods[funcName] = func;
+    });
+
+    return methods;
+  }
+
+  private getEvents(contractDefinition: ContractAbi) {
+    const events: any = {};
+
+    contractDefinition.filter(method => method.type === 'event').forEach(method => {
+      const name = method.name!;
+      const funcName = abiMethodToString(method);
+      const event = this.on.bind(this, method.signature);
+
+      // add method only if not already exists
+      if (!events[name] || events[name].name === 'bound ') events[name] = event;
+
+      // definitely add the method based on its signature
+      events[method.signature!] = event;
+
+      // add event by name
+      events[funcName] = event;
+    });
+
+    // add allEvents
+    events.allEvents = this.on.bind(this, 'allevents');
+
+    return events;
+  }
+
+  private getEnrichedAbiDefinition(contractDefinition: ContractAbi) {
+    return contractDefinition.map(method => {
       // make constant and payable backwards compatible
-      method.constant = method.stateMutability === 'view' || method.stateMutability === 'pure' || method.constant;
-      method.payable = method.stateMutability === 'payable' || method.payable;
+      const constant = method.stateMutability === 'view' || method.stateMutability === 'pure' || method.constant;
+      const payable = method.stateMutability === 'payable' || method.payable;
+
+      method = {
+        ...method,
+        constant,
+        payable,
+      };
 
       // function
       if (method.type === 'function') {
-        const name = method.name!;
-        const funcName = jsonInterfaceMethodToString(method);
-        method.signature = abi.encodeFunctionSignature(funcName);
-        func = this.executorFactory(method);
-
-        // add method only if not one already exists
-        if (!this.methods[name]) {
-          this.methods[name] = func;
-        } else {
-          const cascadeFunc = this.executorFactory(method, this.methods[name]);
-          this.methods[name] = cascadeFunc;
-        }
-
-        // definitely add the method based on its signature
-        this.methods[method.signature!] = func;
-
-        // add method by name
-        this.methods[funcName] = func;
-
-        // event
+        method = {
+          ...method,
+          signature: abi.encodeFunctionSignature(abiMethodToString(method)),
+        };
       } else if (method.type === 'event') {
-        const name = method.name!;
-        const funcName = jsonInterfaceMethodToString(method);
-        method.signature = abi.encodeEventSignature(funcName);
-        var event = this.on.bind(this, method.signature);
-
-        // add method only if not already exists
-        if (!this.events[name] || this.events[name].name === 'bound ') this.events[name] = event;
-
-        // definitely add the method based on its signature
-        this.events[method.signature!] = event;
-
-        // add event by name
-        this.events[funcName] = event;
+        method = {
+          ...method,
+          signature: abi.encodeEventSignature(abiMethodToString(method)),
+        };
       }
 
       return method;
     });
-
-    // add allEvents
-    this.events.allEvents = this.on.bind(this, 'allevents');
-
-    return this.jsonInterface;
   }
 
   /**
@@ -393,35 +485,29 @@ export class Contract {
     return receipt;
   };
 
-  private receiptFormatter = receipt => {
-    if (isArray(receipt.logs)) {
-      // decode logs
-      const events = receipt.logs.map(log => decodeAnyEvent(this.jsonInterface, log));
-      //const events = receipt.logs.map(log => (log.id !== undefined ? log : decodeAnyEvent(this.jsonInterface, log)));
-
-      // make log names keys
-      receipt.events = {};
-      var count = 0;
-      events.forEach(function(ev: any) {
-        if (ev.event) {
-          // if > 1 of the same event, don't overwrite any existing events
-          if (receipt.events[ev.event]) {
-            if (Array.isArray(receipt.events[ev.event])) {
-              receipt.events[ev.event].push(ev);
-            } else {
-              receipt.events[ev.event] = [receipt.events[ev.event], ev];
-            }
-          } else {
-            receipt.events[ev.event] = ev;
-          }
-        } else {
-          receipt.events[count] = ev;
-          count++;
-        }
-      });
-
-      delete receipt.logs;
+  private receiptFormatter = (receipt: TransactionReceipt) => {
+    if (!isArray(receipt.logs)) {
+      return receipt;
     }
+
+    // decode logs
+    const decodedEvents = receipt.logs.map(log => decodeAnyEvent(this.jsonInterface, log));
+
+    // make log names keys
+    receipt.events = {};
+    receipt.unnamedEvents = [];
+    var count = 0;
+    for (let ev of decodedEvents) {
+      if (ev.event) {
+        const events = receipt.events[ev.event] || [];
+        receipt.events[ev.event] = [...events, ev];
+      } else {
+        receipt.unnamedEvents = [...receipt.unnamedEvents, ev];
+        count++;
+      }
+    }
+    delete receipt.logs;
+
     return receipt;
   };
 }

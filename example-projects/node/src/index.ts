@@ -4,8 +4,7 @@ import { getBalance } from './balance-fetcher';
 import { WebsocketProvider } from 'web3x/providers';
 import { Net } from 'web3x/net';
 import { Eth } from 'web3x/eth';
-import { Contract } from 'web3x/contract';
-const abi = require('human-standard-token-abi');
+import { DaiContract } from './contracts/DaiContract';
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 const DAI_CONTRACT_ADDRESS = '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359';
@@ -23,7 +22,7 @@ async function main() {
     const balance = await getBalance(eth, ZERO_ADDRESS);
     console.log(`Balance of 0 address ETH: ${balance}`);
 
-    const contract = new Contract(eth, abi, DAI_CONTRACT_ADDRESS);
+    const contract = new DaiContract(eth, DAI_CONTRACT_ADDRESS);
     const daiBalance = await contract.methods.balanceOf(ZERO_ADDRESS).call();
     console.log(`Balance of 0 address DAI: ${fromWei(daiBalance, 'ether')}`);
 

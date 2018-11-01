@@ -134,7 +134,7 @@ describe('eth', function() {
             });
             expect(keystore).toEqual(test.json);
           },
-          10000,
+          30000,
         );
       });
 
@@ -145,7 +145,7 @@ describe('eth', function() {
             const privateKey = await decrypt(test.json, test.password);
             expect(privateKey).toBe('0x' + test.priv);
           },
-          10000,
+          30000,
         );
       });
     });

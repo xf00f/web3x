@@ -19,7 +19,7 @@ import { toChecksumAddress, hexToNumber } from '../utils';
 import { outputLogFormatter, Log } from './output-log-formatter';
 import { isArray } from 'util';
 
-export interface TransactionReceipt {
+export interface TransactionReceipt<Events = void> {
   transactionHash: string;
   transactionIndex: number;
   blockHash: string;
@@ -30,18 +30,17 @@ export interface TransactionReceipt {
   cumulativeGasUsed: number;
   gasUsed: number;
   logs?: Log[];
-  events?: {
-    [eventName: string]: EventLog;
-  };
+  events?: Events extends void ? { [eventName: string]: EventLog<any>[] } : Events;
+  unnamedEvents?: EventLog<any>[];
   status: string;
 }
 
-export interface EventLog {
+export interface EventLog<ReturnValues> {
   id: string | null;
   removed?: boolean;
   event?: string;
   address: string;
-  returnValues: any;
+  returnValues: ReturnValues;
   logIndex: number | null;
   transactionIndex: number | null;
   transactionHash: string | null;

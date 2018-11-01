@@ -17,11 +17,13 @@
 
 export type ContractAbi = AbiDefinition[];
 
+export type AbiInput = { components?: any; name: string; type: AbiDataTypes; indexed?: boolean };
+
 export interface AbiDefinition {
   constant?: boolean;
   payable?: boolean;
   anonymous?: boolean;
-  inputs?: Array<{ components?: any; name: string; type: AbiDataTypes; indexed?: boolean }>;
+  inputs?: Array<AbiInput>;
   name?: string;
   outputs?: Array<{ components?: any; name: string; type: AbiDataTypes }>;
   type: 'function' | 'constructor' | 'event' | 'fallback';

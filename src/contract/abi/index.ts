@@ -17,13 +17,13 @@
 
 import { isArray, isObject } from 'util';
 import { sha3 } from '../../utils';
-import EthersAbi from 'ethers/utils/abi-coder';
+import { AbiCoder as EthersAbi } from '../../ethers/abi-coder';
 
 /**
  * ABICoder prototype should be used to encode/decode solidity params of any type
  */
 export class ABICoder {
-  private ethersAbiCoder: any;
+  private ethersAbiCoder: EthersAbi;
 
   constructor() {
     this.ethersAbiCoder = new EthersAbi(function(type, value) {
@@ -43,7 +43,7 @@ export class ABICoder {
    */
   encodeFunctionSignature(functionName) {
     if (isObject(functionName)) {
-      functionName = jsonInterfaceMethodToString(functionName);
+      functionName = abiMethodToString(functionName);
     }
 
     return sha3(functionName).slice(0, 10);
@@ -58,7 +58,7 @@ export class ABICoder {
    */
   encodeEventSignature(functionName) {
     if (isObject(functionName)) {
-      functionName = jsonInterfaceMethodToString(functionName);
+      functionName = abiMethodToString(functionName);
     }
 
     return sha3(functionName);
@@ -300,7 +300,7 @@ export class ABICoder {
  * @param {Object} json
  * @return {String} full function/event name
  */
-export function jsonInterfaceMethodToString(json) {
+export function abiMethodToString(json) {
   if (isObject(json) && json.name && json.name.indexOf('(') !== -1) {
     return json.name;
   }

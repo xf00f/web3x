@@ -1,0 +1,6 @@
+{
+  "outputPath": "./src/contracts",
+  "contracts": {
+    "DaiContract": "http://api.etherscan.io/api?module=contract&action=getabi&address=0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359&format=raw"
+  }
+}

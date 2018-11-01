@@ -28,13 +28,13 @@ import { Wallet } from '../accounts';
 
 export type TxFactory = (...args: any[]) => Tx;
 
-interface CallOptions {
+export interface CallOptions {
   from?: string;
   gasPrice?: string | number;
   gas?: number;
 }
 
-interface SendOptions {
+export interface SendOptions {
   from: string;
   gasPrice?: string | number;
   gas?: number;
@@ -54,13 +54,27 @@ type DefaultOptions = {
   gas?: number;
 };
 
+export interface TxCall<T = any> {
+  call(options?: CallOptions, block?: BlockType): Promise<T>;
+  getCallRequestPayload(options?: CallOptions, block?: number);
+  estimateGas(options?: EstimateOptions): Promise<number>;
+  encodeABI();
+}
+
+export interface TxSend<ResponseEvents = any> {
+  send(options?: SendOptions): SendTxPromiEvent<ResponseEvents>;
+  getSendRequestPayload(options?: SendOptions);
+  estimateGas(options?: EstimateOptions): Promise<number>;
+  encodeABI();
+}
+
 /**
  * returns the an object with call, send, estimate functions
  *
  * @method _createTxObject
  * @returns {Object} an object with functions to call the methods
  */
-export class Tx {
+export class Tx implements TxCall, TxSend {
   constructor(
     private eth: Eth,
     private definition: AbiDefinition,

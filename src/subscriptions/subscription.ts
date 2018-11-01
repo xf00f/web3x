@@ -73,7 +73,7 @@ export class Subscription<Result> extends EventEmitter {
     if (!subscription.params) subscription.params = 0;
 
     if (args.length !== subscription.params) {
-      throw InvalidNumberOfParams(args.length, subscription.params + 1, args[0]);
+      throw InvalidNumberOfParams(args.length, subscription.params, args[0]);
     }
   }
 
@@ -178,8 +178,7 @@ export class Subscription<Result> extends EventEmitter {
    * @param {Object} options the options object with address topics and fromBlock
    * @return {Object}
    */
-  subscribe(subscription: string, options?: object, callback?: Callback<Result>) {
-    var _this = this;
+  subscribe(subscription: string, options?: object | Callback<Result>, callback?: Callback<Result>) {
     var args = Array.prototype.slice.call(arguments);
     var payload = this._toPayload(args);
 
@@ -226,16 +225,16 @@ export class Subscription<Result> extends EventEmitter {
           params: [payload.params[1]],
         })
         .then(logs => {
-          logs.forEach(function(log) {
-            var output = _this._formatOutput(log);
-            _this.callback(null, output, _this);
-            _this.emit('data', output);
+          logs.forEach(log => {
+            var output = this._formatOutput(log);
+            this.callback(null, output, this);
+            this.emit('data', output);
           });
         })
         .catch(err => {
           // TODO subscribe here? after the past logs?
-          _this.callback(err, null, _this);
-          _this.emit('error', err);
+          this.callback(err, null, this);
+          this.emit('error', err);
         });
     }
 
@@ -250,58 +249,55 @@ export class Subscription<Result> extends EventEmitter {
         if (!result) {
           throw new Error('No result');
         }
-        _this.id = result;
+        this.id = result;
 
         // call callback on notifications
-        _this.options.requestManager.addSubscription(_this.id, payload.params[0], _this.options.type, function(
-          err,
-          result,
-        ) {
+        this.options.requestManager.addSubscription(this.id, payload.params[0], this.options.type, (err, result) => {
           if (!err) {
             if (!isArray(result)) {
               result = [result];
             }
 
-            result.forEach(function(resultItem) {
-              var output = _this._formatOutput(resultItem);
+            result.forEach(resultItem => {
+              var output = this._formatOutput(resultItem);
 
-              if (isFunction(_this.options.subscription.subscriptionHandler)) {
-                return _this.options.subscription.subscriptionHandler.call(_this, output);
+              if (isFunction(this.options.subscription.subscriptionHandler)) {
+                return this.options.subscription.subscriptionHandler.call(this, output);
               } else {
-                _this.emit('data', output);
+                this.emit('data', output);
               }
 
               // call the callback, last so that unsubscribe there won't affect the emit above
-              _this.callback(null, output, _this);
+              this.callback(null, output, this);
             });
           } else {
             // unsubscribe, but keep listeners
-            _this.options.requestManager.removeSubscription(_this.id);
+            this.options.requestManager.removeSubscription(this.id);
 
             // re-subscribe, if connection fails
-            if (_this.options.requestManager.provider.once) {
-              _this._reconnectIntervalId = setInterval(function() {
+            if (this.options.requestManager.provider.once) {
+              this._reconnectIntervalId = setInterval(() => {
                 // TODO check if that makes sense!
-                if (_this.options.requestManager.provider.reconnect) {
-                  _this.options.requestManager.provider.reconnect();
+                if (this.options.requestManager.provider.reconnect) {
+                  this.options.requestManager.provider.reconnect();
                 }
               }, 500);
 
-              _this.options.requestManager.provider.once('connect', function() {
-                clearInterval(_this._reconnectIntervalId);
-                _this.subscribe(_this.callback);
+              this.options.requestManager.provider.once('connect', () => {
+                clearInterval(this._reconnectIntervalId);
+                this.subscribe(this.callback);
               });
             }
-            _this.emit('error', err);
+            this.emit('error', err);
 
             // call the callback, last so that unsubscribe there won't affect the emit above
-            _this.callback(err, null, _this);
+            this.callback(err, null, this);
           }
         });
       })
       .catch(err => {
-        _this.callback(err, null, _this);
-        _this.emit('error', err);
+        this.callback(err, null, this);
+        this.emit('error', err);
       });
 
     // return an object to cancel the subscription

@@ -22,40 +22,21 @@
       "name": "xf00f",
       "email": "xf00f@protonmail.com",
       "url": "https://github.com/xf00f"
-    },
-    {
-      "name": "Fabian Vogelsteller",
-      "email": "fabian@ethereum.org",
-      "url": "http://frozeman.de"
-    },
-    {
-      "name": "Marek Kotewicz",
-      "email": "marek@parity.io",
-      "url": "https://github.com/debris"
-    },
-    {
-      "name": "Marian Oancea",
-      "url": "https://github.com/cubedro"
-    },
-    {
-      "name": "Gav Wood",
-      "email": "g@parity.io",
-      "url": "http://gavwood.com"
-    },
-    {
-      "name": "Jeffery Wilcke",
-      "email": "jeffrey.wilcke@ethereum.org",
-      "url": "https://github.com/obscuren"
     }
   ],
   "main": "./index.js",
   "types": "./index.d.ts",
   "sideEffects": false,
   "scripts": {
-    "build": "tsc -p tsconfig.cjs.json && tsc -p tsconfig.es.json",
+    "build": "yarn clean && tsc -p tsconfig.cjs.json && tsc -p tsconfig.es.json && node ./package.js",
     "test": "jest",
-    "deploy": "yarn build && yarn test && node ./package.js && npm publish dest && npm publish dest-es",
-    "deploy_patch": "yarn build && yarn test && yarn version --patch && node ./package.js && npm publish dest && npm publish dest-es"
+    "cover": "jest --coverage && cat coverage/lcov.info | node_modules/coveralls/bin/coveralls.js",
+    "clean": "rm -rf ./dest ./dest-es",
+    "deploy": "yarn cover && yarn build && npm publish dest && npm publish dest-es",
+    "deploy_patch": "yarn cover && yarn version --patch && yarn build && npm publish dest && npm publish dest-es"
+  },
+  "bin": {
+    "web3x-codegen": "./codegen/index.js"
   },
   "jest": {
     "transform": {
@@ -73,7 +54,12 @@
     "reporters": [
       "jest-dot-reporter"
     ],
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "coverageDirectory": "../coverage",
+    "coveragePathIgnorePatterns": [
+      "./src/eth-lib",
+      "./src/ethers"
+    ]
   },
   "dependencies": {
     "@types/bn.js": "^4.11.2",
@@ -82,11 +68,14 @@
     "bn.js": "^4.11.8",
     "browserify-aes": "^1.2.0",
     "elliptic": "^6.4.0",
-    "ethers": "^3.0.29",
+    "got": "^9.3.0",
+    "idna-uts46-hx": "^2.3.1",
     "isomorphic-ws": "^4.0.1",
+    "mkdirp": "^0.5.1",
     "node-http-xhr": "^1.3.4",
     "pbkdf2": "^3.0.17",
     "randombytes": "^2.0.6",
+    "swarm-js": "^0.1.39",
     "tslib": "^1.9.3",
     "utf8": "^3.0.0",
     "ws": "^6.1.0"
@@ -94,10 +83,11 @@
   "devDependencies": {
     "@types/jest": "^23.3.2",
     "@types/utf8": "^2.1.6",
-    "ethjs-signer": "^0.1.1",
+    "coveralls": "^3.0.2",
     "jest": "^23.6.0",
     "jest-dot-reporter": "^1.0.7",
     "ts-jest": "^23.10.1",
+    "ts-node": "^7.0.1",
     "typescript": "^3.0.3"
   }
 }

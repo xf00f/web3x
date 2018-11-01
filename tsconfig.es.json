@@ -16,5 +16,5 @@
     "importHelpers": true
   },
   "include": ["src"],
-  "exclude": ["src/**/*.test.ts", "src/**/mock-*.ts"]
+  "exclude": ["src/**/*.test.ts", "src/**/mock-*.ts", "src/codegen"]
 }

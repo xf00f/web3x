@@ -3,35 +3,45 @@
 [![Version](https://img.shields.io/npm/v/web3x.svg)](https://www.npmjs.com/package/web3x)
 [![Downloads](https://img.shields.io/npm/dw/web3x.svg)](https://www.npmjs.com/package/web3x)
 [![Downloads](https://img.shields.io/npm/dw/web3x-es.svg)](https://www.npmjs.com/package/web3x-es)
-[![GitHub Repo Size](https://img.shields.io/github/repo-size/xf00f/web3x.svg)](https://github.com/xf00f/web3x)
+[![GitHub Code Size](https://img.shields.io/github/languages/code-size/xf00f/web3x.svg)](https://github.com/xf00f/web3x)
 [![GitHub Stars](https://img.shields.io/github/stars/xf00f/web3x.svg)](https://github.com/xf00f/web3x/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/xf00f/web3x.svg)](https://github.com/xf00f/web3x/issues)
+[![Coverage](https://img.shields.io/coveralls/github/xf00f/web3x/v1.2.0.svg)](https://coveralls.io/github/xf00f/web3x)
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://github.com/xf00f/web3x/blob/master/LICENSE)
-
 
 TypeScript port of web3.js.
 
+- [Packages](#packages)
+- [Why?](#why)
+- [Usage](#usage)
+- [Contract type safety](#contract-type-safety)
+- [Differences](#differences)
+- [Example projects](#example-projects)
+- [Documentation](#documentation)
+
 ## Packages
 
-- [web3x](https://www.npmjs.com/package/web3x) (CommonJS modules for Node.js)
-- [web3x-es](https://www.npmjs.com/package/web3x-es) (ES6 modules for tools such as Webpack)
+- [web3x](https://www.npmjs.com/package/web3x) (for Node.js)
+- [web3x-es](https://www.npmjs.com/package/web3x-es) (for ES6 aware tools such as Webpack)
 
 ## Why?
 
 web3.js is a very popular Ethereum library, but there are a few issues.
 
 - The Typescript typings are distributed separately and are not perfect.
-- It has not been fully ported to use ES6 modules, making it harder for bundlers to tree-shake dead code.
+- There's no way to to introduce type safety to contract code.
+- It's large. Having not been ported to ES6 modules, it's hard for bundlers to tree-shake dead code.
 - It has a package structure that leads to duplication of external libraries such as bn.js being included multiple times.
 - The code contains side effects, circular dependencies, and is not as immutable or functional as it could be, making it difficult to respond to and resolve issues.
 
 web3x attempts to solve all the above issues.
 
 - It is pure TypeScript.
-- It uses jest for testing.
-- It attempts to reduce dependencies on external libraries.
+- It enables type safe contract interactions by generating typed interfaces from ABIs (remote or local).
+- It significantly reduces dependencies on external libraries.
 - It compiles to both commonjs and ES6 module versions for node.js and ES6 aware web bundlers such as webpack.
-- It strives for functional, immutable, reusable components, allowing the developer to only use, and therefore build, exactly what's necessary.
+- It uses jest for testing.
+- It strives for functional, immutable, reusable components, allowing the developer to only use, and therefore bundle, exactly what's necessary.
 
 In a small example that prints an Eth balance compiled with webpack, web3.js produced an output file of 858k, web3x produced a file of 119k. That's an 86% reduction.
 Working with contracts increased the build size to 159k, and working with local accounts in localStorage increased it to 338k. The majority of Dapps are probably expecting
@@ -49,7 +59,7 @@ import { Web3 } from 'web3x-es';
 import { fromWei } from 'web3x-es/utils';
 
 async function main() {
-  const web3 = new Web3('ws://localhost:7545');
+  const web3 = new Web3('wss://mainnet.infura.io/ws');
   const balance = await web3.eth.getBalance('0x0000000000000000000000000000000000000000');
   document.body.innerText = `Balance of 0 address ETH: ${fromWei(balance, 'ether')}`;
   web3.close();
@@ -78,6 +88,104 @@ main().catch(console.error);
 
 See example projects for more complex examples.
 
+## Contract type safety
+
+Interacting with contracts without type safety is tedious at best, and dangerous at worst. web3x provides either a manual way of introducing type safety to contracts, or an automatic way by introducing a code generation step into your build process. By defining a contracts interface and passing it to a contract instance, a developer can continue to use web3x as normal but with the additional type safety checks on method calls, return values and event logs.
+
+### Manual contract interfaces
+
+The preferred way of enabling contract type safety is to use the automated system, however it can be beneficial to understand the manual process to understand what the code generator does for you. An example contract ABI plus interface and its usage is demonstrated below:
+
+```typescript
+interface MyContractDefinition {
+  methods: {
+    balance(who: Address): Quantity;
+    send(to: Address, value: Quantity): void;
+  };
+  events: {
+    Transfer: {
+      to: Address;
+      amount: Quantity;
+    };
+  };
+}
+
+const abi: ContractDefinition = [
+  {
+    name: 'balance',
+    type: 'function',
+    inputs: [{ name: 'who', type: 'address' }],
+    constant: true,
+    outputs: [{ name: 'value', type: 'uint256' }],
+  },
+  {
+    name: 'send',
+    type: 'function',
+    inputs: [{ name: 'to', type: 'address' }, { name: 'value', type: 'uint256' }],
+    outputs: [],
+    stateMutability: 'payable',
+  },
+  {
+    name: 'Transfer',
+    type: 'event',
+    inputs: [{ name: 'to', type: 'address', indexed: true }, { name: 'amount', type: 'uint256', indexed: true }],
+  },
+];
+
+async function sendFullBalanceFromTo(eth: Eth, contractAddress: Address, from: Address, to: Address) {
+  const contract = new Contract<MyContractDefinition>(eth, abi, contractAddress);
+  // The following code is fully type checked.
+  const balance = await contract.methods.balance(from).call({ from });
+  const receipt = await contract.methods.send(to, balance).send({ from });
+  console.log(`Sent ${receipt.events!.Transfer[0].amount} to ${receipt.events!.Transfer[0].to}.`);
+}
+```
+
+Given the contract ABI, the developer can specify an interface in TypeScript that outlines both the contracts methods, and events. This type is then passed as a type parameter to the `Contract` generic. This generic will ensure the type information is carried through to the appropriate methods calls and responses.
+
+### Automated contract interfaces
+
+The preferred approach is to use code generation to generate the contract interface from the ABI, and to wrap everything up in a derived contract class. Installing web3x includes a tool called `web3x-codegen` in your projects local `bin` folder. When run (e.g. `yarn web3x-codegen`) this will attempt to parse a file called `contracts.json`, will fetch the ABI's from the given locations (either local or remote), and will generate contract classes that conform to the same api as a standard untyped `Contract` instance, but with the additional type safety. An example `contracts.json` looks like:
+
+```json
+{
+  "outputPath": "./src/contracts",
+  "contracts": {
+    "DaiContract": "http://api.etherscan.io/api?module=contract&action=getabi&address=0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359&format=raw",
+    "MyContract": "../truffle-project/build/contracts/MyContract.json"
+  }
+}
+```
+
+This tells the generator download the ABI for the DAI token from the given location on etherscan, and to generate the interface at `./src/contracts/DaiContract.ts`. It also specifies a local ABI file and to generate its interface at `./src/contracts/MyContract.ts`. The json files output by truffle are not pure ABIs, but the code generator will detect it's a truffle output and will extract the ABI accordingly.
+
+For an example of the code generated, take a look at this [example](example-projects/node/src/contracts/DaiContract.ts). As you can see there are two exports, both the definition and the wrapper class. The easiest way to use it is with the class as in this example:
+
+```typescript
+import { fromWei } from 'web3x/utils';
+import { WebsocketProvider } from 'web3x/providers';
+import { Eth } from 'web3x/eth';
+import { DaiContract } from './contracts/DaiContract';
+
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+const DAI_CONTRACT_ADDRESS = '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359';
+
+async function main() {
+  const provider = new WebsocketProvider('wss://mainnet.infura.io/ws');
+  const eth = Eth.fromProvider(provider);
+
+  try {
+    const contract = new DaiContract(eth, DAI_CONTRACT_ADDRESS);
+    const daiBalance = await contract.methods.balanceOf(ZERO_ADDRESS).call();
+    console.log(`Balance of 0 address DAI: ${fromWei(daiBalance, 'ether')}`);
+  } finally {
+    provider.disconnect();
+  }
+}
+
+main().catch(console.error);
+```
+
 ## Differences
 
 This is not a perfect drop in replacement for web3.js, certain things have changed. However it is very close to the original API and porting an application to use it shouldn't be too challenging.
@@ -100,11 +208,3 @@ API documentation has not yet been ported from web3.js. For now the recommended 
 - Take a look at the [webpack example](example-projects/webpack/src/index.ts) to get an idea of how to structure components to minimise builds.
 - Rely on your IDE and TypeScript to provide insight into the API.
 - Delve into the code. It's significantly easier to follow and understand than web3.js.
-
-## Missing functionality
-
-The current features have not yet been ported.
-
-- ssh
-- bzz
-- ens
