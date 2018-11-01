@@ -37,7 +37,7 @@ web3.js is a very popular Ethereum library, but there are a few issues.
 web3x attempts to solve all the above issues.
 
 - It is pure TypeScript.
-- It allows augmentation of contract instances with interfaces for type safe contract interactions.
+- It enables type safe contract interactions by generating typed interfaces from ABIs (remote or local).
 - It significantly reduces dependencies on external libraries.
 - It compiles to both commonjs and ES6 module versions for node.js and ES6 aware web bundlers such as webpack.
 - It uses jest for testing.
