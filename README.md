@@ -82,7 +82,7 @@ Run the code generator:
 yarn web3x-codegen
 ```
 
-The generator downloads the ABI for the DAI token from the given location on etherscan, and to generate the interface at `./src/contracts/DaiContract.ts`. It also specifies a local ABI file and generates its interface at `./src/contracts/MyContract.ts`. The json files output by truffle are not pure ABIs, but the code generator will detect it's a truffle output and will extract the ABI accordingly.
+The generator downloads the ABI for the DAI token from the given location on etherscan, and generates the interface at `./src/contracts/DaiContract.ts`. It also specifies a local ABI file and generates its interface at `./src/contracts/MyContract.ts`. The json files output by truffle are not pure ABIs, but the code generator will detect it's a truffle output and will extract the ABI accordingly.
 
 For an example of the code generated, take a look at this [example](example-projects/node/src/contracts/DaiContract.ts).
 
