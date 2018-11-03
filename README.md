@@ -37,7 +37,7 @@ web3x solves the above issues.
 
 ## Usage
 
-There are two builds of the library. `web3x` uses commonjs style imports and is best used for node.js backends. `web3x-es` uses ES6 imports and is best used for ES6 aware tools like webpack.
+There are two builds of the library. `web3x` uses CommonJS style imports and is best used for Node.js backends. `web3x-es` uses ES6 imports and is best used for ES6 aware tools like Webpack.
 
 Example usage:
 
@@ -120,7 +120,7 @@ main().catch(console.error);
 This is not a perfect drop in replacement for web3.js, there are small differences.
 
 - Callbacks for request/response style calls no longer supported, promises only.
-- You should explicitly import parts of the library rather then accessing them via web3 object.
+- You should explicitly import parts of the library rather then accessing them via the web3 object.
 - Sanitized some hybrid types, e.g. access wallet accounts via `wallet.get(0)` rather than `wallet[0]`.
 
 ## Example projects
