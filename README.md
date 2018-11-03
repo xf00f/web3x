@@ -9,9 +9,9 @@
 [![Coverage](https://img.shields.io/coveralls/github/xf00f/web3x/v1.2.0.svg)](https://coveralls.io/github/xf00f/web3x)
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://github.com/xf00f/web3x/blob/master/LICENSE)
 
-TypeScript port of web3.js. Typed contracts. Tiny builds.
+TypeScript port of web3.js - for perfect types and tiny builds.
 
-![Demo](https://user-images.githubusercontent.com/44038056/47953965-69df9800-df7c-11e8-8468-c45c823c5d40.gif)
+![Demo](https://user-images.githubusercontent.com/44038056/47954017-1d488c80-df7d-11e8-923c-a37f575b9afc.gif)
 
 - [Why?](#why)
 - [Usage](#usage)
