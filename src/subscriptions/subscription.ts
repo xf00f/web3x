@@ -43,6 +43,14 @@ export class Subscription<Result> extends EventEmitter {
     };
   }
 
+  on(event: 'data' | 'changed', listener: (result: Result) => void): this {
+    return super.on(event, listener);
+  }
+
+  once(event: 'data' | 'changed', listener: (result: Result) => void): this {
+    return super.once(event, listener);
+  }
+
   /**
    * Should be used to extract callback from array of arguments. Modifies input param
    *

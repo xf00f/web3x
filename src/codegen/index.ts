@@ -27,15 +27,194 @@ const printer = ts.createPrinter({
 });
 
 interface Config {
-  es6Modules?: boolean;
+  web3xPath?: string;
   outputPath?: string;
   contracts: { [name: string]: string };
 }
 
-function getTsTypeFromSolidityType(input: AbiInput, returnValue: boolean) {
+function makeImports(name: string, web3xPath: string) {
+  return [
+    ts.createImportDeclaration(
+      undefined,
+      undefined,
+      ts.createImportClause(ts.createIdentifier('BN'), undefined),
+      ts.createLiteral('bn.js'),
+    ),
+    ts.createImportDeclaration(
+      undefined,
+      undefined,
+      ts.createImportClause(
+        undefined,
+        ts.createNamedImports([
+          ts.createImportSpecifier(undefined, ts.createIdentifier('EventLog')),
+          ts.createImportSpecifier(undefined, ts.createIdentifier('TransactionReceipt')),
+        ]),
+      ),
+      ts.createLiteral(`${web3xPath}/formatters`),
+    ),
+    ts.createImportDeclaration(
+      undefined,
+      undefined,
+      ts.createImportClause(
+        undefined,
+        ts.createNamedImports([
+          ts.createImportSpecifier(undefined, ts.createIdentifier('Contract')),
+          ts.createImportSpecifier(undefined, ts.createIdentifier('ContractOptions')),
+          ts.createImportSpecifier(undefined, ts.createIdentifier('TxCall')),
+          ts.createImportSpecifier(undefined, ts.createIdentifier('TxSend')),
+          ts.createImportSpecifier(undefined, ts.createIdentifier('EventSubscriptionFactory')),
+        ]),
+      ),
+      ts.createLiteral(`${web3xPath}/contract`),
+    ),
+    ts.createImportDeclaration(
+      undefined,
+      undefined,
+      ts.createImportClause(
+        undefined,
+        ts.createNamedImports([ts.createImportSpecifier(undefined, ts.createIdentifier('Eth'))]),
+      ),
+      ts.createLiteral(`${web3xPath}/eth`),
+    ),
+    ts.createImportDeclaration(
+      undefined,
+      undefined,
+      ts.createImportClause(ts.createIdentifier('abi'), undefined),
+      ts.createLiteral(`./${name}Abi`),
+    ),
+  ];
+}
+
+function makeEventType(definition: AbiDefinition) {
+  const props = ts.createTypeLiteralNode(
+    definition.inputs!.map(input =>
+      ts.createPropertySignature(undefined, input.name, undefined, getTsTypeFromSolidityType(input, true), undefined),
+    ),
+  );
+
+  return ts.createTypeAliasDeclaration(
+    undefined,
+    [ts.createToken(ts.SyntaxKind.ExportKeyword)],
+    `${definition.name}Event`,
+    undefined,
+    props,
+  );
+}
+
+function makeEventTypes(abi: ContractAbi) {
+  return abi.filter(def => def.type === 'event').map(makeEventType);
+}
+
+function makeEventLogInterface(definition: AbiDefinition) {
+  const eventName = `${definition.name!}Event`;
+  return ts.createInterfaceDeclaration(
+    undefined,
+    [ts.createToken(ts.SyntaxKind.ExportKeyword)],
+    `${eventName}Log`,
+    undefined,
+    [
+      ts.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
+        ts.createExpressionWithTypeArguments(
+          [
+            ts.createTypeReferenceNode(eventName, undefined),
+            ts.createLiteralTypeNode(ts.createLiteral(definition.name!)),
+          ],
+          ts.createRegularExpressionLiteral('EventLog'),
+        ),
+      ]),
+    ],
+    [],
+  );
+}
+
+function makeEventLogInterfaces(abi: ContractAbi) {
+  return abi.filter(def => def.type === 'event').map(makeEventLogInterface);
+}
+
+function makeEventsInterface(name: string, abi: ContractAbi) {
+  const events = abi.filter(def => def.type === 'event').map(event => event.name!);
+  return ts.createInterfaceDeclaration(
+    undefined,
+    undefined,
+    `${name}Events`,
+    undefined,
+    undefined,
+    events.map(eventName =>
+      ts.createPropertySignature(
+        undefined,
+        eventName,
+        undefined,
+        ts.createTypeReferenceNode(`EventSubscriptionFactory`, [
+          ts.createTypeReferenceNode(`${eventName}EventLog`, undefined),
+        ]),
+        undefined,
+      ),
+    ),
+  );
+}
+
+function makeEventLogsInterface(name: string, abi: ContractAbi) {
+  const events = abi.filter(def => def.type === 'event').map(event => event.name!);
+  return ts.createInterfaceDeclaration(
+    undefined,
+    undefined,
+    `${name}EventLogs`,
+    undefined,
+    undefined,
+    events.map(eventName =>
+      ts.createPropertySignature(
+        undefined,
+        eventName,
+        undefined,
+        ts.createTypeReferenceNode(`${eventName}EventLog`, undefined),
+        undefined,
+      ),
+    ),
+  );
+}
+
+function makeTxEventLogsInterface(name: string, abi: ContractAbi) {
+  const events = abi.filter(def => def.type === 'event').map(event => event.name!);
+  return ts.createInterfaceDeclaration(
+    undefined,
+    undefined,
+    `${name}TxEventLogs`,
+    undefined,
+    undefined,
+    events.map(eventName =>
+      ts.createPropertySignature(
+        undefined,
+        eventName,
+        undefined,
+        ts.createArrayTypeNode(ts.createTypeReferenceNode(`${eventName}EventLog`, undefined)),
+        undefined,
+      ),
+    ),
+  );
+}
+
+function makeTransactionReceiptInterface(name: string) {
+  return ts.createInterfaceDeclaration(
+    undefined,
+    [ts.createToken(ts.SyntaxKind.ExportKeyword)],
+    `${name}TransactionReceipt`,
+    undefined,
+    [
+      ts.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
+        ts.createExpressionWithTypeArguments(
+          [ts.createTypeReferenceNode(`${name}TxEventLogs`, undefined)],
+          ts.createRegularExpressionLiteral('TransactionReceipt'),
+        ),
+      ]),
+    ],
+    [],
+  );
+}
+
+function getBaseType(input: AbiInput, returnValue: boolean) {
   const { type } = input;
 
-  if (type.match(/u?int\d+/) || type.match(/u?fixed[0-9x]+/)) {
+  if (type.match(/u?int\d*/) || type.match(/u?fixed[0-9x]*/)) {
     return !returnValue
       ? ts.createUnionTypeNode([
           ts.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword),
@@ -60,6 +239,12 @@ function getTsTypeFromSolidityType(input: AbiInput, returnValue: boolean) {
   return ts.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
 }
 
+function getTsTypeFromSolidityType(input: AbiInput, returnValue: boolean) {
+  const { type } = input;
+  const baseType = getBaseType(input, returnValue);
+  return type.match(/\[\]$/) ? ts.createArrayTypeNode(baseType) : baseType;
+}
+
 function makeParameter(input: AbiInput, index: number) {
   return ts.createParameter(
     undefined,
@@ -71,88 +256,41 @@ function makeParameter(input: AbiInput, index: number) {
   );
 }
 
-function getOutputType(definition: AbiDefinition) {
-  if (definition.stateMutability === 'view') {
+function getOutputType(name: string, definition: AbiDefinition) {
+  if (!definition.stateMutability) {
     if (definition.outputs && definition.outputs.length) {
-      return getTsTypeFromSolidityType(definition.outputs[0], true);
+      return ts.createTypeReferenceNode('TxCall', [getTsTypeFromSolidityType(definition.outputs[0], true)]);
+    } else {
+      return ts.createTypeReferenceNode('TxSend', [ts.createTypeReferenceNode(`${name}TransactionReceipt`, undefined)]);
+    }
+  }
+  if (definition.stateMutability === 'view' || definition.stateMutability === 'pure') {
+    if (definition.outputs && definition.outputs.length) {
+      return ts.createTypeReferenceNode('TxCall', [getTsTypeFromSolidityType(definition.outputs[0], true)]);
     } else {
       return undefined;
     }
   } else {
-    return ts.createKeywordTypeNode(ts.SyntaxKind.VoidKeyword);
+    return ts.createTypeReferenceNode('TxSend', [ts.createTypeReferenceNode(`${name}TransactionReceipt`, undefined)]);
   }
 }
 
-function makeMethod(definition: AbiDefinition) {
+function makeMethod(name: string, definition: AbiDefinition) {
   return ts.createMethodSignature(
     undefined,
     definition.inputs!.map(makeParameter),
-    getOutputType(definition),
+    getOutputType(name, definition),
     definition.name!,
     undefined,
   );
 }
 
-function makeEvent(definition: AbiDefinition) {
-  const props = ts.createTypeLiteralNode(
-    definition.inputs!.map(input =>
-      ts.createPropertySignature(undefined, input.name, undefined, getTsTypeFromSolidityType(input, true), undefined),
-    ),
-  );
-
-  return ts.createPropertySignature(undefined, definition.name!, undefined, props, undefined);
+function makeMethodsInterface(name: string, abi: ContractAbi) {
+  const methods = abi.filter(def => def.type === 'function').map(def => makeMethod(name, def));
+  return ts.createInterfaceDeclaration(undefined, undefined, `${name}Methods`, undefined, undefined, methods);
 }
 
-function makeMethodsInterface(name: ts.Identifier, abi: ContractAbi): ts.InterfaceDeclaration {
-  const methods = abi.filter(def => def.type === 'function').map(makeMethod);
-  return ts.createInterfaceDeclaration(undefined, undefined, name, undefined, undefined, methods);
-}
-
-function makeEventsInterface(name: ts.Identifier, abi: ContractAbi): ts.InterfaceDeclaration {
-  const events = abi.filter(def => def.type === 'event').map(makeEvent);
-  return ts.createInterfaceDeclaration(undefined, undefined, name, undefined, undefined, events);
-}
-
-function makeImports(name: string, es6Modules: boolean) {
-  return [
-    ts.createImportDeclaration(
-      undefined,
-      undefined,
-      ts.createImportClause(ts.createIdentifier('BN'), undefined),
-      ts.createRegularExpressionLiteral("'bn.js'"),
-    ),
-    ts.createImportDeclaration(
-      undefined,
-      undefined,
-      ts.createImportClause(
-        undefined,
-        ts.createNamedImports([
-          ts.createImportSpecifier(undefined, ts.createIdentifier('Contract')),
-          ts.createImportSpecifier(undefined, ts.createIdentifier('ContractOptions')),
-          ts.createImportSpecifier(undefined, ts.createIdentifier('ContractAbi')),
-        ]),
-      ),
-      ts.createRegularExpressionLiteral(es6Modules ? "'web3x-es/contract'" : "'web3x/contract'"),
-    ),
-    ts.createImportDeclaration(
-      undefined,
-      undefined,
-      ts.createImportClause(
-        undefined,
-        ts.createNamedImports([ts.createImportSpecifier(undefined, ts.createIdentifier('Eth'))]),
-      ),
-      ts.createRegularExpressionLiteral(es6Modules ? "'web3x-es/eth'" : "'web3x/eth'"),
-    ),
-    ts.createImportDeclaration(
-      undefined,
-      undefined,
-      ts.createImportClause(ts.createIdentifier('abi'), undefined),
-      ts.createRegularExpressionLiteral(`'./${name}.abi.json'`),
-    ),
-  ];
-}
-
-function makeContract(name: string, definitionInterfaceName: ts.Identifier) {
+function makeContract(name: string) {
   const ctor = ts.createConstructor(
     undefined,
     undefined,
@@ -187,7 +325,7 @@ function makeContract(name: string, definitionInterfaceName: ts.Identifier) {
         ts.createStatement(
           ts.createCall(ts.createSuper(), undefined, [
             ts.createIdentifier('eth'),
-            ts.createAsExpression(ts.createIdentifier('abi'), ts.createTypeReferenceNode('ContractAbi', undefined)),
+            ts.createIdentifier('abi'),
             ts.createIdentifier('address'),
             ts.createIdentifier('options'),
           ]),
@@ -205,7 +343,7 @@ function makeContract(name: string, definitionInterfaceName: ts.Identifier) {
     [
       ts.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
         ts.createExpressionWithTypeArguments(
-          [ts.createTypeReferenceNode(definitionInterfaceName, undefined)],
+          [ts.createTypeReferenceNode(`${name}Definition`, undefined)],
           ts.createRegularExpressionLiteral('Contract'),
         ),
       ]),
@@ -214,49 +352,80 @@ function makeContract(name: string, definitionInterfaceName: ts.Identifier) {
   );
 }
 
-function makeFile(name: string, abi: ContractAbi, es6Modules: boolean) {
-  const definitionInterfaceName = ts.createIdentifier(`${name}Definition`);
-  const methodsInterfaceName = ts.createIdentifier(`${name}Methods`);
-  const eventsInterfaceName = ts.createIdentifier(`${name}Events`);
-
-  const methodsInterface = makeMethodsInterface(methodsInterfaceName, abi);
-  const eventsInterface = makeEventsInterface(eventsInterfaceName, abi);
-
+function makeDefinitionInterface(name: string) {
   const props = [
     ts.createPropertySignature(
       undefined,
       'methods',
       undefined,
-      ts.createTypeReferenceNode(methodsInterfaceName, undefined),
+      ts.createTypeReferenceNode(`${name}Methods`, undefined),
       undefined,
     ),
     ts.createPropertySignature(
       undefined,
       'events',
       undefined,
-      ts.createTypeReferenceNode(eventsInterfaceName, undefined),
+      ts.createTypeReferenceNode(`${name}Events`, undefined),
+      undefined,
+    ),
+    ts.createPropertySignature(
+      undefined,
+      'eventLogs',
+      undefined,
+      ts.createTypeReferenceNode(`${name}EventLogs`, undefined),
       undefined,
     ),
   ];
 
-  const definitionInterface = ts.createInterfaceDeclaration(
+  return ts.createInterfaceDeclaration(
     undefined,
     [ts.createToken(ts.SyntaxKind.ExportKeyword)],
-    definitionInterfaceName,
+    `${name}Definition`,
     undefined,
     undefined,
     props,
   );
-
-  const imports = makeImports(name, es6Modules);
-
-  const contract = makeContract(name, definitionInterfaceName);
-
-  return ts.createNodeArray([...imports, methodsInterface, eventsInterface, definitionInterface, contract]);
 }
 
-async function getContractAbi(abiLocation: string): Promise<ContractAbi> {
-  if (abiLocation.match(/^http/)) {
+function makeAbiExport(name: string) {
+  return ts.createVariableStatement(
+    [ts.createModifier(ts.SyntaxKind.ExportKeyword)],
+    [ts.createVariableDeclaration(`${name}Abi`, undefined, ts.createIdentifier('abi'))],
+  );
+}
+
+function makeFile(name: string, abi: ContractAbi, web3xPath: string) {
+  const imports = makeImports(name, web3xPath);
+  const eventTypes = makeEventTypes(abi);
+  const eventLogTypes = makeEventLogInterfaces(abi);
+  const eventsInterface = makeEventsInterface(name, abi);
+  const eventLogsInterface = makeEventLogsInterface(name, abi);
+  const eventTxLogsInterface = makeTxEventLogsInterface(name, abi);
+  const txReceiptInterface = makeTransactionReceiptInterface(name);
+  const methodsInterface = makeMethodsInterface(name, abi);
+  const definitionInterface = makeDefinitionInterface(name);
+  const contract = makeContract(name);
+  const abiExport = makeAbiExport(name);
+
+  return ts.createNodeArray([
+    ...imports,
+    ...eventTypes,
+    ...eventLogTypes,
+    eventsInterface,
+    eventLogsInterface,
+    eventTxLogsInterface,
+    txReceiptInterface,
+    methodsInterface,
+    definitionInterface,
+    contract,
+    abiExport,
+  ]);
+}
+
+async function getContractAbi(abiLocation: string | ContractAbi): Promise<ContractAbi> {
+  if (Array.isArray(abiLocation)) {
+    return abiLocation;
+  } else if (abiLocation.match(/^http/)) {
     const response = await got(abiLocation, { json: true });
     return response.body;
   } else {
@@ -271,33 +440,77 @@ async function getContractAbi(abiLocation: string): Promise<ContractAbi> {
   }
 }
 
-async function generateInterface(outputPath: string, name: string, abiLocation: string, es6Modules: boolean) {
+async function makeAndWriteAbi(outputPath: string, name: string, abi: ContractAbi, web3xPath: string) {
+  const abiOutputFile = `${outputPath}/${name}Abi.ts`;
+  const output = `import { ContractAbi } from '${web3xPath}/contract';\nexport default ${JSON.stringify(
+    abi,
+    undefined,
+    2,
+  )} as ContractAbi;`;
+  fs.writeFileSync(abiOutputFile, output);
+  /*
+  const jsonFile = ts.createSourceFile(
+    'someFile.ts',
+    JSON.stringify(abi),
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
+
+  let thing: any = jsonFile.statements[0];
+
+  const varStmt = ts.createVariableStatement(
+    [ts.createModifier(ts.SyntaxKind.ExportKeyword)],
+    [
+      ts.createVariableDeclaration(
+        `Abi`,
+        undefined,
+        ts.createAsExpression(thing.expression, ts.createTypeReferenceNode('ContractAbi', undefined)),
+      ),
+    ],
+  );
+
+  const resultFile = ts.createSourceFile('', '', ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
+  resultFile.statements = ts.createNodeArray([varStmt]);
+  fs.writeFileSync(abiOutputFile, printer.printFile(resultFile));
+  */
+}
+
+async function makeAndWriteFiles(
+  outputPath: string,
+  name: string,
+  abiLocation: string | ContractAbi,
+  web3xPath: string,
+) {
   const interfaceOutputFile = `${outputPath}/${name}.ts`;
-  const abiOutputFile = `${outputPath}/${name}.abi.json`;
   const abi = await getContractAbi(abiLocation);
 
   const resultFile = ts.createSourceFile('', '', ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
-  resultFile.statements = makeFile(name, abi, es6Modules);
+  resultFile.statements = makeFile(name, abi, web3xPath);
 
   fs.writeFileSync(interfaceOutputFile, printer.printFile(resultFile));
-  fs.writeFileSync(abiOutputFile, JSON.stringify(abi, undefined, 2));
+
+  makeAndWriteAbi(outputPath, name, abi, web3xPath);
+}
+
+function getWeb3xPath() {
+  try {
+    const pkg = JSON.parse(fs.readFileSync('package.json').toString());
+    return !!pkg.dependencies['web3x-es'] || !!pkg.devDependencies['web3x-es'] ? 'web3x-es' : 'web3x';
+  } catch (err) {
+    return 'web3x';
+  }
 }
 
 async function main() {
   const configFile = process.argv[2] || 'contracts.json';
   const config = JSON.parse(fs.readFileSync(configFile).toString()) as Config;
-  const { outputPath = 'contracts' } = config;
-  let es6Modules = false;
-
-  try {
-    const pkg = JSON.parse(fs.readFileSync('package.json').toString());
-    es6Modules = !!pkg.dependencies['web3x-es'] || !!pkg.devDependencies['web3x-es'];
-  } catch (err) {}
+  const { outputPath = './contracts', web3xPath = getWeb3xPath() } = config;
 
   mkdirp.sync(outputPath);
 
   await Promise.all(
-    Object.entries(config.contracts).map(entry => generateInterface(outputPath, entry[0], entry[1], es6Modules)),
+    Object.entries(config.contracts).map(entry => makeAndWriteFiles(outputPath, entry[0], entry[1], web3xPath)),
   );
 }
 

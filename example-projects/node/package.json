@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "typescript": "^3.0.3",
-    "web3x": "^1.0.0"
+    "web3x": "^1.2.1"
   },
   "devDependencies": {
     "jest": "^23.6.0",

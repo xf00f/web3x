@@ -35,10 +35,10 @@ export interface TransactionReceipt<Events = void> {
   status: string;
 }
 
-export interface EventLog<ReturnValues> {
+export interface EventLog<ReturnValues, Name = string> {
   id: string | null;
   removed?: boolean;
-  event?: string;
+  event?: Name;
   address: string;
   returnValues: ReturnValues;
   logIndex: number | null;

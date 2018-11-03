@@ -98,8 +98,6 @@ function addBr() {
 }
 
 async function send(eth: Eth, from: Address, to: Address) {
-  // When using the library in this way Eth object has no knowledge of local accounts. Be sure
-  // to use account function to send a transaction.
   await eth
     .sendTransaction({
       value: toWei('0.01', 'ether'),
@@ -118,7 +116,6 @@ async function send(eth: Eth, from: Address, to: Address) {
 }
 
 async function addDaiBalance(eth: Eth) {
-  const abi = require('human-standard-token-abi');
   const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
   const DAI_CONTRACT_ADDRESS = '0xc4375b7de8af5a38a93548eb8453a498222c4ff2';
 

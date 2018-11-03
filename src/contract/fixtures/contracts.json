@@ -1,0 +1,7 @@
+{
+  "web3xPath": "../..",
+  "outputPath": ".",
+  "contracts": {
+    "TestContract": "./abi.json"
+  }
+}
