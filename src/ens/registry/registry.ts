@@ -16,10 +16,9 @@
 */
 
 import { ENS } from '../ens';
-import { Contract } from '../../contract';
 import { namehash } from './namehash';
-import { REGISTRY_ABI, RegistryDefinition } from './abi/registry';
-import { RESOLVER_ABI, ResolverDefinition } from './abi/resolver';
+import { EnsRegistry } from '../contracts/EnsRegistry';
+import { EnsResolver } from '../contracts/EnsResolver';
 
 /**
  * A wrapper around the ENS registry contract.
@@ -29,12 +28,10 @@ import { RESOLVER_ABI, ResolverDefinition } from './abi/resolver';
  * @constructor
  */
 export class Registry {
-  private contract: Promise<Contract<RegistryDefinition>>;
+  private contract: Promise<EnsRegistry>;
 
   constructor(private ens: ENS) {
-    this.contract = ens
-      .checkNetwork()
-      .then(address => new Contract<RegistryDefinition>(ens.eth, REGISTRY_ABI, address));
+    this.contract = ens.checkNetwork().then(address => new EnsRegistry(ens.eth, address));
   }
 
   /**
@@ -60,6 +57,6 @@ export class Registry {
   async resolver(name: string) {
     const contract = await this.contract;
     const address = await contract.methods.resolver(namehash(name)).call();
-    return new Contract<ResolverDefinition>(this.ens.eth, RESOLVER_ABI, address);
+    return new EnsResolver(this.ens.eth, address);
   }
 }

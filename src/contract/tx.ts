@@ -21,7 +21,7 @@ import { promiEvent } from '../promievent';
 import { fireError, isAddress } from '../utils';
 import { abi } from './abi';
 import { toChecksumAddress } from '../utils';
-import { inputAddressFormatter } from '../formatters';
+import { inputAddressFormatter, TransactionReceipt } from '../formatters';
 import { Eth, SendTxPromiEvent } from '../eth';
 import { BlockType } from '../types';
 import { Wallet } from '../accounts';
@@ -54,18 +54,18 @@ type DefaultOptions = {
   gas?: number;
 };
 
-export interface TxCall<T = any> {
-  call(options?: CallOptions, block?: BlockType): Promise<T>;
+export interface TxCall<Return = any> {
+  call(options?: CallOptions, block?: BlockType): Promise<Return>;
   getCallRequestPayload(options?: CallOptions, block?: number);
   estimateGas(options?: EstimateOptions): Promise<number>;
-  encodeABI();
+  encodeABI(): string;
 }
 
-export interface TxSend<ResponseEvents = any> {
-  send(options?: SendOptions): SendTxPromiEvent<ResponseEvents>;
+export interface TxSend<TxReceipt = TransactionReceipt> {
+  send(options?: SendOptions): SendTxPromiEvent<TxReceipt>;
   getSendRequestPayload(options?: SendOptions);
   estimateGas(options?: EstimateOptions): Promise<number>;
-  encodeABI();
+  encodeABI(): string;
 }
 
 /**

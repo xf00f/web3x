@@ -45,46 +45,26 @@ export interface ContractOptions {
 interface ContractDefinition {
   methods: any;
   events?: any;
+  eventLogs?: any;
 }
 
-type EventSubscriptionFactory<Result = EventLog<any>> = (
+export type EventSubscriptionFactory<Result = EventLog<any>> = (
   options?: object,
   callback?: (err: Error, result: Result, subscription: Subscription<Result>) => void,
-) => Subscription<any>;
-
-type GetReturnType<T extends Function> = T extends (...x: any[]) => infer Return ? Return : never;
-type GetArgumentType<T extends Function> = T extends (...x: infer Args) => any ? Args : never;
+) => Subscription<Result>;
 
 type Events<T extends ContractDefinition | void> = T extends ContractDefinition
   ? Extract<keyof T['events'], string>
   : string;
 
 type GetEventLog<T extends ContractDefinition | void, P extends Events<T>> = T extends ContractDefinition
-  ? EventLog<T['events'][P]>
+  ? T['eventLogs'][P]
   : EventLog<any>;
 
-type GetResponseEvents<Events> = { [P in keyof Events]: EventLog<Events[P]>[] };
+type GetContractMethods<T> = T extends ContractDefinition ? T['methods'] : { [key: string]: (...args: any[]) => Tx };
 
-type MethodType<T extends Function, Events> = ((
-  ...args: GetArgumentType<T>
-) => GetReturnType<T> extends void ? TxSend<GetResponseEvents<Events>> : TxCall<GetReturnType<T>>);
-
-type GetContractMethods<T extends ContractDefinition> = {
-  [P in keyof T['methods']]: MethodType<T['methods'][P] extends Function ? T['methods'][P] : never, T['events']>
-};
-
-type GetContractEvents<T extends ContractDefinition> = {
-  [P in keyof T['events']]: EventSubscriptionFactory<EventLog<T['events'][P]>>
-} & {
-  allEvents: EventSubscriptionFactory;
-};
-
-type ContractMethods<T> = T extends ContractDefinition
-  ? GetContractMethods<T>
-  : { [key: string]: (...args: any[]) => Tx };
-
-type ContractEvents<T> = T extends ContractDefinition
-  ? GetContractEvents<T>
+type GetContractEvents<T> = T extends ContractDefinition
+  ? T['events'] & { allEvents: EventSubscriptionFactory<T['eventLogs'][Events<T>]> }
   : { [key: string]: EventSubscriptionFactory };
 
 /**
@@ -97,8 +77,8 @@ type ContractEvents<T> = T extends ContractDefinition
  * @param {Object} options
  */
 export class Contract<T extends ContractDefinition | void = void> {
-  readonly methods: ContractMethods<T>;
-  readonly events: ContractEvents<T>;
+  readonly methods: GetContractMethods<T>;
+  readonly events: GetContractEvents<T>;
   private options: ContractOptions;
   private extraFormatters;
 
