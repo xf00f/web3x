@@ -11,7 +11,7 @@
 
 TypeScript port of web3.js - for perfect types and tiny builds.
 
-![Demo](https://user-images.githubusercontent.com/44038056/47954017-1d488c80-df7d-11e8-923c-a37f575b9afc.gif)
+![Demo](https://user-images.githubusercontent.com/44038056/47954060-9d6ef200-df7d-11e8-829c-99eb984f9bf1.gif)
 
 - [Why?](#why)
 - [Usage](#usage)
