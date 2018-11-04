@@ -15,9 +15,9 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import * as utils from '../utils';
 import BigNumber from 'bn.js';
 import { Address } from '../types';
+import { isAddress, toChecksumAddress } from '../utils';
 
 var leftPad = function(string, bytes) {
   var result = string;
@@ -122,7 +122,7 @@ export class Iban {
    * @return {Iban} the IBAN object
    */
   static fromAddress(address: Address) {
-    if (!utils.isAddress(address)) {
+    if (!isAddress(address)) {
       throw new Error('Provided address is not a valid address: ' + address);
     }
 
@@ -250,7 +250,7 @@ export class Iban {
     if (this.isDirect()) {
       var base36 = this._iban.substr(4);
       var asBn = new BigNumber(base36, 36);
-      return utils.toChecksumAddress(asBn.toString(16, 20));
+      return toChecksumAddress(asBn.toString(16, 20));
     }
 
     return '';
