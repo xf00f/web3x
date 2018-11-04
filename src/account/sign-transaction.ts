@@ -15,14 +15,13 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Tx } from '../types';
-import { numberToHex } from '../utils';
+import { numberToHex, isHexStrict } from '../utils';
 import RLP from '../eth-lib/rlp';
 import Bytes from '../eth-lib/bytes';
 import Hash from '../eth-lib/hash';
 import Nat from '../eth-lib/nat';
 import Account from '../eth-lib/account';
-import { Eth } from '../eth';
+import { Eth, Tx } from '../eth';
 import { inputCallFormatter } from '../formatters';
 
 export interface SignedTx {
@@ -37,6 +36,10 @@ export interface SignedTx {
 }
 
 export async function signTransaction(tx: Tx, privateKey: string, eth: Eth): Promise<SignedTx> {
+  if (!isHexStrict(privateKey)) {
+    throw new Error('privateKey is not 0x formatted hex.');
+  }
+
   // Resolve immediately if nonce, chainId and price are provided
   if (tx.nonce !== undefined && tx.chainId !== undefined && tx.gasPrice !== undefined) {
     return sign(tx, privateKey);

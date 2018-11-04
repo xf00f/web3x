@@ -15,6 +15,15 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { isString } from 'util';
+import { HttpProvider } from './http';
+import { WebsocketProvider } from './ws';
+import { IpcProvider } from './ipc';
+
+export { WebsocketProvider } from './ws';
+export { HttpProvider } from './http';
+export { IpcProvider } from './ipc';
+
 export type Callback = (err?: Error, result?: JsonRPCResponse) => void;
 
 export interface JsonRPCRequest {
@@ -42,6 +51,18 @@ export interface Provider {
   reset?();
 }
 
-export { WebsocketProvider } from './ws';
-export { HttpProvider } from './http';
-export { IpcProvider } from './ipc';
+function createProviderFromString(provider: Provider | string, net?: any): Provider {
+  if (!isString(provider)) {
+    return provider;
+  }
+
+  if (/^http(s)?:\/\//i.test(provider)) {
+    return new HttpProvider(provider);
+  } else if (/^ws(s)?:\/\//i.test(provider)) {
+    return new WebsocketProvider(provider);
+  } else if (provider && typeof net.connect === 'function') {
+    return new IpcProvider(provider, net);
+  } else {
+    throw new Error(`Can't autodetect provider for ${provider}`);
+  }
+}

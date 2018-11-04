@@ -15,6 +15,4 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export * from './eth';
-export * from './tx';
-export * from './block';
+export * from './account';

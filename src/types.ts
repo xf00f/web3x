@@ -21,17 +21,3 @@ export type Address = string;
 export type TransactionHash = string;
 export type Quantity = string;
 export type Data = string;
-
-export interface Tx {
-  nonce?: string | number;
-  chainId?: string | number;
-  from?: string;
-  to?: string;
-  data?: string;
-  value?: string | number;
-  gas?: string | number;
-  gasPrice?: string | number;
-}
-
-export type BlockType = 'latest' | 'pending' | 'genesis' | number;
-export type BlockHash = string;

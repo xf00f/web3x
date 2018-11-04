@@ -18,7 +18,7 @@
 import { isArray, isFunction } from 'util';
 import { Subscription } from '../subscriptions';
 import { abi, abiMethodToString } from './abi';
-import { Tx, TxFactory, TxSend, TxCall } from './tx';
+import { Tx, TxFactory } from './tx';
 import { decodeAnyEvent } from './decode-event-abi';
 import {
   inputAddressFormatter,
@@ -31,10 +31,9 @@ import { toChecksumAddress, isAddress } from '../utils';
 import { TxDeploy } from './tx-deploy';
 import { ContractAbi, AbiDefinition } from './contract-abi';
 import { Address, Data } from '../types';
-import { BlockType } from '../types';
-import { Eth } from '../eth';
+import { Eth, BlockType } from '../eth';
 import { InvalidNumberOfParams } from '../errors';
-import { Wallet } from '../accounts';
+import { Wallet } from '../wallet';
 
 export interface ContractOptions {
   from?: string;

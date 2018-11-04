@@ -15,37 +15,36 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Tx } from '../types';
 import { create, fromPrivate } from '../eth-lib/account';
 import { randomHex, encrypt, KeyStore, decrypt, fireError } from '../utils';
 import { sign } from '../utils/sign';
 import { signTransaction } from './sign-transaction';
-import { Eth, SendTxPromiEvent } from '../eth';
+import { Eth, Tx, SendTxPromiEvent } from '../eth';
 import { promiEvent } from '../promievent';
 import { TransactionReceipt } from '../formatters';
 
 export class Account {
-  constructor(private eth: Eth, public address: string, public privateKey: string, public publicKey) {}
+  constructor(public address: string, public privateKey: string, public publicKey) {}
 
-  static create(eth: Eth, entropy: string = randomHex(32)) {
+  static create(entropy: string = randomHex(32)) {
     const { privateKey, address, publicKey } = create(entropy);
-    return new Account(eth, address, privateKey, publicKey);
+    return new Account(address, privateKey, publicKey);
   }
 
-  static fromPrivate(eth: Eth, privateKey: string) {
+  static fromPrivate(privateKey: string) {
     const { address, publicKey } = fromPrivate(privateKey);
-    return new Account(eth, address, privateKey, publicKey);
+    return new Account(address, privateKey, publicKey);
   }
 
-  static async fromKeystore(eth: Eth, v3Keystore: KeyStore | string, password: string, nonStrict = false) {
-    return Account.fromPrivate(eth, await decrypt(v3Keystore, password, nonStrict));
+  static async fromKeystore(v3Keystore: KeyStore | string, password: string, nonStrict = false) {
+    return Account.fromPrivate(await decrypt(v3Keystore, password, nonStrict));
   }
 
-  sendTransaction(tx: Tx, extraformatters?: any): SendTxPromiEvent {
+  sendTransaction(tx: Tx, eth: Eth, extraformatters?: any): SendTxPromiEvent {
     const defer = promiEvent<TransactionReceipt>();
-    this.signTransaction(tx)
+    this.signTransaction(tx, eth)
       .then(signedTx => {
-        this.eth.sendSignedTransaction(signedTx.rawTransaction, extraformatters, defer);
+        eth.sendSignedTransaction(signedTx.rawTransaction, extraformatters, defer);
       })
       .catch(err => {
         fireError(err, defer.eventEmitter, defer.reject);
@@ -53,8 +52,8 @@ export class Account {
     return defer.eventEmitter;
   }
 
-  signTransaction(tx: Tx) {
-    return signTransaction(tx, this.privateKey, this.eth);
+  signTransaction(tx: Tx, eth: Eth) {
+    return signTransaction(tx, this.privateKey, eth);
   }
 
   sign(data: string) {

@@ -16,9 +16,8 @@
 */
 
 import { Subscription } from '../subscriptions';
-import { Contract, ContractAbi, ContractOptions } from '../contract';
-import { Accounts, Wallet } from '../accounts';
-import { IRequestManager, BatchManager } from '../request-manager';
+import { Wallet } from '../wallet';
+import { IRequestManager } from '../request-manager';
 import { fireError } from '../utils';
 import {
   outputSyncingFormatter,
@@ -31,37 +30,20 @@ import {
   Log,
 } from '../formatters';
 import { isFunction } from 'util';
-import { Tx, BlockType, BlockHash, TransactionHash } from '../types';
+import { TransactionHash } from '../types';
 import { Callback, Data, Address, Quantity } from '../types';
 import { PromiEvent, promiEvent, PromiEventResult } from '../promievent';
 import { confirmTransaction } from './confirm-transaction';
 import { EthRequestPayloads } from './eth-request-payloads';
-import { Block, BlockHeader } from './block';
+import { Block, BlockHeader, BlockType, BlockHash } from './block';
 import { RequestManager } from '../request-manager';
 import { Provider } from '../providers';
-import { Personal } from '../personal';
-import { Net } from '../net';
+import { Tx, SignedTransaction } from './tx';
 
 export interface LogsSubscriptionOptions {
   fromBlock?: number;
   address?: string;
   topics?: Array<string | string[]>;
-}
-
-export interface SignedTransaction {
-  raw: string;
-  tx: {
-    nonce: string;
-    gasPrice: string;
-    gas: string;
-    to: string;
-    value: string;
-    input: string;
-    v: string;
-    r: string;
-    s: string;
-    hash: string;
-  };
 }
 
 export interface SendTxPromiEvent<TxReceipt = TransactionReceipt> extends PromiEvent<TxReceipt> {
@@ -77,17 +59,14 @@ export interface SendTxPromiEvent<TxReceipt = TransactionReceipt> extends PromiE
 
 export class Eth {
   readonly request: EthRequestPayloads;
-
-  // Following are injected by Web3 for api backwards compatability, but gross.
-  public accounts!: Accounts;
-  public wallet?: Wallet;
-  public personal!: Personal;
-  public net!: Net;
-  public Contract!: new (abi: ContractAbi, address?: string, options?: ContractOptions) => Contract;
-  public BatchRequest!: new () => BatchManager;
+  private wallet?: Wallet;
 
   constructor(readonly requestManager: IRequestManager) {
     this.request = new EthRequestPayloads(undefined, 'latest');
+  }
+
+  setWallet(wallet?: Wallet) {
+    this.wallet = wallet;
   }
 
   static fromProvider(provider: Provider) {
@@ -248,7 +227,7 @@ export class Eth {
       payload = this.request.sendTransaction(tx);
     } else {
       const { from, ...fromlessTx } = tx;
-      const signedTx = await account.signTransaction(fromlessTx);
+      const signedTx = await account.signTransaction(fromlessTx, this);
       payload = this.request.sendSignedTransaction(signedTx.rawTransaction);
     }
 

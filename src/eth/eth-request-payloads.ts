@@ -31,8 +31,10 @@ import {
   outputLogFormatter,
 } from '../formatters';
 import { isString } from 'util';
-import { Tx, BlockType, BlockHash, TransactionHash } from '../types';
+import { TransactionHash } from '../types';
 import { Data, Address } from '../types';
+import { BlockType, BlockHash } from './block';
+import { Tx } from './tx';
 
 const identity = result => result;
 

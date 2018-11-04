@@ -15,6 +15,9 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+export type BlockType = 'latest' | 'pending' | 'genesis' | number;
+export type BlockHash = string;
+
 export interface BlockHeader {
   number: number;
   hash: string;
