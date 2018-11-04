@@ -39,14 +39,14 @@ import { Tx } from './tx';
 const identity = result => result;
 
 export class EthRequestPayloads {
-  constructor(private defaultAccount?: Address, private defaultBlock: BlockType = 'latest') {}
+  constructor(private defaultFromAddress?: Address, private defaultBlock: BlockType = 'latest') {}
 
-  getDefaultAccount() {
-    return this.defaultAccount;
+  getDefaultFromAddress() {
+    return this.defaultFromAddress;
   }
 
-  setDefaultAccount(address?: Address) {
-    this.defaultAccount = address ? toChecksumAddress(inputAddressFormatter(address)) : undefined;
+  setDefaultFromAddress(address?: Address) {
+    this.defaultFromAddress = address ? toChecksumAddress(inputAddressFormatter(address)) : undefined;
   }
 
   getDefaultBlock() {
@@ -227,7 +227,7 @@ export class EthRequestPayloads {
   }
 
   signTransaction(tx: Tx) {
-    tx.from = tx.from || this.defaultAccount;
+    tx.from = tx.from || this.defaultFromAddress;
     return {
       method: 'eth_signTransaction',
       params: [inputTransactionFormatter(tx)],
@@ -244,7 +244,7 @@ export class EthRequestPayloads {
   }
 
   sendTransaction(tx: Tx) {
-    tx.from = tx.from || this.defaultAccount;
+    tx.from = tx.from || this.defaultFromAddress;
     return {
       method: 'eth_sendTransaction',
       params: [inputTransactionFormatter(tx)],
@@ -269,7 +269,7 @@ export class EthRequestPayloads {
   }
 
   estimateGas(tx: Tx) {
-    tx.from = tx.from || this.defaultAccount;
+    tx.from = tx.from || this.defaultFromAddress;
     return {
       method: 'eth_estimateGas',
       params: [inputCallFormatter(tx)],

@@ -17,13 +17,12 @@
 
 import { isBoolean } from 'util';
 import { AbiDefinition } from '.';
-import { promiEvent, PromiEvent } from '../promievent';
-import * as utils from '../utils';
+import { promiEvent } from '../promievent';
 import { abi } from './abi';
-import { toChecksumAddress } from '../utils';
+import { toChecksumAddress, fireError } from '../utils';
 import { inputAddressFormatter } from '../formatters';
 import { Eth, SendTxPromiEvent } from '../eth';
-import { Wallet } from '../accounts';
+import { Wallet } from '../wallet';
 
 interface SendOptions {
   from: string;
@@ -74,7 +73,7 @@ export class TxDeploy {
 
     if (isBoolean(this.definition.payable) && !this.definition.payable && tx.value && tx.value > 0) {
       const defer = promiEvent();
-      return utils.fireError(
+      return fireError(
         new Error('Can not send value to non-payable contract method or constructor'),
         defer.eventEmitter,
         defer.reject,

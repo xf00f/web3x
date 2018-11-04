@@ -15,6 +15,8 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import bip39 from 'bip39';
+import hdkey from 'hdkey';
 import { create, fromPrivate } from '../eth-lib/account';
 import { randomHex, encrypt, KeyStore, decrypt, fireError } from '../utils';
 import { sign } from '../utils/sign';
@@ -34,6 +36,18 @@ export class Account {
   static fromPrivate(privateKey: string) {
     const { address, publicKey } = fromPrivate(privateKey);
     return new Account(address, privateKey, publicKey);
+  }
+
+  static createFromMnemonicAndPath(mnemonic: string, derivationPath: string) {
+    const seed = bip39.mnemonicToSeed(mnemonic).toString('hex');
+    return Account.createFromSeedAndPath(seed, derivationPath);
+  }
+
+  static createFromSeedAndPath(seed: string, derivationPath: string) {
+    const root = hdkey.fromMasterSeed(Buffer.from(seed, 'hex'));
+    const addrNode = root.derive(derivationPath);
+    const privateKey = '0x' + addrNode.privateKey.toString('hex');
+    return Account.fromPrivate(privateKey);
   }
 
   static async fromKeystore(v3Keystore: KeyStore | string, password: string, nonStrict = false) {

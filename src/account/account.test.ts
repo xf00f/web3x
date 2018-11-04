@@ -21,10 +21,10 @@ import { checkAddressChecksum } from '../utils';
 describe('accounts', function() {
   describe('account', function() {
     it('create account from private key', function() {
-      const privateKey = '7a28b5ba57c53603b0b07b56bba752f7784bf506fa95edc395f5cf6c7514fe9d';
+      const privateKey = '0x7a28b5ba57c53603b0b07b56bba752f7784bf506fa95edc395f5cf6c7514fe9d';
       const account = Account.fromPrivate(privateKey);
 
-      expect(account.address).toBe('0x7448a2AC4305F13596649E5BA4A939dAD81C1770');
+      expect(account.address).toBe('0x008AeEda4D805471dF9b2A5B0f38A0C3bCBA786b');
       expect(checkAddressChecksum(account.address)).toBe(true);
     });
 
@@ -35,5 +35,14 @@ describe('accounts', function() {
         localAccount.sendTransaction({ chainId: 1, nonce: 0, gasPrice: 1, to: localAccount.address, value: 1 }),
       ).rejects.toThrowError('"gas" is missing');
     });
+  });
+
+  it('should generate derived ethereum account', async () => {
+    const mnemonic =
+      'air embark traffic hip airport patch airport sure prefer prize enable bronze dizzy any jump road version claw idea ugly fragile release uncover reason';
+    const path = `m/44'/60'/0'/0/0`;
+    const account = Account.createFromMnemonicAndPath(mnemonic, path);
+    expect(account.address).toBe('0xCFaE51EE51d31a6Be641D79aB982a22c1604b5Ad');
+    expect(account.privateKey).toBe('0xbefa3c16c697f6171f2ede1b49ac94ed420b006c25b9b797a86bc5a3bca1c57b');
   });
 });

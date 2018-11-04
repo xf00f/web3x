@@ -69,6 +69,14 @@ export class Eth {
     this.wallet = wallet;
   }
 
+  getDefaultFromAddress() {
+    return this.request.getDefaultFromAddress();
+  }
+
+  setDefaultFromAddress(address?: string) {
+    this.request.setDefaultFromAddress(address);
+  }
+
   static fromProvider(provider: Provider) {
     return new Eth(new RequestManager(provider));
   }
@@ -209,7 +217,7 @@ export class Eth {
   }
 
   private getAccount(address?: string) {
-    address = address || this.request.getDefaultAccount();
+    address = address || this.request.getDefaultFromAddress();
     if (this.wallet && address) {
       return this.wallet.get(address);
     }
