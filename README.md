@@ -88,7 +88,7 @@ For an example of the code generated, take a look at this [example](example-proj
 
 ### Using generated contracts
 
-The following code demonstrates how to use the generated contract class. It's the exact same API as used in web3.js, only now with typesafety.
+The following code demonstrates how to use the generated contract class. It's the exact same API as used in web3.js, only now with type safety.
 
 ```typescript
 import { fromWei } from 'web3x/utils';
