@@ -1,6 +1,6 @@
 {
   "name": "web3x",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "license": "LGPL-3.0",
   "description": "Typescript port of web3.js",
   "repository": {
@@ -33,7 +33,7 @@
     "cover": "jest --coverage && cat coverage/lcov.info | node_modules/coveralls/bin/coveralls.js",
     "clean": "rm -rf ./dest ./dest-es",
     "deploy": "yarn cover && yarn build && npm publish dest && npm publish dest-es",
-    "deploy_patch": "yarn cover && yarn version --patch && yarn build && npm publish dest && npm publish dest-es"
+    "patch_version": "yarn version --patch"
   },
   "bin": {
     "web3x-codegen": "./codegen/index.js"
