@@ -223,7 +223,9 @@ export class Eth {
     // TODO: Can we remove extraFormatters, which is basically exposing contract internals here, and instead
     // wrap the returned PromiEvent in another PromiEvent that does the translations upstream?
     const defer = promiEvent<TransactionReceipt>();
-    this.sendTransactionAsync(defer, tx, extraFormatters);
+    this.sendTransactionAsync(defer, tx, extraFormatters).catch(err => {
+      fireError(err, defer.eventEmitter, defer.reject);
+    });
     return defer.eventEmitter;
   }
 

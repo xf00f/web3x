@@ -113,6 +113,18 @@ describe('eth', () => {
     });
   });
 
+  it('should fail when from not specified', async () => {
+    const eth = new Eth(mockRequestManager);
+
+    await expect(
+      eth.sendTransaction({
+        to: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+        value: 100,
+        gasPrice: 100,
+      }),
+    ).rejects.toThrowError('"from" field must be defined');
+  });
+
   const bootstrap1 = function(address: string | null = contractAddress) {
     mockRequestManager.send.mockImplementationOnce(async payload => {
       expect(payload.method).toBe('eth_sendTransaction');
