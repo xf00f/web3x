@@ -28,5 +28,13 @@ describe('accounts', function() {
       expect(account.address).toBe('0x7448a2AC4305F13596649E5BA4A939dAD81C1770');
       expect(checkAddressChecksum(account.address)).toBe(true);
     });
+
+    it('should fail with missing gas', async () => {
+      const mockEth: any = null;
+      const localAccount = Account.create(mockEth);
+      await expect(
+        localAccount.sendTransaction({ chainId: 1, nonce: 0, gasPrice: 1, to: localAccount.address, value: 1 }),
+      ).rejects.toThrowError('"gas" is missing');
+    });
   });
 });

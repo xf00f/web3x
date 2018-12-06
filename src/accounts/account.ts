@@ -17,7 +17,7 @@
 
 import { Tx } from '../types';
 import { create, fromPrivate } from '../eth-lib/account';
-import { randomHex, encrypt, KeyStore, decrypt } from '../utils';
+import { randomHex, encrypt, KeyStore, decrypt, fireError } from '../utils';
 import { sign } from '../utils/sign';
 import { signTransaction } from './sign-transaction';
 import { Eth, SendTxPromiEvent } from '../eth';
@@ -43,9 +43,13 @@ export class Account {
 
   sendTransaction(tx: Tx, extraformatters?: any): SendTxPromiEvent {
     const defer = promiEvent<TransactionReceipt>();
-    this.signTransaction(tx).then(signedTx => {
-      this.eth.sendSignedTransaction(signedTx.rawTransaction, extraformatters, defer);
-    });
+    this.signTransaction(tx)
+      .then(signedTx => {
+        this.eth.sendSignedTransaction(signedTx.rawTransaction, extraformatters, defer);
+      })
+      .catch(err => {
+        fireError(err, defer.eventEmitter, defer.reject);
+      });
     return defer.eventEmitter;
   }
 
