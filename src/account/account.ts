@@ -26,27 +26,27 @@ import { promiEvent } from '../promievent';
 import { TransactionReceipt } from '../formatters';
 
 export class Account {
-  constructor(public address: string, public privateKey: string, public publicKey) {}
+  constructor(public address: string, public privateKey: Buffer, public publicKey) {}
 
-  static create(entropy: string = randomHex(32)) {
+  static create(entropy: Buffer = randomHex(32)) {
     const { privateKey, address, publicKey } = create(entropy);
     return new Account(address, privateKey, publicKey);
   }
 
-  static fromPrivate(privateKey: string) {
+  static fromPrivate(privateKey: Buffer) {
     const { address, publicKey } = fromPrivate(privateKey);
     return new Account(address, privateKey, publicKey);
   }
 
   static createFromMnemonicAndPath(mnemonic: string, derivationPath: string) {
-    const seed = bip39.mnemonicToSeed(mnemonic).toString('hex');
+    const seed = bip39.mnemonicToSeed(mnemonic);
     return Account.createFromSeedAndPath(seed, derivationPath);
   }
 
-  static createFromSeedAndPath(seed: string, derivationPath: string) {
-    const root = hdkey.fromMasterSeed(Buffer.from(seed, 'hex'));
+  static createFromSeedAndPath(seed: Buffer, derivationPath: string) {
+    const root = hdkey.fromMasterSeed(seed);
     const addrNode = root.derive(derivationPath);
-    const privateKey = '0x' + addrNode.privateKey.toString('hex');
+    const privateKey = addrNode.privateKey;
     return Account.fromPrivate(privateKey);
   }
 

@@ -20,6 +20,7 @@ import randomBytes from 'randombytes';
 import { isString } from 'util';
 import uuid from 'uuid';
 import { scrypt, sha3, pbkdf2 } from '.';
+import { isHex } from './hex';
 
 interface ScryptKdfParams {
   dklen: number;
@@ -56,7 +57,7 @@ export async function decrypt(
   v3Keystore: KeyStore | string,
   password: string,
   nonStrict: boolean = false,
-): Promise<string> {
+): Promise<Buffer> {
   if (!isString(password)) {
     throw new Error('No password given.');
   }
@@ -96,11 +97,11 @@ export async function decrypt(
   const aesKey = derivedKey.slice(0, 16);
 
   const decipher = aes.createDecipheriv(json.crypto.cipher, aesKey, iv);
-  return '0x' + Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString('hex');
+  return Buffer.concat([decipher.update(ciphertext), decipher.final()]);
 }
 
 export async function encrypt(
-  privateKey: string,
+  privateKey: Buffer,
   address: string,
   password: string,
   options: any = {},
@@ -131,7 +132,6 @@ export async function encrypt(
     throw new Error('Unsupported kdf');
   }
 
-  const input = Buffer.from(privateKey.replace('0x', ''), 'hex');
   const aesKey = derivedKey.slice(0, 16);
 
   const cipher = aes.createCipheriv(cipherAlgo, aesKey, iv);
@@ -139,7 +139,7 @@ export async function encrypt(
     throw new Error('Unsupported cipher');
   }
 
-  const ciphertext = Buffer.concat([cipher.update(input), cipher.final()]);
+  const ciphertext = Buffer.concat([cipher.update(privateKey), cipher.final()]);
 
   const mac = sha3(Buffer.concat([derivedKey.slice(16, 32), ciphertext])).replace('0x', '');
 

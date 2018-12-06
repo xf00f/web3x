@@ -62,7 +62,7 @@ export class Wallet {
     return keys.map(key => +key);
   }
 
-  create(numberOfAccounts: number, entropy?: string): Account[] {
+  create(numberOfAccounts: number, entropy?: Buffer): Account[] {
     for (var i = 0; i < numberOfAccounts; ++i) {
       this.add(Account.create(entropy).privateKey);
     }
@@ -83,25 +83,25 @@ export class Wallet {
     return addressOrIndex;
   }
 
-  add(privateKey: string): Account;
+  add(privateKey: Buffer): Account;
   add(account: Account): Account;
-  add(account: string | Account): Account {
-    if (isString(account)) {
-      account = Account.fromPrivate(account);
+  add(accountOrKey: Buffer | Account): Account {
+    if (Buffer.isBuffer(accountOrKey)) {
+      accountOrKey = Account.fromPrivate(accountOrKey);
     } else {
-      account = Account.fromPrivate(account.privateKey);
+      accountOrKey = Account.fromPrivate(accountOrKey.privateKey);
     }
 
-    const existing = this.get(account.address);
+    const existing = this.get(accountOrKey.address);
     if (existing) {
       return existing;
     }
 
     const index = this.findSafeIndex();
-    this.accounts[index] = account;
+    this.accounts[index] = accountOrKey;
     this.length++;
 
-    return account;
+    return accountOrKey;
   }
 
   remove(addressOrIndex: string | number) {
@@ -111,7 +111,7 @@ export class Wallet {
       return false;
     }
 
-    this.accounts[index].privateKey = '';
+    this.accounts[index].privateKey = Buffer.of();
     delete this.accounts[index];
     this.length--;
 

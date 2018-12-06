@@ -119,35 +119,25 @@ var staticTests: { json: KeyStore; password: string; priv: string }[] = [
   },
 ];
 
-describe('eth', function() {
-  describe('accounts', function() {
-    describe('encryption', function() {
-      staticTests.forEach(function(test, i) {
-        it(
-          'encrypt staticTests and compare to keystore',
-          async () => {
-            const keystore = await encrypt(test.priv, test.json.address!, test.password, {
-              id: test.json.id,
-              iv: test.json.crypto.cipherparams.iv,
-              kdf: test.json.crypto.kdf,
-              ...test.json.crypto.kdfparams,
-            });
-            expect(keystore).toEqual(test.json);
-          },
-          30000,
-        );
-      });
+describe('utils', function() {
+  describe('encryption', function() {
+    staticTests.forEach(function(test, i) {
+      it('encrypt staticTests and compare to keystore', async () => {
+        const keystore = await encrypt(Buffer.from(test.priv, 'hex'), test.json.address!, test.password, {
+          id: test.json.id,
+          iv: test.json.crypto.cipherparams.iv,
+          kdf: test.json.crypto.kdf,
+          ...test.json.crypto.kdfparams,
+        });
+        expect(keystore).toEqual(test.json);
+      }, 30000);
+    });
 
-      staticTests.forEach(function(test, i) {
-        it(
-          'decrypt staticTests and compare to private key',
-          async () => {
-            const privateKey = await decrypt(test.json, test.password);
-            expect(privateKey).toBe('0x' + test.priv);
-          },
-          30000,
-        );
-      });
+    staticTests.forEach(function(test, i) {
+      it('decrypt staticTests and compare to private key', async () => {
+        const privateKey = await decrypt(test.json, test.password);
+        expect(privateKey).toEqual(Buffer.from(test.priv, 'hex'));
+      }, 30000);
     });
   });
 });

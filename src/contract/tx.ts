@@ -151,7 +151,7 @@ export class Tx implements TxCall, TxSend {
     }
   }
 
-  private getTx(options) {
+  private getTx(options: any = {}) {
     return {
       to: this.contractAddress,
       from: options.from ? toChecksumAddress(inputAddressFormatter(options.from)) : this.defaultOptions.from,

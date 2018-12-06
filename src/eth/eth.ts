@@ -40,6 +40,8 @@ import { RequestManager } from '../request-manager';
 import { Provider } from '../providers';
 import { Tx, SignedTransaction } from './tx';
 
+export type TypedSigningData = { type: string; name: string; value: string }[];
+
 export interface LogsSubscriptionOptions {
   fromBlock?: number;
   address?: string;
@@ -257,11 +259,16 @@ export class Eth {
 
     if (!account) {
       const payload = this.request.sign(address, dataToSign);
-      return this.requestManager.send(payload);
+      return payload.format(await this.requestManager.send(payload));
     } else {
       const sig = account.sign(dataToSign);
       return sig.signature;
     }
+  }
+
+  async signTypedData(address: Address, dataToSign: TypedSigningData): Promise<Data> {
+    const payload = this.request.signTypedData(address, dataToSign);
+    return payload.format(await this.requestManager.send(payload));
   }
 
   async call(tx: Tx, block?: BlockType, outputFormatter = result => result): Promise<Data> {

@@ -17,6 +17,7 @@
 
 import { signTransaction, recoverTransaction } from './sign-transaction';
 import { Account } from './account';
+import { hexToBuffer } from '../utils';
 
 var clone = function(object) {
   return object ? JSON.parse(JSON.stringify(object)) : [];
@@ -26,7 +27,7 @@ var tests = [
   {
     address: '0x2c7536E3605D9C16a7a3D7b1898e529396a65c23',
     iban: 'XE0556YCRTEZ9JALZBSCXOK4UJ5F3HN03DV',
-    privateKey: '0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318',
+    privateKey: hexToBuffer('0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318'),
     transaction: {
       chainId: 1,
       nonce: 0,
@@ -46,7 +47,7 @@ var tests = [
   {
     address: '0x2c7536E3605D9C16a7a3D7b1898e529396a65c23',
     iban: 'XE0556YCRTEZ9JALZBSCXOK4UJ5F3HN03DV',
-    privateKey: '0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318',
+    privateKey: hexToBuffer('0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318'),
     transaction: {
       chainId: 1,
       nonce: 0,
@@ -69,7 +70,7 @@ var tests = [
   {
     address: '0x2c7536E3605D9C16a7a3D7b1898e529396a65c23',
     iban: 'XE0556YCRTEZ9JALZBSCXOK4UJ5F3HN03DV',
-    privateKey: '0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318',
+    privateKey: hexToBuffer('0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318'),
     transaction: {
       chainId: 1,
       nonce: 0,
@@ -92,7 +93,7 @@ var tests = [
   {
     address: '0x2c7536E3605D9C16a7a3D7b1898e529396a65c23',
     iban: 'XE0556YCRTEZ9JALZBSCXOK4UJ5F3HN03DV',
-    privateKey: '0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318',
+    privateKey: hexToBuffer('0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318'),
     transaction: {
       chainId: 1,
       nonce: 0,
@@ -115,7 +116,7 @@ var tests = [
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
     iban: 'XE25RG8S3H5TX5RD7QTL5UPVW90AHN2VYDC',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 0,
@@ -134,7 +135,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 0,
@@ -154,7 +155,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 10,
@@ -174,7 +175,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: '0xa',
@@ -194,7 +195,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: '16',
@@ -214,7 +215,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 16,
@@ -234,7 +235,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: '0x16',
@@ -254,7 +255,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: '0x16',
@@ -274,7 +275,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 2,
@@ -290,7 +291,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 2,
@@ -305,7 +306,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 2,
@@ -320,7 +321,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 2,
@@ -335,7 +336,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 'a',
@@ -350,7 +351,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: -1,
       nonce: 1,
@@ -365,7 +366,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: -1,
       nonce: 0,
@@ -380,7 +381,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: -2,
@@ -395,7 +396,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 0,
@@ -410,7 +411,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 0,
@@ -511,11 +512,6 @@ describe('accounts', function() {
           expect(recoverTransaction(tx.rawTransaction)).toBe(test.address);
         });
       }
-    });
-
-    it('should throw if not strict hex', async () => {
-      const privateKey = '870c20575bd9da9d747011401ed345edf6229c96ba2bfcd965ed6dee1fc3afd3';
-      await expect(signTransaction({}, privateKey, mockEthereum)).rejects.toBeInstanceOf(Error);
     });
   });
 });

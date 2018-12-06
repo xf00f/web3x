@@ -255,7 +255,15 @@ export class EthRequestPayloads {
   sign(address: Address, dataToSign: Data) {
     return {
       method: 'eth_sign',
-      params: [inputSignFormatter(dataToSign), inputAddressFormatter(address)],
+      params: [inputAddressFormatter(address), inputSignFormatter(dataToSign)],
+      format: identity,
+    };
+  }
+
+  signTypedData(address: Address, dataToSign: { type: string; name: string; value: string }[]) {
+    return {
+      method: 'eth_signTypedData',
+      params: [dataToSign, inputAddressFormatter(address)],
       format: identity,
     };
   }

@@ -16,12 +16,12 @@
 */
 
 import { Account } from './account';
-import { checkAddressChecksum } from '../utils';
+import { checkAddressChecksum, bufferToHex } from '../utils';
 
 describe('accounts', function() {
   describe('account', function() {
     it('create account from private key', function() {
-      const privateKey = '0x7a28b5ba57c53603b0b07b56bba752f7784bf506fa95edc395f5cf6c7514fe9d';
+      const privateKey = Buffer.from('7a28b5ba57c53603b0b07b56bba752f7784bf506fa95edc395f5cf6c7514fe9d', 'hex');
       const account = Account.fromPrivate(privateKey);
 
       expect(account.address).toBe('0x008AeEda4D805471dF9b2A5B0f38A0C3bCBA786b');
@@ -43,6 +43,6 @@ describe('accounts', function() {
     const path = `m/44'/60'/0'/0/0`;
     const account = Account.createFromMnemonicAndPath(mnemonic, path);
     expect(account.address).toBe('0xCFaE51EE51d31a6Be641D79aB982a22c1604b5Ad');
-    expect(account.privateKey).toBe('0xbefa3c16c697f6171f2ede1b49ac94ed420b006c25b9b797a86bc5a3bca1c57b');
+    expect(bufferToHex(account.privateKey)).toBe('0xbefa3c16c697f6171f2ede1b49ac94ed420b006c25b9b797a86bc5a3bca1c57b');
   });
 });
