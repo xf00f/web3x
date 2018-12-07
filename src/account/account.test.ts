@@ -28,11 +28,14 @@ describe('accounts', function() {
       expect(checkAddressChecksum(account.address)).toBe(true);
     });
 
-    it('should fail with missing gas', async () => {
+    it('should fail with 0 gas', async () => {
       const mockEth: any = null;
-      const localAccount = Account.create(mockEth);
+      const localAccount = Account.create();
       await expect(
-        localAccount.sendTransaction({ chainId: 1, nonce: 0, gasPrice: 1, to: localAccount.address, value: 1 }),
+        localAccount.sendTransaction(
+          { chainId: 1, nonce: 0, gasPrice: 1, to: localAccount.address, value: 1, gas: 0 },
+          mockEth,
+        ),
       ).rejects.toThrowError('"gas" is missing');
     });
   });

@@ -25,6 +25,16 @@ import { Eth, Tx, SendTxPromiEvent } from '../eth';
 import { promiEvent } from '../promievent';
 import { TransactionReceipt } from '../formatters';
 
+export interface AccountTx {
+  nonce?: string | number;
+  chainId?: string | number;
+  to?: string;
+  data?: string;
+  value?: string | number;
+  gas: string | number;
+  gasPrice?: string | number;
+}
+
 export class Account {
   constructor(public address: string, public privateKey: Buffer, public publicKey) {}
 
@@ -54,7 +64,7 @@ export class Account {
     return Account.fromPrivate(await decrypt(v3Keystore, password, nonStrict));
   }
 
-  sendTransaction(tx: Tx, eth: Eth, extraformatters?: any): SendTxPromiEvent {
+  sendTransaction(tx: AccountTx, eth: Eth, extraformatters?: any): SendTxPromiEvent {
     const defer = promiEvent<TransactionReceipt>();
     this.signTransaction(tx, eth)
       .then(signedTx => {
@@ -66,7 +76,7 @@ export class Account {
     return defer.eventEmitter;
   }
 
-  signTransaction(tx: Tx, eth: Eth) {
+  signTransaction(tx: AccountTx, eth: Eth) {
     return signTransaction(tx, this.privateKey, eth);
   }
 

@@ -22,7 +22,7 @@ export interface Tx {
   to?: string;
   data?: string;
   value?: string | number;
-  gas?: string | number;
+  gas: string | number;
   gasPrice?: string | number;
 }
 

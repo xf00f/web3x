@@ -20,6 +20,19 @@ import { Eth } from './eth';
 
 describe('eth', () => {
   const contractAddress = '0x1234567890123456789012345678901234567891';
+  const basicTx = {
+    from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+    to: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+    data: '0xa123456',
+    gasPrice: 100,
+    gas: 100,
+  };
+  const deployTx = {
+    from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+    data: '0xa123456',
+    gasPrice: 100,
+    gas: 100,
+  };
   let mockRequestManager: MockRequestManager;
 
   beforeEach(() => {
@@ -31,11 +44,7 @@ describe('eth', () => {
 
     mockRequestManager.send.mockResolvedValue('0x1234567453543456321456321');
 
-    const result = await eth.call({
-      from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-      to: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-      data: '0xa123456',
-    });
+    const result = await eth.call(basicTx);
 
     expect(result).toEqual('0x1234567453543456321456321');
   });
@@ -48,13 +57,7 @@ describe('eth', () => {
       code: 1234,
     });
 
-    await expect(
-      eth.call({
-        from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-        to: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-        data: '0xa123456',
-      }),
-    ).rejects.toEqual({
+    await expect(eth.call(basicTx)).rejects.toEqual({
       message: 'Wrong!',
       code: 1234,
     });
@@ -66,17 +69,9 @@ describe('eth', () => {
     mockRequestManager.send.mockResolvedValue('0x1234567453543456321456321');
 
     await expect(
-      eth.call(
-        {
-          from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-          to: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-          data: '0xa123456',
-        },
-        undefined,
-        _ => {
-          throw new Error('Error!');
-        },
-      ),
+      eth.call(basicTx, undefined, _ => {
+        throw new Error('Error!');
+      }),
     ).rejects.toBeInstanceOf(Error);
   });
 
@@ -90,11 +85,8 @@ describe('eth', () => {
     // eth_getTransactionReceipt
     mockRequestManager.send.mockResolvedValueOnce({ blockHash: '0x1234' });
 
-    await eth.sendTransaction({
-      from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-      to: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-      data: '0xa123456',
-    });
+    const { gasPrice, ...gasPricelessTx } = basicTx;
+    await eth.sendTransaction(gasPricelessTx);
 
     expect(mockRequestManager.send.mock.calls[0][0]).toMatchObject({
       method: 'eth_gasPrice',
@@ -113,16 +105,10 @@ describe('eth', () => {
     });
   });
 
-  it('should fail when from not specified', async () => {
+  it('should fail to send transaction when from not specified', async () => {
     const eth = new Eth(mockRequestManager);
-
-    await expect(
-      eth.sendTransaction({
-        to: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-        value: 100,
-        gasPrice: 100,
-      }),
-    ).rejects.toThrowError('"from" field must be defined');
+    const { from, ...fromlessTx } = basicTx;
+    await expect(eth.sendTransaction(fromlessTx)).rejects.toThrowError('"from" field must be defined');
   });
 
   const bootstrap1 = function(address: string | null = contractAddress) {
@@ -172,12 +158,7 @@ describe('eth', () => {
   it('should use promise when subscribing and checking for receipt', async () => {
     const eth = bootstrap1();
 
-    const result = await eth.sendTransaction({
-      from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-      to: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-      value: '0xa',
-      gasPrice: '23435234234',
-    });
+    const result = await eth.sendTransaction(basicTx);
 
     expect(result).toEqual({
       contractAddress,
@@ -192,25 +173,18 @@ describe('eth', () => {
   it('should use emitter when subscribing and checking for receipt', done => {
     const eth = bootstrap1();
 
-    eth
-      .sendTransaction({
-        from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-        to: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-        value: '0xa',
-        gasPrice: '23435234234',
-      })
-      .on('receipt', function(result) {
-        expect(result).toEqual({
-          contractAddress,
-          cumulativeGasUsed: 10,
-          transactionIndex: 3,
-          blockNumber: 10,
-          blockHash: '0xafff',
-          gasUsed: 0,
-        });
-
-        done();
+    eth.sendTransaction(basicTx).on('receipt', function(result) {
+      expect(result).toEqual({
+        contractAddress,
+        cumulativeGasUsed: 10,
+        transactionIndex: 3,
+        blockNumber: 10,
+        blockHash: '0xafff',
+        gasUsed: 0,
       });
+
+      done();
+    });
   });
 
   it('should use promise when subscribing and checking for deployed contract', async () => {
@@ -221,11 +195,7 @@ describe('eth', () => {
       return '0x321';
     });
 
-    const result = await eth.sendTransaction({
-      from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-      data: '0xa123456',
-      gasPrice: '23435234234',
-    });
+    const result = await eth.sendTransaction(deployTx);
 
     expect(result).toEqual({
       contractAddress,
@@ -246,11 +216,7 @@ describe('eth', () => {
     });
 
     eth
-      .sendTransaction({
-        from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-        data: '0xa123456',
-        gasPrice: '23435234234',
-      })
+      .sendTransaction(deployTx)
       .on('receipt', function(result) {
         expect(result).toEqual({
           contractAddress,
@@ -262,7 +228,8 @@ describe('eth', () => {
         });
 
         done();
-      });
+      })
+      .catch(done);
   });
 
   it('should fail with promise when deploying contract (empty code)', async () => {
@@ -273,13 +240,7 @@ describe('eth', () => {
       return '0x';
     });
 
-    await expect(
-      eth.sendTransaction({
-        from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-        data: '0xa123456',
-        gasPrice: '23435234234',
-      }),
-    ).rejects.toBeInstanceOf(Error);
+    await expect(eth.sendTransaction(deployTx)).rejects.toBeInstanceOf(Error);
   });
 
   it('should fail with emitter when deploying contract (empty code)', done => {
@@ -290,39 +251,23 @@ describe('eth', () => {
       return '0x';
     });
 
-    eth
-      .sendTransaction({
-        from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-        data: '0xa123456',
-        gasPrice: '23435234234',
-      })
-      .on('error', function(error) {
-        expect(error).toBeInstanceOf(Error);
-        done();
-      });
+    eth.sendTransaction(deployTx).on('error', function(error) {
+      expect(error).toBeInstanceOf(Error);
+      done();
+    });
   });
 
   it('should fail with promise when deploying contract (no address)', async () => {
     const eth = bootstrap1(null);
 
-    await expect(
-      eth.sendTransaction({
-        from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-        data: '0xa123456',
-        gasPrice: '23435234234',
-      }),
-    ).rejects.toBeInstanceOf(Error);
+    await expect(eth.sendTransaction(deployTx)).rejects.toBeInstanceOf(Error);
   });
 
   it('should fail with emitter when deploying contract (no address)', done => {
     const eth = bootstrap1(null);
 
     eth
-      .sendTransaction({
-        from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-        data: '0xa123456',
-        gasPrice: '23435234234',
-      })
+      .sendTransaction(deployTx)
       .on('error', function(error) {
         expect(error).toBeInstanceOf(Error);
       })
@@ -370,28 +315,16 @@ describe('eth', () => {
   it('should fail with promise after no receipt after 50 blocks', async () => {
     const eth = failOnTimeout();
 
-    await expect(
-      eth.sendTransaction({
-        from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-        data: '0xa123456',
-        gasPrice: '23435234234',
-      }),
-    ).rejects.toBeInstanceOf(Error);
+    await expect(eth.sendTransaction(basicTx)).rejects.toBeInstanceOf(Error);
   });
 
   it('should fail with emitter after no receipt after 50 blocks', done => {
     const eth = failOnTimeout();
 
-    eth
-      .sendTransaction({
-        from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-        data: '0xa123456',
-        gasPrice: '23435234234',
-      })
-      .on('error', function(error) {
-        expect(error).toBeInstanceOf(Error);
-        done();
-      });
+    eth.sendTransaction(basicTx).on('error', function(error) {
+      expect(error).toBeInstanceOf(Error);
+      done();
+    });
   });
 
   it('should receive emitted confirmation receipts', function(done) {
@@ -442,11 +375,7 @@ describe('eth', () => {
     let countConf = 0;
 
     eth
-      .sendTransaction({
-        from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-        to: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-        gasPrice: '23435234234',
-      })
+      .sendTransaction(basicTx)
       .on('transactionHash', result => {
         expect(result).toBe('0x1234567453543456321456321');
       })
