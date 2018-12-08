@@ -494,12 +494,8 @@ async function makeAndWriteFiles(
 }
 
 function getWeb3xPath() {
-  try {
-    const pkg = JSON.parse(fs.readFileSync('package.json').toString());
-    return !!pkg.dependencies['web3x-es'] || !!pkg.devDependencies['web3x-es'] ? 'web3x-es' : 'web3x';
-  } catch (err) {
-    return 'web3x';
-  }
+  const pkg = JSON.parse(fs.readFileSync(__dirname + '/../../package.json').toString());
+  return pkg.name;
 }
 
 async function main() {
