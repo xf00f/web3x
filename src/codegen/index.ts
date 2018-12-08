@@ -476,7 +476,7 @@ async function makeAndWriteAbi(outputPath: string, name: string, abi: ContractAb
   */
 }
 
-async function makeAndWriteFiles(
+export async function makeAndWriteFiles(
   outputPath: string,
   name: string,
   abiLocation: string | ContractAbi,
@@ -493,13 +493,9 @@ async function makeAndWriteFiles(
   makeAndWriteAbi(outputPath, name, abi, web3xPath);
 }
 
-function getWeb3xPath() {
-  try {
-    const pkg = JSON.parse(fs.readFileSync('package.json').toString());
-    return !!pkg.dependencies['web3x-es'] || !!pkg.devDependencies['web3x-es'] ? 'web3x-es' : 'web3x';
-  } catch (err) {
-    return 'web3x';
-  }
+export function getWeb3xPath() {
+  const pkg = JSON.parse(fs.readFileSync(__dirname + '/../../package.json').toString());
+  return pkg.name;
 }
 
 async function main() {
@@ -514,4 +510,6 @@ async function main() {
   );
 }
 
-main().catch(console.error);
+if (require.main === module) {
+  main().catch(console.error);
+}
