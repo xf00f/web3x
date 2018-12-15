@@ -18,7 +18,7 @@
 import { isArray } from 'util';
 import * as Jsonrpc from './jsonrpc';
 import { givenProvider } from './givenProvider';
-import { Provider } from '../providers';
+import { LegacyProvider } from '../providers';
 import { ErrorResponse, InvalidResponse } from '../errors';
 
 export interface IRequestManager {
@@ -41,7 +41,7 @@ export class RequestManager {
   private subscriptions: any;
   public static givenProvider = givenProvider;
 
-  constructor(public provider: Provider) {
+  constructor(public provider: LegacyProvider) {
     // listen to incoming notifications
     if (this.provider && this.provider.on) {
       this.provider.on('data', (result, deprecatedResult) => {

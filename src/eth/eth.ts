@@ -17,7 +17,6 @@
 
 import { Subscription } from '../subscriptions';
 import { Wallet } from '../wallet';
-import { IRequestManager } from '../request-manager';
 import { fireError } from '../utils';
 import {
   outputSyncingFormatter,
@@ -36,9 +35,8 @@ import { PromiEvent, promiEvent, PromiEventResult } from '../promievent';
 import { confirmTransaction } from './confirm-transaction';
 import { EthRequestPayloads } from './eth-request-payloads';
 import { Block, BlockHeader, BlockType, BlockHash } from './block';
-import { RequestManager } from '../request-manager';
-import { Provider } from '../providers';
 import { Tx, SignedTransaction } from './tx';
+import { EthereumProvider } from '../providers/ethereum';
 
 export type TypedSigningData = { type: string; name: string; value: string }[];
 
@@ -63,7 +61,7 @@ export class Eth {
   readonly request: EthRequestPayloads;
   private wallet?: Wallet;
 
-  constructor(readonly requestManager: IRequestManager) {
+  constructor(readonly provider: EthereumProvider) {
     this.request = new EthRequestPayloads(undefined, 'latest');
   }
 
@@ -79,78 +77,64 @@ export class Eth {
     this.request.setDefaultFromAddress(address);
   }
 
-  static fromProvider(provider: Provider) {
-    return new Eth(new RequestManager(provider));
+  private async send({ method, params, format }: { method: string; params?: any[]; format: any }) {
+    return format(await this.provider.send(method, params));
   }
 
   async getId(): Promise<number> {
-    const payload = this.request.getId();
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getId());
   }
 
   async getNodeInfo(): Promise<string> {
-    const payload = this.request.getNodeInfo();
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getNodeInfo());
   }
 
   async getProtocolVersion(): Promise<string> {
-    const payload = this.request.getProtocolVersion();
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getProtocolVersion());
   }
 
   async getCoinbase(): Promise<Address> {
-    const payload = this.request.getCoinbase();
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getCoinbase());
   }
 
   async isMining(): Promise<boolean> {
-    const payload = this.request.isMining();
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.isMining());
   }
 
   async getHashrate(): Promise<number> {
-    const payload = this.request.getHashrate();
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getHashrate());
   }
 
   async isSyncing(): Promise<Sync | boolean> {
-    const payload = this.request.isSyncing();
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.isSyncing());
   }
 
   async getGasPrice(): Promise<Quantity> {
-    const payload = this.request.getGasPrice();
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getGasPrice());
   }
 
   async getAccounts(): Promise<Address[]> {
-    const payload = this.request.getAccounts();
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getAccounts());
   }
 
   async getBlockNumber(): Promise<number> {
-    const payload = this.request.getBlockNumber();
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getBlockNumber());
   }
 
   async getBalance(address: Address, block?: BlockType): Promise<Quantity> {
-    const payload = this.request.getBalance(address, block);
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getBalance(address, block));
   }
 
   async getStorageAt(address: Address, position: string, block?: BlockType): Promise<Data> {
-    const payload = this.request.getStorageAt(address, position, block);
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getStorageAt(address, position, block));
   }
 
   async getCode(address: Address, block?: BlockType): Promise<Data> {
-    const payload = this.request.getCode(address, block);
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getCode(address, block));
   }
 
   async getBlock(block: BlockType | BlockHash, returnTransactionObjects: boolean = false): Promise<Block> {
-    const payload = this.request.getBlock(block, returnTransactionObjects);
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getBlock(block, returnTransactionObjects));
   }
 
   async getUncle(
@@ -158,43 +142,35 @@ export class Eth {
     uncleIndex: number,
     returnTransactionObjects: boolean = false,
   ): Promise<Block> {
-    const payload = this.request.getUncle(block, uncleIndex, returnTransactionObjects);
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getUncle(block, uncleIndex, returnTransactionObjects));
   }
 
   async getBlockTransactionCount(block: BlockType | BlockHash): Promise<number> {
-    const payload = this.request.getBlockTransactionCount(block);
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getBlockTransactionCount(block));
   }
 
   async getBlockUncleCount(block: BlockType | BlockHash): Promise<number> {
-    const payload = this.request.getBlockUncleCount(block);
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getBlockUncleCount(block));
   }
 
   async getTransaction(hash: TransactionHash): Promise<Transaction> {
-    const payload = this.request.getTransaction(hash);
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getTransaction(hash));
   }
 
   async getTransactionFromBlock(block: BlockType | BlockHash, index: number): Promise<Transaction> {
-    const payload = this.request.getTransactionFromBlock(block, index);
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getTransactionFromBlock(block, index));
   }
 
   async getTransactionReceipt(hash: TransactionHash): Promise<TransactionReceipt> {
-    const payload = this.request.getTransactionReceipt(hash);
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getTransactionReceipt(hash));
   }
 
   async getTransactionCount(address: Address, block?: BlockType): Promise<number> {
-    const payload = this.request.getTransactionCount(address, block);
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getTransactionCount(address, block));
   }
 
   async signTransaction(tx: Tx): Promise<SignedTransaction> {
-    const payload = this.request.signTransaction(tx);
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.signTransaction(tx));
   }
 
   sendSignedTransaction(
@@ -246,7 +222,7 @@ export class Eth {
 
   private async sendTransactionAndWaitForConfirmation(defer, payload, extraFormatters?) {
     try {
-      const result = await this.requestManager.send(payload);
+      const result = await this.provider.send(payload);
       defer.eventEmitter.emit('transactionHash', result);
       confirmTransaction(defer, result, payload, this, extraFormatters);
     } catch (err) {
@@ -258,8 +234,7 @@ export class Eth {
     const account = this.getAccount(address);
 
     if (!account) {
-      const payload = this.request.sign(address, dataToSign);
-      return payload.format(await this.requestManager.send(payload));
+      return await this.send(this.request.sign(address, dataToSign));
     } else {
       const sig = account.sign(dataToSign);
       return sig.signature;
@@ -267,28 +242,23 @@ export class Eth {
   }
 
   async signTypedData(address: Address, dataToSign: TypedSigningData): Promise<Data> {
-    const payload = this.request.signTypedData(address, dataToSign);
-    return payload.format(await this.requestManager.send(payload));
+    return await this.send(this.request.signTypedData(address, dataToSign));
   }
 
   async call(tx: Tx, block?: BlockType, outputFormatter = result => result): Promise<Data> {
-    const payload = this.request.call(tx, block, outputFormatter);
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.call(tx, block, outputFormatter));
   }
 
   async estimateGas(tx: Tx): Promise<number> {
-    const payload = this.request.estimateGas(tx);
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.estimateGas(tx));
   }
 
   async submitWork(nonce: string, powHash: string, digest: string): Promise<boolean> {
-    const payload = this.request.submitWork(nonce, powHash, digest);
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.submitWork(nonce, powHash, digest));
   }
 
   async getWork(): Promise<string[]> {
-    const payload = this.request.getWork();
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getWork());
   }
 
   async getPastLogs(options: {
@@ -297,12 +267,23 @@ export class Eth {
     address?: string;
     topics?: Array<string | string[]>;
   }): Promise<Log[]> {
-    const payload = this.request.getPastLogs(options);
-    return payload.format(await this.requestManager.send(payload))!;
+    return await this.send(this.request.getPastLogs(options));
   }
 
   subscribeLogs(options?: LogsSubscriptionOptions, callback?: Callback<Log>): Subscription<Log> {
-    const subscription = new Subscription<Log>({
+    const subscription = new Subscription<Log>('logs', [inputLogFormatter(options)], this.provider);
+
+    subscription.on('rawdata', result => {
+      const output = outputLogFormatter(result);
+      if (output.removed) {
+        subscription.emit('changed', output);
+      } else {
+        subscription.emit('data', output);
+      }
+    });
+
+    return subscription;
+    /*
       subscription: {
         params: 1,
         inputFormatter: [inputLogFormatter],
@@ -325,6 +306,7 @@ export class Eth {
     });
 
     return subscription.subscribe('logs', options, callback);
+    */
   }
 
   subscribeSyncing(callback?: Callback<object | boolean>): Subscription<object | boolean> {

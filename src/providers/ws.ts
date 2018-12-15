@@ -17,7 +17,9 @@
 
 import Ws, { ClientOptions } from 'isomorphic-ws';
 import { isArray } from 'util';
-import { Callback, JsonRPCRequest, Provider, NotificationCallback } from '.';
+import { Callback, LegacyProvider, NotificationCallback } from '.';
+import { JsonRpcRequest } from './jsonrpc';
+import { LegacyProviderAdapter } from './legacy-provider-adapter';
 
 interface WebsocketProviderOptions {
   timeout?: number;
@@ -30,7 +32,13 @@ type CallbackEntry = {
   method: string;
 };
 
-export class WebsocketProvider implements Provider {
+export class WebsocketProvider extends LegacyProviderAdapter {
+  constructor(url: string, options: WebsocketProviderOptions = {}) {
+    super(new LegacyWebsocketProvider(url, options));
+  }
+}
+
+class LegacyWebsocketProvider implements LegacyProvider {
   private options: WebsocketProviderOptions;
   private responseCallbacks: { [key: string]: CallbackEntry } = {};
   private notificationCallbacks: NotificationCallback[] = [];
@@ -164,7 +172,7 @@ export class WebsocketProvider implements Provider {
     }
   }
 
-  public send(payload: JsonRPCRequest, callback: Callback) {
+  public send(payload: JsonRpcRequest, callback: Callback) {
     if (this.connection.readyState === this.connection.CONNECTING) {
       setTimeout(() => {
         this.send(payload, callback);

@@ -15,16 +15,23 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Provider } from '.';
+import { LegacyProvider } from '.';
 import XMLHttpRequest from 'node-http-xhr';
 import { InvalidResponse, ConnectionTimeout, InvalidConnection } from '../errors';
+import { LegacyProviderAdapter } from './legacy-provider-adapter';
 //import http, { Agent as HttpAgent } from 'http';
 //import https, { Agent as HttpsAgent } from 'https';
+
+export class HttpProvider extends LegacyProviderAdapter {
+  constructor(host: string, options?: any) {
+    super(new LegacyHttpProvider(host, options));
+  }
+}
 
 /**
  * HttpProvider should be used to send rpc calls over http
  */
-export class HttpProvider implements Provider {
+class LegacyHttpProvider implements LegacyProvider {
   //private httpAgent?: HttpAgent;
   //private httpsAgent?: HttpsAgent;
   private timeout: number;
