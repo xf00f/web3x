@@ -12,7 +12,7 @@ const DAI_CONTRACT_ADDRESS = '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359';
 async function main() {
   // Construct necessary components.
   const provider = new WebsocketProvider('wss://mainnet.infura.io/ws');
-  const eth = Eth.fromProvider(provider);
+  const eth = new Eth(provider);
   const net = new Net(eth);
 
   try {

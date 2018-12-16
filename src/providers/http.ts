@@ -15,12 +15,10 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { LegacyProvider } from '.';
+import { LegacyProvider } from './legacy-provider';
 import XMLHttpRequest from 'node-http-xhr';
 import { InvalidResponse, ConnectionTimeout, InvalidConnection } from '../errors';
 import { LegacyProviderAdapter } from './legacy-provider-adapter';
-//import http, { Agent as HttpAgent } from 'http';
-//import https, { Agent as HttpsAgent } from 'https';
 
 export class HttpProvider extends LegacyProviderAdapter {
   constructor(host: string, options?: any) {
@@ -32,8 +30,6 @@ export class HttpProvider extends LegacyProviderAdapter {
  * HttpProvider should be used to send rpc calls over http
  */
 class LegacyHttpProvider implements LegacyProvider {
-  //private httpAgent?: HttpAgent;
-  //private httpsAgent?: HttpsAgent;
   private timeout: number;
   private headers: any;
   private connected: boolean;
@@ -41,13 +37,6 @@ class LegacyHttpProvider implements LegacyProvider {
   constructor(private host: string, options?: any) {
     options = options || {};
     this.host = host || 'http://localhost:8545';
-    /*
-    if (this.host.substring(0, 5) === 'https') {
-      this.httpsAgent = new https.Agent({ keepAlive: true });
-    } else {
-      this.httpAgent = new http.Agent({ keepAlive: true });
-    }
-    */
     this.timeout = options.timeout || 0;
     this.headers = options.headers;
     this.connected = false;
@@ -55,12 +44,6 @@ class LegacyHttpProvider implements LegacyProvider {
 
   private _prepareRequest() {
     var request = new XMLHttpRequest();
-    /*
-    request.nodejsSet({
-      httpsAgent: this.httpsAgent,
-      httpAgent: this.httpAgent,
-    });
-    */
 
     request.open('POST', this.host, true);
     request.setRequestHeader('Content-Type', 'application/json');
@@ -116,14 +99,5 @@ class LegacyHttpProvider implements LegacyProvider {
     }
   }
 
-  disconnect() {
-    /*
-    if (this.httpAgent) {
-      this.httpAgent.destroy();
-    }
-    if (this.httpsAgent) {
-      this.httpsAgent.destroy();
-    }
-    */
-  }
+  disconnect() {}
 }

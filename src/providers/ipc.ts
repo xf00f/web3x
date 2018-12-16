@@ -16,7 +16,7 @@
 */
 
 import { isArray, isFunction } from 'util';
-import { LegacyProvider } from '.';
+import { LegacyProvider } from './legacy-provider';
 import { InvalidResponse, InvalidConnection } from '../errors';
 import { LegacyProviderAdapter } from './legacy-provider-adapter';
 

@@ -1,4 +1,5 @@
 import { Eth } from 'web3x-es/eth';
+import { LegacyProvider, LegacyProviderAdapter } from 'web3x-es/providers';
 import { fromWei, toWei } from 'web3x-es/utils';
 import { Wallet } from 'web3x-es/wallet';
 import { Net } from 'web3x-es/net';
@@ -6,7 +7,9 @@ import { Address } from 'web3x-es/types';
 import { ENS } from 'web3x-es/ens';
 import { DaiContract } from './contracts/DaiContract';
 
-declare const web3: any;
+declare const web3: {
+  currentProvider: LegacyProvider;
+};
 
 /*
   Demonstrates how to create a minimally sized build. If you only need to provide access to Ethereum calls over a
@@ -17,7 +20,7 @@ declare const web3: any;
   Demonstrates use of a code generated contract with full type safety.
 */
 async function main() {
-  const eth = Eth.fromProvider(web3.currentProvider);
+  const eth = new Eth(new LegacyProviderAdapter(web3.currentProvider));
   const net = new Net(eth);
   const network = await net.getNetworkType();
 

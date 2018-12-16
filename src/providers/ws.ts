@@ -17,7 +17,7 @@
 
 import Ws, { ClientOptions } from 'isomorphic-ws';
 import { isArray } from 'util';
-import { Callback, LegacyProvider, NotificationCallback } from '.';
+import { Callback, LegacyProvider, NotificationCallback } from './legacy-provider';
 import { JsonRpcRequest } from './jsonrpc';
 import { LegacyProviderAdapter } from './legacy-provider-adapter';
 
@@ -33,8 +33,16 @@ type CallbackEntry = {
 };
 
 export class WebsocketProvider extends LegacyProviderAdapter {
+  private legacyProvider: LegacyWebsocketProvider;
+
   constructor(url: string, options: WebsocketProviderOptions = {}) {
-    super(new LegacyWebsocketProvider(url, options));
+    const legacyProvider = new LegacyWebsocketProvider(url, options);
+    super(legacyProvider);
+    this.legacyProvider = legacyProvider;
+  }
+
+  disconnect() {
+    this.legacyProvider.disconnect();
   }
 }
 

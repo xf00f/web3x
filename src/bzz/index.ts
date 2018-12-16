@@ -16,7 +16,7 @@
 */
 
 import swarm from 'swarm-js';
-import { LegacyProvider } from '../providers';
+import { LegacyProvider } from '../providers/legacy-provider';
 
 export class Bzz {
   public readonly pick?: any;
