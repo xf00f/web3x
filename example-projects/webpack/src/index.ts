@@ -153,7 +153,7 @@ async function addEnsExamples(eth: Eth) {
     addMessage(`The ENS address ethereum.eth resolves to ${address}`);
     addBr();
   } catch (err) {
-    addMessage(err.stack);
+    addMessage(err.message);
   }
 }
 
