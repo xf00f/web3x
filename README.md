@@ -39,7 +39,9 @@ web3x solves the above issues.
 
 There are two builds of the library. `web3x` uses CommonJS style imports and is best used for Node.js backends. `web3x-es` uses ES6 imports and is best used for ES6 aware tools like Webpack.
 
-Example usage:
+### Using inbuilt providers
+
+The inbuilt providers are all EIP-1193 compatible, and are used as follows:
 
 ```typescript
 import { WebsocketProvider } from 'web3x-es/providers';
@@ -48,12 +50,27 @@ import { fromWei } from 'web3x-es/utils';
 
 async function main() {
   const provider = new WebsocketProvider('wss://mainnet.infura.io/ws');
-  const eth = Eth.fromProvider(provider);
+  const eth = new Eth(provider);
   const balance = await eth.getBalance('0x0000000000000000000000000000000000000000');
   document.body.innerText = `Balance of 0 address ETH: ${fromWei(balance, 'ether')}`;
 }
 
 main().catch(console.error);
+```
+
+### Using legacy providers, e.g. MetaMask
+
+Until MetaMask and other providers are EIP-1193 compatible, you can use them with an adapter as follows:
+
+```typescript
+import { LegacyProvider, LegacyProviderAdapter } from 'web3x-es/providers';
+import { Eth } from 'web3x-es/eth';
+
+declare const web3: {
+  currentProvider: LegacyProvider;
+};
+
+const eth = new Eth(new LegacyProviderAdapter(web3.currentProvider));
 ```
 
 See example projects for more complex examples.
@@ -101,7 +118,7 @@ const DAI_CONTRACT_ADDRESS = '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359';
 
 async function main() {
   const provider = new WebsocketProvider('wss://mainnet.infura.io/ws');
-  const eth = Eth.fromProvider(provider);
+  const eth = new Eth(provider);
 
   try {
     const contract = new DaiContract(eth, DAI_CONTRACT_ADDRESS);
