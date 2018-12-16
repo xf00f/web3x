@@ -27,24 +27,19 @@ import {
   Transaction,
   TransactionReceipt,
   Log,
+  GetLogOptions,
 } from '../formatters';
-import { isFunction } from 'util';
+import { isBoolean } from 'util';
 import { TransactionHash } from '../types';
-import { Callback, Data, Address, Quantity } from '../types';
+import { Data, Address, Quantity } from '../types';
 import { PromiEvent, promiEvent, PromiEventResult } from '../promievent';
 import { confirmTransaction } from './confirm-transaction';
 import { EthRequestPayloads } from './eth-request-payloads';
 import { Block, BlockHeader, BlockType, BlockHash } from './block';
 import { Tx, SignedTransaction } from './tx';
-import { EthereumProvider } from '../providers/ethereum';
+import { EthereumProvider } from '../providers/ethereum-provider';
 
 export type TypedSigningData = { type: string; name: string; value: string }[];
-
-export interface LogsSubscriptionOptions {
-  fromBlock?: number;
-  address?: string;
-  topics?: Array<string | string[]>;
-}
 
 export interface SendTxPromiEvent<TxReceipt = TransactionReceipt> extends PromiEvent<TxReceipt> {
   once(type: 'transactionHash', handler: (transactionHash: string) => void): this;
@@ -222,7 +217,7 @@ export class Eth {
 
   private async sendTransactionAndWaitForConfirmation(defer, payload, extraFormatters?) {
     try {
-      const result = await this.provider.send(payload);
+      const result = await this.send(payload);
       defer.eventEmitter.emit('transactionHash', result);
       confirmTransaction(defer, result, payload, this, extraFormatters);
     } catch (err) {
@@ -261,17 +256,13 @@ export class Eth {
     return await this.send(this.request.getWork());
   }
 
-  async getPastLogs(options: {
-    fromBlock?: BlockType;
-    toBlock?: BlockType;
-    address?: string;
-    topics?: Array<string | string[]>;
-  }): Promise<Log[]> {
+  async getPastLogs(options: GetLogOptions): Promise<Log[]> {
     return await this.send(this.request.getPastLogs(options));
   }
 
-  subscribeLogs(options?: LogsSubscriptionOptions, callback?: Callback<Log>): Subscription<Log> {
-    const subscription = new Subscription<Log>('logs', [inputLogFormatter(options)], this.provider);
+  subscribeLogs(options: GetLogOptions = {}): Subscription<Log> {
+    const { fromBlock, ...subLogOptions } = options;
+    const subscription = new Subscription<Log>('eth', 'logs', [inputLogFormatter(subLogOptions)], this.provider);
 
     subscription.on('rawdata', result => {
       const output = outputLogFormatter(result);
@@ -282,135 +273,75 @@ export class Eth {
       }
     });
 
+    if (fromBlock !== undefined) {
+      this.getPastLogs(options)
+        .then(logs => {
+          logs.forEach(log => subscription.emit('rawdata', log));
+          subscription.subscribe();
+        })
+        .catch(err => {
+          subscription.emit('error', err);
+        });
+    } else {
+      process.nextTick(() => subscription.subscribe());
+    }
+
     return subscription;
-    /*
-      subscription: {
-        params: 1,
-        inputFormatter: [inputLogFormatter],
-        outputFormatter: outputLogFormatter,
-        // DUBLICATE, also in web3-eth-contract
-        subscriptionHandler: function(output) {
-          if (output.removed) {
-            this.emit('changed', output);
-          } else {
-            this.emit('data', output);
-          }
-
-          if (isFunction(this.callback)) {
-            this.callback(null, output, this);
-          }
-        },
-      },
-      requestManager: this.requestManager,
-      type: 'eth',
-    });
-
-    return subscription.subscribe('logs', options, callback);
-    */
   }
 
-  subscribeSyncing(callback?: Callback<object | boolean>): Subscription<object | boolean> {
-    const subscription = new Subscription<object | boolean>({
-      subscription: {
-        params: 0,
-        outputFormatter: outputSyncingFormatter,
-        subscriptionHandler: function(output) {
-          var _this = this;
+  subscribeSyncing(): Subscription<object | boolean> {
+    const subscription = new Subscription<object | boolean>('eth', 'syncing', [], this.provider);
 
-          // fire TRUE at start
-          if (this._isSyncing !== true) {
-            this._isSyncing = true;
-            this.emit('changed', _this._isSyncing);
-
-            if (isFunction(this.callback)) {
-              this.callback(null, _this._isSyncing, this);
-            }
-
-            setTimeout(function() {
-              _this.emit('data', output);
-
-              if (isFunction(_this.callback)) {
-                _this.callback(null, output, _this);
-              }
-            }, 0);
-
-            // fire sync status
-          } else {
-            this.emit('data', output);
-            if (isFunction(_this.callback)) {
-              this.callback(null, output, this);
-            }
-
-            // wait for some time before fireing the FALSE
-            clearTimeout(this._isSyncingTimeout);
-            this._isSyncingTimeout = setTimeout(function() {
-              if (output.currentBlock > output.highestBlock - 200) {
-                _this._isSyncing = false;
-                _this.emit('changed', _this._isSyncing);
-
-                if (isFunction(_this.callback)) {
-                  _this.callback(null, _this._isSyncing, _this);
-                }
-              }
-            }, 500);
-          }
-        },
-      },
-      requestManager: this.requestManager,
-      type: 'eth',
+    subscription.on('rawdata', result => {
+      const output = outputSyncingFormatter(result);
+      if (isBoolean(output)) {
+        subscription.emit('changed', output);
+        return;
+      }
+      subscription.emit('data', output);
     });
 
-    return subscription.subscribe('syncing', callback);
+    process.nextTick(() => subscription.subscribe());
+
+    return subscription;
   }
 
-  subscribeNewBlockHeaders(callback?: Callback<BlockHeader>): Subscription<BlockHeader> {
-    const subscription = new Subscription<BlockHeader>({
-      subscription: {
-        subscriptionName: 'newHeads',
-        params: 0,
-        outputFormatter: outputBlockFormatter,
-      },
-      requestManager: this.requestManager,
-      type: 'eth',
+  subscribeNewBlockHeaders(): Subscription<BlockHeader> {
+    const subscription = new Subscription<BlockHeader>('eth', 'newHeads', [], this.provider);
+
+    subscription.on('rawdata', result => {
+      const output = outputBlockFormatter(result);
+      subscription.emit('data', output);
     });
 
-    return subscription.subscribe('newBlockHeaders', callback);
+    process.nextTick(() => subscription.subscribe());
+
+    return subscription;
   }
 
-  subscribePendingTransactions(callback?: Callback<Transaction>): Subscription<Transaction> {
-    const subscription = new Subscription<Transaction>({
-      subscription: {
-        subscriptionName: 'newPendingTransactions',
-        params: 0,
-      },
-      requestManager: this.requestManager,
-      type: 'eth',
-    });
-
-    return subscription.subscribe('pendingTransactions', callback);
+  subscribePendingTransactions(): Subscription<Transaction> {
+    const subscription = new Subscription<Transaction>('eth', 'newPendingTransactions', [], this.provider);
+    subscription.on('rawdata', result => subscription.emit('data', result));
+    process.nextTick(() => subscription.subscribe());
+    return subscription;
   }
 
-  // Deprecated
-  subscribe(type: 'logs', options?: LogsSubscriptionOptions, callback?: Callback<Log>): Subscription<Log>;
-  subscribe(type: 'syncing', callback?: Callback<object | boolean>): Subscription<object | boolean>;
-  subscribe(type: 'newBlockHeaders', callback?: Callback<BlockHeader>): Subscription<BlockHeader>;
-  subscribe(type: 'pendingTransactions', callback?: Callback<Transaction>): Subscription<Transaction>;
+  subscribe(type: 'logs', options?: GetLogOptions): Subscription<Log>;
+  subscribe(type: 'syncing'): Subscription<object | boolean>;
+  subscribe(type: 'newBlockHeaders'): Subscription<BlockHeader>;
+  subscribe(type: 'pendingTransactions'): Subscription<Transaction>;
   subscribe(type: 'pendingTransactions' | 'newBlockHeaders' | 'syncing' | 'logs', ...args: any[]): Subscription<any> {
     switch (type) {
       case 'logs':
         return this.subscribeLogs(...args);
       case 'syncing':
-        return this.subscribeSyncing(...args);
+        return this.subscribeSyncing();
       case 'newBlockHeaders':
-        return this.subscribeNewBlockHeaders(...args);
+        return this.subscribeNewBlockHeaders();
       case 'pendingTransactions':
-        return this.subscribePendingTransactions(...args);
+        return this.subscribePendingTransactions();
       default:
         throw new Error(`Unknown subscription type: ${type}`);
     }
-  }
-
-  clearSubscriptions() {
-    this.requestManager.clearSubscriptions(false);
   }
 }

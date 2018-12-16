@@ -16,6 +16,7 @@
 */
 
 import { hexToNumber } from '../utils';
+import { isBoolean } from 'util';
 
 export interface Sync {
   startingBlock: number;
@@ -26,8 +27,8 @@ export interface Sync {
 }
 
 export function outputSyncingFormatter(result): Sync | boolean {
-  if (result === false) {
-    return false;
+  if (isBoolean(result)) {
+    return result;
   }
   result.startingBlock = hexToNumber(result.startingBlock);
   result.currentBlock = hexToNumber(result.currentBlock);

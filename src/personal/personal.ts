@@ -15,9 +15,9 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { IRequestManager } from '../request-manager';
 import { PersonalRequestPayloads } from './personal-request-payloads';
 import { Address, Quantity, Data, TransactionHash } from '../types';
+import { EthereumProvider } from '../providers/ethereum-provider';
 
 export interface Transaction {
   from: Address;
@@ -38,50 +38,54 @@ export interface SignedTransaction {
 export class Personal {
   readonly request = new PersonalRequestPayloads();
 
-  constructor(private requestManager: IRequestManager) {}
+  constructor(private provider: EthereumProvider) {}
+
+  private async send({ method, params, format }: { method: string; params?: any[]; format: any }) {
+    return format(await this.provider.send(method, params));
+  }
 
   async getAccounts(): Promise<Address[]> {
     const payload = this.request.getAccounts();
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async newAccount(password: string): Promise<Address> {
     const payload = this.request.newAccount(password);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async unlockAccount(address: Address, password: string, duration: Quantity): Promise<boolean> {
     const payload = this.request.unlockAccount(address, password, duration);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async lockAccount(address: Address) {
     const payload = this.request.lockAccount(address);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async importRawKey(privateKey: Data, password: string): Promise<Address> {
     const payload = this.request.importRawKey(privateKey, password);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async sendTransaction(tx: Transaction, password: string): Promise<TransactionHash> {
     const payload = this.request.sendTransaction(tx, password);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async signTransaction(tx: Transaction, password: string): Promise<SignedTransaction> {
     const payload = this.request.signTransaction(tx, password);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async sign(data: Data, address: Address, password: string): Promise<Data> {
     const payload = this.request.sign(data, address, password);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async ecRecover(data: Data, signedData: Data): Promise<Address> {
     const payload = this.request.ecRecover(data, signedData);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 }

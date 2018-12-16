@@ -37,18 +37,7 @@ export async function confirmTransaction(defer, result, payload, eth: Eth, extra
     isObject(payload.params[0]) && payload.params[0].data && payload.params[0].from && !payload.params[0].to;
 
   // fire "receipt" and confirmation events and resolve after
-  var checkConfirmation = async function(existingReceipt, isPolling, err?, blockHeader?, sub?) {
-    if (err) {
-      sub.unsubscribe();
-      promiseResolved = true;
-      fireError(
-        { message: 'Failed to subscribe to new newBlockHeaders to confirm the transaction receipts.', data: err },
-        defer.eventEmitter,
-        defer.reject,
-      );
-      return;
-    }
-
+  var checkConfirmation = async function(existingReceipt, isPolling, sub?) {
     // create fake unsubscribe
     if (!sub) {
       sub = {
@@ -223,11 +212,27 @@ export async function confirmTransaction(defer, result, payload, eth: Eth, extra
 
   // start watching for confirmation depending on the support features of the provider
   const startWatching = (existingReceipt?) => {
-    // if provider allows PUB/SUB
-    if (eth.requestManager.supportsSubscriptions()) {
-      eth.subscribe('newBlockHeaders', checkConfirmation.bind(null, existingReceipt, false));
-    } else {
-      intervalId = setInterval(checkConfirmation.bind(null, existingReceipt, true), 1000);
+    try {
+      const sub = eth
+        .subscribe('newBlockHeaders')
+        .on('data', () => {
+          checkConfirmation(existingReceipt, false, sub);
+        })
+        .on('error', err => {
+          sub.unsubscribe();
+          promiseResolved = true;
+          fireError(
+            { message: 'Failed to subscribe to new newBlockHeaders to confirm the transaction receipts.', data: err },
+            defer.eventEmitter,
+            defer.reject,
+          );
+        });
+    } catch (err) {
+      if (err.message.includes('does not support subscriptions')) {
+        intervalId = setInterval(() => checkConfirmation(existingReceipt, true), 1000);
+      } else {
+        throw err;
+      }
     }
   };
 

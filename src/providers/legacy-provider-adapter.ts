@@ -1,4 +1,4 @@
-import { EthereumProvider, EthereumProviderNotifications } from './ethereum';
+import { EthereumProvider, EthereumProviderNotifications } from './ethereum-provider';
 import { LegacyProvider } from './legacy-provider';
 import { createJsonRpcPayload, isValidJsonRpcResponse, JsonRpcResponse } from './jsonrpc';
 import { ErrorResponse, InvalidResponse } from '../errors';
@@ -19,7 +19,7 @@ export class LegacyProviderAdapter implements EthereumProvider {
         return;
       }
 
-      this.eventEmitter.emit('notification', result.params.result);
+      this.eventEmitter.emit('notification', result.params);
     });
   }
 

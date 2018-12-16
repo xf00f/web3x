@@ -16,8 +16,8 @@
 */
 
 import { Contract, AbiDefinition } from '.';
-import { MockRequestManager } from '../request-manager/mock-request-manager';
 import { Eth } from '../eth/eth';
+import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
 
 const abi: AbiDefinition[] = [
   {
@@ -49,8 +49,8 @@ describe('eth', function() {
   describe('contract', function() {
     describe('encodeABI', function() {
       const contractAddress = '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe';
-      const mockRequestManager = new MockRequestManager();
-      const eth = new Eth(mockRequestManager);
+      const mockEthereumProvider = new MockEthereumProvider();
+      const eth = new Eth(mockEthereumProvider);
 
       it('should handle bytes32 arrays that only contain 1 byte', function() {
         const contract = new Contract(eth, abi, contractAddress);
