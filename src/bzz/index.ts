@@ -16,12 +16,12 @@
 */
 
 import swarm from 'swarm-js';
-import { Provider } from '../providers';
+import { LegacyProvider } from '../providers/legacy-provider';
 
 export class Bzz {
   public readonly pick?: any;
 
-  constructor(private provider: Provider) {
+  constructor(private provider: LegacyProvider) {
     if (typeof document !== 'undefined') {
       // Only allow file picker when in browser.
       this.pick = swarm.pick;

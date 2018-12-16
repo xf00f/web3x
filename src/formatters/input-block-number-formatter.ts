@@ -17,18 +17,17 @@
 
 import { isHexStrict, numberToHex } from '../utils';
 import { isString } from 'util';
+import { BlockType, BlockHash } from '../eth';
 
-export function inputBlockNumberFormatter(blockNumber) {
-  if (blockNumber === undefined) {
-    return undefined;
-  } else if (blockNumber === 'genesis' || blockNumber === 'earliest') {
+export function inputBlockNumberFormatter(block: BlockType | BlockHash | undefined): string | undefined {
+  if (block === undefined) {
+    return;
+  } else if (block === 'genesis' || block === 'earliest') {
     return '0x0';
-  } else if (blockNumber === 'latest' || blockNumber === 'pending') {
-    return blockNumber;
+  } else if (block === 'latest' || block === 'pending') {
+    return block;
+  } else if (isString(block) && isHexStrict(block)) {
+    return block.toLowerCase();
   }
-  return isHexStrict(blockNumber)
-    ? isString(blockNumber)
-      ? blockNumber.toLowerCase()
-      : blockNumber
-    : numberToHex(blockNumber);
+  return numberToHex(block);
 }

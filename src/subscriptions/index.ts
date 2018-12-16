@@ -15,36 +15,4 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Subscription } from './subscription';
-import { RequestManager } from '../request-manager';
-
-export { Subscription };
-
-export class Subscriptions {
-  public name: string;
-  public type: string;
-  public subscriptions: any;
-
-  constructor(options, public requestManager?: RequestManager) {
-    this.name = options.name;
-    this.type = options.type;
-    this.subscriptions = options.subscriptions || {};
-    this.requestManager = options.requestManager;
-  }
-
-  createFunction() {
-    return (...args: any[]) => {
-      if (!this.subscriptions[args[0]]) {
-        console.warn('Subscription ' + JSON.stringify(args[0]) + " doesn't exist. Subscribing anyway.");
-      }
-
-      const subscription = new Subscription({
-        subscription: this.subscriptions[args[0]],
-        requestManager: this.requestManager,
-        type: this.type,
-      });
-
-      return subscription.subscribe.apply(subscription, args);
-    };
-  }
-}
+export * from './subscription';

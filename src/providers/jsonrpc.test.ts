@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import * as Jsonrpc from './jsonrpc';
+import { createJsonRpcBatchPayload, createJsonRpcPayload, isValidJsonRpcResponse } from './jsonrpc';
 
 describe('jsonrpc', function() {
   describe('isValidResponse', function() {
@@ -26,7 +26,7 @@ describe('jsonrpc', function() {
         result: [],
       };
 
-      const valid = Jsonrpc.isValidResponse(response);
+      const valid = isValidJsonRpcResponse(response);
 
       expect(valid).toBe(true);
     });
@@ -34,7 +34,7 @@ describe('jsonrpc', function() {
     it('should validate basic undefined response', function() {
       const response = undefined;
 
-      const valid = Jsonrpc.isValidResponse(response);
+      const valid = isValidJsonRpcResponse(response);
 
       expect(valid).toBe(false);
     });
@@ -45,7 +45,7 @@ describe('jsonrpc', function() {
         result: [],
       };
 
-      const valid = Jsonrpc.isValidResponse(response);
+      const valid = isValidJsonRpcResponse(response);
 
       expect(valid).toBe(false);
     });
@@ -57,7 +57,7 @@ describe('jsonrpc', function() {
         result: [],
       };
 
-      const valid = Jsonrpc.isValidResponse(response);
+      const valid = isValidJsonRpcResponse(response);
 
       expect(valid).toBe(false);
     });
@@ -68,7 +68,7 @@ describe('jsonrpc', function() {
         result: [],
       };
 
-      const valid = Jsonrpc.isValidResponse(response);
+      const valid = isValidJsonRpcResponse(response);
 
       expect(valid).toBe(false);
     });
@@ -80,7 +80,7 @@ describe('jsonrpc', function() {
         result: [],
       };
 
-      const valid = Jsonrpc.isValidResponse(response);
+      const valid = isValidJsonRpcResponse(response);
 
       expect(valid).toBe(true);
     });
@@ -92,7 +92,7 @@ describe('jsonrpc', function() {
         result: [],
       };
 
-      const valid = Jsonrpc.isValidResponse(response);
+      const valid = isValidJsonRpcResponse(response);
 
       expect(valid).toBe(true);
     });
@@ -103,7 +103,7 @@ describe('jsonrpc', function() {
         id: 1,
       };
 
-      const valid = Jsonrpc.isValidResponse(response);
+      const valid = isValidJsonRpcResponse(response);
 
       expect(valid).toBe(false);
     });
@@ -115,7 +115,7 @@ describe('jsonrpc', function() {
         result: false,
       };
 
-      const valid = Jsonrpc.isValidResponse(response);
+      const valid = isValidJsonRpcResponse(response);
 
       expect(valid).toBe(true);
     });
@@ -127,7 +127,7 @@ describe('jsonrpc', function() {
         result: 0,
       };
 
-      const valid = Jsonrpc.isValidResponse(response);
+      const valid = isValidJsonRpcResponse(response);
 
       expect(valid).toBe(true);
     });
@@ -137,8 +137,8 @@ describe('jsonrpc', function() {
     it('should increment the id', function() {
       const method = 'm';
 
-      const p1 = Jsonrpc.toPayload(method);
-      const p2 = Jsonrpc.toPayload(method);
+      const p1 = createJsonRpcPayload(method);
+      const p2 = createJsonRpcPayload(method);
 
       expect(p2.id).toBe(p1.id + 1);
     });
@@ -158,7 +158,7 @@ describe('jsonrpc', function() {
       ];
 
       // when
-      const payload = Jsonrpc.toBatchPayload(messages);
+      const payload = createJsonRpcBatchPayload(messages);
 
       // then
       expect(Array.isArray(payload)).toBe(true);
@@ -180,7 +180,7 @@ describe('jsonrpc', function() {
       const messages = [];
 
       // when
-      const payload = Jsonrpc.toBatchPayload(messages);
+      const payload = createJsonRpcBatchPayload(messages);
 
       // then
       expect(Array.isArray(payload)).toBe(true);
@@ -194,7 +194,7 @@ describe('jsonrpc', function() {
       const method = 'helloworld';
 
       // when
-      const payload = Jsonrpc.toPayload(method);
+      const payload = createJsonRpcPayload(method);
 
       // then
       expect(payload.jsonrpc).toBe('2.0');
@@ -210,7 +210,7 @@ describe('jsonrpc', function() {
       const params = [123, 'test'];
 
       // when
-      const payload = Jsonrpc.toPayload(method, params);
+      const payload = createJsonRpcPayload(method, params);
 
       // then
       expect(payload.jsonrpc).toBe('2.0');

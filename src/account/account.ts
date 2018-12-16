@@ -21,7 +21,7 @@ import { create, fromPrivate } from '../eth-lib/account';
 import { randomHex, encrypt, KeyStore, decrypt, fireError } from '../utils';
 import { sign } from '../utils/sign';
 import { signTransaction } from './sign-transaction';
-import { Eth, Tx, SendTxPromiEvent } from '../eth';
+import { Eth, SendTxPromiEvent } from '../eth';
 import { promiEvent } from '../promievent';
 import { TransactionReceipt } from '../formatters';
 

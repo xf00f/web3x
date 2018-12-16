@@ -16,142 +16,135 @@
 */
 
 import { Subscription } from '../subscriptions';
-import { IRequestManager } from '../request-manager';
-import { Callback } from '../types';
+import { EthereumProvider } from '../providers/ethereum-provider';
 
 export class Shh {
   public readonly request = new ShhRequestPayloads();
 
-  constructor(private requestManager: IRequestManager) {}
+  constructor(private provider: EthereumProvider) {}
+
+  private async send({ method, params, format }: { method: string; params?: any[]; format: any }) {
+    return format(await this.provider.send(method, params));
+  }
 
   async getVersion() {
     const payload = this.request.getVersion();
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async getInfo() {
     const payload = this.request.getInfo();
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async setMaxMessageSize(size: number) {
     const payload = this.request.setMaxMessageSize(size);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async setMinPoW(pow: number) {
     const payload = this.request.setMinPoW(pow);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async markTrustedPeer(enode: string) {
     const payload = this.request.markTrustedPeer(enode);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async newKeyPair() {
     const payload = this.request.newKeyPair();
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async addPrivateKey(privateKey: string) {
     const payload = this.request.addPrivateKey(privateKey);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async deleteKeyPair(id: string) {
     const payload = this.request.deleteKeyPair(id);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async hasKeyPair(id: string) {
     const payload = this.request.hasKeyPair(id);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async getPublicKey(id: string) {
     const payload = this.request.getPublicKey(id);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async getPrivateKey(id: string) {
     const payload = this.request.getPrivateKey(id);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async newSymKey() {
     const payload = this.request.newSymKey();
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async addSymKey(symKey: string) {
     const payload = this.request.addSymKey(symKey);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async generateSymKeyFromPassword(password: string) {
     const payload = this.request.generateSymKeyFromPassword(password);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async hasSymKey(id: string) {
     const payload = this.request.hasSymKey(id);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async getSymKey(id: string) {
     const payload = this.request.getSymKey(id);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async deleteSymKey(id: string) {
     const payload = this.request.deleteSymKey(id);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async newMessageFilter(options: SubscriptionOptions) {
     const payload = this.request.newMessageFilter(options);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async getFilterMessages(id: string) {
     const payload = this.request.getFilterMessages(id);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async deleteMessageFilter(id: string) {
     const payload = this.request.deleteMessageFilter(id);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async post(post: Post) {
     const payload = this.request.post(post);
-    return payload.format(await this.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
-  subscribeMessages(callback?: Callback<string>): Subscription<string> {
-    const subscription = new Subscription<string>({
-      subscription: {
-        params: 1,
-      },
-      requestManager: this.requestManager,
-      type: 'shh',
-    });
-
-    return subscription.subscribe('messages', undefined, callback);
+  subscribeMessages(options: SubscriptionOptions): Subscription<string> {
+    const subscription = new Subscription<string>('shh', 'messages', [options], this.provider);
+    subscription.on('rawdata', message => subscription.emit('data', message));
+    subscription.subscribe();
+    return subscription;
   }
 
-  subscribe(type: 'messages', callback?: Callback<string>): Subscription<string>;
-  subscribe(type: 'messages', ...args: any[]): Subscription<any> {
+  subscribe(type: 'messages', options: SubscriptionOptions): Subscription<any> {
     switch (type) {
       case 'messages':
-        return this.subscribeMessages(...args);
+        return this.subscribeMessages(options);
       default:
         throw new Error(`Unknown subscription type: ${type}`);
     }
-  }
-
-  clearSubscriptions() {
-    this.requestManager.clearSubscriptions(false);
   }
 }

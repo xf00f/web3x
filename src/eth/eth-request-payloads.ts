@@ -29,6 +29,7 @@ import {
   inputCallFormatter,
   inputLogFormatter,
   outputLogFormatter,
+  GetLogOptions,
 } from '../formatters';
 import { isString } from 'util';
 import { TransactionHash } from '../types';
@@ -178,7 +179,7 @@ export class EthRequestPayloads {
         isString(block) && isHexStrict(block)
           ? 'eth_getBlockTransactionCountByHash'
           : 'eth_getBlockTransactionCountByNumber',
-      params: inputBlockNumberFormatter(this.resolveBlock(block)),
+      params: [inputBlockNumberFormatter(this.resolveBlock(block))],
       format: hexToNumber,
     };
   }
@@ -186,7 +187,7 @@ export class EthRequestPayloads {
   getBlockUncleCount(block: BlockType | BlockHash) {
     return {
       method: isString(block) && isHexStrict(block) ? 'eth_getUncleCountByBlockHash' : 'eth_getUncleCountByBlockNumber',
-      params: inputBlockNumberFormatter(this.resolveBlock(block)),
+      params: [inputBlockNumberFormatter(this.resolveBlock(block))],
       format: hexToNumber,
     };
   }
@@ -300,12 +301,7 @@ export class EthRequestPayloads {
     };
   }
 
-  getPastLogs(options: {
-    fromBlock?: BlockType;
-    toBlock?: BlockType;
-    address?: string;
-    topics?: Array<string | string[]>;
-  }) {
+  getPastLogs(options: GetLogOptions) {
     return {
       method: 'eth_getLogs',
       params: [inputLogFormatter(options)],

@@ -15,5 +15,20 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export { BatchManager } from './batch';
-export { IRequestManager, RequestManager } from './request-manager';
+export { WebsocketProvider } from './ws';
+export { HttpProvider } from './http';
+export { IpcProvider } from './ipc';
+import { JsonRpcRequest, JsonRpcResponse } from './jsonrpc';
+
+export type Callback = (err?: Error, result?: JsonRpcResponse) => void;
+
+export type NotificationCallback = (result: any, deprecatedResult?: any) => void;
+
+export interface LegacyProvider {
+  send(payload: JsonRpcRequest, callback: Callback): any;
+  disconnect();
+  on?(type: string, callback: NotificationCallback);
+  removeListener?(type: string, callback: NotificationCallback);
+  removeAllListeners?(type: string);
+  reset?();
+}

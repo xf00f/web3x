@@ -16,20 +16,16 @@
 */
 
 import { EventEmitter } from 'events';
-import { IRequestManager } from '.';
+import { EthereumProvider } from './ethereum-provider';
 
-export class MockRequestManager implements IRequestManager {
+export class MockEthereumProvider extends EventEmitter implements EthereumProvider {
   public send = jest.fn();
-  public sendBatch = jest.fn();
-  public addSubscription = jest.fn();
-  public removeSubscription = jest.fn();
-  public clearSubscriptions = jest.fn();
-  public close = jest.fn();
-  readonly provider = new EventEmitter();
 
   constructor() {
-    this.addSubscription.mockImplementation((id, name, type, callback) => {
-      this.provider.on(id, callback);
+    super();
+    /*
+    this.on.mockImplementation((subscription, callback) => {
+      this.on(id, callback);
     });
 
     this.removeSubscription.mockImplementation((id, callback) => {
@@ -46,9 +42,6 @@ export class MockRequestManager implements IRequestManager {
     this.clearSubscriptions.mockImplementation(id => {
       this.provider.removeAllListeners();
     });
-  }
-
-  supportsSubscriptions() {
-    return true;
+    */
   }
 }
