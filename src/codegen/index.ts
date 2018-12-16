@@ -18,7 +18,7 @@
 
 import fs from 'fs';
 import ts from 'typescript';
-import { ContractAbi, AbiInput, AbiDefinition } from '../contract';
+import { ContractAbi, AbiInput, AbiDefinition, Tx, AbiOutput } from '../contract';
 import got from 'got';
 import mkdirp from 'mkdirp';
 
@@ -211,9 +211,7 @@ function makeTransactionReceiptInterface(name: string) {
   );
 }
 
-function getBaseType(input: AbiInput, returnValue: boolean) {
-  const { type } = input;
-
+function getBaseType(type: string, returnValue: boolean) {
   if (type.match(/u?int\d*/) || type.match(/u?fixed[0-9x]*/)) {
     return !returnValue
       ? ts.createUnionTypeNode([
@@ -228,21 +226,30 @@ function getBaseType(input: AbiInput, returnValue: boolean) {
     return ts.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
   }
 
-  if (type === 'tuple') {
-    return ts.createTypeLiteralNode(
-      input.components!.map(prop =>
-        ts.createPropertySignature(undefined, prop.name, undefined, getTsTypeFromSolidityType(prop, true), undefined),
-      ),
-    );
-  }
-
   return ts.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
+}
+
+function getTupleType(components: AbiInput[], returnValue: boolean): ts.TypeLiteralNode {
+  return ts.createTypeLiteralNode(
+    components!.map(prop =>
+      ts.createPropertySignature(
+        undefined,
+        prop.name,
+        undefined,
+        getTsTypeFromSolidityType(prop, returnValue),
+        undefined,
+      ),
+    ),
+  );
 }
 
 function getTsTypeFromSolidityType(input: AbiInput, returnValue: boolean) {
   const { type } = input;
-  const baseType = getBaseType(input, returnValue);
-  return type.match(/\[\]$/) ? ts.createArrayTypeNode(baseType) : baseType;
+  const isArray = /\[\]$/.test(type);
+  const baseSolType = isArray ? type.substr(0, type.length - 2) : type;
+  const isTuple = baseSolType === 'tuple';
+  const baseTsType = isTuple ? getTupleType(input.components, returnValue) : getBaseType(input.type, returnValue);
+  return isArray ? ts.createArrayTypeNode(baseTsType) : baseTsType;
 }
 
 function makeParameter(input: AbiInput, index: number) {
@@ -256,17 +263,26 @@ function makeParameter(input: AbiInput, index: number) {
   );
 }
 
+function getCallReturnType(outputs: AbiOutput[]) {
+  if (outputs.length === 1) {
+    return ts.createTypeReferenceNode('TxCall', [getTsTypeFromSolidityType(outputs[0], true)]);
+  } else {
+    const returnType = ts.createTupleTypeNode(outputs.map(i => getTsTypeFromSolidityType(i, true)));
+    return ts.createTypeReferenceNode('TxCall', [returnType]);
+  }
+}
+
 function getOutputType(name: string, definition: AbiDefinition) {
   if (!definition.stateMutability) {
     if (definition.outputs && definition.outputs.length) {
-      return ts.createTypeReferenceNode('TxCall', [getTsTypeFromSolidityType(definition.outputs[0], true)]);
+      return getCallReturnType(definition.outputs);
     } else {
       return ts.createTypeReferenceNode('TxSend', [ts.createTypeReferenceNode(`${name}TransactionReceipt`, undefined)]);
     }
   }
   if (definition.stateMutability === 'view' || definition.stateMutability === 'pure') {
     if (definition.outputs && definition.outputs.length) {
-      return ts.createTypeReferenceNode('TxCall', [getTsTypeFromSolidityType(definition.outputs[0], true)]);
+      return getCallReturnType(definition.outputs);
     } else {
       return undefined;
     }

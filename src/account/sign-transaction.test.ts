@@ -15,8 +15,9 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { recoverTransaction } from './sign-transaction';
+import { signTransaction, recoverTransaction } from './sign-transaction';
 import { Account } from './account';
+import { hexToBuffer } from '../utils';
 
 var clone = function(object) {
   return object ? JSON.parse(JSON.stringify(object)) : [];
@@ -26,7 +27,7 @@ var tests = [
   {
     address: '0x2c7536E3605D9C16a7a3D7b1898e529396a65c23',
     iban: 'XE0556YCRTEZ9JALZBSCXOK4UJ5F3HN03DV',
-    privateKey: '0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318',
+    privateKey: hexToBuffer('0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318'),
     transaction: {
       chainId: 1,
       nonce: 0,
@@ -46,7 +47,7 @@ var tests = [
   {
     address: '0x2c7536E3605D9C16a7a3D7b1898e529396a65c23',
     iban: 'XE0556YCRTEZ9JALZBSCXOK4UJ5F3HN03DV',
-    privateKey: '0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318',
+    privateKey: hexToBuffer('0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318'),
     transaction: {
       chainId: 1,
       nonce: 0,
@@ -69,7 +70,7 @@ var tests = [
   {
     address: '0x2c7536E3605D9C16a7a3D7b1898e529396a65c23',
     iban: 'XE0556YCRTEZ9JALZBSCXOK4UJ5F3HN03DV',
-    privateKey: '0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318',
+    privateKey: hexToBuffer('0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318'),
     transaction: {
       chainId: 1,
       nonce: 0,
@@ -92,7 +93,7 @@ var tests = [
   {
     address: '0x2c7536E3605D9C16a7a3D7b1898e529396a65c23',
     iban: 'XE0556YCRTEZ9JALZBSCXOK4UJ5F3HN03DV',
-    privateKey: '0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318',
+    privateKey: hexToBuffer('0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318'),
     transaction: {
       chainId: 1,
       nonce: 0,
@@ -115,7 +116,7 @@ var tests = [
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
     iban: 'XE25RG8S3H5TX5RD7QTL5UPVW90AHN2VYDC',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 0,
@@ -134,7 +135,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 0,
@@ -154,7 +155,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 10,
@@ -174,7 +175,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: '0xa',
@@ -194,7 +195,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: '16',
@@ -214,7 +215,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 16,
@@ -234,7 +235,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: '0x16',
@@ -254,7 +255,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: '0x16',
@@ -274,7 +275,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 2,
@@ -290,7 +291,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 2,
@@ -305,7 +306,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 2,
@@ -320,7 +321,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 2,
@@ -335,7 +336,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 'a',
@@ -350,7 +351,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: -1,
       nonce: 1,
@@ -365,7 +366,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: -1,
       nonce: 0,
@@ -380,7 +381,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: -2,
@@ -395,7 +396,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 0,
@@ -410,7 +411,7 @@ var tests = [
   },
   {
     address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
-    privateKey: '0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728',
+    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     transaction: {
       chainId: 1,
       nonce: 0,
@@ -440,57 +441,57 @@ describe('accounts', function() {
     tests.forEach(test => {
       if (test.error) {
         it('signTransaction must error', async () => {
-          const testAccount = Account.fromPrivate(mockEthereum, test.privateKey);
-          await expect(testAccount.signTransaction(test.transaction)).rejects.toBeInstanceOf(Error);
+          const testAccount = Account.fromPrivate(test.privateKey);
+          await expect(testAccount.signTransaction(test.transaction, mockEthereum)).rejects.toBeInstanceOf(Error);
         });
       } else {
         it('signTransaction must compare to eth_signTransaction', async () => {
-          const testAccount = Account.fromPrivate(mockEthereum, test.privateKey);
-          const tx = await testAccount.signTransaction(test.transaction);
+          const testAccount = Account.fromPrivate(test.privateKey);
+          const tx = await testAccount.signTransaction(test.transaction, mockEthereum);
           expect(tx.rawTransaction).toBe(test.rawTransaction);
         });
 
         it('signTransaction using the iban as "to" must compare to eth_signTransaction', async () => {
-          const testAccount = Account.fromPrivate(mockEthereum, test.privateKey);
+          const testAccount = Account.fromPrivate(test.privateKey);
           const transaction = clone(test.transaction);
           transaction.to = transaction.toIban;
           delete transaction.toIban;
-          const tx = await testAccount.signTransaction(transaction);
+          const tx = await testAccount.signTransaction(transaction, mockEthereum);
           expect(tx.rawTransaction).toBe(test.rawTransaction);
         });
 
         it('signTransaction will call for nonce', async () => {
-          const testAccount = Account.fromPrivate(mockEthereum, test.privateKey);
+          const testAccount = Account.fromPrivate(test.privateKey);
           const transaction = clone(test.transaction);
           delete transaction.nonce;
           mockEthereum.getTransactionCount.mockResolvedValue(test.transaction.nonce);
-          const tx = await testAccount.signTransaction(transaction);
+          const tx = await testAccount.signTransaction(transaction, mockEthereum);
           expect(tx.rawTransaction).toBe(test.rawTransaction);
           expect(mockEthereum.getTransactionCount).toHaveBeenCalledTimes(1);
         });
 
         it('signTransaction will call for gasPrice', async () => {
-          const testAccount = Account.fromPrivate(mockEthereum, test.privateKey);
+          const testAccount = Account.fromPrivate(test.privateKey);
           const transaction = clone(test.transaction);
           delete transaction.gasPrice;
           mockEthereum.getGasPrice.mockResolvedValue(test.transaction.gasPrice);
-          const tx = await testAccount.signTransaction(transaction);
+          const tx = await testAccount.signTransaction(transaction, mockEthereum);
           expect(tx.rawTransaction).toBe(test.rawTransaction);
           expect(mockEthereum.getGasPrice).toHaveBeenCalledTimes(1);
         });
 
         it('signTransaction will call for chainId', async () => {
-          const testAccount = Account.fromPrivate(mockEthereum, test.privateKey);
+          const testAccount = Account.fromPrivate(test.privateKey);
           const transaction = clone(test.transaction);
           delete transaction.chainId;
           mockEthereum.getId.mockResolvedValue(test.transaction.chainId);
-          const tx = await testAccount.signTransaction(transaction);
+          const tx = await testAccount.signTransaction(transaction, mockEthereum);
           expect(tx.rawTransaction).toBe(test.rawTransaction);
           expect(mockEthereum.getId).toHaveBeenCalledTimes(1);
         });
 
         it('signTransaction will call for nonce, gasPrice and chainId', async () => {
-          const testAccount = Account.fromPrivate(mockEthereum, test.privateKey);
+          const testAccount = Account.fromPrivate(test.privateKey);
           const transaction = clone(test.transaction);
           delete transaction.nonce;
           delete transaction.gasPrice;
@@ -498,7 +499,7 @@ describe('accounts', function() {
           mockEthereum.getTransactionCount.mockResolvedValue(test.transaction.nonce);
           mockEthereum.getGasPrice.mockResolvedValue(test.transaction.gasPrice);
           mockEthereum.getId.mockResolvedValue(test.transaction.chainId);
-          const tx = await testAccount.signTransaction(transaction);
+          const tx = await testAccount.signTransaction(transaction, mockEthereum);
           expect(tx.rawTransaction).toBe(test.rawTransaction);
           expect(mockEthereum.getId).toHaveBeenCalledTimes(1);
           expect(mockEthereum.getGasPrice).toHaveBeenCalledTimes(1);
@@ -506,8 +507,8 @@ describe('accounts', function() {
         });
 
         it('recoverTransaction, must recover signature', async () => {
-          const testAccount = Account.fromPrivate(mockEthereum, test.privateKey);
-          const tx = await testAccount.signTransaction(test.transaction);
+          const testAccount = Account.fromPrivate(test.privateKey);
+          const tx = await testAccount.signTransaction(test.transaction, mockEthereum);
           expect(recoverTransaction(tx.rawTransaction)).toBe(test.address);
         });
       }

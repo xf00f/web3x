@@ -27,7 +27,7 @@ export interface Signature {
   signature: string;
 }
 
-export function sign(data: string, privateKey: string): Signature {
+export function sign(data: string, privateKey: Buffer): Signature {
   var messageHash = hashMessage(data);
   var signature = ethLibSign(messageHash, privateKey);
   var vrs = decodeSignature(signature);

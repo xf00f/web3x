@@ -15,26 +15,27 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { isArray, isFunction } from 'util';
+import { isArray } from 'util';
 import { Subscription } from '../subscriptions';
 import { abi, abiMethodToString } from './abi';
-import { Tx, TxFactory, TxSend, TxCall } from './tx';
+import { Tx, TxFactory } from './tx';
 import { decodeAnyEvent } from './decode-event-abi';
 import {
   inputAddressFormatter,
   EventLog,
   inputBlockNumberFormatter,
-  inputLogFormatter,
   TransactionReceipt,
+  GetLogOptions,
+  FormattedGetLogOptions,
+  inputLogFormatter,
 } from '../formatters';
 import { toChecksumAddress, isAddress } from '../utils';
 import { TxDeploy } from './tx-deploy';
 import { ContractAbi, AbiDefinition } from './contract-abi';
 import { Address, Data } from '../types';
-import { BlockType } from '../types';
-import { Eth } from '../eth';
+import { Eth, BlockType } from '../eth';
 import { InvalidNumberOfParams } from '../errors';
-import { Wallet } from '../accounts';
+import { Wallet } from '../wallet';
 
 export interface ContractOptions {
   from?: string;
@@ -143,14 +144,7 @@ export class Contract<T extends ContractDefinition | void = void> {
    * @param {Function} callback
    * @return {Object} the event subscription
    */
-  once(
-    event: Events<T>,
-    options: {
-      filter?: object;
-      topics?: string[];
-    },
-    callback: (err, res, sub) => void,
-  ) {
+  once(event: Events<T>, options: GetLogOptions, callback: (err, res, sub) => void): void {
     // don't return as once shouldn't provide "on"
     this.on(event, options, (err, res, sub) => {
       sub.unsubscribe();
@@ -158,15 +152,49 @@ export class Contract<T extends ContractDefinition | void = void> {
     });
   }
 
-  getPastEvents<Event extends Events<T>>(
-    event: Event,
-    options: {
-      filter?: object;
-      fromBlock?: BlockType;
-      toBlock?: BlockType;
-      topics?: string[];
-    },
-  ): Promise<GetEventLog<T, Event>[]>;
+  /**
+   * Adds event listeners and creates a subscription.
+   */
+  private on(event: Events<T>, options: GetLogOptions = {}, callback?: (err, res, sub) => void) {
+    const logOptions = this.getLogOptions(event, options);
+    const { fromBlock, ...subLogOptions } = logOptions;
+
+    var subscription = new Subscription('eth', 'logs', [inputLogFormatter(subLogOptions)], this.eth.provider);
+
+    subscription
+      .on('rawdata', log => {
+        const output = decodeAnyEvent(this.jsonInterface, log);
+        if (output.removed) {
+          subscription.emit('changed', output);
+        } else {
+          subscription.emit('data', output);
+        }
+        if (callback) {
+          callback(undefined, output, subscription);
+        }
+      })
+      .on('error', err => {
+        if (callback) {
+          callback(err, undefined, subscription);
+        }
+      });
+
+    if (fromBlock !== undefined) {
+      this.eth
+        .getPastLogs(logOptions)
+        .then(logs => {
+          logs.forEach(log => subscription.emit('rawdata', log));
+          subscription.subscribe();
+        })
+        .catch(err => {
+          subscription.emit('error', err);
+        });
+    } else {
+      process.nextTick(() => subscription.subscribe());
+    }
+
+    return subscription;
+  }
 
   /**
    * Get past events from contracts
@@ -177,17 +205,10 @@ export class Contract<T extends ContractDefinition | void = void> {
    * @param {Function} callback
    * @return {Object} the promievent
    */
-  async getPastEvents(
-    event: Events<T>,
-    options: {
-      filter?: object;
-      fromBlock?: BlockType;
-      toBlock?: BlockType;
-      topics?: string[];
-    } = {},
-  ): Promise<EventLog<any>[]> {
-    const subOptions = this.generateEventOptions(event, options);
-    const result = await this.eth.getPastLogs(subOptions.params);
+  async getPastEvents<Event extends Events<T>>(event: Event, options: GetLogOptions): Promise<GetEventLog<T, Event>[]>;
+  async getPastEvents(event: Events<T>, options: GetLogOptions = {}): Promise<EventLog<any>[]> {
+    const logOptions = this.getLogOptions(event, options);
+    const result = await this.eth.getPastLogs(logOptions);
     return result.map(log => decodeAnyEvent(this.jsonInterface, log));
   }
 
@@ -216,26 +237,28 @@ export class Contract<T extends ContractDefinition | void = void> {
   private getMethods(contractDefinition: ContractAbi) {
     const methods: any = {};
 
-    contractDefinition.filter(method => method.type === 'function').forEach(method => {
-      const name = method.name!;
-      const funcName = abiMethodToString(method);
-      method.signature = abi.encodeFunctionSignature(funcName);
-      const func = this.executorFactory(method);
+    contractDefinition
+      .filter(method => method.type === 'function')
+      .forEach(method => {
+        const name = method.name!;
+        const funcName = abiMethodToString(method);
+        method.signature = abi.encodeFunctionSignature(funcName);
+        const func = this.executorFactory(method);
 
-      // add method only if not one already exists
-      if (!methods[name]) {
-        methods[name] = func;
-      } else {
-        const cascadeFunc = this.executorFactory(method, methods[name]);
-        methods[name] = cascadeFunc;
-      }
+        // add method only if not one already exists
+        if (!methods[name]) {
+          methods[name] = func;
+        } else {
+          const cascadeFunc = this.executorFactory(method, methods[name]);
+          methods[name] = cascadeFunc;
+        }
 
-      // definitely add the method based on its signature
-      methods[method.signature!] = func;
+        // definitely add the method based on its signature
+        methods[method.signature!] = func;
 
-      // add method by name
-      methods[funcName] = func;
-    });
+        // add method by name
+        methods[funcName] = func;
+      });
 
     return methods;
   }
@@ -243,20 +266,22 @@ export class Contract<T extends ContractDefinition | void = void> {
   private getEvents(contractDefinition: ContractAbi) {
     const events: any = {};
 
-    contractDefinition.filter(method => method.type === 'event').forEach(method => {
-      const name = method.name!;
-      const funcName = abiMethodToString(method);
-      const event = this.on.bind(this, method.signature);
+    contractDefinition
+      .filter(method => method.type === 'event')
+      .forEach(method => {
+        const name = method.name!;
+        const funcName = abiMethodToString(method);
+        const event = this.on.bind(this, method.signature);
 
-      // add method only if not already exists
-      if (!events[name] || events[name].name === 'bound ') events[name] = event;
+        // add method only if not already exists
+        if (!events[name] || events[name].name === 'bound ') events[name] = event;
 
-      // definitely add the method based on its signature
-      events[method.signature!] = event;
+        // definitely add the method based on its signature
+        events[method.signature!] = event;
 
-      // add event by name
-      events[funcName] = event;
-    });
+        // add event by name
+        events[funcName] = event;
+      });
 
     // add allEvents
     events.allEvents = this.on.bind(this, 'allevents');
@@ -294,20 +319,6 @@ export class Contract<T extends ContractDefinition | void = void> {
   }
 
   /**
-   * Checks that no listener with name "newListener" or "removeListener" is added.
-   *
-   * @method _checkListener
-   * @param {String} type
-   * @param {String} event
-   * @return {Object} the contract instance
-   */
-  private checkListener(type, event) {
-    if (event === type) {
-      throw new Error('The event "' + type + '" is a reserved event name, you can\'t use it.');
-    }
-  }
-
-  /**
    * Should be used to encode indexed params and options to one final object
    *
    * @method _encodeEventABI
@@ -315,149 +326,67 @@ export class Contract<T extends ContractDefinition | void = void> {
    * @param {Object} options
    * @return {Object} everything combined together and encoded
    */
-  private encodeEventABI(event, options) {
-    options = options || {};
-    var filter = options.filter || {},
-      result: any = {};
+  private getEventTopics(event: AbiDefinition, options: GetLogOptions) {
+    let topics: Array<string | string[]> = [];
 
-    ['fromBlock', 'toBlock']
-      .filter(f => {
-        return options[f] !== undefined;
-      })
-      .forEach(f => {
-        result[f] = inputBlockNumberFormatter(options[f]);
+    // add event signature
+    if (!event.anonymous && event.signature) {
+      topics.push(event.signature);
+    }
+
+    // add event topics (indexed arguments)
+    (event.inputs || [])
+      .filter(input => input.indexed === true)
+      .forEach(input => {
+        const filter = options.filter || {};
+        const value = filter[input.name];
+        if (!value) {
+          return;
+        }
+
+        // TODO: https://github.com/ethereum/web3.js/issues/344
+        // TODO: deal properly with components
+
+        if (isArray(value)) {
+          const t = value.map(v => abi.encodeParameter(input.type, v));
+          topics = [...topics, t];
+        } else {
+          topics = [...topics, abi.encodeParameter(input.type, value)];
+        }
       });
 
-    // use given topics
-    if (isArray(options.topics)) {
-      result.topics = options.topics;
-
-      // create topics based on filter
-    } else {
-      result.topics = [];
-
-      // add event signature
-      if (event && !event.anonymous && event.name !== 'ALLEVENTS') {
-        result.topics.push(event.signature);
-      }
-
-      // add event topics (indexed arguments)
-      if (event.name !== 'ALLEVENTS') {
-        var indexedTopics = event.inputs
-          .filter(i => {
-            return i.indexed === true;
-          })
-          .map(i => {
-            var value = filter[i.name];
-            if (!value) {
-              return null;
-            }
-
-            // TODO: https://github.com/ethereum/web3x/issues/344
-            // TODO: deal properly with components
-
-            if (isArray(value)) {
-              return value.map(v => {
-                return abi.encodeParameter(i.type, v);
-              });
-            }
-            return abi.encodeParameter(i.type, value);
-          });
-
-        result.topics = result.topics.concat(indexedTopics);
-      }
-
-      if (!result.topics.length) delete result.topics;
-    }
-
-    if (this.address) {
-      result.address = this.address.toLowerCase();
-    }
-
-    return result;
+    return topics;
   }
 
   /**
    * Gets the event signature and outputformatters
-   *
-   * @method _generateEventOptions
-   * @param {Object} event
-   * @param {Object} options
-   * @param {Function} callback
-   * @return {Object} the event options object
    */
-  private generateEventOptions(eventName: string = 'allevents', options, callback?) {
-    let event: any =
-      eventName.toLowerCase() === 'allevents'
-        ? {
-            name: 'ALLEVENTS',
-            jsonInterface: this.jsonInterface,
-          }
-        : this.jsonInterface.find(json => {
-            return (
-              json.type === 'event' &&
-              (json.name === eventName || json.signature === '0x' + eventName.replace('0x', ''))
-            );
-          });
-
-    if (!event) {
-      throw new Error('Event "' + event.name + '" doesn\'t exist in this contract.');
-    }
-
+  private getLogOptions(eventName: string = 'allevents', options: GetLogOptions): GetLogOptions {
     if (!isAddress(this.address)) {
       throw new Error("This contract object doesn't have address set yet, please set an address first.");
     }
 
+    if (eventName.toLowerCase() === 'allevents') {
+      return {
+        ...options,
+        address: this.address,
+      };
+    }
+
+    const event = this.jsonInterface.find(
+      json =>
+        json.type === 'event' && (json.name === eventName || json.signature === '0x' + eventName.replace('0x', '')),
+    );
+
+    if (!event) {
+      throw new Error('Event "' + eventName + '" doesn\'t exist in this contract.');
+    }
+
     return {
-      params: this.encodeEventABI(event, options),
-      event: event,
-      callback: callback,
+      ...options,
+      address: this.address,
+      topics: this.getEventTopics(event, options),
     };
-  }
-
-  /**
-   * Adds event listeners and creates a subscription.
-   *
-   * @method _on
-   * @param {String} event
-   * @param {Object} options
-   * @param {Function} callback
-   * @return {Object} the event subscription
-   */
-  private on(event, options, callback) {
-    var subOptions = this.generateEventOptions(event, options, callback);
-
-    // prevent the event "newListener" and "removeListener" from being overwritten
-    this.checkListener('newListener', subOptions.event.name);
-    this.checkListener('removeListener', subOptions.event.name);
-
-    // TODO check if listener already exists? and reuse subscription if options are the same.
-
-    // create new subscription
-    var subscription = new Subscription({
-      subscription: {
-        params: 1,
-        inputFormatter: [inputLogFormatter],
-        outputFormatter: log => decodeAnyEvent(this.jsonInterface, log),
-        // DUBLICATE, also in web3-eth
-        subscriptionHandler: function(output) {
-          if (output.removed) {
-            this.emit('changed', output);
-          } else {
-            this.emit('data', output);
-          }
-
-          if (isFunction(this.callback)) {
-            this.callback(null, output, this);
-          }
-        },
-      },
-      type: 'eth',
-      requestManager: this.eth.requestManager,
-    });
-    subscription.subscribe('logs', subOptions.params, subOptions.callback || function() {});
-
-    return subscription;
   }
 
   private contractDeployFormatter = receipt => {

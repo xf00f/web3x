@@ -16,38 +16,37 @@
 */
 
 import { isString } from 'util';
-import { Account } from './account';
+import { Account } from '../account';
 import { KeyStore, decrypt } from '../utils/encryption';
-import { Eth } from '../eth';
 
 export class Wallet {
   public static defaultKeyName = 'web3js_wallet';
   public length: number = 0;
   public accounts: Account[] = [];
 
-  constructor(private eth: Eth) {}
+  constructor() {}
 
-  static async fromKeystores(eth: Eth, encryptedWallet: KeyStore[], password: string) {
-    const wallet = new Wallet(eth);
+  static async fromKeystores(encryptedWallet: KeyStore[], password: string) {
+    const wallet = new Wallet();
     await wallet.decrypt(encryptedWallet, password);
     return wallet;
   }
 
-  static async fromLocalStorage(eth: Eth, password: string, keyName: string = this.defaultKeyName) {
+  static async fromLocalStorage(password: string, keyName: string = this.defaultKeyName) {
     if (!localStorage) {
-      return new Wallet(eth);
+      return new Wallet();
     }
 
     const keystoreStr = localStorage.getItem(keyName);
 
     if (!keystoreStr) {
-      return new Wallet(eth);
+      return new Wallet();
     }
 
     try {
-      return Wallet.fromKeystores(eth, JSON.parse(keystoreStr), password);
+      return Wallet.fromKeystores(JSON.parse(keystoreStr), password);
     } catch (e) {
-      return new Wallet(eth);
+      return new Wallet();
     }
   }
 
@@ -63,9 +62,9 @@ export class Wallet {
     return keys.map(key => +key);
   }
 
-  create(numberOfAccounts: number, entropy?: string): Account[] {
+  create(numberOfAccounts: number, entropy?: Buffer): Account[] {
     for (var i = 0; i < numberOfAccounts; ++i) {
-      this.add(Account.create(this.eth, entropy).privateKey);
+      this.add(Account.create(entropy).privateKey);
     }
     return this.accounts;
   }
@@ -84,25 +83,25 @@ export class Wallet {
     return addressOrIndex;
   }
 
-  add(privateKey: string): Account;
+  add(privateKey: Buffer): Account;
   add(account: Account): Account;
-  add(account: string | Account): Account {
-    if (isString(account)) {
-      account = Account.fromPrivate(this.eth, account);
+  add(accountOrKey: Buffer | Account): Account {
+    if (Buffer.isBuffer(accountOrKey)) {
+      accountOrKey = Account.fromPrivate(accountOrKey);
     } else {
-      account = Account.fromPrivate(this.eth, account.privateKey);
+      accountOrKey = Account.fromPrivate(accountOrKey.privateKey);
     }
 
-    const existing = this.get(account.address);
+    const existing = this.get(accountOrKey.address);
     if (existing) {
       return existing;
     }
 
     const index = this.findSafeIndex();
-    this.accounts[index] = account;
+    this.accounts[index] = accountOrKey;
     this.length++;
 
-    return account;
+    return accountOrKey;
   }
 
   remove(addressOrIndex: string | number) {
@@ -112,7 +111,7 @@ export class Wallet {
       return false;
     }
 
-    this.accounts[index].privateKey = '';
+    this.accounts[index].privateKey = Buffer.of();
     delete this.accounts[index];
     this.length--;
 

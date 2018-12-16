@@ -15,7 +15,8 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Tx } from '../types';
+import bip39 from 'bip39';
+import hdkey from 'hdkey';
 import { create, fromPrivate } from '../eth-lib/account';
 import { randomHex, encrypt, KeyStore, decrypt, fireError } from '../utils';
 import { sign } from '../utils/sign';
@@ -24,28 +25,50 @@ import { Eth, SendTxPromiEvent } from '../eth';
 import { promiEvent } from '../promievent';
 import { TransactionReceipt } from '../formatters';
 
+export interface AccountTx {
+  nonce?: string | number;
+  chainId?: string | number;
+  to?: string;
+  data?: string;
+  value?: string | number;
+  gas: string | number;
+  gasPrice?: string | number;
+}
+
 export class Account {
-  constructor(private eth: Eth, public address: string, public privateKey: string, public publicKey) {}
+  constructor(public address: string, public privateKey: Buffer, public publicKey) {}
 
-  static create(eth: Eth, entropy: string = randomHex(32)) {
+  static create(entropy: Buffer = randomHex(32)) {
     const { privateKey, address, publicKey } = create(entropy);
-    return new Account(eth, address, privateKey, publicKey);
+    return new Account(address, privateKey, publicKey);
   }
 
-  static fromPrivate(eth: Eth, privateKey: string) {
+  static fromPrivate(privateKey: Buffer) {
     const { address, publicKey } = fromPrivate(privateKey);
-    return new Account(eth, address, privateKey, publicKey);
+    return new Account(address, privateKey, publicKey);
   }
 
-  static async fromKeystore(eth: Eth, v3Keystore: KeyStore | string, password: string, nonStrict = false) {
-    return Account.fromPrivate(eth, await decrypt(v3Keystore, password, nonStrict));
+  static createFromMnemonicAndPath(mnemonic: string, derivationPath: string) {
+    const seed = bip39.mnemonicToSeed(mnemonic);
+    return Account.createFromSeedAndPath(seed, derivationPath);
   }
 
-  sendTransaction(tx: Tx, extraformatters?: any): SendTxPromiEvent {
+  static createFromSeedAndPath(seed: Buffer, derivationPath: string) {
+    const root = hdkey.fromMasterSeed(seed);
+    const addrNode = root.derive(derivationPath);
+    const privateKey = addrNode.privateKey;
+    return Account.fromPrivate(privateKey);
+  }
+
+  static async fromKeystore(v3Keystore: KeyStore | string, password: string, nonStrict = false) {
+    return Account.fromPrivate(await decrypt(v3Keystore, password, nonStrict));
+  }
+
+  sendTransaction(tx: AccountTx, eth: Eth, extraformatters?: any): SendTxPromiEvent {
     const defer = promiEvent<TransactionReceipt>();
-    this.signTransaction(tx)
+    this.signTransaction(tx, eth)
       .then(signedTx => {
-        this.eth.sendSignedTransaction(signedTx.rawTransaction, extraformatters, defer);
+        eth.sendSignedTransaction(signedTx.rawTransaction, extraformatters, defer);
       })
       .catch(err => {
         fireError(err, defer.eventEmitter, defer.reject);
@@ -53,8 +76,8 @@ export class Account {
     return defer.eventEmitter;
   }
 
-  signTransaction(tx: Tx) {
-    return signTransaction(tx, this.privateKey, this.eth);
+  signTransaction(tx: AccountTx, eth: Eth) {
+    return signTransaction(tx, this.privateKey, eth);
   }
 
   sign(data: string) {

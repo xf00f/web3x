@@ -22,9 +22,8 @@ import { fireError, isAddress } from '../utils';
 import { abi } from './abi';
 import { toChecksumAddress } from '../utils';
 import { inputAddressFormatter, TransactionReceipt } from '../formatters';
-import { Eth, SendTxPromiEvent } from '../eth';
-import { BlockType } from '../types';
-import { Wallet } from '../accounts';
+import { Eth, SendTxPromiEvent, BlockType } from '../eth';
+import { Wallet } from '../wallet';
 
 export type TxFactory = (...args: any[]) => Tx;
 
@@ -152,7 +151,7 @@ export class Tx implements TxCall, TxSend {
     }
   }
 
-  private getTx(options) {
+  private getTx(options: any = {}) {
     return {
       to: this.contractAddress,
       from: options.from ? toChecksumAddress(inputAddressFormatter(options.from)) : this.defaultOptions.from,

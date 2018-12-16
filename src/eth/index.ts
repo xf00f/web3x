@@ -16,3 +16,5 @@
 */
 
 export * from './eth';
+export * from './tx';
+export * from './block';

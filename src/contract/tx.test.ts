@@ -18,8 +18,8 @@
 import { Tx } from './tx';
 import { sha3 } from '../utils';
 import { AbiDefinition } from '.';
-import { MockRequestManager } from '../request-manager/mock-request-manager';
 import { Eth } from '../eth';
+import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
 
 describe('eth', () => {
   describe('contract', () => {
@@ -27,10 +27,10 @@ describe('eth', () => {
       const contractAddress = '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe';
       const contractAddressLowercase = contractAddress.toLowerCase();
       const from = '0x5555567890123456789012345678901234567891';
-      let mockRequestManager: MockRequestManager;
+      let mockEthereumProvider: MockEthereumProvider;
 
       beforeEach(() => {
-        mockRequestManager = new MockRequestManager();
+        mockEthereumProvider = new MockEthereumProvider();
       });
 
       it('should emit correct transaction hash and receipt on send', function(done) {
@@ -53,9 +53,9 @@ describe('eth', () => {
           outputs: [],
         };
 
-        mockRequestManager.send.mockImplementationOnce(async payload => {
-          expect(payload.method).toBe('eth_sendTransaction');
-          expect(payload.params).toEqual([
+        mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
+          expect(method).toBe('eth_sendTransaction');
+          expect(params).toEqual([
             {
               data:
                 signature +
@@ -70,9 +70,9 @@ describe('eth', () => {
           return '0x1234000000000000000000000000000000000000000000000000000000056789';
         });
 
-        mockRequestManager.send.mockImplementationOnce(async payload => {
-          expect(payload.method).toBe('eth_getTransactionReceipt');
-          expect(payload.params).toEqual(['0x1234000000000000000000000000000000000000000000000000000000056789']);
+        mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
+          expect(method).toBe('eth_getTransactionReceipt');
+          expect(params).toEqual(['0x1234000000000000000000000000000000000000000000000000000000056789']);
           return {
             contractAddress: contractAddressLowercase,
             cumulativeGasUsed: '0xa',
@@ -84,7 +84,7 @@ describe('eth', () => {
         });
 
         const args = [contractAddress, 10];
-        const tx = new Tx(new Eth(mockRequestManager), methodAbi, contractAddress, args);
+        const tx = new Tx(new Eth(mockEthereumProvider), methodAbi, contractAddress, args);
 
         tx.send({ from: from, gasPrice: '100000000000000' })
           .on('transactionHash', result => {
@@ -125,9 +125,9 @@ describe('eth', () => {
           ],
         };
 
-        mockRequestManager.send.mockImplementationOnce(async payload => {
-          expect(payload.method).toBe('eth_call');
-          expect(payload.params).toEqual([
+        mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
+          expect(method).toBe('eth_call');
+          expect(params).toEqual([
             {
               data: signature + '000000000000000000000000' + contractAddressLowercase.replace('0x', ''),
               from,
@@ -139,7 +139,7 @@ describe('eth', () => {
         });
 
         const args = [contractAddress];
-        const tx = new Tx(new Eth(mockRequestManager), methodAbi, contractAddress, args);
+        const tx = new Tx(new Eth(mockEthereumProvider), methodAbi, contractAddress, args);
 
         const result = await tx.call({ from });
         expect(result).toBe('10');

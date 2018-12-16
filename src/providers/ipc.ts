@@ -16,10 +16,17 @@
 */
 
 import { isArray, isFunction } from 'util';
-import { Provider } from '.';
+import { LegacyProvider } from './legacy-provider';
 import { InvalidResponse, InvalidConnection } from '../errors';
+import { LegacyProviderAdapter } from './legacy-provider-adapter';
 
-export class IpcProvider implements Provider {
+export class IpcProvider extends LegacyProviderAdapter {
+  constructor(path: string, net: any) {
+    super(new LegacyIpcProvider(path, net));
+  }
+}
+
+class LegacyIpcProvider implements LegacyProvider {
   private responseCallbacks: any;
   private notificationCallbacks: any;
   public connected: boolean;

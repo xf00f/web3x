@@ -15,14 +15,13 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Tx } from '../types';
 import { numberToHex } from '../utils';
 import RLP from '../eth-lib/rlp';
 import Bytes from '../eth-lib/bytes';
 import Hash from '../eth-lib/hash';
 import Nat from '../eth-lib/nat';
 import Account from '../eth-lib/account';
-import { Eth } from '../eth';
+import { Eth, Tx } from '../eth';
 import { inputCallFormatter } from '../formatters';
 
 export interface SignedTx {
@@ -36,7 +35,7 @@ export interface SignedTx {
   nonce?: number;
 }
 
-export async function signTransaction(tx: Tx, privateKey: string, eth: Eth): Promise<SignedTx> {
+export async function signTransaction(tx: Tx, privateKey: Buffer, eth: Eth): Promise<SignedTx> {
   // Resolve immediately if nonce, chainId and price are provided
   if (tx.nonce !== undefined && tx.chainId !== undefined && tx.gasPrice !== undefined) {
     return sign(tx, privateKey);
@@ -68,7 +67,7 @@ export function recoverTransaction(rawTx: string): string {
   return Account.recover(Hash.keccak256(signingDataHex), signature);
 }
 
-function sign(tx: Tx, privateKey: string): SignedTx {
+function sign(tx: Tx, privateKey: Buffer): SignedTx {
   if (!tx.gas) {
     throw new Error('"gas" is missing');
   }

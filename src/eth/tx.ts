@@ -15,6 +15,29 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export * from './accounts';
-export * from './account';
-export * from './wallet';
+export interface Tx {
+  nonce?: string | number;
+  chainId?: string | number;
+  from?: string;
+  to?: string;
+  data?: string;
+  value?: string | number;
+  gas: string | number;
+  gasPrice?: string | number;
+}
+
+export interface SignedTransaction {
+  raw: string;
+  tx: {
+    nonce: string;
+    gasPrice: string;
+    gas: string;
+    to: string;
+    value: string;
+    input: string;
+    v: string;
+    r: string;
+    s: string;
+    hash: string;
+  };
+}

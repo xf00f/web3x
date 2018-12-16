@@ -18,14 +18,15 @@
 export type ContractAbi = AbiDefinition[];
 
 export type AbiInput = { components?: any; name: string; type: AbiDataTypes; indexed?: boolean };
+export type AbiOutput = { components?: any; name: string; type: AbiDataTypes };
 
 export interface AbiDefinition {
   constant?: boolean;
   payable?: boolean;
   anonymous?: boolean;
-  inputs?: Array<AbiInput>;
+  inputs?: AbiInput[];
   name?: string;
-  outputs?: Array<{ components?: any; name: string; type: AbiDataTypes }>;
+  outputs?: AbiOutput[];
   type: 'function' | 'constructor' | 'event' | 'fallback';
   stateMutability?: 'pure' | 'view' | 'payable' | 'nonpayable';
   signature?: string;

@@ -23,6 +23,7 @@ export * from './encryption';
 export * from './fire-error';
 export * from './hash-message';
 export * from './hex-ascii';
+export * from './hex-buffer';
 export * from './hex-bytes';
 export * from './hex-number';
 export * from './hex-utf8';

@@ -22,19 +22,23 @@ export class Net {
   private request = new NetRequestPayloads();
   constructor(private eth: Eth) {}
 
+  private async send({ method, params, format }: { method: string; params?: any[]; format: any }) {
+    return format(await this.eth.provider.send(method, params));
+  }
+
   async getId(): Promise<number> {
     const payload = this.request.getId();
-    return payload.format(await this.eth.requestManager.send(payload))!;
+    return payload.format(await this.send(payload))!;
   }
 
   async isListening(): Promise<boolean> {
     const payload = this.request.isListening();
-    return payload.format(await this.eth.requestManager.send(payload));
+    return payload.format(await this.send(payload));
   }
 
   async getPeerCount(): Promise<number> {
     const payload = this.request.getPeerCount();
-    return payload.format(await this.eth.requestManager.send(payload))!;
+    return payload.format(await this.send(payload))!;
   }
 
   async getNetworkType() {

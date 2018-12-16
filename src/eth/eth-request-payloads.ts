@@ -29,22 +29,25 @@ import {
   inputCallFormatter,
   inputLogFormatter,
   outputLogFormatter,
+  GetLogOptions,
 } from '../formatters';
 import { isString } from 'util';
-import { Tx, BlockType, BlockHash, TransactionHash } from '../types';
+import { TransactionHash } from '../types';
 import { Data, Address } from '../types';
+import { BlockType, BlockHash } from './block';
+import { Tx } from './tx';
 
 const identity = result => result;
 
 export class EthRequestPayloads {
-  constructor(private defaultAccount?: Address, private defaultBlock: BlockType = 'latest') {}
+  constructor(private defaultFromAddress?: Address, private defaultBlock: BlockType = 'latest') {}
 
-  getDefaultAccount() {
-    return this.defaultAccount;
+  getDefaultFromAddress() {
+    return this.defaultFromAddress;
   }
 
-  setDefaultAccount(address?: Address) {
-    this.defaultAccount = address ? toChecksumAddress(inputAddressFormatter(address)) : undefined;
+  setDefaultFromAddress(address?: Address) {
+    this.defaultFromAddress = address ? toChecksumAddress(inputAddressFormatter(address)) : undefined;
   }
 
   getDefaultBlock() {
@@ -176,7 +179,7 @@ export class EthRequestPayloads {
         isString(block) && isHexStrict(block)
           ? 'eth_getBlockTransactionCountByHash'
           : 'eth_getBlockTransactionCountByNumber',
-      params: inputBlockNumberFormatter(this.resolveBlock(block)),
+      params: [inputBlockNumberFormatter(this.resolveBlock(block))],
       format: hexToNumber,
     };
   }
@@ -184,7 +187,7 @@ export class EthRequestPayloads {
   getBlockUncleCount(block: BlockType | BlockHash) {
     return {
       method: isString(block) && isHexStrict(block) ? 'eth_getUncleCountByBlockHash' : 'eth_getUncleCountByBlockNumber',
-      params: inputBlockNumberFormatter(this.resolveBlock(block)),
+      params: [inputBlockNumberFormatter(this.resolveBlock(block))],
       format: hexToNumber,
     };
   }
@@ -225,7 +228,7 @@ export class EthRequestPayloads {
   }
 
   signTransaction(tx: Tx) {
-    tx.from = tx.from || this.defaultAccount;
+    tx.from = tx.from || this.defaultFromAddress;
     return {
       method: 'eth_signTransaction',
       params: [inputTransactionFormatter(tx)],
@@ -242,7 +245,7 @@ export class EthRequestPayloads {
   }
 
   sendTransaction(tx: Tx) {
-    tx.from = tx.from || this.defaultAccount;
+    tx.from = tx.from || this.defaultFromAddress;
     return {
       method: 'eth_sendTransaction',
       params: [inputTransactionFormatter(tx)],
@@ -253,7 +256,15 @@ export class EthRequestPayloads {
   sign(address: Address, dataToSign: Data) {
     return {
       method: 'eth_sign',
-      params: [inputSignFormatter(dataToSign), inputAddressFormatter(address)],
+      params: [inputAddressFormatter(address), inputSignFormatter(dataToSign)],
+      format: identity,
+    };
+  }
+
+  signTypedData(address: Address, dataToSign: { type: string; name: string; value: string }[]) {
+    return {
+      method: 'eth_signTypedData',
+      params: [dataToSign, inputAddressFormatter(address)],
       format: identity,
     };
   }
@@ -267,7 +278,7 @@ export class EthRequestPayloads {
   }
 
   estimateGas(tx: Tx) {
-    tx.from = tx.from || this.defaultAccount;
+    tx.from = tx.from || this.defaultFromAddress;
     return {
       method: 'eth_estimateGas',
       params: [inputCallFormatter(tx)],
@@ -290,12 +301,7 @@ export class EthRequestPayloads {
     };
   }
 
-  getPastLogs(options: {
-    fromBlock?: BlockType;
-    toBlock?: BlockType;
-    address?: string;
-    topics?: Array<string | string[]>;
-  }) {
+  getPastLogs(options: GetLogOptions) {
     return {
       method: 'eth_getLogs',
       params: [inputLogFormatter(options)],

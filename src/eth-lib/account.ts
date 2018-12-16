@@ -22,11 +22,11 @@ import { keccak256, keccak256s } from './hash';
 
 const secp256k1 = new elliptic.ec('secp256k1');
 
-export const create = entropy => {
-  const innerHex = keccak256(Bytes.concat(Bytes.random(32), entropy || Bytes.random(32)));
+export const create = (entropy: Buffer) => {
+  const innerHex = keccak256(Bytes.concat(Bytes.random(32), '0x' + entropy.toString('hex') || Bytes.random(32)));
   const middleHex = Bytes.concat(Bytes.concat(Bytes.random(32), innerHex), Bytes.random(32));
   const outerHex = keccak256(middleHex);
-  return fromPrivate(outerHex);
+  return fromPrivate(Buffer.from(outerHex.slice(2), 'hex'));
 };
 
 export const toChecksum = address => {
@@ -37,9 +37,8 @@ export const toChecksum = address => {
   return checksumAddress;
 };
 
-export const fromPrivate = privateKey => {
-  const buffer = Buffer.from(privateKey.slice(2), 'hex');
-  const ecKey = secp256k1.keyFromPrivate(buffer);
+export const fromPrivate = (privateKey: Buffer) => {
+  const ecKey = secp256k1.keyFromPrivate(privateKey);
   const publicKey = '0x' + ecKey.getPublic(false, 'hex').slice(2);
   const publicHash = keccak256(publicKey);
   const address = toChecksum('0x' + publicHash.slice(-40));
@@ -58,10 +57,8 @@ export const decodeSignature = (hex: string) => [
   Bytes.slice(32, 64, hex),
 ];
 
-export const makeSigner = addToV => (hash, privateKey) => {
-  const signature = secp256k1
-    .keyFromPrivate(Buffer.from(privateKey.slice(2), 'hex'))
-    .sign(Buffer.from(hash.slice(2), 'hex'), { canonical: true });
+export const makeSigner = addToV => (hash, privateKey: Buffer) => {
+  const signature = secp256k1.keyFromPrivate(privateKey).sign(Buffer.from(hash.slice(2), 'hex'), { canonical: true });
   return encodeSignature([
     Nat.fromString(Bytes.fromNumber(addToV + signature.recoveryParam)),
     Bytes.pad(32, Bytes.fromNat('0x' + signature.r.toString(16))),
