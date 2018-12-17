@@ -20,15 +20,7 @@ import { Subscription } from '../subscriptions';
 import { abi, abiMethodToString } from './abi';
 import { Tx, TxFactory } from './tx';
 import { decodeAnyEvent } from './decode-event-abi';
-import {
-  inputAddressFormatter,
-  EventLog,
-  inputBlockNumberFormatter,
-  TransactionReceipt,
-  GetLogOptions,
-  FormattedGetLogOptions,
-  inputLogFormatter,
-} from '../formatters';
+import { inputAddressFormatter, EventLog, TransactionReceipt, GetLogOptions, inputLogFormatter } from '../formatters';
 import { toChecksumAddress, isAddress } from '../utils';
 import { TxDeploy } from './tx-deploy';
 import { ContractAbi, AbiDefinition } from './contract-abi';
@@ -405,14 +397,12 @@ export class Contract<T extends ContractDefinition | void = void> {
     // make log names keys
     receipt.events = {};
     receipt.unnamedEvents = [];
-    var count = 0;
     for (let ev of decodedEvents) {
       if (ev.event) {
         const events = receipt.events[ev.event] || [];
         receipt.events[ev.event] = [...events, ev];
       } else {
         receipt.unnamedEvents = [...receipt.unnamedEvents, ev];
-        count++;
       }
     }
     delete receipt.logs;

@@ -15,8 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { signTransaction, recoverTransaction } from './sign-transaction';
-import { Account } from './account';
+import { recoverTransaction, signTransaction } from './sign-transaction';
 import { hexToBuffer } from '../utils';
 
 var clone = function(object) {
@@ -438,60 +437,69 @@ describe('accounts', function() {
       };
     });
 
+    it('should throw if fails to get chainId', async () => {
+      const privateKey = hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728');
+      const tx = {
+        nonce: 0,
+        gasPrice: '230000000000',
+        gas: 50000,
+      };
+      await expect(signTransaction(tx, privateKey, mockEthereum)).rejects.toThrowError('One of the values chainId');
+    });
+
+    it('should throw if gas is zero', async () => {
+      const privateKey = hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728');
+      const tx = { gas: 0 };
+      await expect(signTransaction(tx, privateKey, mockEthereum)).rejects.toThrowError('gas is missing or 0');
+    });
+
     tests.forEach(test => {
       if (test.error) {
         it('signTransaction must error', async () => {
-          const testAccount = Account.fromPrivate(test.privateKey);
-          await expect(testAccount.signTransaction(test.transaction, mockEthereum)).rejects.toBeInstanceOf(Error);
+          await expect(signTransaction(test.transaction, test.privateKey, mockEthereum)).rejects.toBeInstanceOf(Error);
         });
       } else {
         it('signTransaction must compare to eth_signTransaction', async () => {
-          const testAccount = Account.fromPrivate(test.privateKey);
-          const tx = await testAccount.signTransaction(test.transaction, mockEthereum);
+          const tx = await signTransaction(test.transaction, test.privateKey, mockEthereum);
           expect(tx.rawTransaction).toBe(test.rawTransaction);
         });
 
         it('signTransaction using the iban as "to" must compare to eth_signTransaction', async () => {
-          const testAccount = Account.fromPrivate(test.privateKey);
           const transaction = clone(test.transaction);
           transaction.to = transaction.toIban;
           delete transaction.toIban;
-          const tx = await testAccount.signTransaction(transaction, mockEthereum);
+          const tx = await signTransaction(transaction, test.privateKey, mockEthereum);
           expect(tx.rawTransaction).toBe(test.rawTransaction);
         });
 
         it('signTransaction will call for nonce', async () => {
-          const testAccount = Account.fromPrivate(test.privateKey);
           const transaction = clone(test.transaction);
           delete transaction.nonce;
           mockEthereum.getTransactionCount.mockResolvedValue(test.transaction.nonce);
-          const tx = await testAccount.signTransaction(transaction, mockEthereum);
+          const tx = await signTransaction(transaction, test.privateKey, mockEthereum);
           expect(tx.rawTransaction).toBe(test.rawTransaction);
           expect(mockEthereum.getTransactionCount).toHaveBeenCalledTimes(1);
         });
 
         it('signTransaction will call for gasPrice', async () => {
-          const testAccount = Account.fromPrivate(test.privateKey);
           const transaction = clone(test.transaction);
           delete transaction.gasPrice;
           mockEthereum.getGasPrice.mockResolvedValue(test.transaction.gasPrice);
-          const tx = await testAccount.signTransaction(transaction, mockEthereum);
+          const tx = await signTransaction(transaction, test.privateKey, mockEthereum);
           expect(tx.rawTransaction).toBe(test.rawTransaction);
           expect(mockEthereum.getGasPrice).toHaveBeenCalledTimes(1);
         });
 
         it('signTransaction will call for chainId', async () => {
-          const testAccount = Account.fromPrivate(test.privateKey);
           const transaction = clone(test.transaction);
           delete transaction.chainId;
           mockEthereum.getId.mockResolvedValue(test.transaction.chainId);
-          const tx = await testAccount.signTransaction(transaction, mockEthereum);
+          const tx = await signTransaction(transaction, test.privateKey, mockEthereum);
           expect(tx.rawTransaction).toBe(test.rawTransaction);
           expect(mockEthereum.getId).toHaveBeenCalledTimes(1);
         });
 
         it('signTransaction will call for nonce, gasPrice and chainId', async () => {
-          const testAccount = Account.fromPrivate(test.privateKey);
           const transaction = clone(test.transaction);
           delete transaction.nonce;
           delete transaction.gasPrice;
@@ -499,7 +507,7 @@ describe('accounts', function() {
           mockEthereum.getTransactionCount.mockResolvedValue(test.transaction.nonce);
           mockEthereum.getGasPrice.mockResolvedValue(test.transaction.gasPrice);
           mockEthereum.getId.mockResolvedValue(test.transaction.chainId);
-          const tx = await testAccount.signTransaction(transaction, mockEthereum);
+          const tx = await signTransaction(transaction, test.privateKey, mockEthereum);
           expect(tx.rawTransaction).toBe(test.rawTransaction);
           expect(mockEthereum.getId).toHaveBeenCalledTimes(1);
           expect(mockEthereum.getGasPrice).toHaveBeenCalledTimes(1);
@@ -507,8 +515,7 @@ describe('accounts', function() {
         });
 
         it('recoverTransaction, must recover signature', async () => {
-          const testAccount = Account.fromPrivate(test.privateKey);
-          const tx = await testAccount.signTransaction(test.transaction, mockEthereum);
+          const tx = await signTransaction(test.transaction, test.privateKey, mockEthereum);
           expect(recoverTransaction(tx.rawTransaction)).toBe(test.address);
         });
       }

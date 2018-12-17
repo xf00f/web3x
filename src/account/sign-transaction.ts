@@ -36,25 +36,29 @@ export interface SignedTx {
 }
 
 export async function signTransaction(tx: Tx, privateKey: Buffer, eth: Eth): Promise<SignedTx> {
+  if (!tx.gas) {
+    throw new Error('gas is missing or 0');
+  }
+
   // Resolve immediately if nonce, chainId and price are provided
   if (tx.nonce !== undefined && tx.chainId !== undefined && tx.gasPrice !== undefined) {
     return sign(tx, privateKey);
   }
 
   // Otherwise, get the missing info from the Ethereum Node
-  const promises: any = [
-    isNot(tx.chainId) ? eth.getId() : tx.chainId,
-    isNot(tx.gasPrice) ? eth.getGasPrice() : tx.gasPrice,
-    isNot(tx.nonce) ? eth.getTransactionCount(Account.fromPrivate(privateKey).address) : tx.nonce,
+  const promises = [
+    isNot(tx.chainId) ? eth.getId() : Promise.resolve(tx.chainId),
+    isNot(tx.gasPrice) ? eth.getGasPrice() : Promise.resolve(tx.gasPrice),
+    isNot(tx.nonce) ? eth.getTransactionCount(Account.fromPrivate(privateKey).address) : Promise.resolve(tx.nonce),
   ];
 
   const [chainId, gasPrice, nonce] = await Promise.all(promises);
 
   if (isNot(chainId) || isNot(gasPrice) || isNot(nonce)) {
-    throw new Error('One of the values "chainId", "gasPrice", or "nonce" couldn\'t be fetched');
+    throw new Error('One of the values chainId, gasPrice, or nonce could not be fetched');
   }
 
-  return sign(Object.assign(tx, { chainId, gasPrice, nonce }), privateKey);
+  return sign({ ...tx, chainId, gasPrice, nonce }, privateKey);
 }
 
 export function recoverTransaction(rawTx: string): string {
@@ -68,12 +72,8 @@ export function recoverTransaction(rawTx: string): string {
 }
 
 function sign(tx: Tx, privateKey: Buffer): SignedTx {
-  if (!tx.gas) {
-    throw new Error('"gas" is missing');
-  }
-
   if (tx.nonce! < 0 || tx.gas < 0 || tx.gasPrice! < 0 || tx.chainId! < 0) {
-    throw new Error('Gas, gasPrice, nonce or chainId is lower than 0');
+    throw new Error('gas, gasPrice, nonce or chainId is lower than 0');
   }
 
   tx = inputCallFormatter(tx);
