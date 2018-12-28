@@ -510,7 +510,7 @@ export async function makeAndWriteFiles(
 }
 
 export function getWeb3xPath() {
-  const pkg = JSON.parse(fs.readFileSync(__dirname + '/../../package.json').toString());
+  const pkg = JSON.parse(fs.readFileSync(__dirname + '/../package.json').toString());
   return pkg.name;
 }
 
