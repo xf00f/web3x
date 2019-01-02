@@ -19,26 +19,27 @@ import { isBoolean } from 'util';
 import { AbiDefinition } from '.';
 import { promiEvent } from '../promievent';
 import { abi } from './abi';
-import { toChecksumAddress, fireError } from '../utils';
+import { fireError } from '../utils';
 import { inputAddressFormatter } from '../formatters';
 import { Eth, SendTxPromiEvent } from '../eth';
 import { Wallet } from '../wallet';
+import { Address } from '../address';
 
 interface SendOptions {
-  from: string;
+  from?: Address;
   gasPrice?: string | number;
   gas?: number;
   value?: number | string;
 }
 
 interface EstimateOptions {
-  from?: string;
+  from?: Address;
   gasPrice?: string;
   value?: number | string;
 }
 
 type DefaultOptions = {
-  from?: string;
+  from?: Address;
   gasPrice?: string;
   gas?: number;
 };
@@ -58,11 +59,7 @@ export class TxDeploy {
     private defaultOptions: DefaultOptions = {},
     private wallet?: Wallet,
     private extraFormatters?: any,
-  ) {
-    if (this.defaultOptions.from) {
-      this.defaultOptions.from = toChecksumAddress(inputAddressFormatter(this.defaultOptions.from));
-    }
-  }
+  ) {}
 
   public async estimateGas(options: EstimateOptions = {}) {
     return await this.eth.estimateGas(this.getTx(options));
@@ -93,16 +90,16 @@ export class TxDeploy {
     return this.eth.request.sendTransaction(this.getTx(options));
   }
 
-  private getAccount(address?: string) {
+  private getAccount(address?: Address) {
     address = address || this.defaultOptions.from;
     if (this.wallet && address) {
-      return this.wallet.get(address);
+      return this.wallet.get(address.toString());
     }
   }
 
   private getTx(options) {
     return {
-      from: options.from ? toChecksumAddress(inputAddressFormatter(options.from)) : this.defaultOptions.from,
+      from: options.from || this.defaultOptions.from,
       gasPrice: options.gasPrice || this.defaultOptions.gasPrice,
       gas: options.gas || this.defaultOptions.gas,
       value: options.value,

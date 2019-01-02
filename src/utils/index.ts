@@ -16,7 +16,6 @@
 */
 
 export { unitMap } from './units-ethjs-unit';
-export * from './address';
 export * from './bloom';
 export * from './bn';
 export * from './encryption';

@@ -16,8 +16,9 @@
 */
 
 import { PersonalRequestPayloads } from './personal-request-payloads';
-import { Address, Quantity, Data, TransactionHash } from '../types';
+import { Quantity, Data, TransactionHash } from '../types';
 import { EthereumProvider } from '../providers/ethereum-provider';
+import { Address } from '../address';
 
 export interface Transaction {
   from: Address;

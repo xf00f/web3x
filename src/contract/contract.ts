@@ -21,16 +21,16 @@ import { abi, abiMethodToString } from './abi';
 import { Tx, TxFactory } from './tx';
 import { decodeAnyEvent } from './decode-event-abi';
 import { inputAddressFormatter, EventLog, TransactionReceipt, GetLogOptions, inputLogFormatter } from '../formatters';
-import { toChecksumAddress, isAddress } from '../utils';
 import { TxDeploy } from './tx-deploy';
 import { ContractAbi, AbiDefinition } from './contract-abi';
-import { Address, Data } from '../types';
-import { Eth, BlockType } from '../eth';
+import { Data } from '../types';
+import { Eth } from '../eth';
 import { InvalidNumberOfParams } from '../errors';
 import { Wallet } from '../wallet';
+import { Address } from '../address';
 
 export interface ContractOptions {
-  from?: string;
+  from?: Address;
   gasPrice?: string;
   gas?: number;
 }
@@ -78,7 +78,7 @@ export class Contract<T extends ContractDefinition | void = void> {
   constructor(
     private eth: Eth,
     private jsonInterface: ContractAbi,
-    public address?: string,
+    public address?: Address,
     defaultOptions: ContractOptions = {},
     private wallet?: Wallet,
   ) {
@@ -90,7 +90,7 @@ export class Contract<T extends ContractDefinition | void = void> {
     this.options = {
       gas,
       gasPrice,
-      from: from ? toChecksumAddress(inputAddressFormatter(from)) : undefined,
+      from,
     };
 
     if (address) {
@@ -224,7 +224,7 @@ export class Contract<T extends ContractDefinition | void = void> {
   }
 
   private setAddress(address: Address) {
-    this.address = toChecksumAddress(inputAddressFormatter(address));
+    this.address = address;
   }
 
   private getMethods(contractDefinition: ContractAbi) {
@@ -354,14 +354,14 @@ export class Contract<T extends ContractDefinition | void = void> {
    * Gets the event signature and outputformatters
    */
   private getLogOptions(eventName: string = 'allevents', options: GetLogOptions): GetLogOptions {
-    if (!isAddress(this.address)) {
+    if (!this.address) {
       throw new Error("This contract object doesn't have address set yet, please set an address first.");
     }
 
     if (eventName.toLowerCase() === 'allevents') {
       return {
         ...options,
-        address: this.address,
+        address: this.address.toString(),
       };
     }
 
@@ -376,7 +376,7 @@ export class Contract<T extends ContractDefinition | void = void> {
 
     return {
       ...options,
-      address: this.address,
+      address: this.address.toString(),
       topics: this.getEventTopics(event, options),
     };
   }

@@ -45,6 +45,15 @@ function makeImports(name: string, web3xPath: string) {
       undefined,
       ts.createImportClause(
         undefined,
+        ts.createNamedImports([ts.createImportSpecifier(undefined, ts.createIdentifier('Address'))]),
+      ),
+      ts.createLiteral(`${web3xPath}/address`),
+    ),
+    ts.createImportDeclaration(
+      undefined,
+      undefined,
+      ts.createImportClause(
+        undefined,
         ts.createNamedImports([
           ts.createImportSpecifier(undefined, ts.createIdentifier('EventLog')),
           ts.createImportSpecifier(undefined, ts.createIdentifier('TransactionReceipt')),
@@ -325,7 +334,7 @@ function makeContract(name: string) {
         undefined,
         'address',
         ts.createToken(ts.SyntaxKind.QuestionToken),
-        ts.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
+        ts.createTypeReferenceNode('Address', undefined),
       ),
       ts.createParameter(
         undefined,

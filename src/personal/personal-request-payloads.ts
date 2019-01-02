@@ -15,10 +15,10 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { toChecksumAddress } from '../utils';
 import { inputAddressFormatter, inputTransactionFormatter, inputSignFormatter } from '../formatters';
-import { Address, Quantity, Data } from '../types';
+import { Quantity, Data } from '../types';
 import { Transaction } from './personal';
+import { Address } from '../address';
 
 const identity = result => result;
 
@@ -26,7 +26,7 @@ export class PersonalRequestPayloads {
   getAccounts() {
     return {
       method: 'personalListAccounts',
-      format: result => result.map(toChecksumAddress),
+      format: result => result.map(Address.fromString),
     };
   }
 
@@ -34,14 +34,14 @@ export class PersonalRequestPayloads {
     return {
       method: 'personalListAccounts',
       params: [password],
-      format: toChecksumAddress,
+      format: Address.fromString,
     };
   }
 
   unlockAccount(address: Address, password: string, duration: Quantity) {
     return {
       method: 'personal_unlockAccount',
-      params: [inputAddressFormatter(address), password, duration],
+      params: [address, password, duration],
       format: identity,
     };
   }
@@ -49,7 +49,7 @@ export class PersonalRequestPayloads {
   lockAccount(address: Address) {
     return {
       method: 'personal_lockAccount',
-      params: [inputAddressFormatter(address)],
+      params: [address],
       format: identity,
     };
   }
@@ -81,7 +81,7 @@ export class PersonalRequestPayloads {
   sign(data: Data, address: Address, password: string) {
     return {
       method: 'personal_sign',
-      params: [inputSignFormatter(data), inputAddressFormatter(address), password],
+      params: [inputSignFormatter(data), address, password],
       format: identity,
     };
   }

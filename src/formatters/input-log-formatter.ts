@@ -20,6 +20,7 @@ import { inputBlockNumberFormatter } from './input-block-number-formatter';
 import { isArray } from 'util';
 import { inputAddressFormatter } from './input-address-formatter';
 import { BlockType } from '../eth';
+import { Address } from '../address';
 
 export interface GetLogOptions {
   filter?: { [k: string]: any };
@@ -32,7 +33,7 @@ export interface GetLogOptions {
 export interface FormattedGetLogOptions {
   toBlock?: string;
   fromBlock?: string;
-  address?: string | string[];
+  address?: Address | Address[];
   topics?: Array<string | string[]>;
 }
 

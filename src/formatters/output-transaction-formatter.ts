@@ -15,8 +15,9 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { toChecksumAddress, isAddress, hexToNumber } from '../utils';
+import { hexToNumber } from '../utils';
 import { outputBigNumberFormatter } from './output-big-number-formatter';
+import { Address } from '../address';
 
 export interface UnformattedTransaction {
   blockHash: string | null;
@@ -38,13 +39,13 @@ export interface UnformattedTransaction {
 export interface Transaction {
   blockHash: string | null;
   blockNumber: number | null;
-  from: string;
+  from: Address;
   gas: number;
   gasPrice: string;
   hash: string;
   input: string;
   nonce: number;
-  to: string | null;
+  to: Address | null;
   transactionIndex: number | null;
   value: string;
   v: string;
@@ -68,7 +69,7 @@ export function outputTransactionFormatter(tx: UnformattedTransaction): Transact
     gas: hexToNumber(tx.gas)!,
     gasPrice: outputBigNumberFormatter(tx.gasPrice),
     value: outputBigNumberFormatter(tx.value),
-    to: tx.to && isAddress(tx.to) ? toChecksumAddress(tx.to) : null,
-    from: toChecksumAddress(tx.from),
+    to: tx.to ? Address.fromString(tx.to) : null,
+    from: Address.fromString(tx.from),
   };
 }

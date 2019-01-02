@@ -15,11 +15,13 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { Address } from '../address';
+
 export interface Tx {
   nonce?: string | number;
   chainId?: string | number;
-  from?: string;
-  to?: string;
+  from?: Address;
+  to?: Address;
   data?: string;
   value?: string | number;
   gas: string | number;
@@ -32,7 +34,7 @@ export interface SignedTransaction {
     nonce: string;
     gasPrice: string;
     gas: string;
-    to: string;
+    to: Address;
     value: string;
     input: string;
     v: string;

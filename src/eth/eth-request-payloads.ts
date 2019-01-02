@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { toChecksumAddress, numberToHex, hexToNumber, isHexStrict } from '../utils';
+import { numberToHex, hexToNumber, isHexStrict } from '../utils';
 import {
   inputAddressFormatter,
   outputSyncingFormatter,
@@ -33,9 +33,10 @@ import {
 } from '../formatters';
 import { isString } from 'util';
 import { TransactionHash } from '../types';
-import { Data, Address } from '../types';
+import { Data } from '../types';
 import { BlockType, BlockHash } from './block';
 import { Tx } from './tx';
+import { Address } from '../address';
 
 const identity = result => result;
 
@@ -47,7 +48,7 @@ export class EthRequestPayloads {
   }
 
   setDefaultFromAddress(address?: Address) {
-    this.defaultFromAddress = address ? toChecksumAddress(inputAddressFormatter(address)) : undefined;
+    this.defaultFromAddress = address;
   }
 
   getDefaultBlock() {
@@ -117,7 +118,7 @@ export class EthRequestPayloads {
   getAccounts() {
     return {
       method: 'eth_accounts',
-      format: result => result.map(toChecksumAddress),
+      format: result => result.map(Address.toChecksumAddress),
     };
   }
 
@@ -131,7 +132,7 @@ export class EthRequestPayloads {
   getBalance(address: Address, block?: BlockType) {
     return {
       method: 'eth_getBalance',
-      params: [inputAddressFormatter(address), inputBlockNumberFormatter(this.resolveBlock(block))],
+      params: [address, inputBlockNumberFormatter(this.resolveBlock(block))],
       format: outputBigNumberFormatter,
     };
   }
@@ -139,11 +140,7 @@ export class EthRequestPayloads {
   getStorageAt(address: Address, position: string, block?: BlockType) {
     return {
       method: 'eth_getStorageAt',
-      params: [
-        inputAddressFormatter(address),
-        numberToHex(position),
-        inputBlockNumberFormatter(this.resolveBlock(block)),
-      ],
+      params: [address, numberToHex(position), inputBlockNumberFormatter(this.resolveBlock(block))],
       format: identity,
     };
   }
@@ -151,7 +148,7 @@ export class EthRequestPayloads {
   getCode(address: Address, block?: BlockType) {
     return {
       method: 'eth_getCode',
-      params: [inputAddressFormatter(address), inputBlockNumberFormatter(this.resolveBlock(block))],
+      params: [address, inputBlockNumberFormatter(this.resolveBlock(block))],
       format: identity,
     };
   }
@@ -222,7 +219,7 @@ export class EthRequestPayloads {
   getTransactionCount(address: Address, block?: BlockType) {
     return {
       method: 'eth_getTransactionCount',
-      params: [inputAddressFormatter(address), inputBlockNumberFormatter(this.resolveBlock(block))],
+      params: [address, inputBlockNumberFormatter(this.resolveBlock(block))],
       format: hexToNumber,
     };
   }
@@ -256,7 +253,7 @@ export class EthRequestPayloads {
   sign(address: Address, dataToSign: Data) {
     return {
       method: 'eth_sign',
-      params: [inputAddressFormatter(address), inputSignFormatter(dataToSign)],
+      params: [address, inputSignFormatter(dataToSign)],
       format: identity,
     };
   }
@@ -264,7 +261,7 @@ export class EthRequestPayloads {
   signTypedData(address: Address, dataToSign: { type: string; name: string; value: string }[]) {
     return {
       method: 'eth_signTypedData',
-      params: [dataToSign, inputAddressFormatter(address)],
+      params: [dataToSign, address],
       format: identity,
     };
   }

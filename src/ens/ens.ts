@@ -19,9 +19,9 @@ import { config } from './config';
 import { Registry } from './registry';
 import { Eth } from '../eth';
 import { namehash } from './registry/namehash';
-import { Address } from '../types';
 import { SendOptions } from '../contract';
 import { Net } from '../net';
+import { Address } from '../address';
 
 /**
  * Constructs a new instance of ENS
@@ -75,7 +75,7 @@ export class ENS {
    */
   async setAddress(name: string, address: Address, sendOptions: SendOptions) {
     const resolver = await this.registry.resolver(name);
-    return await resolver.methods.setAddr(namehash(name), address).send(sendOptions);
+    return await resolver.methods.setAddr(namehash(name), address.toString()).send(sendOptions);
   }
 
   /**
@@ -181,6 +181,6 @@ export class ENS {
       throw new Error('ENS is not supported on network ' + networkType);
     }
 
-    return addr;
+    return Address.fromString(addr);
   }
 }
