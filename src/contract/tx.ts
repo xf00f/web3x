@@ -18,37 +18,37 @@
 import { isBoolean } from 'util';
 import { AbiDefinition } from '.';
 import { promiEvent } from '../promievent';
-import { fireError, isAddress } from '../utils';
+import { fireError } from '../utils';
 import { abi } from './abi';
-import { toChecksumAddress } from '../utils';
 import { inputAddressFormatter, TransactionReceipt } from '../formatters';
 import { Eth, SendTxPromiEvent, BlockType } from '../eth';
 import { Wallet } from '../wallet';
+import { Address } from '../address';
 
 export type TxFactory = (...args: any[]) => Tx;
 
 export interface CallOptions {
-  from?: string;
+  from?: Address;
   gasPrice?: string | number;
   gas?: number;
 }
 
 export interface SendOptions {
-  from: string;
+  from?: Address;
   gasPrice?: string | number;
   gas?: number;
   value?: number | string;
 }
 
 interface EstimateOptions {
-  from?: string;
+  from?: Address;
   gas?: string | number;
   gasPrice?: string | number;
   value?: number | string;
 }
 
 type DefaultOptions = {
-  from?: string;
+  from?: Address;
   gasPrice?: string | number;
   gas?: number;
 };
@@ -77,7 +77,7 @@ export class Tx implements TxCall, TxSend {
   constructor(
     private eth: Eth,
     private definition: AbiDefinition,
-    private contractAddress: string,
+    private contractAddress: Address,
     private args: any[] = [],
     private defaultOptions: DefaultOptions = {},
     private wallet?: Wallet,
@@ -85,10 +85,6 @@ export class Tx implements TxCall, TxSend {
   ) {
     if (this.definition.type !== 'function') {
       throw new Error('Tx should only be used with functions.');
-    }
-
-    if (this.defaultOptions.from) {
-      this.defaultOptions.from = toChecksumAddress(inputAddressFormatter(this.defaultOptions.from));
     }
   }
 
@@ -113,7 +109,7 @@ export class Tx implements TxCall, TxSend {
     const tx = this.getTx(options);
 
     // return error, if no "from" is specified
-    if (!isAddress(tx.from)) {
+    if (!tx.from) {
       const defer = promiEvent();
       return fireError(
         new Error('No "from" address specified in neither the given options, nor the default options.'),
@@ -144,17 +140,17 @@ export class Tx implements TxCall, TxSend {
     return this.eth.request.sendTransaction(this.getTx(options));
   }
 
-  private getAccount(address?: string) {
+  private getAccount(address?: Address) {
     address = address || this.defaultOptions.from;
     if (this.wallet && address) {
-      return this.wallet.get(address);
+      return this.wallet.get(address.toString());
     }
   }
 
-  private getTx(options: any = {}) {
+  private getTx(options: any = {}): any {
     return {
       to: this.contractAddress,
-      from: options.from ? toChecksumAddress(inputAddressFormatter(options.from)) : this.defaultOptions.from,
+      from: options.from || this.defaultOptions.from,
       gasPrice: options.gasPrice || this.defaultOptions.gasPrice,
       gas: options.gas || this.defaultOptions.gas,
       value: options.value,

@@ -15,6 +15,8 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { Address } from '../address';
+
 export type BlockType = 'latest' | 'pending' | 'genesis' | number;
 export type BlockHash = string;
 
@@ -28,7 +30,7 @@ export interface BlockHeader {
   transactionRoot: string;
   stateRoot: string;
   receiptRoot: string;
-  miner: string;
+  miner: Address;
   extraData: string;
   gasLimit: number;
   gasUsed: number;
@@ -49,8 +51,8 @@ export interface Transaction {
   blockHash: string;
   blockNumber: number;
   transactionIndex: number;
-  from: string;
-  to: string;
+  from: Address;
+  to: Address;
   value: string;
   gasPrice: string;
   gas: number;

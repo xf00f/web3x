@@ -15,10 +15,11 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { toChecksumAddress, hexToNumber } from '../utils';
+import { hexToNumber } from '../utils';
 import { outputBigNumberFormatter } from './output-big-number-formatter';
 import { outputTransactionFormatter } from './output-transaction-formatter';
 import { isString, isArray } from 'util';
+import { Address } from '../address';
 
 /**
  * Formats the output of a block to its proper values
@@ -44,7 +45,7 @@ export function outputBlockFormatter(block) {
     });
   }
 
-  if (block.miner) block.miner = toChecksumAddress(block.miner);
+  if (block.miner) block.miner = Address.fromString(block.miner);
 
   return block;
 }

@@ -19,6 +19,7 @@ import { ENS } from '../ens';
 import { namehash } from './namehash';
 import { EnsRegistry } from '../contracts/EnsRegistry';
 import { EnsResolver } from '../contracts/EnsResolver';
+import { Address } from '../../address';
 
 /**
  * A wrapper around the ENS registry contract.
@@ -57,6 +58,6 @@ export class Registry {
   async resolver(name: string) {
     const contract = await this.contract;
     const address = await contract.methods.resolver(namehash(name)).call();
-    return new EnsResolver(this.ens.eth, address);
+    return new EnsResolver(this.ens.eth, Address.fromString(address));
   }
 }

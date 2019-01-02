@@ -23,6 +23,7 @@ import Nat from '../eth-lib/nat';
 import Account from '../eth-lib/account';
 import { Eth, Tx } from '../eth';
 import { inputCallFormatter } from '../formatters';
+import { Address } from '../address';
 
 export interface SignedTx {
   messageHash: string;
@@ -49,7 +50,9 @@ export async function signTransaction(tx: Tx, privateKey: Buffer, eth: Eth): Pro
   const promises = [
     isNot(tx.chainId) ? eth.getId() : Promise.resolve(tx.chainId),
     isNot(tx.gasPrice) ? eth.getGasPrice() : Promise.resolve(tx.gasPrice),
-    isNot(tx.nonce) ? eth.getTransactionCount(Account.fromPrivate(privateKey).address) : Promise.resolve(tx.nonce),
+    isNot(tx.nonce)
+      ? eth.getTransactionCount(Address.fromString(Account.fromPrivate(privateKey).address))
+      : Promise.resolve(tx.nonce),
   ];
 
   const [chainId, gasPrice, nonce] = await Promise.all(promises);
@@ -77,28 +80,23 @@ function sign(tx: Tx, privateKey: Buffer): SignedTx {
   }
 
   tx = inputCallFormatter(tx);
-
-  const transaction = tx;
-  transaction.to = tx.to || '0x';
-  transaction.data = tx.data || '0x';
-  transaction.value = tx.value || '0x';
-  transaction.chainId = numberToHex(tx.chainId);
+  tx.chainId = numberToHex(tx.chainId);
 
   const rlpEncoded = RLP.encode([
-    Bytes.fromNat(transaction.nonce),
-    Bytes.fromNat(transaction.gasPrice),
-    Bytes.fromNat(transaction.gas),
-    transaction.to.toLowerCase(),
-    Bytes.fromNat(transaction.value),
-    transaction.data,
-    Bytes.fromNat(transaction.chainId || '0x1'),
+    Bytes.fromNat(tx.nonce),
+    Bytes.fromNat(tx.gasPrice),
+    Bytes.fromNat(tx.gas),
+    tx.to ? tx.to.toString().toLowerCase() : '0x',
+    Bytes.fromNat(tx.value || '0x'),
+    tx.data || '0x',
+    Bytes.fromNat(tx.chainId || '0x1'),
     '0x',
     '0x',
   ]);
 
   const messageHash = Hash.keccak256(rlpEncoded);
 
-  const signature = Account.makeSigner(Nat.toNumber(transaction.chainId || '0x1') * 2 + 35)(
+  const signature = Account.makeSigner(Nat.toNumber(tx.chainId || '0x1') * 2 + 35)(
     Hash.keccak256(rlpEncoded),
     privateKey,
   );

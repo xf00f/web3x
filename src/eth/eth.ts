@@ -31,13 +31,14 @@ import {
 } from '../formatters';
 import { isBoolean } from 'util';
 import { TransactionHash } from '../types';
-import { Data, Address, Quantity } from '../types';
+import { Data, Quantity } from '../types';
 import { PromiEvent, promiEvent, PromiEventResult } from '../promievent';
 import { confirmTransaction } from './confirm-transaction';
 import { EthRequestPayloads } from './eth-request-payloads';
 import { Block, BlockHeader, BlockType, BlockHash } from './block';
 import { Tx, SignedTransaction } from './tx';
 import { EthereumProvider } from '../providers/ethereum-provider';
+import { Address } from '../address';
 
 export type TypedSigningData = { type: string; name: string; value: string }[];
 
@@ -68,7 +69,7 @@ export class Eth {
     return this.request.getDefaultFromAddress();
   }
 
-  setDefaultFromAddress(address?: string) {
+  setDefaultFromAddress(address?: Address) {
     this.request.setDefaultFromAddress(address);
   }
 
@@ -189,10 +190,10 @@ export class Eth {
     return defer.eventEmitter;
   }
 
-  private getAccount(address?: string) {
+  private getAccount(address?: Address) {
     address = address || this.request.getDefaultFromAddress();
     if (this.wallet && address) {
-      return this.wallet.get(address);
+      return this.wallet.get(address.toString());
     }
   }
 

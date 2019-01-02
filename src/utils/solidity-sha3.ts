@@ -19,10 +19,10 @@ import { isArray, isObject } from 'util';
 import BN from 'bn.js';
 import { isHexStrict, toHex } from './hex';
 import { utf8ToHex } from './hex-utf8';
-import { isAddress } from './address';
 import { leftPad, rightPad } from './padding';
 import { sha3 } from './sha3';
 import { isBN } from './bn';
+import { Address } from '../address';
 
 var _elementaryName = function(name) {
   /*jshint maxcomplexity:false */
@@ -99,7 +99,7 @@ var _solidityPack = function(type, value, arraySize) {
       size = 40;
     }
 
-    if (!isAddress(value)) {
+    if (!Address.isAddress(value)) {
       throw new Error(value + ' is not a valid address, or the checksum is invalid.');
     }
 

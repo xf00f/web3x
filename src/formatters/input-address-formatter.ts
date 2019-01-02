@@ -16,18 +16,14 @@
 */
 
 import { Iban } from '../iban';
-import { isAddress } from '../utils';
+import { Address } from '../address';
 
-export function inputAddressFormatter(address) {
+export function inputAddressFormatter(address: string) {
   const iban = new Iban(address);
   if (iban.isValid() && iban.isDirect()) {
-    return iban.toAddress().toLowerCase();
-  } else if (isAddress(address)) {
-    return '0x' + address.toLowerCase().replace('0x', '');
+    return iban.toAddress();
+  } else if (Address.isAddress(address)) {
+    return Address.fromString(address);
   }
-  throw new Error(
-    'Provided address "' +
-      address +
-      '" is invalid, the capitalization checksum test failed, or its an indrect IBAN address which can\'t be converted.',
-  );
+  throw new Error(`Address ${address} is invalid, the checksum failed, or its an indrect IBAN address.`);
 }

@@ -17,7 +17,6 @@
 
 export type Callback<T> = (error: Error, result: T) => void;
 
-export type Address = string;
 export type TransactionHash = string;
 export type Quantity = string;
 export type Data = string;

@@ -1,6 +1,7 @@
 import BN from "bn.js";
+import { Address } from "../../address";
 import { EventLog, TransactionReceipt } from "../../formatters";
-import { Contract, ContractOptions, ContractAbi, TxCall, TxSend, EventSubscriptionFactory } from "../../contract";
+import { Contract, ContractOptions, TxCall, TxSend, EventSubscriptionFactory } from "../../contract";
 import { Eth } from "../../eth";
 import abi from "./TestContractAbi";
 export type ChangedEvent = {
@@ -55,8 +56,8 @@ export interface TestContractDefinition {
     eventLogs: TestContractEventLogs;
 }
 export class TestContract extends Contract<TestContractDefinition> {
-    constructor(eth: Eth, address?: string, options?: ContractOptions) {
-        super(eth, (abi as ContractAbi), address, options);
+    constructor(eth: Eth, address?: Address, options?: ContractOptions) {
+        super(eth, abi, address, options);
     }
 }
-export var TestContractAbi = (abi as ContractAbi);
+export var TestContractAbi = abi;

@@ -24,11 +24,12 @@ import { signTransaction } from './sign-transaction';
 import { Eth, SendTxPromiEvent } from '../eth';
 import { promiEvent } from '../promievent';
 import { TransactionReceipt } from '../formatters';
+import { Address } from '../address';
 
 export interface AccountTx {
   nonce?: string | number;
   chainId?: string | number;
-  to?: string;
+  to?: Address;
   data?: string;
   value?: string | number;
   gas: string | number;

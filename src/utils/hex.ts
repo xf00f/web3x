@@ -16,7 +16,7 @@
 */
 
 import randomBytes from 'randombytes';
-import { isAddress } from './address';
+import { Address } from '../address';
 import { isBoolean, isObject, isString } from 'util';
 import { isBN } from './bn';
 import { utf8ToHex } from './hex-utf8';
@@ -58,7 +58,7 @@ export function isHex(hex: string) {
 export function toHex(value: string | number | BN | boolean | object, returnType?: any) {
   /*jshint maxcomplexity: false */
 
-  if (isAddress(value)) {
+  if (isString(value) && Address.isAddress(value)) {
     return returnType ? 'address' : '0x' + (value as string).toLowerCase().replace(/^0x/i, '');
   }
 

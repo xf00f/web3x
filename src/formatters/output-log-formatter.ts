@@ -15,8 +15,10 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { sha3, toChecksumAddress, hexToNumber } from '../utils';
-import { TransactionHash, Address, Data } from '../types';
+import { sha3, hexToNumber } from '../utils';
+import { TransactionHash, Data } from '../types';
+import { Address } from '../address';
+import { isString } from 'util';
 
 export interface UnformattedLog {
   removed?: boolean;
@@ -68,7 +70,7 @@ export function outputLogFormatter(log: UnformattedLog | Log): Log {
   const blockNumber = log.blockNumber !== null ? hexToNumber(log.blockNumber) : null;
   const transactionIndex = log.transactionIndex !== null ? hexToNumber(log.transactionIndex) : null;
   const logIndex = log.logIndex !== null ? hexToNumber(log.logIndex) : null;
-  const address = toChecksumAddress(log.address);
+  const address = isString(log.address) ? Address.fromString(log.address) : log.address;
 
   return { ...log, id, blockNumber, transactionIndex, logIndex, address };
 }

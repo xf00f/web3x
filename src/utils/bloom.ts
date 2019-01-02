@@ -15,9 +15,9 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Address, isAddress } from './address';
 import { isTopic } from './topic';
 import { sha3 } from './sha3';
+import { Address } from '../address';
 
 /**
  * Ethereum bloom filter support.
@@ -75,11 +75,11 @@ function testBytes(bloom, bytes: string) {
  * @param {String} address in hex notation
  * @returns {Boolean} topic is (probably) part of the block
  */
-export var testAddress = function(bloom: string, address: Address) {
+export var testAddress = function(bloom: string, address: string) {
   if (!isBloom(bloom)) {
     throw 'Invalid bloom given';
   }
-  if (!isAddress(address)) {
+  if (!Address.isAddress(address)) {
     throw 'Invalid address given: "' + address + '"';
   }
 

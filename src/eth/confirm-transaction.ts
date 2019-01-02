@@ -237,18 +237,14 @@ export async function confirmTransaction(defer, result, payload, eth: Eth, extra
   };
 
   // first check if we already have a confirmed transaction
-  try {
-    const receipt = await eth.getTransactionReceipt(result);
-    if (receipt && receipt.blockHash) {
-      if (defer.eventEmitter.listeners('confirmation').length > 0) {
-        // We must keep on watching for new Blocks, if a confirmation listener is present
-        startWatching(receipt);
-      }
-      checkConfirmation(receipt, false);
-    } else if (!promiseResolved) {
-      startWatching();
+  const receipt = await eth.getTransactionReceipt(result);
+  if (receipt && receipt.blockHash) {
+    if (defer.eventEmitter.listeners('confirmation').length > 0) {
+      // We must keep on watching for new Blocks, if a confirmation listener is present
+      startWatching(receipt);
     }
-  } catch (_) {
-    if (!promiseResolved) startWatching();
+    checkConfirmation(receipt, false);
+  } else if (!promiseResolved) {
+    startWatching();
   }
 }

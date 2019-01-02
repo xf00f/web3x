@@ -16,8 +16,7 @@
 */
 
 import BigNumber from 'bn.js';
-import { Address } from '../types';
-import { isAddress, toChecksumAddress } from '../utils';
+import { Address } from '../address';
 
 var leftPad = function(string, bytes) {
   var result = string;
@@ -122,13 +121,7 @@ export class Iban {
    * @return {Iban} the IBAN object
    */
   static fromAddress(address: Address) {
-    if (!isAddress(address)) {
-      throw new Error('Provided address is not a valid address: ' + address);
-    }
-
-    address = address.replace('0x', '').replace('0X', '');
-
-    var asBn = new BigNumber(address, 16);
+    var asBn = new BigNumber(address.toBuffer(), 16);
     var base36 = asBn.toString(36);
     var padded = leftPad(base36, 15);
     return Iban.fromBban(padded.toUpperCase());
@@ -250,10 +243,10 @@ export class Iban {
     if (this.isDirect()) {
       var base36 = this._iban.substr(4);
       var asBn = new BigNumber(base36, 36);
-      return toChecksumAddress(asBn.toString(16, 20));
+      return Address.fromString(asBn.toString(16, 20));
     }
 
-    return '';
+    throw new Error('Address is not direct');
   }
 
   toString() {

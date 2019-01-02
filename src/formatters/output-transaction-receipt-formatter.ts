@@ -15,9 +15,10 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { toChecksumAddress, hexToNumber } from '../utils';
+import { hexToNumber } from '../utils';
 import { outputLogFormatter, Log } from './output-log-formatter';
 import { isArray } from 'util';
+import { Address } from '../address';
 
 export interface TransactionReceipt<Events = void> {
   transactionHash: string;
@@ -39,7 +40,7 @@ export interface EventLog<ReturnValues, Name = string> {
   id: string | null;
   removed?: boolean;
   event?: Name;
-  address: string;
+  address: Address;
   returnValues: ReturnValues;
   logIndex: number | null;
   transactionIndex: number | null;
@@ -75,7 +76,7 @@ export function outputTransactionReceiptFormatter(receipt) {
   }
 
   if (receipt.contractAddress) {
-    receipt.contractAddress = toChecksumAddress(receipt.contractAddress);
+    receipt.contractAddress = Address.fromString(receipt.contractAddress);
   }
 
   if (typeof receipt.status !== 'undefined') {
