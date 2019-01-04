@@ -17,18 +17,19 @@
 
 import { Eth } from './eth';
 import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
+import { Address } from '../address';
 
 describe('eth', () => {
-  const contractAddress = '0x1234567890123456789012345678901234567891';
+  const contractAddress = Address.fromString('0x1234567890123456789012345678901234567891');
   const basicTx = {
-    from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-    to: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+    from: Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe'),
+    to: Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe'),
     data: '0xa123456',
     gasPrice: 100,
     gas: 100,
   };
   const deployTx = {
-    from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+    from: Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe'),
     data: '0xa123456',
     gasPrice: 100,
     gas: 100,
@@ -110,7 +111,7 @@ describe('eth', () => {
     await expect(eth.sendTransaction(fromlessTx)).rejects.toThrowError('"from" field must be defined');
   });
 
-  const bootstrap1 = function(address: string | null = contractAddress) {
+  const bootstrap1 = function(address: string | null = contractAddress.toString()) {
     mockEthereumProvider.send.mockImplementationOnce(async method => {
       expect(method).toBe('eth_sendTransaction');
       return '0x1234567453543456321456321';
@@ -169,18 +170,21 @@ describe('eth', () => {
   it('should use emitter when subscribing and checking for receipt', done => {
     const eth = bootstrap1();
 
-    eth.sendTransaction(basicTx).on('receipt', function(result) {
-      expect(result).toEqual({
-        contractAddress,
-        cumulativeGasUsed: 10,
-        transactionIndex: 3,
-        blockNumber: 10,
-        blockHash: '0xafff',
-        gasUsed: 0,
-      });
+    eth
+      .sendTransaction(basicTx)
+      .on('receipt', function(result) {
+        expect(result).toEqual({
+          contractAddress,
+          cumulativeGasUsed: 10,
+          transactionIndex: 3,
+          blockNumber: 10,
+          blockHash: '0xafff',
+          gasUsed: 0,
+        });
 
-      done();
-    });
+        done();
+      })
+      .on('error', done);
   });
 
   it('should use promise when subscribing and checking for deployed contract', async () => {

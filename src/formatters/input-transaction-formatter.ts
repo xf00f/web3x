@@ -16,7 +16,6 @@
 */
 
 import { numberToHex, isHex } from '../utils';
-import { isNumber, isObject } from 'util';
 import { inputAddressFormatter } from './input-address-formatter';
 
 /**
@@ -29,16 +28,11 @@ import { inputAddressFormatter } from './input-address-formatter';
 export function inputTransactionFormatter(options) {
   options = _txInputFormatter(options);
 
-  // check from, only if not number, or object
-  if (!isNumber(options.from) && !isObject(options.from)) {
-    options.from = options.from || (this ? this.defaultAccount : null);
-
-    if (!options.from && !isNumber(options.from)) {
-      throw new Error('The send transactions "from" field must be defined!');
-    }
-
-    options.from = inputAddressFormatter(options.from);
+  if (!options.from) {
+    throw new Error('The send transactions "from" field must be defined!');
   }
+
+  options.from = inputAddressFormatter(options.from);
 
   return options;
 }
@@ -53,10 +47,8 @@ export function inputTransactionFormatter(options) {
 export function inputCallFormatter(options) {
   options = _txInputFormatter(options);
 
-  var from = options.from || (this ? this.defaultAccount : null);
-
-  if (from) {
-    options.from = inputAddressFormatter(from);
+  if (options.from) {
+    options.from = inputAddressFormatter(options.from);
   }
 
   return options;

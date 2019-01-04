@@ -18,6 +18,7 @@
 import { isArray, isObject } from 'util';
 import { sha3 } from '../../utils';
 import { AbiCoder as EthersAbi } from '../../ethers/abi-coder';
+import { Address } from '../../address';
 
 /**
  * ABICoder prototype should be used to encode/decode solidity params of any type
@@ -85,6 +86,7 @@ export class ABICoder {
    * @return {String} encoded list of params
    */
   encodeParameters(types, params) {
+    params = params.map(p => (p instanceof Address ? p.toString() : p));
     return this.ethersAbiCoder.encode(this.mapTypes(types), params);
   }
 

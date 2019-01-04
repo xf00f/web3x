@@ -15,9 +15,10 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { isString } from 'util';
+import { isNumber } from 'util';
 import { Account } from '../account';
 import { KeyStore, decrypt } from '../utils/encryption';
+import { Address } from '../address';
 
 export class Wallet {
   public static defaultKeyName = 'web3js_wallet';
@@ -69,18 +70,18 @@ export class Wallet {
     return this.accounts;
   }
 
-  get(addressOrIndex: string | number) {
-    if (isString(addressOrIndex)) {
-      return this.accounts.find(a => a && a.address.toLowerCase() === addressOrIndex.toLowerCase());
+  get(addressOrIndex: string | number | Address) {
+    if (isNumber(addressOrIndex)) {
+      return this.accounts[addressOrIndex];
     }
-    return this.accounts[addressOrIndex];
+    return this.accounts.find(a => a && a.address.toString().toLowerCase() === addressOrIndex.toString().toLowerCase());
   }
 
-  indexOf(addressOrIndex: string | number) {
-    if (isString(addressOrIndex)) {
-      return this.accounts.findIndex(a => a.address.toLowerCase() === addressOrIndex.toLowerCase());
+  indexOf(addressOrIndex: string | number | Address) {
+    if (isNumber(addressOrIndex)) {
+      return addressOrIndex;
     }
-    return addressOrIndex;
+    return this.accounts.findIndex(a => a.address.toString().toLowerCase() === addressOrIndex.toString().toLowerCase());
   }
 
   add(privateKey: Buffer): Account;
@@ -104,7 +105,7 @@ export class Wallet {
     return accountOrKey;
   }
 
-  remove(addressOrIndex: string | number) {
+  remove(addressOrIndex: string | number | Address) {
     const index = this.indexOf(addressOrIndex);
 
     if (index == -1) {

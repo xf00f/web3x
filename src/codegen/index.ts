@@ -235,6 +235,10 @@ function getBaseType(type: string, returnValue: boolean) {
     return ts.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
   }
 
+  if (type === 'address') {
+    return ts.createTypeReferenceNode('Address', undefined);
+  }
+
   return ts.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
 }
 

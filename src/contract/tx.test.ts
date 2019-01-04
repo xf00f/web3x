@@ -20,13 +20,16 @@ import { sha3 } from '../utils';
 import { AbiDefinition } from '.';
 import { Eth } from '../eth';
 import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
+import { Address } from '../address';
 
 describe('eth', () => {
   describe('contract', () => {
     describe('tx', () => {
-      const contractAddress = '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe';
-      const contractAddressLowercase = contractAddress.toLowerCase();
-      const from = '0x5555567890123456789012345678901234567891';
+      const contractAddress = Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe');
+      const contractAddressLowercase = contractAddress.toString().toLowerCase();
+      const contractAddressUnprefixedLowercase = contractAddressLowercase.slice(2);
+      const from = Address.fromString('0x5555567890123456789012345678901234567891');
+      const fromAddressLowercase = from.toString().toLowerCase();
       let mockEthereumProvider: MockEthereumProvider;
 
       beforeEach(() => {
@@ -60,9 +63,9 @@ describe('eth', () => {
               data:
                 signature +
                 '000000000000000000000000' +
-                contractAddressLowercase.replace('0x', '') +
+                contractAddressUnprefixedLowercase +
                 '000000000000000000000000000000000000000000000000000000000000000a',
-              from: from,
+              from: fromAddressLowercase,
               to: contractAddressLowercase,
               gasPrice: '0x5af3107a4000',
             },
@@ -100,7 +103,8 @@ describe('eth', () => {
               gasUsed: 0,
             });
             done();
-          });
+          })
+          .on('error', done);
       });
 
       it('should return correct result on call', async () => {
@@ -129,8 +133,8 @@ describe('eth', () => {
           expect(method).toBe('eth_call');
           expect(params).toEqual([
             {
-              data: signature + '000000000000000000000000' + contractAddressLowercase.replace('0x', ''),
-              from,
+              data: signature + '000000000000000000000000' + contractAddressUnprefixedLowercase,
+              from: from.toString().toLowerCase(),
               to: contractAddressLowercase,
             },
             'latest',

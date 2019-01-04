@@ -16,6 +16,7 @@
 */
 
 import { Iban } from './iban';
+import { Address } from '../address';
 
 describe('iban', function() {
   describe('createIndirect', function() {
@@ -44,7 +45,7 @@ describe('iban', function() {
     describe('toAddress', function() {
       tests.forEach(function(test) {
         it('should transform iban to address: ' + test.address, function() {
-          expect(Iban.toAddress(test.direct)).toBe(test.address);
+          expect(Iban.toAddress(test.direct).toString()).toBe(test.address);
         });
       });
 
@@ -55,9 +56,9 @@ describe('iban', function() {
 
     describe('instance address', function() {
       tests.forEach(function(test) {
-        it('shoud transform iban to address: ' + test.address, function() {
+        it('should transform iban to address: ' + test.address, function() {
           const iban = new Iban(test.direct);
-          expect(iban.toAddress()).toBe(test.address);
+          expect(iban.toAddress().toString()).toBe(test.address);
         });
       });
     });
@@ -74,7 +75,7 @@ describe('iban', function() {
 
     tests.forEach(function(test) {
       it('shoud create indirect iban: ' + test.expected, function() {
-        expect(Iban.fromAddress(test.address)).toEqual(new Iban(test.expected));
+        expect(Iban.fromString(test.address)).toEqual(new Iban(test.expected));
       });
     });
   });
@@ -90,7 +91,7 @@ describe('iban', function() {
 
     tests.forEach(function(test) {
       it('should create indirect iban: ' + test.expected, function() {
-        expect(Iban.toIban(test.address)).toBe(test.expected);
+        expect(Iban.toIban(Address.fromString(test.address))).toBe(test.expected);
       });
     });
   });

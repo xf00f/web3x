@@ -17,12 +17,13 @@
 
 import { sha3 } from '../utils';
 import { decodeEvent } from './decode-event-abi';
+import { Address } from '../address';
 
 describe('eth', () => {
   describe('contract', () => {
     describe('decode-event-abi', () => {
       it('decodeEventABI should return the decoded event object with topics', () => {
-        const address = '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe';
+        const address = Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe');
         const signature = 'Changed(address,uint256,uint256,uint256)';
         const result = decodeEvent(
           {
@@ -38,10 +39,10 @@ describe('eth', () => {
           },
           {
             id: '',
-            address: address,
+            address,
             topics: [
               sha3(signature),
-              '0x000000000000000000000000' + address.replace('0x', ''),
+              '0x000000000000000000000000' + address.toString().replace('0x', ''),
               '0x0000000000000000000000000000000000000000000000000000000000000001',
             ],
             blockNumber: 3,
@@ -55,7 +56,7 @@ describe('eth', () => {
           },
         );
 
-        expect(result.returnValues.from).toBe(address);
+        expect(result.returnValues.from).toEqual(address);
         expect(result.returnValues.amount).toBe('1');
         expect(result.returnValues.t1).toBe('1');
         expect(result.returnValues.t2).toBe('8');
