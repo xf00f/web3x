@@ -16,6 +16,11 @@
 */
 
 import { abi } from '.';
+import { Address } from '../../address';
+
+const address1 = Address.fromString('0x407d73d8a49eeb85d32cf465507dd71d507100c1');
+const address2 = Address.fromString('0x407d73d8a49eeb85d32cf465507dd71d507100c3');
+const address3 = Address.fromString('0x1234567890123456789012345678901234567890');
 
 describe('decodeParameters', function() {
   const tests = [
@@ -76,7 +81,7 @@ describe('decodeParameters', function() {
     },
     {
       params: [['address'], '0x0000000000000000000000000000000000000000000000000000000000000000'],
-      result: { '0': '0x0000000000000000000000000000000000000000', __length__: 1 },
+      result: { '0': Address.fromString('0x0000000000000000000000000000000000000000'), __length__: 1 },
     },
     {
       params: [['bytes32'], '0x0000000000000000000000000000000000000000000000000000000000000000'],
@@ -89,7 +94,7 @@ describe('decodeParameters', function() {
   ];
   tests.forEach(function(test) {
     it('should convert correctly', function() {
-      expect(abi.decodeParameters.apply(abi, test.params)).toEqual(test.result);
+      expect(abi.decodeParameters.apply(abi, test.params as any)).toEqual(test.result);
     });
   });
 
@@ -137,7 +142,7 @@ describe('decodeParameters', function() {
 
   failures.forEach(function(test) {
     it('should not convert ' + test.params[1] + ' to ' + test.params[0], function() {
-      expect(_ => abi.decodeParameters.apply(abi, test.params)).toThrow();
+      expect(_ => abi.decodeParameters.apply(abi, test.params as any)).toThrow();
     });
   });
 });
@@ -158,12 +163,12 @@ describe('decodeParameters', function() {
 
   test({
     types: ['address'],
-    expected: ['0x407D73d8a49eeb85D32Cf465507dd71d507100c1'],
+    expected: [address1],
     values: '000000000000000000000000407d73d8a49eeb85d32cf465507dd71d507100c1',
   });
   test({
     types: ['address', 'address'],
-    expected: ['0x407D73d8a49eeb85D32Cf465507dd71d507100c1', '0x407D73d8A49eEB85D32Cf465507Dd71d507100c3'],
+    expected: [address1, address2],
     values:
       '000000000000000000000000407d73d8a49eeb85d32cf465507dd71d507100c1' +
       '000000000000000000000000407d73d8a49eeb85d32cf465507dd71d507100c3',
@@ -302,7 +307,7 @@ describe('decodeParameters', function() {
   });
   test({
     types: ['address[2][1]', 'bool'],
-    expected: [[['0x407D73d8a49eeb85D32Cf465507dd71d507100c1', '0x407D73d8A49eEB85D32Cf465507Dd71d507100c3']], false],
+    expected: [[[address1, address2]], false],
     values:
       '000000000000000000000000407d73d8a49eeb85d32cf465507dd71d507100c1' +
       '000000000000000000000000407d73d8a49eeb85d32cf465507dd71d507100c3' +
@@ -342,11 +347,7 @@ describe('decodeParameters', function() {
   });
   test({
     types: ['tuple(address,address)', 'tuple(string,string)', 'bool'],
-    expected: [
-      ['0x1234567890123456789012345678901234567890', '0x1234567890123456789012345678901234567890'],
-      ['hello', 'world'],
-      false,
-    ],
+    expected: [[address3, address3], ['hello', 'world'], false],
     values:
       '0000000000000000000000001234567890123456789012345678901234567890' +
       '0000000000000000000000001234567890123456789012345678901234567890' +
@@ -481,7 +482,7 @@ describe('decodeParameters', function() {
         true,
         [
           '0x1234567890123456789012345678901234567890123456789012345678901234',
-          '0x1337133713371337133713371337133713371337',
+          Address.fromString('0x1337133713371337133713371337133713371337'),
         ],
         '0x6265636175736520697420776f726b736265636175736520697420776f726b73',
       ],
@@ -532,11 +533,17 @@ describe('decodeParameters', function() {
     ],
     expected: [
       ['this is more reasonable', [true, false]],
-      '0x1b3F5FE0Fd513E6cbdEE459F0b0e19095FE91958',
+      Address.fromString('0x1b3F5FE0Fd513E6cbdEE459F0b0e19095FE91958'),
       '0x6c6f6c6f6c6f6c6f6c',
-      ['0xabcdef12345678', '0x87654321fedcba', 'bazbar', false, '0xd13b6e9058E58B8677233CEc2315e1D9e77C79C4'],
+      [
+        '0xabcdef12345678',
+        '0x87654321fedcba',
+        'bazbar',
+        false,
+        Address.fromString('0xd13b6e9058E58B8677233CEc2315e1D9e77C79C4'),
+      ],
       '-6',
-      ['-7', '5', ['foobar', '-8', '0xB1eeF147028E9f480DbC5ccaA3277D417D1b85F0']],
+      ['-7', '5', ['foobar', '-8', Address.fromString('0xB1eeF147028E9f480DbC5ccaA3277D417D1b85F0')]],
     ],
     values:
       '00000000000000000000000000000000000000000000000000000000000000c0' +
@@ -585,18 +592,15 @@ describe('decodeParameters', function() {
         true,
         '0xffffffffffffffffffffffffffffffffabdef123849181759adebfadecaefbae',
       ],
-      '0x1234567890123456789012345678901234567890',
+      address3,
       [
         '0x0ab3e6dfa1594c15af0000000000000000000000000000000000000000000000',
         '0xffffffffffffffffffffffffffffffffabdef123849181759adebfadecaefbae',
         'string',
       ],
       [
-        ['0x1234567890123456789012345678901234567890', true],
-        [
-          '0x1234567890123456789012345678901234567890',
-          '0xffffffffffffffffffffffffffffffffabdef123849181759adebfadecaefbae',
-        ],
+        [address3, true],
+        [address3, '0xffffffffffffffffffffffffffffffffabdef123849181759adebfadecaefbae'],
         ['-6124612', '89000'],
       ],
     ],

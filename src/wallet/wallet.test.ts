@@ -16,12 +16,13 @@
 */
 
 import { Wallet } from './wallet';
-import { isAddress, hexToBuffer } from '../utils';
+import { hexToBuffer } from '../utils';
 import { Account } from '../account';
+import { Address } from '../address';
 
 const tests = [
   {
-    address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
+    address: Address.fromString('0xEB014f8c8B418Db6b45774c326A0E64C78914dC0'),
     privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     data: 'Some data',
     // signature done with personal_sign
@@ -29,7 +30,7 @@ const tests = [
       '0xa8037a6116c176a25e6fc224947fde9e79a2deaa0dd8b67b366fbdfdbffc01f953e41351267b20d4a89ebfe9c8f03c04de9b345add4a52f15bd026b63c8fb1501b',
   },
   {
-    address: '0xEB014f8c8B418Db6b45774c326A0E64C78914dC0',
+    address: Address.fromString('0xEB014f8c8B418Db6b45774c326A0E64C78914dC0'),
     privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
     data: 'Some data!%$$%&@*',
     // signature done with personal_sign
@@ -50,8 +51,8 @@ describe('wallet', function() {
       wallet.create(3);
       expect(wallet.length).toBe(5);
 
-      expect(isAddress(wallet.accounts[1].address)).toBe(true);
-      expect(isAddress(wallet.accounts[2].address)).toBe(true);
+      expect(Address.isAddress(wallet.accounts[1].address.toString())).toBe(true);
+      expect(Address.isAddress(wallet.accounts[2].address.toString())).toBe(true);
     });
 
     it('add wallet using a privatekey', function() {
@@ -59,13 +60,12 @@ describe('wallet', function() {
 
       const account = wallet.add(test.privateKey);
 
-      expect(account.address).toBe(test.address);
-      expect(account.privateKey).toBe(test.privateKey);
+      expect(account.address).toEqual(test.address);
+      expect(account.privateKey).toEqual(test.privateKey);
       expect(wallet.indexOf(account.address)).toBe(0);
 
-      expect(wallet.get(test.address)!.address).toBe(test.address);
-      expect(wallet.get(test.address.toLowerCase())!.address).toBe(test.address);
-      expect(wallet.get(0)!.address).toBe(test.address);
+      expect(wallet.get(test.address)!.address).toEqual(test.address);
+      expect(wallet.get(0)!.address).toEqual(test.address);
       expect(wallet.length).toBe(1);
     });
 
@@ -75,13 +75,12 @@ describe('wallet', function() {
       const account = Account.fromPrivate(test.privateKey);
       wallet.add(account);
 
-      expect(account.address).toBe(test.address);
-      expect(account.privateKey).toBe(test.privateKey);
+      expect(account.address).toEqual(test.address);
+      expect(account.privateKey).toEqual(test.privateKey);
       expect(wallet.indexOf(account.address)).toBe(0);
 
-      expect(wallet.get(test.address)!.address).toBe(test.address);
-      expect(wallet.get(test.address.toLowerCase())!.address).toBe(test.address);
-      expect(wallet.get(0)!.address).toBe(test.address);
+      expect(wallet.get(test.address)!.address).toEqual(test.address);
+      expect(wallet.get(0)!.address).toEqual(test.address);
       expect(wallet.length).toBe(1);
     });
 
@@ -92,13 +91,12 @@ describe('wallet', function() {
       wallet.add(account);
       wallet.add(account);
 
-      expect(account.address).toBe(test.address);
-      expect(account.privateKey).toBe(test.privateKey);
+      expect(account.address).toEqual(test.address);
+      expect(account.privateKey).toEqual(test.privateKey);
       expect(wallet.indexOf(account.address)).toBe(0);
 
-      expect(wallet.get(test.address)!.address).toBe(test.address);
-      expect(wallet.get(test.address.toLowerCase())!.address).toBe(test.address);
-      expect(wallet.get(0)!.address).toBe(test.address);
+      expect(wallet.get(test.address)!.address).toEqual(test.address);
+      expect(wallet.get(0)!.address).toEqual(test.address);
       expect(wallet.length).toBe(1);
     });
 
@@ -110,7 +108,6 @@ describe('wallet', function() {
 
       wallet.remove(0);
       expect(wallet.get(test.address)).toBeUndefined();
-      expect(wallet.get(test.address.toLowerCase())).toBeUndefined();
       expect(wallet.get(0)).toBeUndefined();
       expect(wallet.length).toBe(0);
     });
@@ -131,7 +128,7 @@ describe('wallet', function() {
       wallet.add(test.privateKey);
       expect(wallet.length).toBe(1);
 
-      wallet.remove(test.address.toLowerCase());
+      wallet.remove(test.address.toString().toLowerCase());
       expect(wallet.length).toBe(0);
     });
 
@@ -160,8 +157,8 @@ describe('wallet', function() {
       expect(wallet.length).toBe(3);
 
       wallet.create(2);
-      expect(isAddress(wallet.accounts[2].address)).toBe(true);
-      expect(isAddress(wallet.accounts[4].address)).toBe(true);
+      expect(Address.isAddress(wallet.accounts[2].address.toString())).toBe(true);
+      expect(Address.isAddress(wallet.accounts[4].address.toString())).toBe(true);
       expect(wallet.get(5)).toBeUndefined();
 
       const afterMoreCreation = remainingAddresses.map(n => wallet.get(n)!.address);
@@ -210,7 +207,7 @@ describe('wallet', function() {
       expect(wallet.length).toBe(4);
 
       const addressFromKeystore = wallet.accounts[0].address;
-      expect(addressFromKeystore).toBe(addressFromWallet);
+      expect(addressFromKeystore).toEqual(addressFromWallet);
     });
   });
 });

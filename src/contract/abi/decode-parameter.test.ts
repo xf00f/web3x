@@ -16,6 +16,14 @@
 */
 
 import { abi } from '.';
+import { Address } from '../../address';
+
+const address1 = Address.fromString('0x407d73d8a49eeb85d32cf465507dd71d507100c1');
+const address2 = Address.fromString('0x407d73d8a49eeb85d32cf465507dd71d507100c2');
+const address3 = Address.fromString('0x407d73d8a49eeb85d32cf465507dd71d507100c3');
+const address4 = Address.fromString('0x407d73d8a49eeb85d32cf465507dd71d507100c4');
+const address5 = Address.fromString('0xbbf289d846208c16edc8474705c748aff07732db');
+const address6 = Address.fromString('0x1234567890123456789012345678901234567890');
 
 describe('decodeParameter', function() {
   const tests = [
@@ -34,7 +42,7 @@ describe('decodeParameter', function() {
 
   tests.forEach(function(test) {
     it('should convert correctly', function() {
-      expect(abi.decodeParameter.apply(abi, test.params)).toEqual(test.result);
+      expect(abi.decodeParameter(test.params[0], test.params[1])).toEqual(test.result);
     });
   });
 });
@@ -51,19 +59,19 @@ describe('decodeParameter', function() {
 
   test({
     type: 'address',
-    expected: '0x407D73d8a49eeb85D32Cf465507dd71d507100c1',
+    expected: address1,
     value: '000000000000000000000000407d73d8a49eeb85d32cf465507dd71d507100c1',
   });
   test({
     type: 'address[2]',
-    expected: ['0x407D73d8a49eeb85D32Cf465507dd71d507100c1', '0x407D73d8A49eEB85D32Cf465507Dd71d507100c3'],
+    expected: [address1, address3],
     value:
       '000000000000000000000000407d73d8a49eeb85d32cf465507dd71d507100c1' +
       '000000000000000000000000407d73d8a49eeb85d32cf465507dd71d507100c3',
   });
   test({
     type: 'address[]',
-    expected: ['0x407D73d8a49eeb85D32Cf465507dd71d507100c1', '0x407D73d8A49eEB85D32Cf465507Dd71d507100c3'],
+    expected: [address1, address3],
     value:
       '0000000000000000000000000000000000000000000000000000000000000020' +
       '0000000000000000000000000000000000000000000000000000000000000002' +
@@ -72,10 +80,7 @@ describe('decodeParameter', function() {
   });
   test({
     type: 'address[][2]',
-    expected: [
-      ['0x407D73d8a49eeb85D32Cf465507dd71d507100c1', '0x407d73d8a49EEB85d32Cf465507dD71D507100c2'],
-      ['0x407D73d8A49eEB85D32Cf465507Dd71d507100c3', '0x407D73d8a49eeb85D32CF465507dd71d507100C4'],
-    ],
+    expected: [[address1, address2], [address3, address4]],
     value:
       '0000000000000000000000000000000000000000000000000000000000000020' +
       '0000000000000000000000000000000000000000000000000000000000000040' +
@@ -89,10 +94,7 @@ describe('decodeParameter', function() {
   });
   test({
     type: 'address[2][]',
-    expected: [
-      ['0x407D73d8a49eeb85D32Cf465507dd71d507100c1', '0x407d73d8a49EEB85d32Cf465507dD71D507100c2'],
-      ['0x407D73d8A49eEB85D32Cf465507Dd71d507100c3', '0x407D73d8a49eeb85D32CF465507dd71d507100C4'],
-    ],
+    expected: [[address1, address2], [address3, address4]],
     value:
       '0000000000000000000000000000000000000000000000000000000000000020' +
       '0000000000000000000000000000000000000000000000000000000000000002' /* 20 */ +
@@ -101,8 +103,8 @@ describe('decodeParameter', function() {
       '000000000000000000000000407d73d8a49eeb85d32cf465507dd71d507100c3' +
       '000000000000000000000000407d73d8a49eeb85d32cf465507dd71d507100c4',
   });
-  // test({ type: 'address[][]', expected: [['0x407D73d8a49eeb85D32Cf465507dd71d507100c1', '0x407d73d8a49EEB85d32Cf465507dD71D507100c2'],
-  //                                        ['0x407D73d8A49eEB85D32Cf465507Dd71d507100c3', '0x407D73d8a49eeb85D32CF465507dd71d507100C4']],
+  // test({ type: 'address[][]', expected: [[address1, address2],
+  //                                        [address3, address4]],
   //                                                     value: '0000000000000000000000000000000000000000000000000000000000000020' +
   //                                                            '0000000000000000000000000000000000000000000000000000000000000002' + /* 20 */
   //                                                            '0000000000000000000000000000000000000000000000000000000000000080' +
@@ -437,7 +439,7 @@ describe('decodeParameter', function() {
   });
   test({
     type: 'address',
-    expected: '0x407D73d8a49eeb85D32Cf465507dd71d507100c1',
+    expected: address1,
     value: '000000000000000000000000407d73d8a49eeb85d32cf465507dd71d507100c1',
   });
   test({
@@ -468,12 +470,12 @@ describe('decodeParameter', function() {
   });
   test({
     type: 'tuple(address)',
-    expected: ['0xbBF289D846208c16EDc8474705C748aff07732dB'],
+    expected: [address5],
     value: '000000000000000000000000bbf289d846208c16edc8474705c748aff07732db',
   });
   test({
     type: 'tuple(address,address)',
-    expected: ['0xbBF289D846208c16EDc8474705C748aff07732dB', '0xbBF289D846208c16EDc8474705C748aff07732dB'],
+    expected: [address5, address5],
     value:
       '000000000000000000000000bbf289d846208c16edc8474705c748aff07732db' +
       '000000000000000000000000bbf289d846208c16edc8474705c748aff07732db',
@@ -557,7 +559,7 @@ describe('decodeParameter', function() {
   });
   test({
     type: 'tuple(uint8,uint8,uint8,uint8,string,address,bool)',
-    expected: ['1', '2', '3', '4', 'five', '0x0000000000000000000000000000000000000006', true],
+    expected: ['1', '2', '3', '4', 'five', Address.fromString('0x0000000000000000000000000000000000000006'), true],
     value:
       '0000000000000000000000000000000000000000000000000000000000000020' +
       '0000000000000000000000000000000000000000000000000000000000000001' +
@@ -572,10 +574,7 @@ describe('decodeParameter', function() {
   });
   test({
     type: 'tuple(tuple(address,address),tuple(uint256,uint256))',
-    expected: [
-      ['0x1234567890123456789012345678901234567890', '0x1234567890123456789012345678901234567890'],
-      ['5', '6'],
-    ],
+    expected: [[address6, address6], ['5', '6']],
     value:
       '0000000000000000000000001234567890123456789012345678901234567890' +
       '0000000000000000000000001234567890123456789012345678901234567890' +
@@ -584,11 +583,7 @@ describe('decodeParameter', function() {
   });
   test({
     type: 'tuple(tuple(address,address),tuple(uint256,uint256),tuple(string,string))',
-    expected: [
-      ['0x1234567890123456789012345678901234567890', '0x1234567890123456789012345678901234567890'],
-      ['5', '6'],
-      ['a string', 'another string'],
-    ],
+    expected: [[address6, address6], ['5', '6'], ['a string', 'another string']],
     value:
       '0000000000000000000000000000000000000000000000000000000000000020' +
       '0000000000000000000000001234567890123456789012345678901234567890' +

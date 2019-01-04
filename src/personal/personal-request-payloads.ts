@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { inputAddressFormatter, inputTransactionFormatter, inputSignFormatter } from '../formatters';
+import { inputTransactionFormatter, inputSignFormatter } from '../formatters';
 import { Quantity, Data } from '../types';
 import { Transaction } from './personal';
 import { Address } from '../address';

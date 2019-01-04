@@ -11,7 +11,7 @@ export class Address {
 
   static fromString(address: string) {
     if (!Address.isAddress(address)) {
-      throw new Error('Invalid address string.');
+      throw new Error(`Invalid address string: ${address}`);
     }
     return new Address(Buffer.from(address.replace(/^0x/i, ''), 'hex'));
   }

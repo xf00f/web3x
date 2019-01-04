@@ -20,7 +20,7 @@ import { AbiDefinition } from '.';
 import { promiEvent } from '../promievent';
 import { fireError } from '../utils';
 import { abi } from './abi';
-import { inputAddressFormatter, TransactionReceipt } from '../formatters';
+import { TransactionReceipt } from '../formatters';
 import { Eth, SendTxPromiEvent, BlockType } from '../eth';
 import { Wallet } from '../wallet';
 import { Address } from '../address';

@@ -20,10 +20,12 @@ import { TestContract, TestContractAbi } from './fixtures/TestContract';
 import { sha3 } from '../utils';
 import { Eth } from '../eth/eth';
 import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
+import { Address } from '../address';
 
-const address = '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe';
-const addressLowercase = '0x11f4d0a3c12e86b4b5f39b213f7e19d048276dae';
-const address2 = '0x5555567890123456789012345678901234567891';
+const address = Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe');
+const addressLowercase = address.toString().toLowerCase();
+const addressUnprefixedLowercase = addressLowercase.slice(2);
+const address2 = Address.fromString('0x5555567890123456789012345678901234567891');
 
 describe('contract', function() {
   let eth: Eth;
@@ -43,19 +45,6 @@ describe('contract', function() {
     it('should transform address to checksum address', function() {
       const contract = new TestContract(eth, address);
       expect(contract.address).toBe(address);
-    });
-
-    it('should fail on invalid address', function() {
-      const test = () => new TestContract(eth, '0x11F4D0A3c12e86B4b5F39B213F7E19D048276DAe');
-      expect(test).toThrow();
-    });
-
-    it('should fail on invalid address as options.from', function() {
-      var test = () =>
-        new TestContract(eth, address, {
-          from: '0x11F4D0A3c12e86B4b5F39B213F7E19D048276DAe',
-        });
-      expect(test).toThrow();
     });
   });
 
@@ -106,7 +95,7 @@ describe('contract', function() {
       const contract = new TestContract(eth, address);
 
       const event = contract.events.Changed({ filter: { from: address } }, function(_, result) {
-        expect(result.returnValues.from).toBe(address);
+        expect(result.returnValues.from).toEqual(address);
         expect(result.returnValues.amount).toBe('1');
         expect(result.returnValues.t1).toBe('1');
         expect(result.returnValues.t2).toBe('8');
@@ -124,7 +113,7 @@ describe('contract', function() {
       const event = contract.events['0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651'](
         { filter: { from: address } },
         function(err, result) {
-          expect(result.returnValues.from).toBe(address);
+          expect(result.returnValues.from).toEqual(address);
           expect(result.returnValues.amount).toBe('1');
           expect(result.returnValues.t1).toBe('1');
           expect(result.returnValues.t2).toBe('8');
@@ -141,7 +130,7 @@ describe('contract', function() {
       const contract = new TestContract(eth, address);
 
       var event = contract.events[signature]({ filter: { from: address } }, function(err, result) {
-        expect(result.returnValues.from).toBe(address);
+        expect(result.returnValues.from).toEqual(address);
         expect(result.returnValues.amount).toBe('1');
         expect(result.returnValues.t1).toBe('1');
         expect(result.returnValues.t2).toBe('8');
@@ -197,19 +186,19 @@ describe('contract', function() {
         count++;
 
         if (count === 1) {
-          expect(result.returnValues.from).toBe(address);
+          expect(result.returnValues.from).toEqual(address);
           expect(result.returnValues.amount).toBe('2');
           expect(result.returnValues.t1).toBe('2');
           expect(result.returnValues.t2).toBe('9');
         }
         if (count === 2) {
-          expect(result.returnValues.from).toBe(address);
+          expect(result.returnValues.from).toEqual(address);
           expect(result.returnValues.amount).toBe('3');
           expect(result.returnValues.t1).toBe('4');
           expect(result.returnValues.t2).toBe('5');
         }
         if (count === 3) {
-          expect(result.returnValues.from).toBe(address);
+          expect(result.returnValues.from).toEqual(address);
           expect(result.returnValues.amount).toBe('1');
           expect(result.returnValues.t1).toBe('1');
           expect(result.returnValues.t2).toBe('8');
@@ -278,7 +267,7 @@ describe('contract', function() {
           topics: [
             sha3('Unchanged(uint256,address,uint256)'),
             '0x0000000000000000000000000000000000000000000000000000000000000002',
-            '0x000000000000000000000000' + address.replace('0x', ''),
+            '0x000000000000000000000000' + address.toString().replace('0x', ''),
           ],
           data: '0x0000000000000000000000000000000000000000000000000000000000000005',
         });
@@ -293,13 +282,13 @@ describe('contract', function() {
         count++;
 
         if (count === 1 && result.event === 'Changed') {
-          expect(result.returnValues.from).toBe(address);
+          expect(result.returnValues.from).toEqual(address);
           expect(result.returnValues.amount).toBe('1');
           expect(result.returnValues.t1).toBe('1');
           expect(result.returnValues.t2).toBe('8');
         }
         if (count === 2 && result.event === 'Unchanged') {
-          expect(result.returnValues.addressFrom).toBe(address);
+          expect(result.returnValues.addressFrom).toEqual(address);
           expect(result.returnValues.value).toBe('2');
           expect(result.returnValues.t1).toBe('5');
 
@@ -393,7 +382,7 @@ describe('contract', function() {
       const res = await contract.methods
         .hasALotOfParams('0x24545345', '0xff24545345', ['0xff24545345', '0x5345', '0x4545', '0x453345'])
         .call();
-      expect(res).toBe(address);
+      expect(res).toEqual(address);
     });
 
     it('should send overload functions with zero parameters', async () => {
@@ -518,7 +507,7 @@ describe('contract', function() {
       ]);
 
       expect(m1).toBe('10');
-      expect(m2).toBe('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe');
+      expect(m2).toEqual(address);
       expect(m3).toBe('Hello!%!');
     });
 
@@ -552,7 +541,7 @@ describe('contract', function() {
           {
             data: sha3(signature).slice(0, 10),
             to: addressLowercase,
-            from: address2,
+            from: address2.toString().toLowerCase(),
           },
           'latest',
         ]);
@@ -586,7 +575,7 @@ describe('contract', function() {
         gasUsed: '0x0',
         logs: [
           {
-            address: address,
+            address,
             topics: [
               sha3('Unchanged(uint256,address,uint256)'),
               '0x0000000000000000000000000000000000000000000000000000000000000002',
@@ -640,7 +629,7 @@ describe('contract', function() {
             events: {
               Unchanged: [
                 {
-                  address: address,
+                  address,
                   blockNumber: 10,
                   transactionHash: '0x1234',
                   blockHash: '0x1345',
@@ -661,7 +650,7 @@ describe('contract', function() {
                     topics: [
                       '0xf359668f205d0b5cfdc20d11353e05f633f83322e96f15486cbb007d210d66e5',
                       '0x0000000000000000000000000000000000000000000000000000000000000002',
-                      '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
+                      '0x000000000000000000000000' + addressUnprefixedLowercase,
                     ],
                     data: '0x0000000000000000000000000000000000000000000000000000000000000005',
                   },
@@ -669,7 +658,7 @@ describe('contract', function() {
               ],
               Changed: [
                 {
-                  address: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+                  address,
                   blockNumber: 10,
                   transactionHash: '0x1234',
                   blockHash: '0x1345',
@@ -677,11 +666,11 @@ describe('contract', function() {
                   id: 'log_9ff24cb4',
                   transactionIndex: 0,
                   returnValues: {
-                    0: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+                    0: address,
                     1: '1',
                     2: '1',
                     3: '8',
-                    from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+                    from: address,
                     amount: '1',
                     t1: '1',
                     t2: '8',
@@ -691,7 +680,7 @@ describe('contract', function() {
                   raw: {
                     topics: [
                       '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
-                      '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
+                      '0x000000000000000000000000' + addressUnprefixedLowercase,
                       '0x0000000000000000000000000000000000000000000000000000000000000001',
                     ],
                     data:
@@ -714,11 +703,11 @@ describe('contract', function() {
       const receipt = await contract.methods.mySend(address, 10).send({ from: address2, gasPrice: '21345678654321' });
 
       expect(receipt.events!.Changed[0].returnValues).toEqual({
-        0: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+        0: address,
         1: '1',
         2: '1',
         3: '8',
-        from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+        from: address,
         amount: '1',
         t1: '1',
         t2: '8',
@@ -802,7 +791,7 @@ describe('contract', function() {
             events: {
               Changed: [
                 {
-                  address: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+                  address,
                   blockNumber: 10,
                   transactionHash: '0x1234',
                   blockHash: '0x1345',
@@ -810,11 +799,11 @@ describe('contract', function() {
                   id: 'log_9ff24cb4',
                   transactionIndex: 0,
                   returnValues: {
-                    0: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+                    0: address,
                     1: '1',
                     2: '1',
                     3: '8',
-                    from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+                    from: address,
                     amount: '1',
                     t1: '1',
                     t2: '8',
@@ -832,7 +821,7 @@ describe('contract', function() {
                   },
                 },
                 {
-                  address: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+                  address,
                   blockNumber: 10,
                   transactionHash: '0x1234',
                   blockHash: '0x1345',
@@ -840,11 +829,11 @@ describe('contract', function() {
                   id: 'log_8b8a2b7f',
                   transactionIndex: 0,
                   returnValues: {
-                    0: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+                    0: address,
                     1: '2',
                     2: '1',
                     3: '8',
-                    from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+                    from: address,
                     amount: '2',
                     t1: '1',
                     t2: '8',
@@ -1301,12 +1290,12 @@ describe('contract', function() {
 
       const topic1 = [
         sha3(signature),
-        '0x000000000000000000000000' + address.replace('0x', ''),
+        '0x000000000000000000000000' + address.toString().replace('0x', ''),
         '0x000000000000000000000000000000000000000000000000000000000000000a',
       ];
       const topic2 = [
         sha3(signature),
-        '0x000000000000000000000000' + address.replace('0x', ''),
+        '0x000000000000000000000000' + address.toString().replace('0x', ''),
         '0x0000000000000000000000000000000000000000000000000000000000000003',
       ];
 
@@ -1471,7 +1460,7 @@ describe('contract', function() {
       const contract = new TestContract(eth, address);
 
       const result = await contract.methods.owner().call();
-      expect(result).toBe(address);
+      expect(result).toEqual(address);
     });
 
     it('should decode an struct correctly', function(done) {
@@ -1479,7 +1468,7 @@ describe('contract', function() {
         expect(method).toBe('eth_call');
         expect(params).toEqual([
           {
-            data: '0x2a4aedd50000000000000000000000009cc9a2c777605af16872e0997b3aeb91d96d5d8c',
+            data: '0x2a4aedd5000000000000000000000000' + addressUnprefixedLowercase,
             to: addressLowercase,
           },
           'latest',
@@ -1490,7 +1479,7 @@ describe('contract', function() {
       const contract = new TestContract(eth, address);
 
       contract.methods
-        .listOfNestedStructs('0x9CC9a2c777605Af16872E0997b3Aeb91d96D5D8c')
+        .listOfNestedStructs(address)
         .call()
         .then(function(result) {
           var expectedArray: boolean[] = [];
@@ -1539,7 +1528,7 @@ describe('contract', function() {
           {
             data:
               '0x1234567000000000000000000000000' +
-              addressLowercase.replace('0x', '') +
+              addressUnprefixedLowercase +
               '00000000000000000000000000000000000000000000000000000000000000c8',
             from: addressLowercase,
             gas: '0xc350',
@@ -1599,11 +1588,11 @@ describe('contract', function() {
           expect('0x5550000000000000000000000000000000000000000000000000000000000032').toBe(value);
         })
         .on('receipt', receipt => {
-          expect(address).toBe(receipt.contractAddress);
+          expect(address).toEqual(receipt.contractAddress);
           expect(contract.address).toBeUndefined();
         })
         .then(_ => {
-          expect(contract.address).toBe(address);
+          expect(contract.address).toEqual(address);
           done();
         });
     });

@@ -18,7 +18,6 @@
 import { utf8ToHex } from '../utils';
 import { inputBlockNumberFormatter } from './input-block-number-formatter';
 import { isArray } from 'util';
-import { inputAddressFormatter } from './input-address-formatter';
 import { BlockType } from '../eth';
 import { Address } from '../address';
 
@@ -26,14 +25,14 @@ export interface GetLogOptions {
   filter?: { [k: string]: any };
   toBlock?: BlockType;
   fromBlock?: BlockType;
-  address?: string | string[];
-  topics?: Array<string | string[] | null>;
+  address?: Address | Address[];
+  topics?: Array<string | string[]>;
 }
 
 export interface FormattedGetLogOptions {
   toBlock?: string;
   fromBlock?: string;
-  address?: Address | Address[];
+  address?: string | string[];
   topics?: Array<string | string[]>;
 }
 
@@ -67,8 +66,8 @@ export function inputLogFormatter(options: GetLogOptions = {}): FormattedGetLogO
 
   if (options.address) {
     formattedLogOptions.address = isArray(options.address)
-      ? options.address.map(inputAddressFormatter)
-      : inputAddressFormatter(options.address);
+      ? options.address.map(a => a.toString().toLowerCase())
+      : options.address.toString().toLowerCase();
   }
 
   return formattedLogOptions;

@@ -20,7 +20,7 @@ import randomBytes from 'randombytes';
 import { isString } from 'util';
 import uuid from 'uuid';
 import { scrypt, sha3, pbkdf2 } from '.';
-import { isHex } from './hex';
+import { Address } from '../address';
 
 interface ScryptKdfParams {
   dklen: number;
@@ -102,7 +102,7 @@ export async function decrypt(
 
 export async function encrypt(
   privateKey: Buffer,
-  address: string,
+  address: Address,
   password: string,
   options: any = {},
 ): Promise<KeyStore> {
@@ -146,7 +146,10 @@ export async function encrypt(
   return {
     version: 3,
     id,
-    address: address.toLowerCase().replace('0x', ''),
+    address: address
+      .toString()
+      .toLowerCase()
+      .replace('0x', ''),
     crypto: {
       ciphertext: ciphertext.toString('hex'),
       cipherparams: {

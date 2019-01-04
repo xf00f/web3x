@@ -16,6 +16,7 @@
 */
 
 import { outputTransactionFormatter } from './output-transaction-formatter';
+import { Address } from '../address';
 
 describe('formatters', function() {
   describe('outputTransactionFormatter', function() {
@@ -39,8 +40,8 @@ describe('formatters', function() {
         }),
       ).toEqual({
         input: '0x3454645634534',
-        from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-        to: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+        from: Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe'),
+        to: Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe'),
         value: '1000',
         gas: 1000,
         gasPrice: '1000',
@@ -75,7 +76,7 @@ describe('formatters', function() {
         }),
       ).toEqual({
         input: '0x3454645634534',
-        from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+        from: Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe'),
         to: null,
         value: '1000',
         gas: 1000,

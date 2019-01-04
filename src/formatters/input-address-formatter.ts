@@ -17,13 +17,28 @@
 
 import { Iban } from '../iban';
 import { Address } from '../address';
+import { isString } from 'util';
 
-export function inputAddressFormatter(address: string) {
-  const iban = new Iban(address);
-  if (iban.isValid() && iban.isDirect()) {
-    return iban.toAddress();
-  } else if (Address.isAddress(address)) {
-    return Address.fromString(address);
+export function inputAddressFormatter(address: string | Iban | Address) {
+  if (isString(address)) {
+    const iban = new Iban(address);
+    if (iban.isValid() && iban.isDirect()) {
+      return iban
+        .toAddress()
+        .toString()
+        .toLowerCase();
+    } else if (Address.isAddress(address)) {
+      return Address.fromString(address)
+        .toString()
+        .toLowerCase();
+    }
+    throw new Error(`Address ${address} is invalid, the checksum failed, or its an indrect IBAN address.`);
+  } else if (address instanceof Iban) {
+    return address
+      .toAddress()
+      .toString()
+      .toLowerCase();
+  } else {
+    return address.toString().toLowerCase();
   }
-  throw new Error(`Address ${address} is invalid, the checksum failed, or its an indrect IBAN address.`);
 }

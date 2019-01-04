@@ -16,6 +16,7 @@
 */
 
 import { abi } from '.';
+import { Address } from '../../address';
 
 const tests = [
   {
@@ -179,12 +180,12 @@ const tests = [
       ],
     ],
     result: {
-      '0': '0xae653250B4220835050B75D3bC91433246903A95',
-      '1': '0x94011c67BC1E6448ed4b8682047358ca6cD09470',
+      '0': Address.fromString('0xae653250B4220835050B75D3bC91433246903A95'),
+      '1': Address.fromString('0x94011c67BC1E6448ed4b8682047358ca6cD09470'),
       '2': '10000',
       '3': 'test x',
-      from: '0xae653250B4220835050B75D3bC91433246903A95',
-      to: '0x94011c67BC1E6448ed4b8682047358ca6cD09470',
+      from: Address.fromString('0xae653250B4220835050B75D3bC91433246903A95'),
+      to: Address.fromString('0x94011c67BC1E6448ed4b8682047358ca6cD09470'),
       amount: '10000',
       narrative: 'test x',
       __length__: 4,
@@ -221,12 +222,12 @@ const tests = [
       ],
     ],
     result: {
-      '0': '0xae653250B4220835050B75D3bC91433246903A95',
-      '1': '0x94011c67BC1E6448ed4b8682047358ca6cD09470',
+      '0': Address.fromString('0xae653250B4220835050B75D3bC91433246903A95'),
+      '1': Address.fromString('0x94011c67BC1E6448ed4b8682047358ca6cD09470'),
       '2': '10000',
       '3': 'Hello!%!',
-      from: '0xae653250B4220835050B75D3bC91433246903A95',
-      to: '0x94011c67BC1E6448ed4b8682047358ca6cD09470',
+      from: Address.fromString('0xae653250B4220835050B75D3bC91433246903A95'),
+      to: Address.fromString('0x94011c67BC1E6448ed4b8682047358ca6cD09470'),
       amount: '10000',
       narrative: 'Hello!%!',
       __length__: 4,

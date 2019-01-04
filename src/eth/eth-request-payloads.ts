@@ -17,7 +17,6 @@
 
 import { numberToHex, hexToNumber, isHexStrict } from '../utils';
 import {
-  inputAddressFormatter,
   outputSyncingFormatter,
   outputBigNumberFormatter,
   inputBlockNumberFormatter,
@@ -132,7 +131,7 @@ export class EthRequestPayloads {
   getBalance(address: Address, block?: BlockType) {
     return {
       method: 'eth_getBalance',
-      params: [address, inputBlockNumberFormatter(this.resolveBlock(block))],
+      params: [address.toString().toLowerCase(), inputBlockNumberFormatter(this.resolveBlock(block))],
       format: outputBigNumberFormatter,
     };
   }
@@ -140,7 +139,11 @@ export class EthRequestPayloads {
   getStorageAt(address: Address, position: string, block?: BlockType) {
     return {
       method: 'eth_getStorageAt',
-      params: [address, numberToHex(position), inputBlockNumberFormatter(this.resolveBlock(block))],
+      params: [
+        address.toString().toLowerCase(),
+        numberToHex(position),
+        inputBlockNumberFormatter(this.resolveBlock(block)),
+      ],
       format: identity,
     };
   }
@@ -148,7 +151,7 @@ export class EthRequestPayloads {
   getCode(address: Address, block?: BlockType) {
     return {
       method: 'eth_getCode',
-      params: [address, inputBlockNumberFormatter(this.resolveBlock(block))],
+      params: [address.toString().toLowerCase(), inputBlockNumberFormatter(this.resolveBlock(block))],
       format: identity,
     };
   }
@@ -219,7 +222,7 @@ export class EthRequestPayloads {
   getTransactionCount(address: Address, block?: BlockType) {
     return {
       method: 'eth_getTransactionCount',
-      params: [address, inputBlockNumberFormatter(this.resolveBlock(block))],
+      params: [address.toString().toLowerCase(), inputBlockNumberFormatter(this.resolveBlock(block))],
       format: hexToNumber,
     };
   }
@@ -253,7 +256,7 @@ export class EthRequestPayloads {
   sign(address: Address, dataToSign: Data) {
     return {
       method: 'eth_sign',
-      params: [address, inputSignFormatter(dataToSign)],
+      params: [address.toString().toLowerCase(), inputSignFormatter(dataToSign)],
       format: identity,
     };
   }
@@ -261,7 +264,7 @@ export class EthRequestPayloads {
   signTypedData(address: Address, dataToSign: { type: string; name: string; value: string }[]) {
     return {
       method: 'eth_signTypedData',
-      params: [dataToSign, address],
+      params: [dataToSign, address.toString().toLowerCase()],
       format: identity,
     };
   }

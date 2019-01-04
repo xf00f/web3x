@@ -20,7 +20,7 @@ import { Subscription } from '../subscriptions';
 import { abi, abiMethodToString } from './abi';
 import { Tx, TxFactory } from './tx';
 import { decodeAnyEvent } from './decode-event-abi';
-import { inputAddressFormatter, EventLog, TransactionReceipt, GetLogOptions, inputLogFormatter } from '../formatters';
+import { EventLog, TransactionReceipt, GetLogOptions, inputLogFormatter } from '../formatters';
 import { TxDeploy } from './tx-deploy';
 import { ContractAbi, AbiDefinition } from './contract-abi';
 import { Data } from '../types';
@@ -361,7 +361,7 @@ export class Contract<T extends ContractDefinition | void = void> {
     if (eventName.toLowerCase() === 'allevents') {
       return {
         ...options,
-        address: this.address.toString(),
+        address: this.address,
       };
     }
 
@@ -376,7 +376,7 @@ export class Contract<T extends ContractDefinition | void = void> {
 
     return {
       ...options,
-      address: this.address.toString(),
+      address: this.address,
       topics: this.getEventTopics(event, options),
     };
   }

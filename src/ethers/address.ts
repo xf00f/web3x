@@ -14,35 +14,9 @@ import * as errors from './errors';
 // Imported Types
 
 import { Arrayish } from './bytes';
+import { Address } from '../address';
 
 ///////////////////////////////
-
-function getChecksumAddress(address: string): string {
-  if (typeof address !== 'string' || !address.match(/^0x[0-9A-Fa-f]{40}$/)) {
-    errors.throwError('invalid address', errors.INVALID_ARGUMENT, { arg: 'address', value: address });
-  }
-
-  address = address.toLowerCase();
-
-  let chars = address.substring(2).split('');
-
-  let hashed = new Uint8Array(40);
-  for (let i = 0; i < 40; i++) {
-    hashed[i] = chars[i].charCodeAt(0);
-  }
-  hashed = arrayify(keccak256(hashed));
-
-  for (var i = 0; i < 40; i += 2) {
-    if (hashed[i >> 1] >> 4 >= 8) {
-      chars[i] = chars[i].toUpperCase();
-    }
-    if ((hashed[i >> 1] & 0x0f) >= 8) {
-      chars[i + 1] = chars[i + 1].toUpperCase();
-    }
-  }
-
-  return '0x' + chars.join('');
-}
 
 // Shims for environments that are missing some required constants and functions
 var MAX_SAFE_INTEGER: number = 0x1fffffffffffff;
@@ -91,7 +65,7 @@ function ibanChecksum(address: string): string {
   return checksum;
 }
 
-export function getAddress(address: string): string {
+export function getAddress(address: string): Address {
   if (typeof address !== 'string') {
     errors.throwError('invalid address', errors.INVALID_ARGUMENT, { arg: 'address', value: address });
   }
@@ -102,14 +76,7 @@ export function getAddress(address: string): string {
       address = '0x' + address;
     }
 
-    const result = getChecksumAddress(address);
-
-    // It is a checksummed address with a bad checksum
-    if (address.match(/([A-F].*[a-f])|([a-f].*[A-F])/) && result !== address) {
-      errors.throwError('bad address checksum', errors.INVALID_ARGUMENT, { arg: 'address', value: address });
-    }
-
-    // Maybe ICAP? (we only support direct mode)
+    const result = Address.fromString(address);
 
     return result;
   } else if (address.match(/^XE[0-9]{2}[0-9A-Za-z]{30,31}$/)) {
@@ -122,14 +89,14 @@ export function getAddress(address: string): string {
     while (result.length < 40) {
       result = '0' + result;
     }
-    return getChecksumAddress('0x' + result);
+    return Address.fromString(result);
   } else {
     return errors.throwError('invalid address', errors.INVALID_ARGUMENT, { arg: 'address', value: address });
   }
 }
 
 export function getIcapAddress(address: string): string {
-  var base36 = new BN(getAddress(address).substring(2), 16).toString(36).toUpperCase();
+  var base36 = new BN(Address.fromString(address).toBuffer()).toString(36).toUpperCase();
   while (base36.length < 30) {
     base36 = '0' + base36;
   }

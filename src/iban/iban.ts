@@ -127,6 +127,13 @@ export class Iban {
     return Iban.fromBban(padded.toUpperCase());
   }
 
+  static fromString(address: string) {
+    var asBn = new BigNumber(Address.fromString(address).toBuffer(), 16);
+    var base36 = asBn.toString(36);
+    var padded = leftPad(base36, 15);
+    return Iban.fromBban(padded.toUpperCase());
+  }
+
   /**
    * Convert the passed BBAN to an IBAN for this country specification.
    * Please note that <i>"generation of the IBAN shall be the exclusive responsibility of the bank/branch servicing the account"</i>.

@@ -37,16 +37,16 @@ export interface AccountTx {
 }
 
 export class Account {
-  constructor(public address: string, public privateKey: Buffer, public publicKey) {}
+  constructor(public address: Address, public privateKey: Buffer, public publicKey: Buffer) {}
 
   static create(entropy: Buffer = randomHex(32)) {
     const { privateKey, address, publicKey } = create(entropy);
-    return new Account(address, privateKey, publicKey);
+    return new Account(Address.fromString(address), privateKey, publicKey);
   }
 
   static fromPrivate(privateKey: Buffer) {
     const { address, publicKey } = fromPrivate(privateKey);
-    return new Account(address, privateKey, publicKey);
+    return new Account(Address.fromString(address), privateKey, publicKey);
   }
 
   static createFromMnemonicAndPath(mnemonic: string, derivationPath: string) {
