@@ -128,24 +128,6 @@ async function send(eth: Eth, from: Address, to: Address) {
     .on('error', err => addMessage(err.message));
 }
 
-function sendathing(eth: Eth, from: Address, to: Address) {
-  return eth
-    .sendTransaction({
-      value: toWei('0.01', 'ether'),
-      from,
-      to,
-      gas: 50000,
-    })
-    .on('transactionHash', txHash => addMessage(`Sent transaction ${txHash}`))
-    .on('receipt', async receipt => {
-      addMessage(`Transaction complete for ${receipt.transactionHash}.`);
-      addMessage(`New 'from' balance: ${fromWei(await eth.getBalance(from), 'ether')}`);
-      addMessage(`New 'to' balance: ${fromWei(await eth.getBalance(to), 'ether')}`);
-      addBr();
-    })
-    .on('error', err => addMessage(err.message));
-}
-
 async function addEnsExamples(eth: Eth) {
   try {
     const ens = new ENS(eth);

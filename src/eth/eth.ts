@@ -39,6 +39,9 @@ import { Block, BlockHeader, BlockType, BlockHash } from './block';
 import { Tx, SignedTransaction } from './tx';
 import { EthereumProvider } from '../providers/ethereum-provider';
 import { Address } from '../address';
+import { LegacyProvider, LegacyProviderAdapter } from '../providers';
+
+declare const web3: { currentProvider?: LegacyProvider; ethereumProvider?: LegacyProvider } | undefined;
 
 export type TypedSigningData = { type: string; name: string; value: string }[];
 
@@ -59,6 +62,17 @@ export class Eth {
 
   constructor(readonly provider: EthereumProvider) {
     this.request = new EthRequestPayloads(undefined, 'latest');
+  }
+
+  static fromCurrentProvider() {
+    if (!web3) {
+      return;
+    }
+    const provider = web3.currentProvider || web3.ethereumProvider;
+    if (!provider) {
+      return;
+    }
+    return new Eth(new LegacyProviderAdapter(provider));
   }
 
   setWallet(wallet?: Wallet) {

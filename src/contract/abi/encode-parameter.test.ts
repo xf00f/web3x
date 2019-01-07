@@ -16,6 +16,7 @@
 */
 
 import { abi } from '.';
+import { Address } from '../../address';
 
 describe('encodeParameter', function() {
   const tests = [
@@ -36,7 +37,7 @@ describe('encodeParameter', function() {
 
   tests.forEach(function(test) {
     it('should convert correctly', function() {
-      expect(abi.encodeParameter.apply(abi, test.params)).toEqual(test.result);
+      expect(abi.encodeParameter.apply(abi, test.params as any)).toEqual(test.result);
     });
   });
 });
@@ -50,7 +51,7 @@ describe('encodeParameter', function() {
 
   test({
     type: 'address',
-    value: '0x407d73d8a49eeb85d32cf465507dd71d507100c1',
+    value: Address.fromString('0x407d73d8a49eeb85d32cf465507dd71d507100c1'),
     expected: '000000000000000000000000407d73d8a49eeb85d32cf465507dd71d507100c1',
   });
   test({

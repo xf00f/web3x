@@ -64,6 +64,14 @@ export class Address {
     return checksumAddress;
   }
 
+  equals(rhs: Address) {
+    return this.buffer.equals(rhs.buffer);
+  }
+
+  toJSON() {
+    return this.toString();
+  }
+
   toString() {
     return Address.toChecksumAddress(bufferToHex(this.buffer));
   }
