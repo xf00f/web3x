@@ -5,9 +5,9 @@ import { WebsocketProvider } from 'web3x/providers';
 import { Net } from 'web3x/net';
 import { Eth } from 'web3x/eth';
 import { DaiContract } from './contracts/DaiContract';
+import { Address } from 'web3x/address';
 
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-const DAI_CONTRACT_ADDRESS = '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359';
+const DAI_CONTRACT_ADDRESS = Address.fromString('0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359');
 
 async function main() {
   // Construct necessary components.
@@ -21,12 +21,12 @@ async function main() {
     console.log(`Node info: ${await eth.getNodeInfo()}`);
 
     // Simple balance query.
-    const balance = await eth.getBalance(ZERO_ADDRESS);
+    const balance = await eth.getBalance(Address.ZERO);
     console.log(`Balance of 0 address ETH: ${fromWei(balance, 'ether')}`);
 
     // Use our type safe auto generated dai contract.
     const contract = new DaiContract(eth, DAI_CONTRACT_ADDRESS);
-    const daiBalance = await contract.methods.balanceOf(ZERO_ADDRESS).call();
+    const daiBalance = await contract.methods.balanceOf(Address.ZERO).call();
     console.log(`Balance of 0 address DAI: ${fromWei(daiBalance, 'ether')}`);
 
     // Create an account, encrypt and decrypt.

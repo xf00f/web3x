@@ -16,6 +16,7 @@
 */
 
 import { abi } from '.';
+import { Address } from '../../address';
 
 describe('encodeParameter', function() {
   const tests = [
@@ -50,7 +51,7 @@ describe('encodeParameter', function() {
 
   test({
     type: 'address',
-    value: '0x407d73d8a49eeb85d32cf465507dd71d507100c1',
+    value: Address.fromString('0x407d73d8a49eeb85d32cf465507dd71d507100c1'),
     expected: '000000000000000000000000407d73d8a49eeb85d32cf465507dd71d507100c1',
   });
   test({

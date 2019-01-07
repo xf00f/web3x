@@ -86,7 +86,6 @@ export class ABICoder {
    * @return {String} encoded list of params
    */
   encodeParameters(types, params) {
-    params = params.map(p => (p instanceof Address ? p.toString() : p));
     return this.ethersAbiCoder.encode(this.mapTypes(types), params);
   }
 

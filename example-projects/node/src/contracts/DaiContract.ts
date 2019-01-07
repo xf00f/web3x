@@ -1,38 +1,39 @@
 import BN from "bn.js";
+import { Address } from "web3x/address";
 import { EventLog, TransactionReceipt } from "web3x/formatters";
 import { Contract, ContractOptions, TxCall, TxSend, EventSubscriptionFactory } from "web3x/contract";
 import { Eth } from "web3x/eth";
 import abi from "./DaiContractAbi";
 export type MintEvent = {
-    guy: string;
+    guy: Address;
     wad: string;
 };
 export type BurnEvent = {
-    guy: string;
+    guy: Address;
     wad: string;
 };
 export type LogSetAuthorityEvent = {
-    authority: string;
+    authority: Address;
 };
 export type LogSetOwnerEvent = {
-    owner: string;
+    owner: Address;
 };
 export type LogNoteEvent = {
     sig: string;
-    guy: string;
+    guy: Address;
     foo: string;
     bar: string;
     wad: string;
     fax: string;
 };
 export type ApprovalEvent = {
-    src: string;
-    guy: string;
+    src: Address;
+    guy: Address;
     wad: string;
 };
 export type TransferEvent = {
-    src: string;
-    dst: string;
+    src: Address;
+    dst: Address;
     wad: string;
 };
 export interface MintEventLog extends EventLog<MintEvent, "Mint"> {
@@ -81,29 +82,29 @@ export interface DaiContractTransactionReceipt extends TransactionReceipt<DaiCon
 interface DaiContractMethods {
     name(): TxCall<string>;
     stop(): TxSend<DaiContractTransactionReceipt>;
-    approve(guy: string, wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
-    setOwner(owner_: string): TxSend<DaiContractTransactionReceipt>;
+    approve(guy: Address, wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
+    setOwner(owner_: Address): TxSend<DaiContractTransactionReceipt>;
     totalSupply(): TxCall<string>;
-    transferFrom(src: string, dst: string, wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
+    transferFrom(src: Address, dst: Address, wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
     decimals(): TxCall<string>;
-    mint(guy: string, wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
+    mint(guy: Address, wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
     burn(wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
     setName(name_: string): TxSend<DaiContractTransactionReceipt>;
-    balanceOf(src: string): TxCall<string>;
+    balanceOf(src: Address): TxCall<string>;
     stopped(): TxCall<boolean>;
-    setAuthority(authority_: string): TxSend<DaiContractTransactionReceipt>;
-    owner(): TxCall<string>;
+    setAuthority(authority_: Address): TxSend<DaiContractTransactionReceipt>;
+    owner(): TxCall<Address>;
     symbol(): TxCall<string>;
-    burn(guy: string, wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
+    burn(guy: Address, wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
     mint(wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
-    transfer(dst: string, wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
-    push(dst: string, wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
-    move(src: string, dst: string, wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
+    transfer(dst: Address, wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
+    push(dst: Address, wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
+    move(src: Address, dst: Address, wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
     start(): TxSend<DaiContractTransactionReceipt>;
-    authority(): TxCall<string>;
-    approve(guy: string): TxSend<DaiContractTransactionReceipt>;
-    allowance(src: string, guy: string): TxCall<string>;
-    pull(src: string, wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
+    authority(): TxCall<Address>;
+    approve(guy: Address): TxSend<DaiContractTransactionReceipt>;
+    allowance(src: Address, guy: Address): TxCall<string>;
+    pull(src: Address, wad: number | string | BN): TxSend<DaiContractTransactionReceipt>;
 }
 export interface DaiContractDefinition {
     methods: DaiContractMethods;
@@ -111,7 +112,7 @@ export interface DaiContractDefinition {
     eventLogs: DaiContractEventLogs;
 }
 export class DaiContract extends Contract<DaiContractDefinition> {
-    constructor(eth: Eth, address?: string, options?: ContractOptions) {
+    constructor(eth: Eth, address?: Address, options?: ContractOptions) {
         super(eth, abi, address, options);
     }
 }

@@ -17,6 +17,7 @@
 
 import { recoverTransaction, signTransaction } from './sign-transaction';
 import { hexToBuffer } from '../utils';
+import { Address } from '../address';
 
 var clone = function(object) {
   return object ? JSON.parse(JSON.stringify(object)) : [];
@@ -32,7 +33,7 @@ var tests = [
       nonce: 0,
       gasPrice: '20000000000',
       gas: 21000,
-      to: '0xF0109fC8DF283027b6285cc889F5aA624EaC1F55',
+      to: Address.fromString('0xF0109fC8DF283027b6285cc889F5aA624EaC1F55'),
       toIban: 'XE04S1IRT2PR8A8422TPBL9SR6U0HODDCUT', // will be switched to "to" in the test
       value: '1000000000',
       data: '',
@@ -52,7 +53,7 @@ var tests = [
       nonce: 0,
       gasPrice: '0',
       gas: 31853,
-      to: '0xF0109fC8DF283027b6285cc889F5aA624EaC1F55',
+      to: Address.fromString('0xF0109fC8DF283027b6285cc889F5aA624EaC1F55'),
       toIban: 'XE04S1IRT2PR8A8422TPBL9SR6U0HODDCUT', // will be switched to "to" in the test
       value: '0',
       data: '',
@@ -75,7 +76,7 @@ var tests = [
       nonce: 0,
       gasPrice: '234567897654321',
       gas: 2000000,
-      to: '0xF0109fC8DF283027b6285cc889F5aA624EaC1F55',
+      to: Address.fromString('0xF0109fC8DF283027b6285cc889F5aA624EaC1F55'),
       toIban: 'XE04S1IRT2PR8A8422TPBL9SR6U0HODDCUT', // will be switched to "to" in the test
       value: '1000000000',
       data: '',
@@ -98,7 +99,7 @@ var tests = [
       nonce: 0,
       gasPrice: '0',
       gas: 31853,
-      to: '0xF0109fC8DF283027b6285cc889F5aA624EaC1F55',
+      to: Address.fromString('0xF0109fC8DF283027b6285cc889F5aA624EaC1F55'),
       toIban: 'XE04S1IRT2PR8A8422TPBL9SR6U0HODDCUT', // will be switched to "to" in the test
       value: '0',
       data: '',
@@ -121,7 +122,7 @@ var tests = [
       nonce: 0,
       gasPrice: '20000000000',
       gas: 21000,
-      to: '0x3535353535353535353535353535353535353535',
+      to: Address.fromString('0x3535353535353535353535353535353535353535'),
       toIban: 'XE4967QZMA14MI680T89KSPPJEJMU68MEYD', // will be switched to "to" in the test
       value: '1000000000000000000',
       data: '',
@@ -140,12 +141,12 @@ var tests = [
       nonce: 0,
       gasPrice: '230000000000',
       gas: 50000,
-      to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c',
+      to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'),
       toIban: 'XE63TIJX31ZHSLZ6F601ZPKVDKKYHMIK03G', // will be switched to "to" in the test
       value: '1000000000000000000',
       data: '0x0123abcd',
     },
-    // web3.eth.signTransaction({from: "0xEB014f8c8B418Db6b45774c326A0E64C78914dC0", gasPrice: "230000000000", gas: "50000", to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c', value: "1000000000000000000", data: "0x0123abcd"}).then(console.log);
+    // web3.eth.signTransaction({from: "0xEB014f8c8B418Db6b45774c326A0E64C78914dC0", gasPrice: "230000000000", gas: "50000", to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'), value: "1000000000000000000", data: "0x0123abcd"}).then(console.log);
     // signature from eth_signTransaction
     rawTransaction:
       '0xf8708085358d117c0082c35094fcad0b19bb29d4674531d6f115237e16afce377c880de0b6b3a7640000840123abcd26a031bb05bd1535150d312dcaa870a4a69c130a51aa80537659c1f308bf1f180ac6a012c938a8e04ac4e279d0b7c29811609031a96e949ad98f1ca74ca6078910bede',
@@ -160,12 +161,12 @@ var tests = [
       nonce: 10,
       gasPrice: '230000000000',
       gas: 50000,
-      to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c',
+      to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'),
       toIban: 'XE63TIJX31ZHSLZ6F601ZPKVDKKYHMIK03G', // will be switched to "to" in the test
       value: '1000000000000000000',
       data: '0x0123abcd',
     },
-    // web3.eth.signTransaction({from: "0xEB014f8c8B418Db6b45774c326A0E64C78914dC0", gasPrice: "230000000000", gas: "50000", to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c', value: "1000000000000000000", data: "0x0123abcd"}).then(console.log);
+    // web3.eth.signTransaction({from: "0xEB014f8c8B418Db6b45774c326A0E64C78914dC0", gasPrice: "230000000000", gas: "50000", to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'), value: "1000000000000000000", data: "0x0123abcd"}).then(console.log);
     // signature from eth_signTransaction
     rawTransaction:
       '0xf8700a85358d117c0082c35094fcad0b19bb29d4674531d6f115237e16afce377c880de0b6b3a7640000840123abcd25a0496e628e8348a24312ded09ee3d99d85b1b8f947725aa382dcf4003b7389d5aaa00c1b1cfdd66c510fd708d33279a1a61e53dff3c6ced67cf7f7b830862d6e2029',
@@ -180,12 +181,12 @@ var tests = [
       nonce: '0xa',
       gasPrice: '230000000000',
       gas: 50000,
-      to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c',
+      to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'),
       toIban: 'XE63TIJX31ZHSLZ6F601ZPKVDKKYHMIK03G', // will be switched to "to" in the test
       value: '1000000000000000000',
       data: '0x0123abcd',
     },
-    // web3.eth.signTransaction({from: "0xEB014f8c8B418Db6b45774c326A0E64C78914dC0", gasPrice: "230000000000", gas: "50000", to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c', value: "1000000000000000000", data: "0x0123abcd"}).then(console.log);
+    // web3.eth.signTransaction({from: "0xEB014f8c8B418Db6b45774c326A0E64C78914dC0", gasPrice: "230000000000", gas: "50000", to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'), value: "1000000000000000000", data: "0x0123abcd"}).then(console.log);
     // signature from eth_signTransaction
     rawTransaction:
       '0xf8700a85358d117c0082c35094fcad0b19bb29d4674531d6f115237e16afce377c880de0b6b3a7640000840123abcd25a0496e628e8348a24312ded09ee3d99d85b1b8f947725aa382dcf4003b7389d5aaa00c1b1cfdd66c510fd708d33279a1a61e53dff3c6ced67cf7f7b830862d6e2029',
@@ -200,12 +201,12 @@ var tests = [
       nonce: '16',
       gasPrice: '230000000000',
       gas: 50000,
-      to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c',
+      to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'),
       toIban: 'XE63TIJX31ZHSLZ6F601ZPKVDKKYHMIK03G', // will be switched to "to" in the test
       value: '1000000000000000000',
       data: '0x0123abcd',
     },
-    // web3.eth.signTransaction({from: "0xEB014f8c8B418Db6b45774c326A0E64C78914dC0", gasPrice: "230000000000", gas: "50000", to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c', value: "1000000000000000000", data: "0x0123abcd"}).then(console.log);
+    // web3.eth.signTransaction({from: "0xEB014f8c8B418Db6b45774c326A0E64C78914dC0", gasPrice: "230000000000", gas: "50000", to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'), value: "1000000000000000000", data: "0x0123abcd"}).then(console.log);
     // signature from eth_signTransaction
     rawTransaction:
       '0xf8701085358d117c0082c35094fcad0b19bb29d4674531d6f115237e16afce377c880de0b6b3a7640000840123abcd25a04ba217e16f62ac277698e8853bcc010db07285b457606e9f3487c70ccc5e6508a05c6cfaa17fc1a52bede0cf25c8bd2e024b4fb89ed205f62cb3e177a83654f29d',
@@ -220,12 +221,12 @@ var tests = [
       nonce: 16,
       gasPrice: '230000000000',
       gas: 50000,
-      to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c',
+      to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'),
       toIban: 'XE63TIJX31ZHSLZ6F601ZPKVDKKYHMIK03G', // will be switched to "to" in the test
       value: '1000000000000000000',
       data: '0x0123abcd',
     },
-    // web3.eth.signTransaction({from: "0xEB014f8c8B418Db6b45774c326A0E64C78914dC0", gasPrice: "230000000000", gas: "50000", to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c', value: "1000000000000000000", data: "0x0123abcd"}).then(console.log);
+    // web3.eth.signTransaction({from: "0xEB014f8c8B418Db6b45774c326A0E64C78914dC0", gasPrice: "230000000000", gas: "50000", to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'), value: "1000000000000000000", data: "0x0123abcd"}).then(console.log);
     // signature from eth_signTransaction
     rawTransaction:
       '0xf8701085358d117c0082c35094fcad0b19bb29d4674531d6f115237e16afce377c880de0b6b3a7640000840123abcd25a04ba217e16f62ac277698e8853bcc010db07285b457606e9f3487c70ccc5e6508a05c6cfaa17fc1a52bede0cf25c8bd2e024b4fb89ed205f62cb3e177a83654f29d',
@@ -240,12 +241,12 @@ var tests = [
       nonce: '0x16',
       gasPrice: '230000000000',
       gas: 50000,
-      to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c',
+      to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'),
       toIban: 'XE63TIJX31ZHSLZ6F601ZPKVDKKYHMIK03G', // will be switched to "to" in the test
       value: '1000000000000000000',
       data: '0x0123abcd',
     },
-    // web3.eth.signTransaction({from: "0xEB014f8c8B418Db6b45774c326A0E64C78914dC0", gasPrice: "230000000000", gas: "50000", to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c', value: "1000000000000000000", data: "0x0123abcd"}).then(console.log);
+    // web3.eth.signTransaction({from: "0xEB014f8c8B418Db6b45774c326A0E64C78914dC0", gasPrice: "230000000000", gas: "50000", to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'), value: "1000000000000000000", data: "0x0123abcd"}).then(console.log);
     // signature from eth_signTransaction
     rawTransaction:
       '0xf8701685358d117c0082c35094fcad0b19bb29d4674531d6f115237e16afce377c880de0b6b3a7640000840123abcd26a0e027ec9e9921975678b73de44f7d2cd6b987a6655b9d0291b2cdff15836c6efba051b4e20835793bf0cdf268339111a24d80a4a7bb141e975a66d0edbcc20542d0',
@@ -260,12 +261,12 @@ var tests = [
       nonce: '0x16',
       gasPrice: '230000000000',
       gas: 50000,
-      to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c',
+      to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'),
       toIban: 'XE63TIJX31ZHSLZ6F601ZPKVDKKYHMIK03G', // will be switched to "to" in the test
       value: '1000000000000000000',
       input: '0x0123abcd',
     },
-    // web3.eth.signTransaction({from: "0xEB014f8c8B418Db6b45774c326A0E64C78914dC0", gasPrice: "230000000000", gas: "50000", to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c', value: "1000000000000000000", data: "0x0123abcd"}).then(console.log);
+    // web3.eth.signTransaction({from: "0xEB014f8c8B418Db6b45774c326A0E64C78914dC0", gasPrice: "230000000000", gas: "50000", to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'), value: "1000000000000000000", data: "0x0123abcd"}).then(console.log);
     // signature from eth_signTransaction
     rawTransaction:
       '0xf8701685358d117c0082c35094fcad0b19bb29d4674531d6f115237e16afce377c880de0b6b3a7640000840123abcd26a0e027ec9e9921975678b73de44f7d2cd6b987a6655b9d0291b2cdff15836c6efba051b4e20835793bf0cdf268339111a24d80a4a7bb141e975a66d0edbcc20542d0',
@@ -280,7 +281,7 @@ var tests = [
       nonce: 2,
       gasPrice: '20000',
       gas: 50000,
-      to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c',
+      to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'),
       toIban: 'XE63TIJX31ZHSLZ6F601ZPKVDKKYHMIK03G', // will be switched to "to" in the test
       value: '1000000000000000000',
       data: '0x0123abcd',
@@ -296,7 +297,7 @@ var tests = [
       nonce: 2,
       gasPrice: '0A',
       gas: 50000,
-      to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c',
+      to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'),
       toIban: 'XE63TIJX31ZHSLZ6F601ZPKVDKKYHMIK03G', // will be switched to "to" in the test
       value: '1000000000000000000',
       data: '0x0123abcd',
@@ -311,7 +312,7 @@ var tests = [
       nonce: 2,
       gasPrice: '200000',
       gas: 50000,
-      to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c',
+      to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'),
       toIban: 'XE63TIJX31ZHSLZ6F601ZPKVDKKYHMIK03G', // will be switched to "to" in the test
       value: '1000000000000000000',
       data: 'test',
@@ -326,7 +327,7 @@ var tests = [
       nonce: 2,
       gasPrice: 'A',
       gas: 50000,
-      to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c',
+      to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'),
       toIban: 'XE63TIJX31ZHSLZ6F601ZPKVDKKYHMIK03G', // will be switched to "to" in the test
       value: '1000000000000000000',
       data: '0x0123abcd',
@@ -341,7 +342,7 @@ var tests = [
       nonce: 'a',
       gasPrice: '230000000000',
       gas: 50000,
-      to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c',
+      to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'),
       toIban: 'XE63TIJX31ZHSLZ6F601ZPKVDKKYHMIK03G', // will be switched to "to" in the test
       value: '1000000000000000000',
       data: '0x0123abcd',
@@ -356,7 +357,7 @@ var tests = [
       nonce: 1,
       gasPrice: '230000000000',
       gas: 50000,
-      to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c',
+      to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'),
       toIban: 'XE63TIJX31ZHSLZ6F601ZPKVDKKYHMIK03G', // will be switched to "to" in the test
       value: '1000000000000000000',
       data: '0x0123abcd',
@@ -371,7 +372,7 @@ var tests = [
       nonce: 0,
       gasPrice: '230000000000',
       gas: 50000,
-      to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c',
+      to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'),
       toIban: 'XE63TIJX31ZHSLZ6F601ZPKVDKKYHMIK03G', // will be switched to "to" in the test
       value: '1000000000000000000',
       data: '0x0123abcd',
@@ -386,7 +387,7 @@ var tests = [
       nonce: -2,
       gasPrice: '230000000000',
       gas: 50000,
-      to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c',
+      to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'),
       toIban: 'XE63TIJX31ZHSLZ6F601ZPKVDKKYHMIK03G', // will be switched to "to" in the test
       value: '1000000000000000000',
       data: '0x0123abcd',
@@ -401,7 +402,7 @@ var tests = [
       nonce: 0,
       gasPrice: '-230000000000',
       gas: 50000,
-      to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c',
+      to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'),
       toIban: 'XE63TIJX31ZHSLZ6F601ZPKVDKKYHMIK03G', // will be switched to "to" in the test
       value: '1000000000000000000',
       data: '0x0123abcd',
@@ -416,7 +417,7 @@ var tests = [
       nonce: 0,
       gasPrice: '230000000000',
       gas: -50000,
-      to: '0xFCAd0B19bB29D4674531d6f115237E16AfCE377c',
+      to: Address.fromString('0xFCAd0B19bB29D4674531d6f115237E16AfCE377c'),
       toIban: 'XE63TIJX31ZHSLZ6F601ZPKVDKKYHMIK03G', // will be switched to "to" in the test
       value: '1000000000000000000',
       data: '0x0123abcd',
