@@ -91,6 +91,7 @@ export class Subscription<Result = any> extends EventEmitter {
       this.provider.removeListener('notification', this.listener);
     }
     this.removeAllListeners();
+    this.provider.send(`${this.type}_unsubscribe`, [this.id]);
     this.id = undefined;
     this.listener = undefined;
   }
