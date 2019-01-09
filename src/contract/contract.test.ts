@@ -90,7 +90,7 @@ describe('contract', function() {
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
         expect(method).toBe('eth_subscribe');
         expect(params[1]).toEqual({
-          topics: [sha3(signature), '0x000000000000000000000000' + addressLowercase.replace('0x', '')],
+          topics: [sha3(signature), '0x000000000000000000000000' + addressLowercase.replace('0x', ''), null],
           address: addressLowercase,
         });
 
@@ -1318,6 +1318,7 @@ describe('contract', function() {
             topics: [
               '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
               '0x000000000000000000000000' + address2.replace('0x', ''),
+              null,
             ],
           },
         ]);

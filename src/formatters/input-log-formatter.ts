@@ -26,7 +26,7 @@ export interface GetLogOptions {
   toBlock?: BlockType;
   fromBlock?: BlockType;
   address?: string | string[];
-  topics?: Array<string | string[]>;
+  topics?: Array<string | string[] | null>;
 }
 
 export interface FormattedGetLogOptions {
@@ -46,11 +46,11 @@ export interface FormattedGetLogOptions {
 export function inputLogFormatter(options: GetLogOptions = {}): FormattedGetLogOptions {
   let formattedLogOptions: FormattedGetLogOptions = {};
 
-  if (options.fromBlock) {
+  if (options.fromBlock !== undefined) {
     formattedLogOptions.fromBlock = inputBlockNumberFormatter(options.fromBlock);
   }
 
-  if (options.toBlock) {
+  if (options.toBlock !== undefined) {
     formattedLogOptions.toBlock = inputBlockNumberFormatter(options.toBlock);
   }
 

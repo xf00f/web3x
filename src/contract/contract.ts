@@ -198,7 +198,8 @@ export class Contract<T extends ContractDefinition | void = void> {
    * @return {Object} the promievent
    */
   async getPastEvents<Event extends Events<T>>(event: Event, options: GetLogOptions): Promise<GetEventLog<T, Event>[]>;
-  async getPastEvents(event: Events<T>, options: GetLogOptions = {}): Promise<EventLog<any>[]> {
+  async getPastEvents(event: 'allevents', options: GetLogOptions): Promise<EventLog<any>[]>;
+  async getPastEvents(event: Events<T> & 'allevents', options: GetLogOptions = {}): Promise<EventLog<any>[]> {
     const logOptions = this.getLogOptions(event, options);
     const result = await this.eth.getPastLogs(logOptions);
     return result.map(log => decodeAnyEvent(this.jsonInterface, log));
@@ -327,27 +328,26 @@ export class Contract<T extends ContractDefinition | void = void> {
     }
 
     // add event topics (indexed arguments)
-    (event.inputs || [])
+    const indexedTopics = (event.inputs || [])
       .filter(input => input.indexed === true)
-      .forEach(input => {
+      .map(input => {
         const filter = options.filter || {};
         const value = filter[input.name];
         if (!value) {
-          return;
+          return null;
         }
 
         // TODO: https://github.com/ethereum/web3.js/issues/344
         // TODO: deal properly with components
 
         if (isArray(value)) {
-          const t = value.map(v => abi.encodeParameter(input.type, v));
-          topics = [...topics, t];
+          return value.map(v => abi.encodeParameter(input.type, v));
         } else {
-          topics = [...topics, abi.encodeParameter(input.type, value)];
+          return abi.encodeParameter(input.type, value);
         }
       });
 
-    return topics;
+    return [...topics, ...indexedTopics];
   }
 
   /**
