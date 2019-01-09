@@ -26,7 +26,7 @@ export interface GetLogOptions {
   toBlock?: BlockType;
   fromBlock?: BlockType;
   address?: Address | Address[];
-  topics?: Array<string | string[]>;
+  topics?: Array<string | string[] | null>;
 }
 
 export interface FormattedGetLogOptions {
