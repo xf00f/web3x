@@ -20,10 +20,12 @@
     ]
   },
   "dependencies": {
+    "ts-jest": "^23.10.5",
     "typescript": "^3.0.3",
     "web3x": "^2.0.1"
   },
   "devDependencies": {
+    "@types/jest": "^23.3.12",
     "jest": "^23.6.0",
     "nodemon": "^1.18.5"
   }
