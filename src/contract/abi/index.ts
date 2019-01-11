@@ -182,7 +182,8 @@ export class ABICoder {
     });
 
     const nonIndexedData = data;
-    const notIndexedParams = nonIndexedData ? this.decodeParameters(notIndexedInputs, nonIndexedData) : [];
+    const notIndexedParams =
+      nonIndexedData && nonIndexedData !== '0x' ? this.decodeParameters(notIndexedInputs, nonIndexedData) : [];
 
     const returnValue: any = {};
     returnValue.__length__ = 0;
