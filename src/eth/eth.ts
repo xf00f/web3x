@@ -15,19 +15,8 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { isBoolean } from 'util';
 import { Address } from '../address';
-import {
-  GetLogOptions,
-  inputLogFormatter,
-  Log,
-  outputBlockFormatter,
-  outputLogFormatter,
-  outputSyncingFormatter,
-  Sync,
-  Transaction,
-  TransactionReceipt,
-} from '../formatters';
+import { GetLogOptions, Log, Sync, Transaction, TransactionReceipt } from '../formatters';
 import { PromiEvent, promiEvent, PromiEventResult } from '../promievent';
 import { LegacyProvider, LegacyProviderAdapter } from '../providers';
 import { EthereumProvider } from '../providers/ethereum-provider';
@@ -39,6 +28,10 @@ import { Wallet } from '../wallet';
 import { Block, BlockHash, BlockHeader, BlockType } from './block';
 import { confirmTransaction } from './confirm-transaction';
 import { EthRequestPayloads } from './eth-request-payloads';
+import { subscribeForLogs } from './subscriptions/logs';
+import { subscribeForNewHeads } from './subscriptions/new-heads';
+import { subscribeForNewPendingTransactions } from './subscriptions/new-pending-transactions';
+import { subscribeForSyncing } from './subscriptions/syncing';
 import { SignedTransaction, Tx } from './tx';
 
 declare const web3: { currentProvider?: LegacyProvider; ethereumProvider?: LegacyProvider } | undefined;
@@ -275,86 +268,23 @@ export class Eth {
     return await this.send(this.request.getPastLogs(options));
   }
 
-  public subscribeLogs(options: GetLogOptions = {}): Subscription<Log> {
-    const { fromBlock, ...subLogOptions } = options;
-    const subscription = new Subscription<Log>('eth', 'logs', [inputLogFormatter(subLogOptions)], this.provider);
-
-    subscription.on('rawdata', result => {
-      const output = outputLogFormatter(result);
-      if (output.removed) {
-        subscription.emit('changed', output);
-      } else {
-        subscription.emit('data', output);
-      }
-    });
-
-    if (fromBlock !== undefined) {
-      this.getPastLogs(options)
-        .then(logs => {
-          logs.forEach(log => subscription.emit('rawdata', log));
-          subscription.subscribe();
-        })
-        .catch(err => {
-          subscription.emit('error', err);
-        });
-    } else {
-      process.nextTick(() => subscription.subscribe());
-    }
-
-    return subscription;
-  }
-
-  public subscribeSyncing(): Subscription<object | boolean> {
-    const subscription = new Subscription<object | boolean>('eth', 'syncing', [], this.provider);
-
-    subscription.on('rawdata', result => {
-      const output = outputSyncingFormatter(result);
-      if (isBoolean(output)) {
-        subscription.emit('changed', output);
-        return;
-      }
-      subscription.emit('data', output);
-    });
-
-    process.nextTick(() => subscription.subscribe());
-
-    return subscription;
-  }
-
-  public subscribeNewBlockHeaders(): Subscription<BlockHeader> {
-    const subscription = new Subscription<BlockHeader>('eth', 'newHeads', [], this.provider);
-
-    subscription.on('rawdata', result => {
-      const output = outputBlockFormatter(result);
-      subscription.emit('data', output);
-    });
-
-    process.nextTick(() => subscription.subscribe());
-
-    return subscription;
-  }
-
-  public subscribePendingTransactions(): Subscription<Transaction> {
-    const subscription = new Subscription<Transaction>('eth', 'newPendingTransactions', [], this.provider);
-    subscription.on('rawdata', result => subscription.emit('data', result));
-    process.nextTick(() => subscription.subscribe());
-    return subscription;
-  }
-
   public subscribe(type: 'logs', options?: GetLogOptions): Subscription<Log>;
   public subscribe(type: 'syncing'): Subscription<object | boolean>;
   public subscribe(type: 'newBlockHeaders'): Subscription<BlockHeader>;
   public subscribe(type: 'pendingTransactions'): Subscription<Transaction>;
-  public subscribe(type: 'pendingTransactions' | 'newBlockHeaders' | 'syncing' | 'logs', ...args: any[]): Subscription<any> {
+  public subscribe(
+    type: 'pendingTransactions' | 'newBlockHeaders' | 'syncing' | 'logs',
+    ...args: any[]
+  ): Subscription<any> {
     switch (type) {
       case 'logs':
-        return this.subscribeLogs(...args);
+        return subscribeForLogs(this, ...args);
       case 'syncing':
-        return this.subscribeSyncing();
+        return subscribeForSyncing(this.provider);
       case 'newBlockHeaders':
-        return this.subscribeNewBlockHeaders();
+        return subscribeForNewHeads(this.provider);
       case 'pendingTransactions':
-        return this.subscribePendingTransactions();
+        return subscribeForNewPendingTransactions(this.provider);
       default:
         throw new Error(`Unknown subscription type: ${type}`);
     }

@@ -122,7 +122,7 @@ The generator will create 3 contracts:
 
 - For the first it uses etherscan to download the contract ABI and initialisation code at the given address, and generates the interface at `./src/contracts/DaiContract.ts`.
 - For the second it specifies a truffle build output and generates its interface at `./src/contracts/MyTruffleContract.ts`.
-- For the third specifies a raw ABI file and compilied initialisation code, and generates its interface at `./src/contracts/MyRawAbiContract.ts`. The `initDataFile` is optional but you won't be able to easily deploy the contract without it.
+- For the third it reads a raw ABI file and compilied initialisation code from local files, and generates its interface at `./src/contracts/MyRawAbiContract.ts`. The `initDataFile` property is optional but you won't be able to easily deploy the contract without it.
 
 For an example of the code generated, take a look at this [example](example-projects/node/src/contracts/DaiContract.ts).
 

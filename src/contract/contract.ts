@@ -19,7 +19,7 @@ import { isArray } from 'util';
 import { Address } from '../address';
 import { InvalidNumberOfParams } from '../errors';
 import { Eth } from '../eth';
-import { EventLog, GetLogOptions, inputLogFormatter, TransactionReceipt } from '../formatters';
+import { EventLog, GetLogOptions, inputLogFormatter, Log, TransactionReceipt } from '../formatters';
 import { Subscription } from '../subscriptions';
 import { Data } from '../types';
 import { Wallet } from '../wallet';
@@ -137,7 +137,6 @@ export class Contract<T extends ContractDefinition | void = void> {
    * @return {Object} the event subscription
    */
   public once(event: Events<T>, options: GetLogOptions, callback: (err, res, sub) => void): void {
-    // don't return as once shouldn't provide "on"
     this.on(event, options, (err, res, sub) => {
       sub.unsubscribe();
       callback(err, res, sub);
@@ -150,39 +149,44 @@ export class Contract<T extends ContractDefinition | void = void> {
   private on(event: string, options: GetLogOptions = {}, callback?: (err, res, sub) => void) {
     const logOptions = this.getLogOptions(event, options);
     const { fromBlock, ...subLogOptions } = logOptions;
+    const params = [inputLogFormatter(subLogOptions)];
 
-    const subscription = new Subscription('eth', 'logs', [inputLogFormatter(subLogOptions)], this.eth.provider);
+    const subscription = new Subscription<Log>(
+      'eth',
+      'logs',
+      params,
+      this.eth.provider,
+      (result, sub) => {
+        const output = decodeAnyEvent(this.jsonInterface, result);
+        sub.emit(output.removed ? 'changed' : 'data', output);
+        if (callback) {
+          callback(undefined, output, sub);
+        }
+      },
+      false,
+    );
 
-    subscription
-      .on('rawdata', log => {
-        const output = decodeAnyEvent(this.jsonInterface, log);
-        if (output.removed) {
-          subscription.emit('changed', output);
-        } else {
-          subscription.emit('data', output);
-        }
-        if (callback) {
-          callback(undefined, output, subscription);
-        }
-      })
-      .on('error', err => {
-        if (callback) {
-          callback(err, undefined, subscription);
-        }
-      });
+    subscription.on('error', err => {
+      if (callback) {
+        callback(err, undefined, subscription);
+      }
+    });
 
     if (fromBlock !== undefined) {
       this.eth
         .getPastLogs(logOptions)
         .then(logs => {
-          logs.forEach(log => subscription.emit('rawdata', log));
+          logs.forEach(result => {
+            const output = decodeAnyEvent(this.jsonInterface, result);
+            subscription.emit('data', output);
+          });
           subscription.subscribe();
         })
         .catch(err => {
           subscription.emit('error', err);
         });
     } else {
-      process.nextTick(() => subscription.subscribe());
+      subscription.subscribe();
     }
 
     return subscription;
