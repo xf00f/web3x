@@ -73,6 +73,13 @@ declare const web3: {
 const eth = new Eth(new LegacyProviderAdapter(web3.currentProvider));
 ```
 
+Or a shorthand version:
+
+```typescript
+import { Eth } from 'web3x-es/eth';
+const eth = Eth.fromCurrentProvider();
+```
+
 See example projects for more complex examples.
 
 ## Contract type safety
@@ -87,8 +94,20 @@ An example `contracts.json` looks like:
 {
   "outputPath": "./src/contracts",
   "contracts": {
-    "DaiContract": "http://api.etherscan.io/api?module=contract&action=getabi&address=0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359&format=raw",
-    "MyContract": "../truffle-project/build/contracts/MyContract.json"
+    "DaiContract": {
+      "source": "etherscan",
+      "net": "mainnet",
+      "address": "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359"
+    },
+    "MyTruffleContract": {
+      "source": "truffle",
+      "buildFile": "../truffle-project/build/contracts/MyContract.json"
+    },
+    "MyRawAbiContract": {
+      "source": "files",
+      "abiFile": "../my-contract/abi.json",
+      "initDataFile": "../my-contract/init-code.bin"
+    }
   }
 }
 ```
@@ -99,7 +118,11 @@ Run the code generator:
 yarn web3x-codegen
 ```
 
-The generator downloads the ABI for the DAI token from the given location on etherscan, and generates the interface at `./src/contracts/DaiContract.ts`. It also specifies a local ABI file and generates its interface at `./src/contracts/MyContract.ts`. The json files output by truffle are not pure ABIs, but the code generator will detect it's a truffle output and will extract the ABI accordingly.
+The generator will create 3 contracts:
+
+- For the first it uses etherscan to download the contract ABI and initialisation code at the given address, and generates the interface at `./src/contracts/DaiContract.ts`.
+- For the second it specifies a truffle build output and generates its interface at `./src/contracts/MyTruffleContract.ts`.
+- For the third specifies a raw ABI file and compilied initialisation code, and generates its interface at `./src/contracts/MyRawAbiContract.ts`. The `initDataFile` is optional but you won't be able to easily deploy the contract without it.
 
 For an example of the code generated, take a look at this [example](example-projects/node/src/contracts/DaiContract.ts).
 
@@ -108,12 +131,12 @@ For an example of the code generated, take a look at this [example](example-proj
 The following code demonstrates how to use the generated contract class. It's the exact same API as used in web3.js, only now with type safety.
 
 ```typescript
+import { Address } from 'web3x/address';
 import { fromWei } from 'web3x/utils';
 import { WebsocketProvider } from 'web3x/providers';
 import { Eth } from 'web3x/eth';
 import { DaiContract } from './contracts/DaiContract';
 
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 const DAI_CONTRACT_ADDRESS = '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359';
 
 async function main() {
@@ -122,8 +145,38 @@ async function main() {
 
   try {
     const contract = new DaiContract(eth, DAI_CONTRACT_ADDRESS);
-    const daiBalance = await contract.methods.balanceOf(ZERO_ADDRESS).call();
+    const daiBalance = await contract.methods.balanceOf(Address.ZERO).call();
     console.log(`Balance of 0 address DAI: ${fromWei(daiBalance, 'ether')}`);
+  } finally {
+    provider.disconnect();
+  }
+}
+
+main().catch(console.error);
+```
+
+Deploying contracts is trivial as well, as the bytecode is imported by web3x-codegen and included as part of the contract class.
+The following code deploys an exact replica of the DAI contract on mainnet, only now you can mint your own funds.
+
+```typescript
+import { Address } from 'web3x/address';
+import { fromWei, toWei } from 'web3x/utils';
+import { WebsocketProvider } from 'web3x/providers';
+import { Eth } from 'web3x/eth';
+import { DaiContract } from './contracts/DaiContract';
+
+async function main() {
+  const from = Address.fromString('0x903ddd91207f737255ca93eb5885c0e087be0fc3');
+  const gasPrice = 50000;
+  const provider = new WebsocketProvider('wss://mainnet.infura.io/ws');
+  const eth = new Eth(provider);
+
+  try {
+    const contract = new DaiContract(eth);
+    await contract.deploy('xf00f token').send({ from, gasPrice });
+    await contract.methods.mint(toWei(1000, 'ether')).send({ from, gasPrice });
+    const balance = await contract.methods.balanceOf(from).call();
+    console.log(`Balance of ${from}: ${fromWei(balance, 'ether')}`);
   } finally {
     provider.disconnect();
   }
@@ -137,6 +190,8 @@ main().catch(console.error);
 This is not a perfect drop in replacement for web3.js, there are small differences.
 
 - Callbacks for request/response style calls no longer supported, promises only.
+- Address objects must be used insead of strings. e.g. `Address.fromString('0x903ddd91207f737255ca93eb5885c0e087be0fc3')`
+- Buffers are often used instead of `0x` prefixed strings.
 - You should explicitly import parts of the library rather then accessing them via the web3 object.
 - Sanitized some hybrid types, e.g. access wallet accounts via `wallet.get(0)` rather than `wallet[0]`.
 
