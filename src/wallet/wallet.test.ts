@@ -15,10 +15,10 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Wallet } from './wallet';
-import { hexToBuffer } from '../utils';
 import { Account } from '../account';
 import { Address } from '../address';
+import { hexToBuffer } from '../utils';
+import { Wallet } from './wallet';
 
 const tests = [
   {
@@ -39,9 +39,9 @@ const tests = [
   },
 ];
 
-describe('wallet', function() {
-  tests.forEach(function(test, i) {
-    it('creates the right number of wallets', function() {
+describe('wallet', () => {
+  tests.forEach((test, i) => {
+    it('creates the right number of wallets', () => {
       const wallet = new Wallet();
       expect(wallet.length).toBe(0);
 
@@ -55,7 +55,7 @@ describe('wallet', function() {
       expect(Address.isAddress(wallet.accounts[2].address.toString())).toBe(true);
     });
 
-    it('add wallet using a privatekey', function() {
+    it('add wallet using a privatekey', () => {
       const wallet = new Wallet();
 
       const account = wallet.add(test.privateKey);
@@ -69,7 +69,7 @@ describe('wallet', function() {
       expect(wallet.length).toBe(1);
     });
 
-    it('add wallet using an account', function() {
+    it('add wallet using an account', () => {
       const wallet = new Wallet();
 
       const account = Account.fromPrivate(test.privateKey);
@@ -84,7 +84,7 @@ describe('wallet', function() {
       expect(wallet.length).toBe(1);
     });
 
-    it('should not add wallet twice work', function() {
+    it('should not add wallet twice work', () => {
       const wallet = new Wallet();
 
       const account = Account.fromPrivate(test.privateKey);
@@ -100,7 +100,7 @@ describe('wallet', function() {
       expect(wallet.length).toBe(1);
     });
 
-    it('remove wallet using an index', function() {
+    it('remove wallet using an index', () => {
       const wallet = new Wallet();
 
       wallet.add(test.privateKey);
@@ -112,7 +112,7 @@ describe('wallet', function() {
       expect(wallet.length).toBe(0);
     });
 
-    it('remove wallet using an address', function() {
+    it('remove wallet using an address', () => {
       const wallet = new Wallet();
 
       wallet.add(test.privateKey);
@@ -122,7 +122,7 @@ describe('wallet', function() {
       expect(wallet.length).toBe(0);
     });
 
-    it('remove wallet using an lowercase address', function() {
+    it('remove wallet using an lowercase address', () => {
       const wallet = new Wallet();
 
       wallet.add(test.privateKey);
@@ -132,7 +132,7 @@ describe('wallet', function() {
       expect(wallet.length).toBe(0);
     });
 
-    it('create 5 wallets, remove two, create two more and check for overwrites', function() {
+    it('create 5 wallets, remove two, create two more and check for overwrites', () => {
       const count = 5;
       const wallet = new Wallet();
       expect(wallet.length).toBe(0);
@@ -141,8 +141,6 @@ describe('wallet', function() {
       const initialAddresses = [0, 1, 2, 3, 4].map(n => wallet.get(n)!.address);
       expect(wallet.length).toBe(count);
 
-      wallet.get(2)!.address;
-      wallet.get(4)!.address;
       const remainingAddresses = [0, 1, 3];
       const beforeRemoval = remainingAddresses.map(n => wallet.get(n)!.address);
 
@@ -171,7 +169,7 @@ describe('wallet', function() {
       expect(initialAddresses).not.toEqual(newAddresses);
     });
 
-    it('clear wallet', function() {
+    it('clear wallet', () => {
       const count = 10;
       const wallet = new Wallet();
 

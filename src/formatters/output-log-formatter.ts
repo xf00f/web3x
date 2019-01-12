@@ -15,12 +15,13 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { sha3, hexToNumber } from '../utils';
-import { TransactionHash, Data } from '../types';
-import { Address } from '../address';
 import { isString } from 'util';
+import { Address } from '../address';
+import { Data, TransactionHash } from '../types';
+import { hexToNumber, sha3 } from '../utils';
 
 export interface UnformattedLog {
+  id?: string;
   removed?: boolean;
   logIndex: string | null;
   blockNumber: string | null;
@@ -53,7 +54,7 @@ export interface Log {
  * @returns {Object} log
  */
 export function outputLogFormatter(log: UnformattedLog | Log): Log {
-  let id: string | null = log['id'] || null;
+  let id: string | null = log.id || null;
 
   // generate a custom log id
   if (

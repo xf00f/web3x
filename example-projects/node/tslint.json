@@ -3,7 +3,7 @@
   "extends": ["tslint:recommended", "tslint-config-prettier"],
   "rules": {
     "no-empty": [true, "allow-empty-functions"],
-    "no-console": true,
+    "no-console": false,
     "interface-name": false,
     "interface-over-type-literal": false,
     "object-literal-sort-keys": false,
@@ -12,5 +12,8 @@
     "max-classes-per-file": false,
     "no-var-requires": false,
     "array-type": [true, "array"]
+  },
+  "linterOptions": {
+    "exclude": ["src/contracts/**"]
   }
 }

@@ -16,7 +16,7 @@
 */
 
 export function ErrorResponse(result) {
-  var message = !!result && !!result.error && !!result.error.message ? result.error.message : JSON.stringify(result);
+  const message = !!result && !!result.error && !!result.error.message ? result.error.message : JSON.stringify(result);
   return new Error('Returned error: ' + message);
 }
 
@@ -33,7 +33,7 @@ export function InvalidProvider() {
 }
 
 export function InvalidResponse(result) {
-  var message =
+  const message =
     !!result && !!result.error && !!result.error.message
       ? result.error.message
       : 'Invalid JSON RPC response: ' + JSON.stringify(result);

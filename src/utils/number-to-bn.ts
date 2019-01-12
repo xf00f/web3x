@@ -23,12 +23,12 @@ function stripHexPrefix(str: string) {
 
 export function numberToBN(arg) {
   if (typeof arg === 'string' || typeof arg === 'number') {
-    var multiplier = new BN(1); // eslint-disable-line
-    var formattedString = String(arg)
+    let multiplier = new BN(1); // eslint-disable-line
+    const formattedString = String(arg)
       .toLowerCase()
       .trim();
-    var isHexPrefixed = formattedString.substr(0, 2) === '0x' || formattedString.substr(0, 3) === '-0x';
-    var stringArg = stripHexPrefix(formattedString); // eslint-disable-line
+    const isHexPrefixed = formattedString.substr(0, 2) === '0x' || formattedString.substr(0, 3) === '-0x';
+    let stringArg = stripHexPrefix(formattedString); // eslint-disable-line
     if (stringArg.substr(0, 1) === '-') {
       stringArg = stripHexPrefix(stringArg.slice(1));
       multiplier = new BN(-1, 10);

@@ -17,9 +17,9 @@
 
 import { createJsonRpcBatchPayload, createJsonRpcPayload, isValidJsonRpcResponse } from './jsonrpc';
 
-describe('jsonrpc', function() {
-  describe('isValidResponse', function() {
-    it('should validate basic jsonrpc response', function() {
+describe('jsonrpc', () => {
+  describe('isValidResponse', () => {
+    it('should validate basic jsonrpc response', () => {
       const response = {
         jsonrpc: '2.0',
         id: 1,
@@ -31,7 +31,7 @@ describe('jsonrpc', function() {
       expect(valid).toBe(true);
     });
 
-    it('should validate basic undefined response', function() {
+    it('should validate basic undefined response', () => {
       const response = undefined;
 
       const valid = isValidJsonRpcResponse(response);
@@ -39,7 +39,7 @@ describe('jsonrpc', function() {
       expect(valid).toBe(false);
     });
 
-    it('should validate jsonrpc response without jsonrpc field', function() {
+    it('should validate jsonrpc response without jsonrpc field', () => {
       const response = {
         id: 1,
         result: [],
@@ -50,7 +50,7 @@ describe('jsonrpc', function() {
       expect(valid).toBe(false);
     });
 
-    it('should validate jsonrpc response with wrong jsonrpc version', function() {
+    it('should validate jsonrpc response with wrong jsonrpc version', () => {
       const response = {
         jsonrpc: '1.0',
         id: 1,
@@ -62,7 +62,7 @@ describe('jsonrpc', function() {
       expect(valid).toBe(false);
     });
 
-    it('should validate jsonrpc response without id number', function() {
+    it('should validate jsonrpc response without id number', () => {
       const response = {
         jsonrpc: '2.0',
         result: [],
@@ -73,7 +73,7 @@ describe('jsonrpc', function() {
       expect(valid).toBe(false);
     });
 
-    it('should validate jsonrpc response with string id field', function() {
+    it('should validate jsonrpc response with string id field', () => {
       const response = {
         jsonrpc: '2.0',
         id: 'x',
@@ -85,7 +85,7 @@ describe('jsonrpc', function() {
       expect(valid).toBe(true);
     });
 
-    it('should validate jsonrpc response with string id field but as number', function() {
+    it('should validate jsonrpc response with string id field but as number', () => {
       const response = {
         jsonrpc: '2.0',
         id: '23',
@@ -97,7 +97,7 @@ describe('jsonrpc', function() {
       expect(valid).toBe(true);
     });
 
-    it('should validate jsonrpc response without result field', function() {
+    it('should validate jsonrpc response without result field', () => {
       const response = {
         jsonrpc: '2.0',
         id: 1,
@@ -108,7 +108,7 @@ describe('jsonrpc', function() {
       expect(valid).toBe(false);
     });
 
-    it('should validate jsonrpc response with result field === false', function() {
+    it('should validate jsonrpc response with result field === false', () => {
       const response = {
         jsonrpc: '2.0',
         id: 1,
@@ -120,7 +120,7 @@ describe('jsonrpc', function() {
       expect(valid).toBe(true);
     });
 
-    it('should validate jsonrpc response with result field === 0', function() {
+    it('should validate jsonrpc response with result field === 0', () => {
       const response = {
         jsonrpc: '2.0',
         id: 1,
@@ -133,8 +133,8 @@ describe('jsonrpc', function() {
     });
   });
 
-  describe('id', function() {
-    it('should increment the id', function() {
+  describe('id', () => {
+    it('should increment the id', () => {
       const method = 'm';
 
       const p1 = createJsonRpcPayload(method);
@@ -144,8 +144,8 @@ describe('jsonrpc', function() {
     });
   });
 
-  describe('toBatchPayload', function() {
-    it('should create basic batch payload', function() {
+  describe('toBatchPayload', () => {
+    it('should create basic batch payload', () => {
       // given
       const messages = [
         {
@@ -175,7 +175,7 @@ describe('jsonrpc', function() {
       expect(payload[0].id + 1).toBe(payload[1].id);
     });
 
-    it('should create batch payload for empty input array', function() {
+    it('should create batch payload for empty input array', () => {
       // given
       const messages = [];
 
@@ -188,8 +188,8 @@ describe('jsonrpc', function() {
     });
   });
 
-  describe('toPayload', function() {
-    it('should create basic payload', function() {
+  describe('toPayload', () => {
+    it('should create basic payload', () => {
       // given
       const method = 'helloworld';
 
@@ -204,7 +204,7 @@ describe('jsonrpc', function() {
       expect(typeof payload.id).toBe('number');
     });
 
-    it('should create payload with params', function() {
+    it('should create payload with params', () => {
       // given
       const method = 'helloworld1';
       const params = [123, 'test'];

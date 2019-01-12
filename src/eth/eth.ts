@@ -15,31 +15,31 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Subscription } from '../subscriptions';
-import { Wallet } from '../wallet';
-import { fireError } from '../utils';
+import { isBoolean } from 'util';
+import { Address } from '../address';
 import {
-  outputSyncingFormatter,
-  outputBlockFormatter,
+  GetLogOptions,
   inputLogFormatter,
+  Log,
+  outputBlockFormatter,
   outputLogFormatter,
+  outputSyncingFormatter,
   Sync,
   Transaction,
   TransactionReceipt,
-  Log,
-  GetLogOptions,
 } from '../formatters';
-import { isBoolean } from 'util';
+import { PromiEvent, promiEvent, PromiEventResult } from '../promievent';
+import { LegacyProvider, LegacyProviderAdapter } from '../providers';
+import { EthereumProvider } from '../providers/ethereum-provider';
+import { Subscription } from '../subscriptions';
 import { TransactionHash } from '../types';
 import { Data, Quantity } from '../types';
-import { PromiEvent, promiEvent, PromiEventResult } from '../promievent';
+import { fireError } from '../utils';
+import { Wallet } from '../wallet';
+import { Block, BlockHash, BlockHeader, BlockType } from './block';
 import { confirmTransaction } from './confirm-transaction';
 import { EthRequestPayloads } from './eth-request-payloads';
-import { Block, BlockHeader, BlockType, BlockHash } from './block';
-import { Tx, SignedTransaction } from './tx';
-import { EthereumProvider } from '../providers/ethereum-provider';
-import { Address } from '../address';
-import { LegacyProvider, LegacyProviderAdapter } from '../providers';
+import { SignedTransaction, Tx } from './tx';
 
 declare const web3: { currentProvider?: LegacyProvider; ethereumProvider?: LegacyProvider } | undefined;
 
@@ -57,14 +57,14 @@ export interface SendTxPromiEvent<TxReceipt = TransactionReceipt> extends PromiE
 }
 
 export class Eth {
-  readonly request: EthRequestPayloads;
+  public readonly request: EthRequestPayloads;
   private wallet?: Wallet;
 
   constructor(readonly provider: EthereumProvider) {
     this.request = new EthRequestPayloads(undefined, 'latest');
   }
 
-  static fromCurrentProvider() {
+  public static fromCurrentProvider() {
     if (!web3) {
       return;
     }
@@ -75,15 +75,15 @@ export class Eth {
     return new Eth(new LegacyProviderAdapter(provider));
   }
 
-  setWallet(wallet?: Wallet) {
+  public setWallet(wallet?: Wallet) {
     this.wallet = wallet;
   }
 
-  getDefaultFromAddress() {
+  public getDefaultFromAddress() {
     return this.request.getDefaultFromAddress();
   }
 
-  setDefaultFromAddress(address?: Address) {
+  public setDefaultFromAddress(address?: Address) {
     this.request.setDefaultFromAddress(address);
   }
 
@@ -91,63 +91,63 @@ export class Eth {
     return format(await this.provider.send(method, params));
   }
 
-  async getId(): Promise<number> {
+  public async getId(): Promise<number> {
     return await this.send(this.request.getId());
   }
 
-  async getNodeInfo(): Promise<string> {
+  public async getNodeInfo(): Promise<string> {
     return await this.send(this.request.getNodeInfo());
   }
 
-  async getProtocolVersion(): Promise<string> {
+  public async getProtocolVersion(): Promise<string> {
     return await this.send(this.request.getProtocolVersion());
   }
 
-  async getCoinbase(): Promise<Address> {
+  public async getCoinbase(): Promise<Address> {
     return await this.send(this.request.getCoinbase());
   }
 
-  async isMining(): Promise<boolean> {
+  public async isMining(): Promise<boolean> {
     return await this.send(this.request.isMining());
   }
 
-  async getHashrate(): Promise<number> {
+  public async getHashrate(): Promise<number> {
     return await this.send(this.request.getHashrate());
   }
 
-  async isSyncing(): Promise<Sync | boolean> {
+  public async isSyncing(): Promise<Sync | boolean> {
     return await this.send(this.request.isSyncing());
   }
 
-  async getGasPrice(): Promise<Quantity> {
+  public async getGasPrice(): Promise<Quantity> {
     return await this.send(this.request.getGasPrice());
   }
 
-  async getAccounts(): Promise<Address[]> {
+  public async getAccounts(): Promise<Address[]> {
     return await this.send(this.request.getAccounts());
   }
 
-  async getBlockNumber(): Promise<number> {
+  public async getBlockNumber(): Promise<number> {
     return await this.send(this.request.getBlockNumber());
   }
 
-  async getBalance(address: Address, block?: BlockType): Promise<Quantity> {
+  public async getBalance(address: Address, block?: BlockType): Promise<Quantity> {
     return await this.send(this.request.getBalance(address, block));
   }
 
-  async getStorageAt(address: Address, position: string, block?: BlockType): Promise<Data> {
+  public async getStorageAt(address: Address, position: string, block?: BlockType): Promise<Data> {
     return await this.send(this.request.getStorageAt(address, position, block));
   }
 
-  async getCode(address: Address, block?: BlockType): Promise<Data> {
+  public async getCode(address: Address, block?: BlockType): Promise<Data> {
     return await this.send(this.request.getCode(address, block));
   }
 
-  async getBlock(block: BlockType | BlockHash, returnTransactionObjects: boolean = false): Promise<Block> {
+  public async getBlock(block: BlockType | BlockHash, returnTransactionObjects: boolean = false): Promise<Block> {
     return await this.send(this.request.getBlock(block, returnTransactionObjects));
   }
 
-  async getUncle(
+  public async getUncle(
     block: BlockType | BlockHash,
     uncleIndex: number,
     returnTransactionObjects: boolean = false,
@@ -155,35 +155,35 @@ export class Eth {
     return await this.send(this.request.getUncle(block, uncleIndex, returnTransactionObjects));
   }
 
-  async getBlockTransactionCount(block: BlockType | BlockHash): Promise<number> {
+  public async getBlockTransactionCount(block: BlockType | BlockHash): Promise<number> {
     return await this.send(this.request.getBlockTransactionCount(block));
   }
 
-  async getBlockUncleCount(block: BlockType | BlockHash): Promise<number> {
+  public async getBlockUncleCount(block: BlockType | BlockHash): Promise<number> {
     return await this.send(this.request.getBlockUncleCount(block));
   }
 
-  async getTransaction(hash: TransactionHash): Promise<Transaction> {
+  public async getTransaction(hash: TransactionHash): Promise<Transaction> {
     return await this.send(this.request.getTransaction(hash));
   }
 
-  async getTransactionFromBlock(block: BlockType | BlockHash, index: number): Promise<Transaction> {
+  public async getTransactionFromBlock(block: BlockType | BlockHash, index: number): Promise<Transaction> {
     return await this.send(this.request.getTransactionFromBlock(block, index));
   }
 
-  async getTransactionReceipt(hash: TransactionHash): Promise<TransactionReceipt> {
+  public async getTransactionReceipt(hash: TransactionHash): Promise<TransactionReceipt> {
     return await this.send(this.request.getTransactionReceipt(hash));
   }
 
-  async getTransactionCount(address: Address, block?: BlockType): Promise<number> {
+  public async getTransactionCount(address: Address, block?: BlockType): Promise<number> {
     return await this.send(this.request.getTransactionCount(address, block));
   }
 
-  async signTransaction(tx: Tx): Promise<SignedTransaction> {
+  public async signTransaction(tx: Tx): Promise<SignedTransaction> {
     return await this.send(this.request.signTransaction(tx));
   }
 
-  sendSignedTransaction(
+  public sendSignedTransaction(
     data: Data,
     extraFormatters?: any,
     defer?: PromiEventResult<TransactionReceipt>,
@@ -194,7 +194,7 @@ export class Eth {
     return defer.eventEmitter;
   }
 
-  sendTransaction(tx: Tx, extraFormatters?: any): SendTxPromiEvent {
+  public sendTransaction(tx: Tx, extraFormatters?: any): SendTxPromiEvent {
     // TODO: Can we remove extraFormatters, which is basically exposing contract internals here, and instead
     // wrap the returned PromiEvent in another PromiEvent that does the translations upstream?
     const defer = promiEvent<TransactionReceipt>();
@@ -240,7 +240,7 @@ export class Eth {
     }
   }
 
-  async sign(address: Address, dataToSign: Data): Promise<Data> {
+  public async sign(address: Address, dataToSign: Data): Promise<Data> {
     const account = this.getAccount(address);
 
     if (!account) {
@@ -251,31 +251,31 @@ export class Eth {
     }
   }
 
-  async signTypedData(address: Address, dataToSign: TypedSigningData): Promise<Data> {
+  public async signTypedData(address: Address, dataToSign: TypedSigningData): Promise<Data> {
     return await this.send(this.request.signTypedData(address, dataToSign));
   }
 
-  async call(tx: Tx, block?: BlockType, outputFormatter = result => result): Promise<Data> {
+  public async call(tx: Tx, block?: BlockType, outputFormatter = result => result): Promise<Data> {
     return await this.send(this.request.call(tx, block, outputFormatter));
   }
 
-  async estimateGas(tx: Tx): Promise<number> {
+  public async estimateGas(tx: Tx): Promise<number> {
     return await this.send(this.request.estimateGas(tx));
   }
 
-  async submitWork(nonce: string, powHash: string, digest: string): Promise<boolean> {
+  public async submitWork(nonce: string, powHash: string, digest: string): Promise<boolean> {
     return await this.send(this.request.submitWork(nonce, powHash, digest));
   }
 
-  async getWork(): Promise<string[]> {
+  public async getWork(): Promise<string[]> {
     return await this.send(this.request.getWork());
   }
 
-  async getPastLogs(options: GetLogOptions): Promise<Log[]> {
+  public async getPastLogs(options: GetLogOptions): Promise<Log[]> {
     return await this.send(this.request.getPastLogs(options));
   }
 
-  subscribeLogs(options: GetLogOptions = {}): Subscription<Log> {
+  public subscribeLogs(options: GetLogOptions = {}): Subscription<Log> {
     const { fromBlock, ...subLogOptions } = options;
     const subscription = new Subscription<Log>('eth', 'logs', [inputLogFormatter(subLogOptions)], this.provider);
 
@@ -304,7 +304,7 @@ export class Eth {
     return subscription;
   }
 
-  subscribeSyncing(): Subscription<object | boolean> {
+  public subscribeSyncing(): Subscription<object | boolean> {
     const subscription = new Subscription<object | boolean>('eth', 'syncing', [], this.provider);
 
     subscription.on('rawdata', result => {
@@ -321,7 +321,7 @@ export class Eth {
     return subscription;
   }
 
-  subscribeNewBlockHeaders(): Subscription<BlockHeader> {
+  public subscribeNewBlockHeaders(): Subscription<BlockHeader> {
     const subscription = new Subscription<BlockHeader>('eth', 'newHeads', [], this.provider);
 
     subscription.on('rawdata', result => {
@@ -334,18 +334,18 @@ export class Eth {
     return subscription;
   }
 
-  subscribePendingTransactions(): Subscription<Transaction> {
+  public subscribePendingTransactions(): Subscription<Transaction> {
     const subscription = new Subscription<Transaction>('eth', 'newPendingTransactions', [], this.provider);
     subscription.on('rawdata', result => subscription.emit('data', result));
     process.nextTick(() => subscription.subscribe());
     return subscription;
   }
 
-  subscribe(type: 'logs', options?: GetLogOptions): Subscription<Log>;
-  subscribe(type: 'syncing'): Subscription<object | boolean>;
-  subscribe(type: 'newBlockHeaders'): Subscription<BlockHeader>;
-  subscribe(type: 'pendingTransactions'): Subscription<Transaction>;
-  subscribe(type: 'pendingTransactions' | 'newBlockHeaders' | 'syncing' | 'logs', ...args: any[]): Subscription<any> {
+  public subscribe(type: 'logs', options?: GetLogOptions): Subscription<Log>;
+  public subscribe(type: 'syncing'): Subscription<object | boolean>;
+  public subscribe(type: 'newBlockHeaders'): Subscription<BlockHeader>;
+  public subscribe(type: 'pendingTransactions'): Subscription<Transaction>;
+  public subscribe(type: 'pendingTransactions' | 'newBlockHeaders' | 'syncing' | 'logs', ...args: any[]): Subscription<any> {
     switch (type) {
       case 'logs':
         return this.subscribeLogs(...args);

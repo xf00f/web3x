@@ -15,10 +15,10 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { testTopic, testAddress } from './bloom';
+import { testAddress, testTopic } from './bloom';
 
-describe('utils', function() {
-  describe('hasTopic', function() {
+describe('utils', () => {
+  describe('hasTopic', () => {
     const topicTests = [
       {
         bloom:
@@ -44,16 +44,16 @@ describe('utils', function() {
       },
     ];
 
-    topicTests.forEach(function(test) {
+    topicTests.forEach(test => {
       it('should match bloom filter', () => {
-        test.topics.forEach(function(topic) {
+        test.topics.forEach(topic => {
           expect(testTopic(test.bloom, topic)).toBe(test.result);
         });
       });
     });
   });
 
-  describe('testAddress', function() {
+  describe('testAddress', () => {
     const addressTests = [
       {
         bloom:
@@ -75,7 +75,7 @@ describe('utils', function() {
       },
     ];
 
-    addressTests.forEach(function(test) {
+    addressTests.forEach(test => {
       expect(testAddress(test.bloom, test.address)).toBe(test.result);
     });
   });

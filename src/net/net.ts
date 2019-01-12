@@ -15,8 +15,8 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { NetRequestPayloads } from './net-request-payloads';
 import { Eth } from '../eth';
+import { NetRequestPayloads } from './net-request-payloads';
 
 export class Net {
   private request = new NetRequestPayloads();
@@ -26,22 +26,22 @@ export class Net {
     return format(await this.eth.provider.send(method, params));
   }
 
-  async getId(): Promise<number> {
+  public async getId(): Promise<number> {
     const payload = this.request.getId();
     return payload.format(await this.send(payload))!;
   }
 
-  async isListening(): Promise<boolean> {
+  public async isListening(): Promise<boolean> {
     const payload = this.request.isListening();
     return payload.format(await this.send(payload));
   }
 
-  async getPeerCount(): Promise<number> {
+  public async getPeerCount(): Promise<number> {
     const payload = this.request.getPeerCount();
     return payload.format(await this.send(payload))!;
   }
 
-  async getNetworkType() {
+  public async getNetworkType() {
     const block = await this.eth.getBlock(0);
     const genesisHash = block.hash;
     const id = await this.getId();

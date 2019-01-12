@@ -15,13 +15,13 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import randomBytes from 'randombytes';
-import { Address } from '../address';
-import { isBoolean, isObject, isString } from 'util';
-import { isBN } from './bn';
-import { utf8ToHex } from './hex-utf8';
-import { numberToHex } from './hex-number';
 import BN from 'bn.js';
+import randomBytes from 'randombytes';
+import { isBoolean, isObject, isString } from 'util';
+import { Address } from '../address';
+import { isBN } from './bn';
+import { numberToHex } from './hex-number';
+import { utf8ToHex } from './hex-utf8';
 
 /**
  * Check if string is HEX, requires a 0x in front

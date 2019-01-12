@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { numberToHex, isHex } from '../utils';
+import { isHex, numberToHex } from '../utils';
 import { inputAddressFormatter } from './input-address-formatter';
 
 /**
@@ -83,10 +83,10 @@ function _txInputFormatter(options) {
   }
 
   ['gasPrice', 'gas', 'value', 'nonce']
-    .filter(function(key) {
+    .filter(key => {
       return options[key] !== undefined;
     })
-    .forEach(function(key) {
+    .forEach(key => {
       options[key] = numberToHex(options[key]);
     });
 

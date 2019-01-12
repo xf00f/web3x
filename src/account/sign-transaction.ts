@@ -15,15 +15,15 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { numberToHex } from '../utils';
-import RLP from '../eth-lib/rlp';
+import { Address } from '../address';
+import { Eth, Tx } from '../eth';
+import Account from '../eth-lib/account';
 import Bytes from '../eth-lib/bytes';
 import Hash from '../eth-lib/hash';
 import Nat from '../eth-lib/nat';
-import Account from '../eth-lib/account';
-import { Eth, Tx } from '../eth';
+import RLP from '../eth-lib/rlp';
 import { inputCallFormatter } from '../formatters';
-import { Address } from '../address';
+import { numberToHex } from '../utils';
 
 export interface SignedTx {
   messageHash: string;
@@ -65,12 +65,12 @@ export async function signTransaction(tx: Tx, privateKey: Buffer, eth: Eth): Pro
 }
 
 export function recoverTransaction(rawTx: string): string {
-  var values = RLP.decode(rawTx);
-  var signature = Account.encodeSignature(values.slice(6, 9));
-  var recovery = Bytes.toNumber(values[6]);
-  var extraData = recovery < 35 ? [] : [Bytes.fromNumber((recovery - 35) >> 1), '0x', '0x'];
-  var signingData = values.slice(0, 6).concat(extraData);
-  var signingDataHex = RLP.encode(signingData);
+  const values = RLP.decode(rawTx);
+  const signature = Account.encodeSignature(values.slice(6, 9));
+  const recovery = Bytes.toNumber(values[6]);
+  const extraData = recovery < 35 ? [] : [Bytes.fromNumber((recovery - 35) >> 1), '0x', '0x'];
+  const signingData = values.slice(0, 6).concat(extraData);
+  const signingDataHex = RLP.encode(signingData);
   return Account.recover(Hash.keccak256(signingDataHex), signature);
 }
 

@@ -17,14 +17,14 @@
 
 import bip39 from 'bip39';
 import hdkey from 'hdkey';
+import { Address } from '../address';
+import { Eth, SendTxPromiEvent } from '../eth';
 import { create, fromPrivate } from '../eth-lib/account';
-import { randomHex, encrypt, KeyStore, decrypt, fireError } from '../utils';
+import { TransactionReceipt } from '../formatters';
+import { promiEvent } from '../promievent';
+import { decrypt, encrypt, fireError, KeyStore, randomHex } from '../utils';
 import { sign } from '../utils/sign';
 import { signTransaction } from './sign-transaction';
-import { Eth, SendTxPromiEvent } from '../eth';
-import { promiEvent } from '../promievent';
-import { TransactionReceipt } from '../formatters';
-import { Address } from '../address';
 
 export interface AccountTx {
   nonce?: string | number;
@@ -39,33 +39,33 @@ export interface AccountTx {
 export class Account {
   constructor(readonly address: Address, readonly privateKey: Buffer, readonly publicKey: Buffer) {}
 
-  static create(entropy: Buffer = randomHex(32)) {
+  public static create(entropy: Buffer = randomHex(32)) {
     const { privateKey, address, publicKey } = create(entropy);
     return new Account(Address.fromString(address), privateKey, publicKey);
   }
 
-  static fromPrivate(privateKey: Buffer) {
+  public static fromPrivate(privateKey: Buffer) {
     const { address, publicKey } = fromPrivate(privateKey);
     return new Account(Address.fromString(address), privateKey, publicKey);
   }
 
-  static createFromMnemonicAndPath(mnemonic: string, derivationPath: string) {
+  public static createFromMnemonicAndPath(mnemonic: string, derivationPath: string) {
     const seed = bip39.mnemonicToSeed(mnemonic);
     return Account.createFromSeedAndPath(seed, derivationPath);
   }
 
-  static createFromSeedAndPath(seed: Buffer, derivationPath: string) {
+  public static createFromSeedAndPath(seed: Buffer, derivationPath: string) {
     const root = hdkey.fromMasterSeed(seed);
     const addrNode = root.derive(derivationPath);
     const privateKey = addrNode.privateKey;
     return Account.fromPrivate(privateKey);
   }
 
-  static async fromKeystore(v3Keystore: KeyStore | string, password: string, nonStrict = false) {
+  public static async fromKeystore(v3Keystore: KeyStore | string, password: string, nonStrict = false) {
     return Account.fromPrivate(await decrypt(v3Keystore, password, nonStrict));
   }
 
-  sendTransaction(tx: AccountTx, eth: Eth, extraformatters?: any): SendTxPromiEvent {
+  public sendTransaction(tx: AccountTx, eth: Eth, extraformatters?: any): SendTxPromiEvent {
     const defer = promiEvent<TransactionReceipt>();
     this.signTransaction(tx, eth)
       .then(signedTx => {
@@ -77,15 +77,15 @@ export class Account {
     return defer.eventEmitter;
   }
 
-  signTransaction(tx: AccountTx, eth: Eth) {
+  public signTransaction(tx: AccountTx, eth: Eth) {
     return signTransaction(tx, this.privateKey, eth);
   }
 
-  sign(data: string) {
+  public sign(data: string) {
     return sign(data, this.privateKey);
   }
 
-  encrypt(password: string, options?: any) {
+  public encrypt(password: string, options?: any) {
     return encrypt(this.privateKey, this.address, password, options);
   }
 }

@@ -17,8 +17,8 @@
 
 import Ws, { ClientOptions } from 'isomorphic-ws';
 import { isArray } from 'util';
-import { Callback, LegacyProvider, NotificationCallback } from './legacy-provider';
 import { JsonRpcRequest } from './jsonrpc';
+import { Callback, LegacyProvider, NotificationCallback } from './legacy-provider';
 import { LegacyProviderAdapter } from './legacy-provider-adapter';
 
 interface WebsocketProviderOptions {
@@ -41,7 +41,7 @@ export class WebsocketProvider extends LegacyProviderAdapter {
     this.legacyProvider = legacyProvider;
   }
 
-  disconnect() {
+  public disconnect() {
     this.legacyProvider.disconnect();
   }
 }
@@ -83,12 +83,14 @@ class LegacyWebsocketProvider implements LegacyProvider {
     const data: string = typeof e.data === 'string' ? e.data : '';
 
     this.parseResponse(data).forEach(result => {
-      var id = null;
+      let id = null;
 
       // get the id which matches the returned id
       if (isArray(result)) {
         result.forEach((load: any) => {
-          if (this.responseCallbacks[load.id]) id = load.id;
+          if (this.responseCallbacks[load.id]) {
+            id = load.id;
+          }
         });
       } else {
         id = result.id;
@@ -155,8 +157,8 @@ class LegacyWebsocketProvider implements LegacyProvider {
   }
 
   private addResponseCallback(payload: any, callback: Callback) {
-    var id = payload.id || payload[0].id;
-    var method = payload.method || payload[0].method;
+    const id = payload.id || payload[0].id;
+    const method = payload.method || payload[0].method;
 
     this.responseCallbacks[id] = { callback, method };
 
@@ -172,7 +174,7 @@ class LegacyWebsocketProvider implements LegacyProvider {
   }
 
   private timeout() {
-    for (var key in this.responseCallbacks) {
+    for (const key in this.responseCallbacks) {
       if (this.responseCallbacks[key]) {
         this.responseCallbacks[key].callback(new Error('Connection error'), undefined);
         delete this.responseCallbacks[key];
@@ -189,6 +191,7 @@ class LegacyWebsocketProvider implements LegacyProvider {
     }
 
     if (this.connection.readyState !== this.connection.OPEN) {
+      // tslint:disable-next-line:no-console
       console.error('connection not open on send()');
       this.onError();
       callback(new Error('connection not open'), undefined);
@@ -199,7 +202,7 @@ class LegacyWebsocketProvider implements LegacyProvider {
     this.addResponseCallback(payload, callback);
   }
 
-  on(type: string, callback: NotificationCallback) {
+  public on(type: string, callback: NotificationCallback) {
     switch (type) {
       case 'data':
         this.notificationCallbacks.push(callback);
@@ -209,11 +212,11 @@ class LegacyWebsocketProvider implements LegacyProvider {
     }
   }
 
-  removeListener(type: string, callback: NotificationCallback) {
+  public removeListener(type: string, callback: NotificationCallback) {
     switch (type) {
       case 'data':
         const i = this.notificationCallbacks.indexOf(callback);
-        if (i != -1) {
+        if (i !== -1) {
           this.notificationCallbacks.splice(i, 1);
         }
         break;
@@ -222,7 +225,7 @@ class LegacyWebsocketProvider implements LegacyProvider {
     }
   }
 
-  removeAllListeners(type: string) {
+  public removeAllListeners(type: string) {
     switch (type) {
       case 'data':
         this.notificationCallbacks = [];
@@ -232,12 +235,12 @@ class LegacyWebsocketProvider implements LegacyProvider {
     }
   }
 
-  reset() {
+  public reset() {
     this.timeout();
     this.notificationCallbacks = [];
   }
 
-  disconnect() {
+  public disconnect() {
     if (this.connection) {
       this.connection.close();
     }

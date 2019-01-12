@@ -15,25 +15,25 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { isArray } from 'util';
+import { Address } from '../address';
+import { BlockType } from '../eth';
 import { utf8ToHex } from '../utils';
 import { inputBlockNumberFormatter } from './input-block-number-formatter';
-import { isArray } from 'util';
-import { BlockType } from '../eth';
-import { Address } from '../address';
 
 export interface GetLogOptions {
   filter?: { [k: string]: any };
   toBlock?: BlockType;
   fromBlock?: BlockType;
   address?: Address | Address[];
-  topics?: Array<string | string[] | null>;
+  topics?: (string | string[] | null)[];
 }
 
 export interface FormattedGetLogOptions {
   toBlock?: string;
   fromBlock?: string;
   address?: string | string[];
-  topics?: Array<string | string[]>;
+  topics?: (string | string[])[];
 }
 
 /**
@@ -44,7 +44,7 @@ export interface FormattedGetLogOptions {
  * @returns {Object} log
  */
 export function inputLogFormatter(options: GetLogOptions = {}): FormattedGetLogOptions {
-  let formattedLogOptions: FormattedGetLogOptions = {};
+  const formattedLogOptions: FormattedGetLogOptions = {};
 
   if (options.fromBlock !== undefined) {
     formattedLogOptions.fromBlock = inputBlockNumberFormatter(options.fromBlock);
@@ -56,8 +56,10 @@ export function inputLogFormatter(options: GetLogOptions = {}): FormattedGetLogO
 
   // Convert topics to hex.
   formattedLogOptions.topics = (options.topics || []).map(topic => {
-    const toTopic = function(value) {
-      if (value === null || typeof value === 'undefined') return null;
+    const toTopic = value => {
+      if (value === null || typeof value === 'undefined') {
+        return null;
+      }
       value = String(value);
       return value.indexOf('0x') === 0 ? value : utf8ToHex(value);
     };

@@ -15,15 +15,13 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { recoverTransaction, signTransaction } from './sign-transaction';
-import { hexToBuffer } from '../utils';
 import { Address } from '../address';
+import { hexToBuffer } from '../utils';
+import { recoverTransaction, signTransaction } from './sign-transaction';
 
-var clone = function(object) {
-  return object ? JSON.parse(JSON.stringify(object)) : [];
-};
+const clone = object => (object ? JSON.parse(JSON.stringify(object)) : []);
 
-var tests = [
+const tests = [
   {
     address: '0x2c7536E3605D9C16a7a3D7b1898e529396a65c23',
     iban: 'XE0556YCRTEZ9JALZBSCXOK4UJ5F3HN03DV',
@@ -426,8 +424,8 @@ var tests = [
   },
 ];
 
-describe('accounts', function() {
-  describe('sign-transaction', function() {
+describe('accounts', () => {
+  describe('sign-transaction', () => {
     let mockEthereum;
 
     beforeEach(() => {

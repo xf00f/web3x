@@ -17,9 +17,9 @@
 
 import { outputPostFormatter } from './output-post-formatter';
 
-describe('formatters', function() {
-  describe('outputPostFormatter', function() {
-    it('should return the correct value', function() {
+describe('formatters', () => {
+  describe('outputPostFormatter', () => {
+    it('should return the correct value', () => {
       expect(
         outputPostFormatter({
           expiry: '0x3e8',

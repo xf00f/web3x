@@ -17,7 +17,7 @@
 
 import { abi } from '.';
 
-describe('encodeParameters', function() {
+describe('encodeParameters', () => {
   const tests = [
     {
       params: [['uint256', 'string'], ['2345675643', 'Hello!%']],
@@ -44,16 +44,16 @@ describe('encodeParameters', function() {
     },
   ];
 
-  tests.forEach(function(test) {
-    it('should convert correctly', function() {
+  tests.forEach(test => {
+    it('should convert correctly', () => {
       expect(abi.encodeParameters.apply(abi, test.params as any)).toEqual(test.result);
     });
   });
 });
 
-describe('encodeParameters', function() {
-  var test = function(t) {
-    it('should correct encode paramters', function() {
+describe('encodeParameters', () => {
+  const test = t => {
+    it('should correct encode paramters', () => {
       expect(abi.encodeParameters(t.types, t.values).replace('0x', '')).toBe(t.expected);
     });
   };

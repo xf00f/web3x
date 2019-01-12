@@ -17,7 +17,7 @@
 
 import { abi } from '.';
 
-var tests = [
+const tests = [
   {
     params: [
       {
@@ -83,10 +83,10 @@ var tests = [
   },
 ];
 
-describe('encodeFunctionCall', function() {
-  tests.forEach(function(test) {
-    it('should convert correctly', function() {
-      expect(abi.encodeFunctionCall.apply(abi, test.params)).toEqual(test.result);
+describe('encodeFunctionCall', () => {
+  tests.forEach(test => {
+    it('should convert correctly', () => {
+      expect(abi.encodeFunctionCall.apply(abi, test.params as any)).toEqual(test.result);
     });
   });
 });

@@ -15,14 +15,14 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { hexToBytes, isHexStrict } from '.';
 import Hash from '../eth-lib/hash';
-import { isHexStrict, hexToBytes } from '.';
 
 export function hashMessage(data) {
-  var message = isHexStrict(data) ? hexToBytes(data) : data;
-  var messageBuffer = Buffer.from(message);
-  var preamble = '\x19Ethereum Signed Message:\n' + message.length;
-  var preambleBuffer = Buffer.from(preamble);
-  var ethMessage = Buffer.concat([preambleBuffer, messageBuffer]);
+  const message = isHexStrict(data) ? hexToBytes(data) : data;
+  const messageBuffer = Buffer.from(message);
+  const preamble = '\x19Ethereum Signed Message:\n' + message.length;
+  const preambleBuffer = Buffer.from(preamble);
+  const ethMessage = Buffer.concat([preambleBuffer, messageBuffer]);
   return Hash.keccak256s(ethMessage);
 }

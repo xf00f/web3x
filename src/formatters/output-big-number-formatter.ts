@@ -15,6 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import BN from 'bn.js';
 import { toBN } from '../utils';
 
 /**
@@ -24,6 +25,6 @@ import { toBN } from '../utils';
  * @param {String|Number|BigNumber} number
  * @returns {BigNumber} object
  */
-export function outputBigNumberFormatter(number) {
-  return toBN(number).toString(10);
+export function outputBigNumberFormatter(num: string | number | BN) {
+  return toBN(num).toString(10);
 }

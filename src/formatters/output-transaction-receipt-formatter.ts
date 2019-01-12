@@ -15,10 +15,10 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { hexToNumber } from '../utils';
-import { outputLogFormatter, Log } from './output-log-formatter';
 import { isArray } from 'util';
 import { Address } from '../address';
+import { hexToNumber } from '../utils';
+import { Log, outputLogFormatter } from './output-log-formatter';
 
 export interface TransactionReceipt<Events = void> {
   transactionHash: string;
@@ -66,8 +66,12 @@ export function outputTransactionReceiptFormatter(receipt) {
     throw new Error('Received receipt is invalid: ' + receipt);
   }
 
-  if (receipt.blockNumber !== null) receipt.blockNumber = hexToNumber(receipt.blockNumber);
-  if (receipt.transactionIndex !== null) receipt.transactionIndex = hexToNumber(receipt.transactionIndex);
+  if (receipt.blockNumber !== null) {
+    receipt.blockNumber = hexToNumber(receipt.blockNumber);
+  }
+  if (receipt.transactionIndex !== null) {
+    receipt.transactionIndex = hexToNumber(receipt.transactionIndex);
+  }
   receipt.cumulativeGasUsed = hexToNumber(receipt.cumulativeGasUsed);
   receipt.gasUsed = hexToNumber(receipt.gasUsed);
 
@@ -80,7 +84,7 @@ export function outputTransactionReceiptFormatter(receipt) {
   }
 
   if (typeof receipt.status !== 'undefined') {
-    receipt.status = Boolean(parseInt(receipt.status));
+    receipt.status = Boolean(parseInt(receipt.status, 10));
   }
 
   return receipt;

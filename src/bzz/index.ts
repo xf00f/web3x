@@ -28,15 +28,15 @@ export class Bzz {
     }
   }
 
-  download(bzzHash: string, localPath?: string) {
+  public download(bzzHash: string, localPath?: string) {
     swarm.at(this.provider).download(bzzHash, localPath);
   }
 
-  upload(mixed: string | Buffer | number[] | object) {
+  public upload(mixed: string | Buffer | number[] | object) {
     swarm.at(this.provider).upload(mixed);
   }
 
-  isAvailable(swarmUrl: string) {
+  public isAvailable(swarmUrl: string) {
     swarm.at(this.provider).isAvailable(swarmUrl);
   }
 }

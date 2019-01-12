@@ -16,9 +16,9 @@
 */
 
 import BN from 'bn.js';
-import { unitMap, fromWei as ethjsFromWei, toWei as ethjsToWei } from './units-ethjs-unit';
-import { isBN } from './bn';
 import { isString } from 'util';
+import { isBN } from './bn';
+import { fromWei as ethjsFromWei, toWei as ethjsToWei, unitMap } from './units-ethjs-unit';
 
 /**
  * Returns value of unit in Wei
@@ -58,20 +58,20 @@ function getUnitValue(unit) {
  * - tether
  *
  * @method fromWei
- * @param {Number|String} number can be a number, number string or a HEX of a decimal
+ * @param {Number|String} num can be a number, number string or a HEX of a decimal
  * @param {String} unit the unit to convert to, default ether
  * @return {String|Object} When given a BN object it returns one as well, otherwise a number
  */
-export function fromWei(number: string, unit: keyof typeof unitMap): string;
-export function fromWei(number: BN, unit: keyof typeof unitMap): BN;
-export function fromWei(number: string | BN, unit: keyof typeof unitMap) {
+export function fromWei(num: string, unit: keyof typeof unitMap): string;
+export function fromWei(num: BN, unit: keyof typeof unitMap): BN;
+export function fromWei(num: string | BN, unit: keyof typeof unitMap) {
   unit = getUnitValue(unit);
 
-  if (!isBN(number) && !isString(number)) {
+  if (!isBN(num) && !isString(num)) {
     throw new Error('Please pass numbers as strings or BigNumber objects to avoid precision errors.');
   }
 
-  return isBN(number) ? new BN(ethjsFromWei(number, unit)) : ethjsFromWei(number, unit);
+  return isBN(num) ? new BN(ethjsFromWei(num, unit)) : ethjsFromWei(num, unit);
 }
 
 /**
@@ -92,18 +92,18 @@ export function fromWei(number: string | BN, unit: keyof typeof unitMap) {
  * - tether
  *
  * @method toWei
- * @param {Number|String|BN} number can be a number, number string or a HEX of a decimal
+ * @param {Number|String|BN} num can be a number, number string or a HEX of a decimal
  * @param {String} unit the unit to convert from, default ether
  * @return {String|Object} When given a BN object it returns one as well, otherwise a number
  */
-export function toWei(number: BN, unit: keyof typeof unitMap): BN;
-export function toWei(number: string, unit: keyof typeof unitMap): string;
-export function toWei(number: string | BN, unit: keyof typeof unitMap) {
+export function toWei(num: BN, unit: keyof typeof unitMap): BN;
+export function toWei(num: string, unit: keyof typeof unitMap): string;
+export function toWei(num: string | BN, unit: keyof typeof unitMap) {
   unit = getUnitValue(unit);
 
-  if (!isBN(number) && !isString(number)) {
+  if (!isBN(num) && !isString(num)) {
     throw new Error('Please pass numbers as strings or BigNumber objects to avoid precision errors.');
   }
 
-  return isBN(number) ? ethjsToWei(number, unit) : ethjsToWei(number, unit).toString(10);
+  return isBN(num) ? ethjsToWei(num, unit) : ethjsToWei(num, unit).toString(10);
 }

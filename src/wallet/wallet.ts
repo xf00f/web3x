@@ -17,41 +17,39 @@
 
 import { isNumber } from 'util';
 import { Account } from '../account';
-import { KeyStore, decrypt } from '../utils/encryption';
 import { Address } from '../address';
+import { decrypt, KeyStore } from '../utils/encryption';
 
 export class Wallet {
-  static readonly defaultKeyName = 'web3js_wallet';
+  public static readonly defaultKeyName = 'web3js_wallet';
   public length: number = 0;
   public accounts: Account[] = [];
 
-  constructor() {}
-
-  static fromMnemonic(mnemonic: string, numberOfAccounts: number) {
+  public static fromMnemonic(mnemonic: string, numberOfAccounts: number) {
     const wallet = new Wallet();
-    for (var i = 0; i < numberOfAccounts; ++i) {
+    for (let i = 0; i < numberOfAccounts; ++i) {
       const path = `m/44'/60'/0'/0/${i}`;
       wallet.add(Account.createFromMnemonicAndPath(mnemonic, path));
     }
     return wallet;
   }
 
-  static fromSeed(seed: Buffer, numberOfAccounts: number) {
+  public static fromSeed(seed: Buffer, numberOfAccounts: number) {
     const wallet = new Wallet();
-    for (var i = 0; i < numberOfAccounts; ++i) {
+    for (let i = 0; i < numberOfAccounts; ++i) {
       const path = `m/44'/60'/0'/0/${i}`;
       wallet.add(Account.createFromSeedAndPath(seed, path));
     }
     return wallet;
   }
 
-  static async fromKeystores(encryptedWallet: KeyStore[], password: string) {
+  public static async fromKeystores(encryptedWallet: KeyStore[], password: string) {
     const wallet = new Wallet();
     await wallet.decrypt(encryptedWallet, password);
     return wallet;
   }
 
-  static async fromLocalStorage(password: string, keyName: string = this.defaultKeyName) {
+  public static async fromLocalStorage(password: string, keyName: string = this.defaultKeyName) {
     if (!localStorage) {
       return new Wallet();
     }
@@ -69,30 +67,28 @@ export class Wallet {
     }
   }
 
-  create(numberOfAccounts: number, entropy?: Buffer): Account[] {
-    for (var i = 0; i < numberOfAccounts; ++i) {
+  public create(numberOfAccounts: number, entropy?: Buffer): Account[] {
+    for (let i = 0; i < numberOfAccounts; ++i) {
       this.add(Account.create(entropy).privateKey);
     }
     return this.accounts;
   }
 
-  get(addressOrIndex: string | number | Address) {
+  public get(addressOrIndex: string | number | Address) {
     if (isNumber(addressOrIndex)) {
       return this.accounts[addressOrIndex];
     }
     return this.accounts.find(a => a && a.address.toString().toLowerCase() === addressOrIndex.toString().toLowerCase());
   }
 
-  indexOf(addressOrIndex: string | number | Address) {
+  public indexOf(addressOrIndex: string | number | Address) {
     if (isNumber(addressOrIndex)) {
       return addressOrIndex;
     }
     return this.accounts.findIndex(a => a.address.toString().toLowerCase() === addressOrIndex.toString().toLowerCase());
   }
 
-  add(privateKey: Buffer): Account;
-  add(account: Account): Account;
-  add(accountOrKey: Buffer | Account): Account {
+  public add(accountOrKey: Buffer | Account): Account {
     const account = Buffer.isBuffer(accountOrKey) ? Account.fromPrivate(accountOrKey) : accountOrKey;
 
     const existing = this.get(account.address);
@@ -107,10 +103,10 @@ export class Wallet {
     return account;
   }
 
-  remove(addressOrIndex: string | number | Address) {
+  public remove(addressOrIndex: string | number | Address) {
     const index = this.indexOf(addressOrIndex);
 
-    if (index == -1) {
+    if (index === -1) {
       return false;
     }
 
@@ -120,16 +116,16 @@ export class Wallet {
     return true;
   }
 
-  clear() {
+  public clear() {
     this.accounts = [];
     this.length = 0;
   }
 
-  encrypt(password: string, options?) {
+  public encrypt(password: string, options?) {
     return Promise.all(this.currentIndexes().map(index => this.accounts[index].encrypt(password, options)));
   }
 
-  async decrypt(encryptedWallet: KeyStore[], password: string) {
+  public async decrypt(encryptedWallet: KeyStore[], password: string) {
     const decrypted = await Promise.all(encryptedWallet.map(keystore => decrypt(keystore, password)));
     decrypted.forEach(account => {
       if (!account) {
@@ -142,7 +138,7 @@ export class Wallet {
     return this.accounts;
   }
 
-  async save(password: string, keyName: string = Wallet.defaultKeyName) {
+  public async save(password: string, keyName: string = Wallet.defaultKeyName) {
     if (!localStorage) {
       return false;
     }

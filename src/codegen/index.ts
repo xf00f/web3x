@@ -20,8 +20,8 @@ import fs from 'fs';
 import mkdirp from 'mkdirp';
 import ts, { ClassElement } from 'typescript';
 import { AbiDefinition, AbiInput, AbiOutput, ContractAbi } from '../contract';
+import { ContractBuildData, loadDataFromConfig } from './sources';
 import { Config } from './sources/config';
-import { loadDataFromConfig, ContractBuildData } from './sources';
 
 const printer = ts.createPrinter({
   newLine: ts.NewLineKind.LineFeed,
@@ -524,5 +524,6 @@ async function main() {
 }
 
 if (require.main === module) {
+  // tslint:disable-next-line:no-console
   main().catch(console.error);
 }

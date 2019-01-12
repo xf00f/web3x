@@ -59,8 +59,8 @@ export function numberToHex(value): string {
     throw new Error('Given input "' + value + '" is not a number.');
   }
 
-  var number = toBN(value);
-  var result = number.toString(16);
+  const num = toBN(value);
+  const result = num.toString(16);
 
-  return number.lt(new BN(0)) ? '-0x' + result.substr(1) : '0x' + result;
+  return num.lt(new BN(0)) ? '-0x' + result.substr(1) : '0x' + result;
 }

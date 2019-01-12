@@ -15,120 +15,120 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { numberToHex, hexToNumber, isHexStrict } from '../utils';
+import { isString } from 'util';
+import { Address } from '../address';
 import {
-  outputSyncingFormatter,
-  outputBigNumberFormatter,
+  GetLogOptions,
   inputBlockNumberFormatter,
-  outputBlockFormatter,
-  outputTransactionFormatter,
-  outputTransactionReceiptFormatter,
-  inputTransactionFormatter,
-  inputSignFormatter,
   inputCallFormatter,
   inputLogFormatter,
+  inputSignFormatter,
+  inputTransactionFormatter,
+  outputBigNumberFormatter,
+  outputBlockFormatter,
   outputLogFormatter,
-  GetLogOptions,
+  outputSyncingFormatter,
+  outputTransactionFormatter,
+  outputTransactionReceiptFormatter,
 } from '../formatters';
-import { isString } from 'util';
 import { TransactionHash } from '../types';
 import { Data } from '../types';
-import { BlockType, BlockHash } from './block';
+import { hexToNumber, isHexStrict, numberToHex } from '../utils';
+import { BlockHash, BlockType } from './block';
 import { Tx } from './tx';
-import { Address } from '../address';
 
 const identity = result => result;
 
 export class EthRequestPayloads {
   constructor(private defaultFromAddress?: Address, private defaultBlock: BlockType = 'latest') {}
 
-  getDefaultFromAddress() {
+  public getDefaultFromAddress() {
     return this.defaultFromAddress;
   }
 
-  setDefaultFromAddress(address?: Address) {
+  public setDefaultFromAddress(address?: Address) {
     this.defaultFromAddress = address;
   }
 
-  getDefaultBlock() {
+  public getDefaultBlock() {
     return this.defaultBlock;
   }
 
-  setDefaultBlock(block: BlockType) {
+  public setDefaultBlock(block: BlockType) {
     this.defaultBlock = block;
   }
 
-  getId() {
+  public getId() {
     return {
       method: 'net_version',
       format: hexToNumber,
     };
   }
 
-  getNodeInfo() {
+  public getNodeInfo() {
     return {
       method: 'web3_clientVersion',
       format: identity,
     };
   }
 
-  getProtocolVersion() {
+  public getProtocolVersion() {
     return {
       method: 'eth_protocolVersion',
       format: identity,
     };
   }
 
-  getCoinbase() {
+  public getCoinbase() {
     return {
       method: 'eth_coinbase',
       format: identity,
     };
   }
 
-  isMining() {
+  public isMining() {
     return {
       method: 'eth_mining',
       format: identity,
     };
   }
 
-  getHashrate() {
+  public getHashrate() {
     return {
       method: 'eth_hashrate',
       format: hexToNumber,
     };
   }
 
-  isSyncing() {
+  public isSyncing() {
     return {
       method: 'eth_syncing',
       format: outputSyncingFormatter,
     };
   }
 
-  getGasPrice() {
+  public getGasPrice() {
     return {
       method: 'eth_gasPrice',
       format: outputBigNumberFormatter,
     };
   }
 
-  getAccounts() {
+  public getAccounts() {
     return {
       method: 'eth_accounts',
       format: result => result.map(Address.toChecksumAddress),
     };
   }
 
-  getBlockNumber() {
+  public getBlockNumber() {
     return {
       method: 'eth_blockNumber',
       format: hexToNumber,
     };
   }
 
-  getBalance(address: Address, block?: BlockType) {
+  public getBalance(address: Address, block?: BlockType) {
     return {
       method: 'eth_getBalance',
       params: [address.toString().toLowerCase(), inputBlockNumberFormatter(this.resolveBlock(block))],
@@ -136,7 +136,7 @@ export class EthRequestPayloads {
     };
   }
 
-  getStorageAt(address: Address, position: string, block?: BlockType) {
+  public getStorageAt(address: Address, position: string, block?: BlockType) {
     return {
       method: 'eth_getStorageAt',
       params: [
@@ -148,7 +148,7 @@ export class EthRequestPayloads {
     };
   }
 
-  getCode(address: Address, block?: BlockType) {
+  public getCode(address: Address, block?: BlockType) {
     return {
       method: 'eth_getCode',
       params: [address.toString().toLowerCase(), inputBlockNumberFormatter(this.resolveBlock(block))],
@@ -156,7 +156,7 @@ export class EthRequestPayloads {
     };
   }
 
-  getBlock(block: BlockType | BlockHash, returnTransactionObjects: boolean = false) {
+  public getBlock(block: BlockType | BlockHash, returnTransactionObjects: boolean = false) {
     return {
       method: isString(block) && isHexStrict(block) ? 'eth_getBlockByHash' : 'eth_getBlockByNumber',
       params: [inputBlockNumberFormatter(this.resolveBlock(block)), returnTransactionObjects],
@@ -164,7 +164,7 @@ export class EthRequestPayloads {
     };
   }
 
-  getUncle(block: BlockType | BlockHash, uncleIndex: number, returnTransactionObjects: boolean = false) {
+  public getUncle(block: BlockType | BlockHash, uncleIndex: number, returnTransactionObjects: boolean = false) {
     return {
       method:
         isString(block) && isHexStrict(block) ? 'eth_getUncleByBlockHashAndIndex' : 'eth_getUncleByBlockNumberAndIndex',
@@ -173,7 +173,7 @@ export class EthRequestPayloads {
     };
   }
 
-  getBlockTransactionCount(block: BlockType | BlockHash) {
+  public getBlockTransactionCount(block: BlockType | BlockHash) {
     return {
       method:
         isString(block) && isHexStrict(block)
@@ -184,7 +184,7 @@ export class EthRequestPayloads {
     };
   }
 
-  getBlockUncleCount(block: BlockType | BlockHash) {
+  public getBlockUncleCount(block: BlockType | BlockHash) {
     return {
       method: isString(block) && isHexStrict(block) ? 'eth_getUncleCountByBlockHash' : 'eth_getUncleCountByBlockNumber',
       params: [inputBlockNumberFormatter(this.resolveBlock(block))],
@@ -192,7 +192,7 @@ export class EthRequestPayloads {
     };
   }
 
-  getTransaction(hash: TransactionHash) {
+  public getTransaction(hash: TransactionHash) {
     return {
       method: 'eth_getTransactionByHash',
       params: [hash],
@@ -200,7 +200,7 @@ export class EthRequestPayloads {
     };
   }
 
-  getTransactionFromBlock(block: BlockType | BlockHash, index: number) {
+  public getTransactionFromBlock(block: BlockType | BlockHash, index: number) {
     return {
       method:
         isString(block) && isHexStrict(block)
@@ -211,7 +211,7 @@ export class EthRequestPayloads {
     };
   }
 
-  getTransactionReceipt(hash: TransactionHash) {
+  public getTransactionReceipt(hash: TransactionHash) {
     return {
       method: 'eth_getTransactionReceipt',
       params: [hash],
@@ -219,7 +219,7 @@ export class EthRequestPayloads {
     };
   }
 
-  getTransactionCount(address: Address, block?: BlockType) {
+  public getTransactionCount(address: Address, block?: BlockType) {
     return {
       method: 'eth_getTransactionCount',
       params: [address.toString().toLowerCase(), inputBlockNumberFormatter(this.resolveBlock(block))],
@@ -227,7 +227,7 @@ export class EthRequestPayloads {
     };
   }
 
-  signTransaction(tx: Tx) {
+  public signTransaction(tx: Tx) {
     tx.from = tx.from || this.defaultFromAddress;
     return {
       method: 'eth_signTransaction',
@@ -236,7 +236,7 @@ export class EthRequestPayloads {
     };
   }
 
-  sendSignedTransaction(data: Data) {
+  public sendSignedTransaction(data: Data) {
     return {
       method: 'eth_sendRawTransaction',
       params: [data],
@@ -244,7 +244,7 @@ export class EthRequestPayloads {
     };
   }
 
-  sendTransaction(tx: Tx) {
+  public sendTransaction(tx: Tx) {
     tx.from = tx.from || this.defaultFromAddress;
     return {
       method: 'eth_sendTransaction',
@@ -253,7 +253,7 @@ export class EthRequestPayloads {
     };
   }
 
-  sign(address: Address, dataToSign: Data) {
+  public sign(address: Address, dataToSign: Data) {
     return {
       method: 'eth_sign',
       params: [address.toString().toLowerCase(), inputSignFormatter(dataToSign)],
@@ -261,7 +261,7 @@ export class EthRequestPayloads {
     };
   }
 
-  signTypedData(address: Address, dataToSign: { type: string; name: string; value: string }[]) {
+  public signTypedData(address: Address, dataToSign: { type: string; name: string; value: string }[]) {
     return {
       method: 'eth_signTypedData',
       params: [dataToSign, address.toString().toLowerCase()],
@@ -269,7 +269,7 @@ export class EthRequestPayloads {
     };
   }
 
-  call(callObject: Tx, block?: BlockType, outputFormatter = result => result) {
+  public call(callObject: Tx, block?: BlockType, outputFormatter = result => result) {
     return {
       method: 'eth_call',
       params: [inputCallFormatter(callObject), inputBlockNumberFormatter(this.resolveBlock(block))],
@@ -277,7 +277,7 @@ export class EthRequestPayloads {
     };
   }
 
-  estimateGas(tx: Tx) {
+  public estimateGas(tx: Tx) {
     tx.from = tx.from || this.defaultFromAddress;
     return {
       method: 'eth_estimateGas',
@@ -286,7 +286,7 @@ export class EthRequestPayloads {
     };
   }
 
-  submitWork(nonce: string, powHash: string, digest: string) {
+  public submitWork(nonce: string, powHash: string, digest: string) {
     return {
       method: 'eth_submitWork',
       params: [nonce, powHash, digest],
@@ -294,14 +294,14 @@ export class EthRequestPayloads {
     };
   }
 
-  getWork() {
+  public getWork() {
     return {
       method: 'eth_getWork',
       format: identity,
     };
   }
 
-  getPastLogs(options: GetLogOptions) {
+  public getPastLogs(options: GetLogOptions) {
     return {
       method: 'eth_getLogs',
       params: [inputLogFormatter(options)],

@@ -16,18 +16,18 @@
 */
 
 import { isArray } from 'util';
-import { Subscription } from '../subscriptions';
-import { abi, abiMethodToString } from './abi';
-import { Tx, TxFactory } from './tx';
-import { decodeAnyEvent } from './decode-event-abi';
-import { EventLog, TransactionReceipt, GetLogOptions, inputLogFormatter } from '../formatters';
-import { TxDeploy } from './tx-deploy';
-import { ContractAbi, AbiDefinition } from './contract-abi';
-import { Data } from '../types';
-import { Eth } from '../eth';
-import { InvalidNumberOfParams } from '../errors';
-import { Wallet } from '../wallet';
 import { Address } from '../address';
+import { InvalidNumberOfParams } from '../errors';
+import { Eth } from '../eth';
+import { EventLog, GetLogOptions, inputLogFormatter, TransactionReceipt } from '../formatters';
+import { Subscription } from '../subscriptions';
+import { Data } from '../types';
+import { Wallet } from '../wallet';
+import { abi, abiMethodToString } from './abi';
+import { AbiDefinition, ContractAbi } from './contract-abi';
+import { decodeAnyEvent } from './decode-event-abi';
+import { Tx, TxFactory } from './tx';
+import { TxDeploy } from './tx-deploy';
 
 export interface ContractOptions {
   from?: Address;
@@ -70,8 +70,8 @@ type GetContractEvents<T> = T extends ContractDefinition
  * @param {Object} options
  */
 export class Contract<T extends ContractDefinition | void = void> {
-  readonly methods: GetContractMethods<T>;
-  readonly events: GetContractEvents<T>;
+  public readonly methods: GetContractMethods<T>;
+  public readonly events: GetContractEvents<T>;
   private options: ContractOptions;
   private extraFormatters;
 
@@ -109,7 +109,7 @@ export class Contract<T extends ContractDefinition | void = void> {
    *
    * All event listeners will be removed, once the last possible event is fired ("error", or "receipt")
    */
-  deployBytecode(data: Data, ...args: any[]) {
+  public deployBytecode(data: Data, ...args: any[]) {
     const constructor: AbiDefinition = this.jsonInterface.find(method => method.type === 'constructor') || {
       type: 'constructor',
     };
@@ -118,7 +118,7 @@ export class Contract<T extends ContractDefinition | void = void> {
     return new TxDeploy(this.eth, constructor, data, args, this.options, this.wallet, this.extraFormatters);
   }
 
-  once<Event extends Events<T>>(
+  public once<Event extends Events<T>>(
     event: Event,
     options: {
       filter?: object;
@@ -136,7 +136,7 @@ export class Contract<T extends ContractDefinition | void = void> {
    * @param {Function} callback
    * @return {Object} the event subscription
    */
-  once(event: Events<T>, options: GetLogOptions, callback: (err, res, sub) => void): void {
+  public once(event: Events<T>, options: GetLogOptions, callback: (err, res, sub) => void): void {
     // don't return as once shouldn't provide "on"
     this.on(event, options, (err, res, sub) => {
       sub.unsubscribe();
@@ -151,7 +151,7 @@ export class Contract<T extends ContractDefinition | void = void> {
     const logOptions = this.getLogOptions(event, options);
     const { fromBlock, ...subLogOptions } = logOptions;
 
-    var subscription = new Subscription('eth', 'logs', [inputLogFormatter(subLogOptions)], this.eth.provider);
+    const subscription = new Subscription('eth', 'logs', [inputLogFormatter(subLogOptions)], this.eth.provider);
 
     subscription
       .on('rawdata', log => {
@@ -197,9 +197,12 @@ export class Contract<T extends ContractDefinition | void = void> {
    * @param {Function} callback
    * @return {Object} the promievent
    */
-  async getPastEvents<Event extends Events<T>>(event: Event, options: GetLogOptions): Promise<GetEventLog<T, Event>[]>;
-  async getPastEvents(event: 'allevents', options: GetLogOptions): Promise<EventLog<any>[]>;
-  async getPastEvents(event: Events<T> & 'allevents', options: GetLogOptions = {}): Promise<EventLog<any>[]> {
+  public async getPastEvents<Event extends Events<T>>(
+    event: Event,
+    options: GetLogOptions,
+  ): Promise<GetEventLog<T, Event>[]>;
+  public async getPastEvents(event: 'allevents', options: GetLogOptions): Promise<EventLog<any>[]>;
+  public async getPastEvents(event: Events<T> & 'allevents', options: GetLogOptions = {}): Promise<EventLog<any>[]> {
     const logOptions = this.getLogOptions(event, options);
     const result = await this.eth.getPastLogs(logOptions);
     return result.map(log => decodeAnyEvent(this.jsonInterface, log));
@@ -267,7 +270,9 @@ export class Contract<T extends ContractDefinition | void = void> {
         const event = this.on.bind(this, method.signature!);
 
         // add method only if not already exists
-        if (!events[name] || events[name].name === 'bound ') events[name] = event;
+        if (!events[name] || events[name].name === 'bound ') {
+          events[name] = event;
+        }
 
         // definitely add the method based on its signature
         events[method.signature!] = event;
@@ -320,7 +325,7 @@ export class Contract<T extends ContractDefinition | void = void> {
    * @return {Object} everything combined together and encoded
    */
   private getEventTopics(event: AbiDefinition, options: GetLogOptions) {
-    let topics: Array<string | string[]> = [];
+    const topics: (string | string[])[] = [];
 
     // add event signature
     if (!event.anonymous && event.signature) {
@@ -397,7 +402,7 @@ export class Contract<T extends ContractDefinition | void = void> {
     // make log names keys
     receipt.events = {};
     receipt.unnamedEvents = [];
-    for (let ev of decodedEvents) {
+    for (const ev of decodedEvents) {
       if (ev.event) {
         const events = receipt.events[ev.event] || [];
         receipt.events[ev.event] = [...events, ev];

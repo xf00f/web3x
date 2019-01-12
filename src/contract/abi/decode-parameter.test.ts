@@ -25,7 +25,7 @@ const address4 = Address.fromString('0x407d73d8a49eeb85d32cf465507dd71d507100c4'
 const address5 = Address.fromString('0xbbf289d846208c16edc8474705c748aff07732db');
 const address6 = Address.fromString('0x1234567890123456789012345678901234567890');
 
-describe('decodeParameter', function() {
+describe('decodeParameter', () => {
   const tests = [
     {
       params: ['uint256', '0x0000000000000000000000000000000000000000000000000000000000000010'],
@@ -40,19 +40,16 @@ describe('decodeParameter', function() {
     },
   ];
 
-  tests.forEach(function(test) {
-    it('should convert correctly', function() {
+  tests.forEach(test => {
+    it('should convert correctly', () => {
       expect(abi.decodeParameter(test.params[0], test.params[1])).toEqual(test.result);
     });
   });
 });
 
-describe('decodeParameter', function() {
-  var test = function(t) {
-    it('should decode parameter correctly', function() {
-      if (t.type === 'tuple') {
-        console.log(t);
-      }
+describe('decodeParameter', () => {
+  const test = t => {
+    it('should decode parameter correctly', () => {
       expect(abi.decodeParameter(t.type, t.value)).toEqual(t.expected);
     });
   };

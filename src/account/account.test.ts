@@ -15,12 +15,12 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Account } from './account';
-import { bufferToHex, recover, hexToBuffer } from '../utils';
 import { Address } from '../address';
+import { bufferToHex, hexToBuffer, recover } from '../utils';
+import { Account } from './account';
 
 describe('account', () => {
-  it('should create account', function() {
+  it('should create account', () => {
     const account = Account.create();
     expect(account).toBeInstanceOf(Account);
   });

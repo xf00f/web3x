@@ -20,21 +20,21 @@ import { hexToNumber } from '../utils';
 const identity = result => result;
 
 export class NetRequestPayloads {
-  getId() {
+  public getId() {
     return {
       method: 'net_version',
       format: hexToNumber,
     };
   }
 
-  isListening() {
+  public isListening() {
     return {
       method: 'net_listening',
       format: identity,
     };
   }
 
-  getPeerCount() {
+  public getPeerCount() {
     return {
       method: 'net_peerCount',
       format: hexToNumber,

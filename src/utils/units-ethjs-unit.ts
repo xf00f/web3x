@@ -61,7 +61,7 @@ export const unitMap = {
  */
 export function getValueOfUnit(unitInput) {
   const unit = unitInput ? unitInput.toLowerCase() : 'ether';
-  var unitValue = unitMap[unit]; // eslint-disable-line
+  const unitValue = unitMap[unit]; // eslint-disable-line
 
   if (typeof unitValue !== 'string') {
     throw new Error(
@@ -98,8 +98,8 @@ export function numberToString(arg) {
 }
 
 export function fromWei(weiInput, unit, optionsInput?) {
-  var wei = numberToBN(weiInput); // eslint-disable-line
-  var negative = wei.lt(zero); // eslint-disable-line
+  let wei = numberToBN(weiInput); // eslint-disable-line
+  const negative = wei.lt(zero); // eslint-disable-line
   const base = getValueOfUnit(unit);
   const baseLength = unitMap[unit].length - 1 || 1;
   const options = optionsInput || {};
@@ -108,7 +108,7 @@ export function fromWei(weiInput, unit, optionsInput?) {
     wei = wei.mul(negative1);
   }
 
-  var fraction = wei.mod(base).toString(10); // eslint-disable-line
+  let fraction = wei.mod(base).toString(10); // eslint-disable-line
 
   while (fraction.length < baseLength) {
     fraction = `0${fraction}`;
@@ -118,13 +118,13 @@ export function fromWei(weiInput, unit, optionsInput?) {
     fraction = fraction.match(/^([0-9]*[1-9]|0)(0*)/)![1];
   }
 
-  var whole = wei.div(base).toString(10); // eslint-disable-line
+  let whole = wei.div(base).toString(10); // eslint-disable-line
 
   if (options.commify) {
     whole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
 
-  var value = `${whole}${fraction == '0' ? '' : `.${fraction}`}`; // eslint-disable-line
+  let value = `${whole}${fraction === '0' ? '' : `.${fraction}`}`; // eslint-disable-line
 
   if (negative) {
     value = `-${value}`;
@@ -134,12 +134,12 @@ export function fromWei(weiInput, unit, optionsInput?) {
 }
 
 export function toWei(etherInput, unit) {
-  var ether = numberToString(etherInput); // eslint-disable-line
+  let ether = numberToString(etherInput); // eslint-disable-line
   const base = getValueOfUnit(unit);
   const baseLength = unitMap[unit].length - 1 || 1;
 
   // Is it negative?
-  var negative = ether.substring(0, 1) === '-'; // eslint-disable-line
+  const negative = ether.substring(0, 1) === '-'; // eslint-disable-line
   if (negative) {
     ether = ether.substring(1);
   }
@@ -149,13 +149,13 @@ export function toWei(etherInput, unit) {
   }
 
   // Split it into a whole and fractional part
-  var comps = ether.split('.'); // eslint-disable-line
+  const comps = ether.split('.'); // eslint-disable-line
   if (comps.length > 2) {
     throw new Error(`[ethjs-unit] while converting number ${etherInput} to wei,  too many decimal points`);
   }
 
-  var whole = comps[0],
-    fraction = comps[1]; // eslint-disable-line
+  let whole = comps[0];
+  let fraction = comps[1];
 
   if (!whole) {
     whole = '0';
@@ -173,7 +173,7 @@ export function toWei(etherInput, unit) {
 
   whole = new BN(whole);
   fraction = new BN(fraction);
-  var wei = whole.mul(base).add(fraction); // eslint-disable-line
+  let wei = whole.mul(base).add(fraction); // eslint-disable-line
 
   if (negative) {
     wei = wei.mul(negative1);

@@ -1,22 +1,22 @@
 import { bufferToHex, sha3 } from '../utils';
 
 export class Address {
-  static ZERO = new Address(Buffer.alloc(20));
+  public static ZERO = new Address(Buffer.alloc(20));
 
   constructor(private buffer: Buffer) {
-    if (buffer.length != 20) {
+    if (buffer.length !== 20) {
       throw new Error('Invalid address buffer.');
     }
   }
 
-  static fromString(address: string) {
+  public static fromString(address: string) {
     if (!Address.isAddress(address)) {
       throw new Error(`Invalid address string: ${address}`);
     }
     return new Address(Buffer.from(address.replace(/^0x/i, ''), 'hex'));
   }
 
-  static isAddress(address: string) {
+  public static isAddress(address: string) {
     if (!/^(0x)?[0-9a-f]{40}$/i.test(address)) {
       // Does not have the basic requirements of an address.
       return false;
@@ -28,7 +28,7 @@ export class Address {
     }
   }
 
-  static checkAddressChecksum(address: string) {
+  public static checkAddressChecksum(address: string) {
     address = address.replace(/^0x/i, '');
     const addressHash = sha3(address.toLowerCase()).replace(/^0x/i, '');
 
@@ -44,7 +44,7 @@ export class Address {
     return true;
   }
 
-  static toChecksumAddress(address: string) {
+  public static toChecksumAddress(address: string) {
     if (!Address.isAddress(address)) {
       throw new Error('Invalid address string.');
     }
@@ -64,19 +64,19 @@ export class Address {
     return checksumAddress;
   }
 
-  equals(rhs: Address) {
+  public equals(rhs: Address) {
     return this.buffer.equals(rhs.buffer);
   }
 
-  toJSON() {
+  public toJSON() {
     return this.toString();
   }
 
-  toString() {
+  public toString() {
     return Address.toChecksumAddress(bufferToHex(this.buffer));
   }
 
-  toBuffer() {
+  public toBuffer() {
     return this.buffer;
   }
 }

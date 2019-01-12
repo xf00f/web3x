@@ -15,9 +15,9 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { Address } from '../address';
 import { hexToNumber } from '../utils';
 import { outputBigNumberFormatter } from './output-big-number-formatter';
-import { Address } from '../address';
 
 export interface UnformattedTransaction {
   blockHash: string | null;

@@ -1,9 +1,9 @@
-import { getFromEtherscan } from './source-etherscan';
-import { ContractConfig } from './config';
 import { Address } from '../../address';
+import { ContractAbi } from '../../contract';
+import { ContractConfig } from './config';
+import { getFromEtherscan } from './source-etherscan';
 import { getFromFiles } from './source-files';
 import { getFromTruffle } from './source-truffle';
-import { ContractAbi } from '../../contract';
 
 export interface ContractBuildData {
   abi: ContractAbi;

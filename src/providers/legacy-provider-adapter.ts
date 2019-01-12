@@ -1,8 +1,8 @@
-import { EthereumProvider, EthereumProviderNotifications } from './ethereum-provider';
-import { LegacyProvider } from './legacy-provider';
-import { createJsonRpcPayload, isValidJsonRpcResponse, JsonRpcResponse } from './jsonrpc';
-import { ErrorResponse, InvalidResponse } from '../errors';
 import { EventEmitter } from 'events';
+import { ErrorResponse, InvalidResponse } from '../errors';
+import { EthereumProvider, EthereumProviderNotifications } from './ethereum-provider';
+import { createJsonRpcPayload, isValidJsonRpcResponse, JsonRpcResponse } from './jsonrpc';
+import { LegacyProvider } from './legacy-provider';
 
 export class LegacyProviderAdapter implements EthereumProvider {
   private eventEmitter = new EventEmitter();
@@ -23,11 +23,11 @@ export class LegacyProviderAdapter implements EthereumProvider {
     });
   }
 
-  send(method: string, params?: any[]): Promise<any> {
+  public send(method: string, params?: any[]): Promise<any> {
     return new Promise((resolve, reject) => {
       const payload = createJsonRpcPayload(method, params);
 
-      this.provider.send(payload, function(err, message) {
+      this.provider.send(payload, (err, message) => {
         if (err) {
           return reject(err);
         }
@@ -48,12 +48,12 @@ export class LegacyProviderAdapter implements EthereumProvider {
     });
   }
 
-  on(notification: 'notification', listener: (result: any) => void): this;
-  on(notification: 'connect', listener: () => void): this;
-  on(notification: 'close', listener: (code: number, reason: string) => void): this;
-  on(notification: 'networkChanged', listener: (networkId: string) => void): this;
-  on(notification: 'accountsChanged', listener: (accounts: string[]) => void): this;
-  on(notification: EthereumProviderNotifications, listener: (...args: any[]) => void): this {
+  public on(notification: 'notification', listener: (result: any) => void): this;
+  public on(notification: 'connect', listener: () => void): this;
+  public on(notification: 'close', listener: (code: number, reason: string) => void): this;
+  public on(notification: 'networkChanged', listener: (networkId: string) => void): this;
+  public on(notification: 'accountsChanged', listener: (accounts: string[]) => void): this;
+  public on(notification: EthereumProviderNotifications, listener: (...args: any[]) => void): this {
     if (notification !== 'notification') {
       throw new Error('Legacy providers only support notification event.');
     }
@@ -64,12 +64,12 @@ export class LegacyProviderAdapter implements EthereumProvider {
     return this;
   }
 
-  removeListener(notification: 'notification', listener: (result: any) => void): this;
-  removeListener(notification: 'connect', listener: () => void): this;
-  removeListener(notification: 'close', listener: (code: number, reason: string) => void): this;
-  removeListener(notification: 'networkChanged', listener: (networkId: string) => void): this;
-  removeListener(notification: 'accountsChanged', listener: (accounts: string[]) => void): this;
-  removeListener(notification: EthereumProviderNotifications, listener: (...args: any[]) => void): this {
+  public removeListener(notification: 'notification', listener: (result: any) => void): this;
+  public removeListener(notification: 'connect', listener: () => void): this;
+  public removeListener(notification: 'close', listener: (code: number, reason: string) => void): this;
+  public removeListener(notification: 'networkChanged', listener: (networkId: string) => void): this;
+  public removeListener(notification: 'accountsChanged', listener: (accounts: string[]) => void): this;
+  public removeListener(notification: EthereumProviderNotifications, listener: (...args: any[]) => void): this {
     if (!this.provider.removeListener) {
       throw new Error('Legacy provider does not support subscriptions.');
     }
@@ -83,7 +83,7 @@ export class LegacyProviderAdapter implements EthereumProvider {
     return this;
   }
 
-  removeAllListeners(notification: EthereumProviderNotifications) {
+  public removeAllListeners(notification: EthereumProviderNotifications) {
     this.eventEmitter.removeAllListeners('notification');
     if (this.provider.removeAllListeners) {
       this.provider.removeAllListeners('data');

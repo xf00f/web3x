@@ -15,9 +15,9 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Eth } from './eth';
-import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
 import { Address } from '../address';
+import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
+import { Eth } from './eth';
 
 describe('eth', () => {
   const contractAddress = Address.fromString('0x1234567890123456789012345678901234567891');
@@ -111,7 +111,7 @@ describe('eth', () => {
     await expect(eth.sendTransaction(fromlessTx)).rejects.toThrowError('"from" field must be defined');
   });
 
-  const bootstrap1 = function(address: string | null = contractAddress.toString()) {
+  const bootstrap1 = (address: string | null = contractAddress.toString()) => {
     mockEthereumProvider.send.mockImplementationOnce(async method => {
       expect(method).toBe('eth_sendTransaction');
       return '0x1234567453543456321456321';
@@ -125,7 +125,7 @@ describe('eth', () => {
     mockEthereumProvider.send.mockImplementationOnce(async method => {
       expect(method).toBe('eth_subscribe');
 
-      setTimeout(function() {
+      setTimeout(() => {
         mockEthereumProvider.emit('notification', {
           subscription: '0x1234567',
           result: {
@@ -172,7 +172,7 @@ describe('eth', () => {
 
     eth
       .sendTransaction(basicTx)
-      .on('receipt', function(result) {
+      .on('receipt', result => {
         expect(result).toEqual({
           contractAddress,
           cumulativeGasUsed: 10,
@@ -217,7 +217,7 @@ describe('eth', () => {
 
     eth
       .sendTransaction(deployTx)
-      .on('receipt', function(result) {
+      .on('receipt', result => {
         expect(result).toEqual({
           contractAddress,
           cumulativeGasUsed: 10,
@@ -251,7 +251,7 @@ describe('eth', () => {
       return '0x';
     });
 
-    eth.sendTransaction(deployTx).on('error', function(error) {
+    eth.sendTransaction(deployTx).on('error', error => {
       expect(error).toBeInstanceOf(Error);
       done();
     });
@@ -268,16 +268,16 @@ describe('eth', () => {
 
     eth
       .sendTransaction(deployTx)
-      .on('error', function(error) {
+      .on('error', error => {
         expect(error).toBeInstanceOf(Error);
       })
-      .catch(function(error) {
+      .catch(error => {
         expect(error).toBeInstanceOf(Error);
         done();
       });
   });
 
-  const failOnTimeout = function() {
+  const failOnTimeout = () => {
     mockEthereumProvider.send.mockImplementationOnce(async method => {
       expect(method).toBe('eth_sendTransaction');
       return '0x1234567453543456321456321';
@@ -293,7 +293,7 @@ describe('eth', () => {
 
       // Fire 50 fake newBlocks
       for (let i = 0; i < 51; i++) {
-        setTimeout(function() {
+        setTimeout(() => {
           mockEthereumProvider.emit('notification', {
             subscription: '0x1234567',
             result: {
@@ -318,13 +318,13 @@ describe('eth', () => {
   it('should fail with emitter after no receipt after 50 blocks', done => {
     const eth = failOnTimeout();
 
-    eth.sendTransaction(basicTx).on('error', function(error) {
+    eth.sendTransaction(basicTx).on('error', error => {
       expect(error).toBeInstanceOf(Error);
       done();
     });
   });
 
-  it('should receive emitted confirmation receipts', function(done) {
+  it('should receive emitted confirmation receipts', done => {
     mockEthereumProvider.send.mockImplementationOnce(async method => {
       expect(method).toBe('eth_sendTransaction');
       return '0x1234567453543456321456321';
@@ -340,7 +340,7 @@ describe('eth', () => {
 
       // Fire 10 fake newBlocks
       for (let i = 0; i < 10; i++) {
-        setTimeout(function() {
+        setTimeout(() => {
           mockEthereumProvider.emit('notification', {
             subscription: '0x1234567',
             result: {

@@ -15,8 +15,8 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { decodeSignature, encodeSignature, recover as ethLibRecover, sign as ethLibSign } from '../eth-lib/account';
 import { hashMessage } from './hash-message';
-import { sign as ethLibSign, recover as ethLibRecover, encodeSignature, decodeSignature } from '../eth-lib/account';
 
 export interface Signature {
   message: string;
@@ -28,9 +28,9 @@ export interface Signature {
 }
 
 export function sign(data: string, privateKey: Buffer): Signature {
-  var messageHash = hashMessage(data);
-  var signature = ethLibSign(messageHash, privateKey);
-  var vrs = decodeSignature(signature);
+  const messageHash = hashMessage(data);
+  const signature = ethLibSign(messageHash, privateKey);
+  const vrs = decodeSignature(signature);
   return {
     message: data,
     messageHash,
