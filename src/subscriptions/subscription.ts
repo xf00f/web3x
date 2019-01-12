@@ -33,16 +33,14 @@ export class Subscription<Result = any> extends EventEmitter {
     readonly subscription: string,
     readonly params: any[],
     private provider: EthereumProvider,
+    private callback: (result: Result, sub: Subscription<Result>) => void,
+    subscribeImmediately: boolean = true,
   ) {
     super();
-  }
 
-  public on(event: 'rawdata' | 'data' | 'changed' | 'error', listener: (result: Result) => void): this {
-    return super.on(event, listener);
-  }
-
-  public once(event: 'rawdata' | 'data' | 'changed' | 'error', listener: (result: Result) => void): this {
-    return super.once(event, listener);
+    if (subscribeImmediately) {
+      this.subscribe();
+    }
   }
 
   public async subscribe() {
@@ -82,7 +80,7 @@ export class Subscription<Result = any> extends EventEmitter {
     const resultArr = isArray(result) ? result : [result];
 
     resultArr.forEach(resultItem => {
-      this.emit('rawdata', resultItem);
+      this.callback(resultItem, this);
     });
   }
 
@@ -90,7 +88,6 @@ export class Subscription<Result = any> extends EventEmitter {
     if (this.listener) {
       this.provider.removeListener('notification', this.listener);
     }
-    this.removeAllListeners();
     this.provider.send(`${this.type}_unsubscribe`, [this.id]);
     this.id = undefined;
     this.listener = undefined;
