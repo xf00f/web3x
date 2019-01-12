@@ -21,11 +21,29 @@ import { KeyStore, decrypt } from '../utils/encryption';
 import { Address } from '../address';
 
 export class Wallet {
-  public static defaultKeyName = 'web3js_wallet';
+  static readonly defaultKeyName = 'web3js_wallet';
   public length: number = 0;
   public accounts: Account[] = [];
 
   constructor() {}
+
+  static fromMnemonic(mnemonic: string, numberOfAccounts: number) {
+    const wallet = new Wallet();
+    for (var i = 0; i < numberOfAccounts; ++i) {
+      const path = `m/44'/60'/0'/0/${i}`;
+      wallet.add(Account.createFromMnemonicAndPath(mnemonic, path));
+    }
+    return wallet;
+  }
+
+  static fromSeed(seed: Buffer, numberOfAccounts: number) {
+    const wallet = new Wallet();
+    for (var i = 0; i < numberOfAccounts; ++i) {
+      const path = `m/44'/60'/0'/0/${i}`;
+      wallet.add(Account.createFromSeedAndPath(seed, path));
+    }
+    return wallet;
+  }
 
   static async fromKeystores(encryptedWallet: KeyStore[], password: string) {
     const wallet = new Wallet();
@@ -49,18 +67,6 @@ export class Wallet {
     } catch (e) {
       return new Wallet();
     }
-  }
-
-  private findSafeIndex(pointer: number = 0) {
-    while (this.accounts[pointer]) {
-      ++pointer;
-    }
-    return pointer;
-  }
-
-  private currentIndexes() {
-    const keys = Object.keys(this.accounts);
-    return keys.map(key => +key);
   }
 
   create(numberOfAccounts: number, entropy?: Buffer): Account[] {
@@ -87,22 +93,18 @@ export class Wallet {
   add(privateKey: Buffer): Account;
   add(account: Account): Account;
   add(accountOrKey: Buffer | Account): Account {
-    if (Buffer.isBuffer(accountOrKey)) {
-      accountOrKey = Account.fromPrivate(accountOrKey);
-    } else {
-      accountOrKey = Account.fromPrivate(accountOrKey.privateKey);
-    }
+    const account = Buffer.isBuffer(accountOrKey) ? Account.fromPrivate(accountOrKey) : accountOrKey;
 
-    const existing = this.get(accountOrKey.address);
+    const existing = this.get(account.address);
     if (existing) {
       return existing;
     }
 
     const index = this.findSafeIndex();
-    this.accounts[index] = accountOrKey;
+    this.accounts[index] = account;
     this.length++;
 
-    return accountOrKey;
+    return account;
   }
 
   remove(addressOrIndex: string | number | Address) {
@@ -112,7 +114,6 @@ export class Wallet {
       return false;
     }
 
-    this.accounts[index].privateKey = Buffer.of();
     delete this.accounts[index];
     this.length--;
 
@@ -120,11 +121,8 @@ export class Wallet {
   }
 
   clear() {
-    var indexes = this.currentIndexes();
-
-    indexes.forEach(index => {
-      this.remove(index);
-    });
+    this.accounts = [];
+    this.length = 0;
   }
 
   encrypt(password: string, options?) {
@@ -152,5 +150,17 @@ export class Wallet {
     localStorage.setItem(keyName, JSON.stringify(await this.encrypt(password)));
 
     return true;
+  }
+
+  private findSafeIndex(pointer: number = 0) {
+    while (this.accounts[pointer]) {
+      ++pointer;
+    }
+    return pointer;
+  }
+
+  private currentIndexes() {
+    const keys = Object.keys(this.accounts);
+    return keys.map(key => +key);
   }
 }

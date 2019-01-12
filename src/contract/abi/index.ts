@@ -16,9 +16,8 @@
 */
 
 import { isArray, isObject } from 'util';
-import { sha3 } from '../../utils';
 import { AbiCoder as EthersAbi } from '../../ethers/abi-coder';
-import { Address } from '../../address';
+import { sha3 } from '../../utils';
 
 /**
  * ABICoder prototype should be used to encode/decode solidity params of any type
@@ -27,7 +26,7 @@ export class ABICoder {
   private ethersAbiCoder: EthersAbi;
 
   constructor() {
-    this.ethersAbiCoder = new EthersAbi(function(type, value) {
+    this.ethersAbiCoder = new EthersAbi((type, value) => {
       if (type.match(/^u?int/) && !isArray(value) && (!isObject(value) || value.constructor.name !== 'BN')) {
         return value.toString();
       }
@@ -42,7 +41,7 @@ export class ABICoder {
    * @param {String|Object} functionName
    * @return {String} encoded function name
    */
-  encodeFunctionSignature(functionName) {
+  public encodeFunctionSignature(functionName) {
     if (isObject(functionName)) {
       functionName = abiMethodToString(functionName);
     }
@@ -57,7 +56,7 @@ export class ABICoder {
    * @param {String|Object} functionName
    * @return {String} encoded function name
    */
-  encodeEventSignature(functionName) {
+  public encodeEventSignature(functionName) {
     if (isObject(functionName)) {
       functionName = abiMethodToString(functionName);
     }
@@ -73,7 +72,7 @@ export class ABICoder {
    * @param {Object} param
    * @return {String} encoded plain param
    */
-  encodeParameter(type, param) {
+  public encodeParameter(type, param) {
     return this.encodeParameters([type], [param]);
   }
 
@@ -85,7 +84,7 @@ export class ABICoder {
    * @param {Array} params
    * @return {String} encoded list of params
    */
-  encodeParameters(types, params) {
+  public encodeParameters(types, params) {
     return this.ethersAbiCoder.encode(this.mapTypes(types), params);
   }
 
@@ -97,7 +96,7 @@ export class ABICoder {
    * @param {Array} params
    * @return {String} The encoded ABI for this function call
    */
-  encodeFunctionCall(jsonInterface, params) {
+  public encodeFunctionCall(jsonInterface, params) {
     return (
       this.encodeFunctionSignature(jsonInterface) +
       this.encodeParameters(jsonInterface.inputs, params).replace('0x', '')
@@ -112,7 +111,7 @@ export class ABICoder {
    * @param {String} bytes
    * @return {Object} plain param
    */
-  decodeParameter(type, bytes) {
+  public decodeParameter(type, bytes) {
     return this.decodeParameters([type], bytes)[0];
   }
 
@@ -124,7 +123,7 @@ export class ABICoder {
    * @param {String} bytes
    * @return {Array} array of plain params
    */
-  decodeParameters(outputs, bytes) {
+  public decodeParameters(outputs, bytes) {
     if (!bytes || bytes === '0x' || bytes === '0X') {
       throw new Error("Returned values aren't valid, did it run Out of Gas?");
     }
@@ -133,7 +132,7 @@ export class ABICoder {
     const returnValue: any = {};
     returnValue.__length__ = 0;
 
-    outputs.forEach(function(output, i) {
+    outputs.forEach((output, i) => {
       let decodedValue = res[returnValue.__length__];
       decodedValue = decodedValue === '0x' ? null : decodedValue;
 
@@ -158,7 +157,7 @@ export class ABICoder {
    * @param {Array} topics
    * @return {Array} array of plain params
    */
-  decodeLog(inputs, data, topics) {
+  public decodeLog(inputs, data, topics) {
     topics = isArray(topics) ? topics : [topics];
 
     data = data || '';
@@ -171,9 +170,9 @@ export class ABICoder {
 
     inputs.forEach((input, i) => {
       if (input.indexed) {
-        indexedParams[i] = ['bool', 'int', 'uint', 'address', 'fixed', 'ufixed'].find(function(staticType) {
-          return input.type.indexOf(staticType) !== -1;
-        })
+        indexedParams[i] = ['bool', 'int', 'uint', 'address', 'fixed', 'ufixed'].find(
+          staticType => input.type.indexOf(staticType) !== -1,
+        )
           ? this.decodeParameter(input.type, topics[topicCount])
           : topics[topicCount];
         topicCount++;
@@ -189,7 +188,7 @@ export class ABICoder {
     const returnValue: any = {};
     returnValue.__length__ = 0;
 
-    inputs.forEach(function(res, i) {
+    inputs.forEach((res, i) => {
       returnValue[i] = res.type === 'string' ? '' : null;
 
       if (typeof notIndexedParams[i] !== 'undefined') {
@@ -262,7 +261,7 @@ export class ABICoder {
       structName = structName.slice(0, -2);
     }
 
-    return { type: type, name: structName };
+    return { type, name: structName };
   }
 
   /**
@@ -320,19 +319,19 @@ export function abiMethodToString(json) {
  */
 function flattenTypes(includeTuple, puts) {
   // console.log("entered _flattenTypes. inputs/outputs: " + puts)
-  var types: any[] = [];
+  const types: any[] = [];
 
-  puts.forEach(function(param) {
+  puts.forEach(param => {
     if (typeof param.components === 'object') {
       if (param.type.substring(0, 5) !== 'tuple') {
         throw new Error('components found but type is not tuple; report on GitHub');
       }
-      var suffix = '';
-      var arrayBracket = param.type.indexOf('[');
+      let suffix = '';
+      const arrayBracket = param.type.indexOf('[');
       if (arrayBracket >= 0) {
         suffix = param.type.substring(arrayBracket);
       }
-      var result = flattenTypes(includeTuple, param.components);
+      const result = flattenTypes(includeTuple, param.components);
       // console.log("result should have things: " + result)
       if (isArray(result) && includeTuple) {
         // console.log("include tuple word, and its an array. joining...: " + result.types)

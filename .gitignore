@@ -1,4 +1,5 @@
 *.log
+*.ignore
 dest
 dest-es
 node_modules

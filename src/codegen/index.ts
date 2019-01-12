@@ -17,20 +17,15 @@
 */
 
 import fs from 'fs';
-import ts from 'typescript';
-import { ContractAbi, AbiInput, AbiDefinition, Tx, AbiOutput } from '../contract';
-import got from 'got';
 import mkdirp from 'mkdirp';
+import ts, { ClassElement } from 'typescript';
+import { AbiDefinition, AbiInput, AbiOutput, ContractAbi } from '../contract';
+import { Config } from './sources/config';
+import { loadDataFromConfig, ContractBuildData } from './sources';
 
 const printer = ts.createPrinter({
   newLine: ts.NewLineKind.LineFeed,
 });
-
-interface Config {
-  web3xPath?: string;
-  outputPath?: string;
-  contracts: { [name: string]: string };
-}
 
 function makeImports(name: string, web3xPath: string) {
   return [
@@ -71,6 +66,7 @@ function makeImports(name: string, web3xPath: string) {
           ts.createImportSpecifier(undefined, ts.createIdentifier('ContractOptions')),
           ts.createImportSpecifier(undefined, ts.createIdentifier('TxCall')),
           ts.createImportSpecifier(undefined, ts.createIdentifier('TxSend')),
+          ts.createImportSpecifier(undefined, ts.createIdentifier('TxDeploy')),
           ts.createImportSpecifier(undefined, ts.createIdentifier('EventSubscriptionFactory')),
         ]),
       ),
@@ -304,7 +300,7 @@ function getOutputType(name: string, definition: AbiDefinition) {
   }
 }
 
-function makeMethod(name: string, definition: AbiDefinition) {
+function makeMethodSignature(name: string, definition: AbiDefinition) {
   return ts.createMethodSignature(
     undefined,
     definition.inputs!.map(makeParameter),
@@ -315,11 +311,13 @@ function makeMethod(name: string, definition: AbiDefinition) {
 }
 
 function makeMethodsInterface(name: string, abi: ContractAbi) {
-  const methods = abi.filter(def => def.type === 'function').map(def => makeMethod(name, def));
+  const methods = abi.filter(def => def.type === 'function').map(def => makeMethodSignature(name, def));
   return ts.createInterfaceDeclaration(undefined, undefined, `${name}Methods`, undefined, undefined, methods);
 }
 
-function makeContract(name: string) {
+function makeContract(name: string, initData: string | undefined, abi: ContractAbi) {
+  const members: ClassElement[] = [];
+
   const ctor = ts.createConstructor(
     undefined,
     undefined,
@@ -364,6 +362,34 @@ function makeContract(name: string) {
     ),
   );
 
+  members.push(ctor);
+
+  if (initData) {
+    const ctorDef = abi.find(def => def.type === 'constructor')!;
+    const deployMethod = ts.createMethod(
+      undefined,
+      undefined,
+      undefined,
+      'deploy',
+      undefined,
+      undefined,
+      ctorDef.inputs!.map(makeParameter),
+      ts.createTypeReferenceNode('TxDeploy', undefined),
+      ts.createBlock(
+        [
+          ts.createReturn(
+            ts.createCall(ts.createPropertyAccess(ts.createSuper(), 'deployBytecode'), undefined, [
+              ts.createStringLiteral(initData),
+              ...ctorDef.inputs!.map(input => ts.createIdentifier(input.name)),
+            ]),
+          ),
+        ],
+        true,
+      ),
+    );
+    members.push(deployMethod);
+  }
+
   return ts.createClassDeclaration(
     undefined,
     [ts.createToken(ts.SyntaxKind.ExportKeyword)],
@@ -377,7 +403,7 @@ function makeContract(name: string) {
         ),
       ]),
     ],
-    [ctor],
+    members,
   );
 }
 
@@ -423,7 +449,7 @@ function makeAbiExport(name: string) {
   );
 }
 
-function makeFile(name: string, abi: ContractAbi, web3xPath: string) {
+function makeFile(name: string, abi: ContractAbi, initData: string | undefined, web3xPath: string) {
   const imports = makeImports(name, web3xPath);
   const eventTypes = makeEventTypes(abi);
   const eventLogTypes = makeEventLogInterfaces(abi);
@@ -433,7 +459,7 @@ function makeFile(name: string, abi: ContractAbi, web3xPath: string) {
   const txReceiptInterface = makeTransactionReceiptInterface(name);
   const methodsInterface = makeMethodsInterface(name, abi);
   const definitionInterface = makeDefinitionInterface(name);
-  const contract = makeContract(name);
+  const contract = makeContract(name, initData, abi);
   const abiExport = makeAbiExport(name);
 
   return ts.createNodeArray([
@@ -451,24 +477,6 @@ function makeFile(name: string, abi: ContractAbi, web3xPath: string) {
   ]);
 }
 
-async function getContractAbi(abiLocation: string | ContractAbi): Promise<ContractAbi> {
-  if (Array.isArray(abiLocation)) {
-    return abiLocation;
-  } else if (abiLocation.match(/^http/)) {
-    const response = await got(abiLocation, { json: true });
-    return response.body;
-  } else {
-    const json = JSON.parse(fs.readFileSync(abiLocation).toString());
-    if (Array.isArray(json)) {
-      return json;
-    } else if (json.abi && Array.isArray(json.abi)) {
-      return json.abi;
-    } else {
-      throw new Error(`Unable to extract ABI from json at ${abiLocation}`);
-    }
-  }
-}
-
 async function makeAndWriteAbi(outputPath: string, name: string, abi: ContractAbi, web3xPath: string) {
   const abiOutputFile = `${outputPath}/${name}Abi.ts`;
   const output = `import { ContractAbi } from '${web3xPath}/contract';\nexport default ${JSON.stringify(
@@ -477,45 +485,18 @@ async function makeAndWriteAbi(outputPath: string, name: string, abi: ContractAb
     2,
   )} as ContractAbi;`;
   fs.writeFileSync(abiOutputFile, output);
-  /*
-  const jsonFile = ts.createSourceFile(
-    'someFile.ts',
-    JSON.stringify(abi),
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.TS,
-  );
-
-  let thing: any = jsonFile.statements[0];
-
-  const varStmt = ts.createVariableStatement(
-    [ts.createModifier(ts.SyntaxKind.ExportKeyword)],
-    [
-      ts.createVariableDeclaration(
-        `Abi`,
-        undefined,
-        ts.createAsExpression(thing.expression, ts.createTypeReferenceNode('ContractAbi', undefined)),
-      ),
-    ],
-  );
-
-  const resultFile = ts.createSourceFile('', '', ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
-  resultFile.statements = ts.createNodeArray([varStmt]);
-  fs.writeFileSync(abiOutputFile, printer.printFile(resultFile));
-  */
 }
 
 export async function makeAndWriteFiles(
   outputPath: string,
   name: string,
-  abiLocation: string | ContractAbi,
+  { abi, initData }: ContractBuildData,
   web3xPath: string,
 ) {
   const interfaceOutputFile = `${outputPath}/${name}.ts`;
-  const abi = await getContractAbi(abiLocation);
 
   const resultFile = ts.createSourceFile('', '', ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
-  resultFile.statements = makeFile(name, abi, web3xPath);
+  resultFile.statements = makeFile(name, abi, initData, web3xPath);
 
   fs.writeFileSync(interfaceOutputFile, printer.printFile(resultFile));
 
@@ -535,7 +516,10 @@ async function main() {
   mkdirp.sync(outputPath);
 
   await Promise.all(
-    Object.entries(config.contracts).map(entry => makeAndWriteFiles(outputPath, entry[0], entry[1], web3xPath)),
+    Object.entries(config.contracts).map(async entry => {
+      const buildData = await loadDataFromConfig(entry[1]);
+      makeAndWriteFiles(outputPath, entry[0], buildData, web3xPath);
+    }),
   );
 }
 
