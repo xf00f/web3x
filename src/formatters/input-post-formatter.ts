@@ -15,8 +15,8 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { numberToHex, utf8ToHex } from '../utils';
 import { isArray } from 'util';
+import { numberToHex, utf8ToHex } from '../utils';
 
 /**
  * Formats the input of a whisper post and converts all values to HEX
@@ -28,9 +28,15 @@ import { isArray } from 'util';
 export function inputPostFormatter(post) {
   // post.payload = utils.toHex(post.payload);
 
-  if (post.ttl) post.ttl = numberToHex(post.ttl);
-  if (post.workToProve) post.workToProve = numberToHex(post.workToProve);
-  if (post.priority) post.priority = numberToHex(post.priority);
+  if (post.ttl) {
+    post.ttl = numberToHex(post.ttl);
+  }
+  if (post.workToProve) {
+    post.workToProve = numberToHex(post.workToProve);
+  }
+  if (post.priority) {
+    post.priority = numberToHex(post.priority);
+  }
 
   // fallback
   if (!isArray(post.topics)) {
@@ -38,7 +44,7 @@ export function inputPostFormatter(post) {
   }
 
   // format the following options
-  post.topics = post.topics.map(function(topic) {
+  post.topics = post.topics.map(topic => {
     // convert only if not hex
     return topic.indexOf('0x') === 0 ? topic : utf8ToHex(topic);
   });

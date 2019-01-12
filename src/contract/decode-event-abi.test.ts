@@ -15,9 +15,9 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { Address } from '../address';
 import { sha3 } from '../utils';
 import { decodeEvent } from './decode-event-abi';
-import { Address } from '../address';
 
 describe('eth', () => {
   describe('contract', () => {
@@ -68,7 +68,7 @@ describe('eth', () => {
       const tests: any = [
         {
           abi: {
-            name: name,
+            name,
             type: 'event',
             inputs: [],
           },
@@ -100,7 +100,7 @@ describe('eth', () => {
         },
         {
           abi: {
-            name: name,
+            name,
             inputs: [
               {
                 name: 'a',
@@ -141,7 +141,7 @@ describe('eth', () => {
         },
         {
           abi: {
-            name: name,
+            name,
             inputs: [
               {
                 name: 'a',
@@ -218,7 +218,7 @@ describe('eth', () => {
         },
         {
           abi: {
-            name: name,
+            name,
             anonymous: true,
             inputs: [
               {

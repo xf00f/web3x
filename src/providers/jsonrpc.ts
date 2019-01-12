@@ -53,7 +53,7 @@ export function createJsonRpcPayload(method: string, params?: any[]): JsonRpcReq
   return {
     jsonrpc: '2.0',
     id: JsonRpc.messageId,
-    method: method,
+    method,
     params: params || [],
   };
 }

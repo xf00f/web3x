@@ -23,7 +23,7 @@ import { EventEmitter } from 'events';
  * @method eventifiedPromise
  */
 export class PromiEvent<T> implements Promise<T>, EventEmitter {
-  [Symbol.toStringTag]: 'Promise';
+  public [Symbol.toStringTag]: 'Promise';
 
   public resolve!: (result: T) => void;
   public reject!: (reason?: any) => void;
@@ -35,20 +35,20 @@ export class PromiEvent<T> implements Promise<T>, EventEmitter {
     this.emitter = emitter;
   }
 
-  then<TResult1 = T, TResult2 = never>(
+  public then<TResult1 = T, TResult2 = never>(
     onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | null | undefined,
     onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined,
   ) {
     return new PromiEvent(this.promise.then(onfulfilled, onrejected), this.emitter);
   }
 
-  catch<TResult = never>(
+  public catch<TResult = never>(
     onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null,
   ): PromiEvent<T | TResult> {
     return new PromiEvent(this.promise.catch(onrejected), this.emitter);
   }
 
-  finally(onfinally?: (() => void) | undefined | null): Promise<T> {
+  public finally(onfinally?: (() => void) | undefined | null): Promise<T> {
     const promise: any = this.promise;
     if (promise.finally) {
       return new PromiEvent(promise.finally(onfinally), this.emitter);
@@ -57,70 +57,72 @@ export class PromiEvent<T> implements Promise<T>, EventEmitter {
     }
   }
 
-  addListener(event: string | symbol, listener: (...args: any[]) => void): this {
+  public addListener(event: string | symbol, listener: (...args: any[]) => void): this {
     this.emitter.addListener(event, listener);
     return this;
   }
 
-  on(event: string | symbol, listener: (...args: any[]) => void): this {
+  public on(event: string | symbol, listener: (...args: any[]) => void): this {
     this.emitter.on(event, listener);
     return this;
   }
 
-  once(event: string | symbol, listener: (...args: any[]) => void): this {
+  public once(event: string | symbol, listener: (...args: any[]) => void): this {
     this.emitter.once(event, listener);
     return this;
   }
-  prependListener(event: string | symbol, listener: (...args: any[]) => void): this {
+  public prependListener(event: string | symbol, listener: (...args: any[]) => void): this {
     this.emitter.prependListener(event, listener);
     return this;
   }
-  prependOnceListener(event: string | symbol, listener: (...args: any[]) => void): this {
+  public prependOnceListener(event: string | symbol, listener: (...args: any[]) => void): this {
     this.emitter.prependOnceListener(event, listener);
     return this;
   }
 
-  removeListener(event: string | symbol, listener: (...args: any[]) => void): this {
+  public removeListener(event: string | symbol, listener: (...args: any[]) => void): this {
     this.emitter.removeListener(event, listener);
     return this;
   }
 
-  off(event: string | symbol, listener: (...args: any[]) => void): this {
+  public off(event: string | symbol, listener: (...args: any[]) => void): this {
     this.emitter.off(event, listener);
     return this;
   }
 
-  removeAllListeners(event?: string | symbol | undefined): this {
+  public removeAllListeners(event?: string | symbol | undefined): this {
     this.emitter.removeAllListeners(event);
     return this;
   }
 
-  setMaxListeners(n: number): this {
+  public setMaxListeners(n: number): this {
     this.emitter.setMaxListeners(n);
     return this;
   }
 
-  getMaxListeners(): number {
+  public getMaxListeners(): number {
     return this.emitter.getMaxListeners();
   }
 
-  listeners(event: string | symbol): Function[] {
+  // tslint:disable-next-line:ban-types
+  public listeners(event: string | symbol): Function[] {
     return this.emitter.listeners(event);
   }
 
-  rawListeners(event: string | symbol): Function[] {
+  // tslint:disable-next-line:ban-types
+  public rawListeners(event: string | symbol): Function[] {
     return this.emitter.rawListeners(event);
   }
 
-  emit(event: string | symbol, ...args: any[]): boolean {
+  public emit(event: string | symbol, ...args: any[]): boolean {
     return this.emitter.emit(event, ...args);
   }
 
-  eventNames(): (string | symbol)[] {
+  public eventNames(): (string | symbol)[] {
     return this.emitter.eventNames();
   }
 
-  listenerCount(type: string | symbol): number {
+  public listenerCount(type: string | symbol): number {
     return this.emitter.listenerCount(type);
   }
 }
@@ -132,7 +134,8 @@ export interface PromiEventResult<T> {
 }
 
 export function promiEvent<T>(justPromise: boolean = false): PromiEventResult<T> {
-  let resolve, reject;
+  let resolve;
+  let reject;
   const promise = new Promise<T>((res, rej) => {
     resolve = res;
     reject = rej;

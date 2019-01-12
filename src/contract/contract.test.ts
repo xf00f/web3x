@@ -16,18 +16,18 @@
 */
 
 import { Contract } from '.';
-import { TestContract, TestContractAbi } from './fixtures/TestContract';
-import { sha3 } from '../utils';
+import { Address } from '../address';
 import { Eth } from '../eth/eth';
 import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
-import { Address } from '../address';
+import { sha3 } from '../utils';
+import { TestContract, TestContractAbi } from './fixtures/TestContract';
 
 const address = Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe');
 const addressLowercase = address.toString().toLowerCase();
 const addressUnprefixedLowercase = addressLowercase.slice(2);
 const address2 = Address.fromString('0x5555567890123456789012345678901234567891');
 
-describe('contract', function() {
+describe('contract', () => {
   let eth: Eth;
   let mockEthereumProvider: MockEthereumProvider;
 
@@ -36,19 +36,19 @@ describe('contract', function() {
     eth = new Eth(mockEthereumProvider);
   });
 
-  describe('instantiation', function() {
-    it('should transform address from checksum addressess', function() {
+  describe('instantiation', () => {
+    it('should transform address from checksum addressess', () => {
       const contract = new TestContract(eth, address);
       expect(contract.address).toBe(address);
     });
 
-    it('should transform address to checksum address', function() {
+    it('should transform address to checksum address', () => {
       const contract = new TestContract(eth, address);
       expect(contract.address).toBe(address);
     });
   });
 
-  describe('event', function() {
+  describe('event', () => {
     const signature = 'Changed(address,uint256,uint256,uint256)';
 
     function emitData(delayMs: number = 0, extend?: object) {
@@ -93,12 +93,12 @@ describe('contract', function() {
       });
     }
 
-    it('should create event subscription', function(done) {
+    it('should create event subscription', done => {
       mockEthSubscribe();
 
       const contract = new TestContract(eth, address);
 
-      const event = contract.events.Changed({ filter: { from: address } }, function(_, result) {
+      const event = contract.events.Changed({ filter: { from: address } }, (_, result) => {
         expect(result.returnValues.from).toEqual(address);
         expect(result.returnValues.amount).toBe('1');
         expect(result.returnValues.t1).toBe('1');
@@ -109,14 +109,14 @@ describe('contract', function() {
       });
     });
 
-    it('should create event from the events object using a signature and callback', function(done) {
+    it('should create event from the events object using a signature and callback', done => {
       mockEthSubscribe();
 
       const contract = new TestContract(eth, address);
 
       const event = contract.events['0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651'](
         { filter: { from: address } },
-        function(err, result) {
+        (err, result) => {
           expect(result.returnValues.from).toEqual(address);
           expect(result.returnValues.amount).toBe('1');
           expect(result.returnValues.t1).toBe('1');
@@ -128,12 +128,12 @@ describe('contract', function() {
       );
     });
 
-    it('should create event from the events object using event name and parameters', function(done) {
+    it('should create event from the events object using event name and parameters', done => {
       mockEthSubscribe();
 
       const contract = new TestContract(eth, address);
 
-      var event = contract.events[signature]({ filter: { from: address } }, function(err, result) {
+      const event = contract.events[signature]({ filter: { from: address } }, (err, result) => {
         expect(result.returnValues.from).toEqual(address);
         expect(result.returnValues.amount).toBe('1');
         expect(result.returnValues.t1).toBe('1');
@@ -144,7 +144,7 @@ describe('contract', function() {
       });
     });
 
-    it('should create event from the events object and use the fromBlock option', function(done) {
+    it('should create event from the events object and use the fromBlock option', done => {
       mockEthereumProvider.send.mockImplementationOnce(method => {
         expect(method).toBe('eth_getLogs');
         return [
@@ -186,7 +186,7 @@ describe('contract', function() {
       const contract = new TestContract(eth, address);
       let count = 0;
 
-      let event = contract.events.Changed({ fromBlock: 0, filter: { from: address } }).on('data', result => {
+      const event = contract.events.Changed({ fromBlock: 0, filter: { from: address } }).on('data', result => {
         count++;
 
         if (count === 1) {
@@ -221,7 +221,7 @@ describe('contract', function() {
       const contract = new TestContract(eth, address);
 
       await new Promise(resolve => {
-        contract.once('Changed', { filter: { from: address } }, function(err, result, sub) {
+        contract.once('Changed', { filter: { from: address } }, (err, result, sub) => {
           count++;
           resolve();
         });
@@ -238,7 +238,7 @@ describe('contract', function() {
       expect(count).toBe(1);
     });
 
-    it('should create event subscription and fire the changed event, if log.removed = true', function(done) {
+    it('should create event subscription and fire the changed event, if log.removed = true', done => {
       mockEthSubscribe();
       emitData(200, { removed: true });
 
@@ -247,18 +247,18 @@ describe('contract', function() {
 
       contract.events
         .Changed({ filter: { from: address } })
-        .on('data', function(result) {
+        .on('data', result => {
           expect(count).toBe(1);
           count++;
         })
-        .on('changed', function(result) {
+        .on('changed', result => {
           expect(result.removed).toBe(true);
           expect(count).toBe(2);
           done();
         });
     });
 
-    it('should create all event filter and receive two logs', function(done) {
+    it('should create all event filter and receive two logs', done => {
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
         expect(method).toBe('eth_subscribe');
         expect(params[1]).toEqual({
@@ -282,7 +282,7 @@ describe('contract', function() {
       const contract = new TestContract(eth, address);
 
       let count = 0;
-      let event = contract.events.allEvents({}, function(_, result) {
+      const event = contract.events.allEvents({}, (_, result) => {
         count++;
 
         if (count === 1 && result.event === 'Changed') {
@@ -306,7 +306,7 @@ describe('contract', function() {
   describe('balance call', () => {
     const signature = 'balance(address)';
 
-    it('should encode a function call', function() {
+    it('should encode a function call', () => {
       const contract = new TestContract(eth, address);
 
       const result = contract.methods.balance(address).encodeABI();
@@ -316,10 +316,10 @@ describe('contract', function() {
       );
     });
 
-    it('should encode a constructor call with data', function() {
+    it('should encode a constructor call with data', () => {
       const contract = new TestContract(eth, address);
 
-      var result = contract.deployBytecode('0x1234', address, 10).encodeABI();
+      const result = contract.deployBytecode('0x1234', address, 10).encodeABI();
 
       expect(result).toBe(
         '0x1234' +
@@ -593,7 +593,7 @@ describe('contract', function() {
             data: '0x0000000000000000000000000000000000000000000000000000000000000005',
           },
           {
-            address: address,
+            address,
             topics: [
               sha3('Changed(address,uint256,uint256,uint256)'),
               '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
@@ -612,7 +612,7 @@ describe('contract', function() {
       });
     }
 
-    it('should sendTransaction and check for receipts with formatted logs', function(done) {
+    it('should sendTransaction and check for receipts with formatted logs', done => {
       bootstrap();
 
       const contract = new TestContract(eth, address);
@@ -727,7 +727,7 @@ describe('contract', function() {
       });
     });
 
-    it('should sendTransaction and check for receipts with formatted logs when multiple of same event', function(done) {
+    it('should sendTransaction and check for receipts with formatted logs when multiple of same event', done => {
       mockEthereumProvider.send.mockResolvedValueOnce(
         '0x1234000000000000000000000000000000000000000000000000000000056789',
       );
@@ -742,7 +742,7 @@ describe('contract', function() {
         gasUsed: '0x0',
         logs: [
           {
-            address: address,
+            address,
             topics: [
               sha3('Changed(address,uint256,uint256,uint256)'),
               '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
@@ -758,7 +758,7 @@ describe('contract', function() {
               '0000000000000000000000000000000000000000000000000000000000000008',
           },
           {
-            address: address,
+            address,
             topics: [
               sha3('Changed(address,uint256,uint256,uint256)'),
               '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
@@ -781,7 +781,7 @@ describe('contract', function() {
       contract.methods
         .mySend(address, 10)
         .send({ from: address2, gasPrice: '21345678654321' })
-        .on('receipt', function(receipt) {
+        .on('receipt', receipt => {
           // wont throw if it errors ?! nope: causes a timeout
           expect(receipt).toEqual({
             contractAddress: null,
@@ -862,7 +862,7 @@ describe('contract', function() {
         });
     });
 
-    it('should sendTransaction and receive multiple confirmations', function(done) {
+    it('should sendTransaction and receive multiple confirmations', done => {
       // eth_sendTransaction
       mockEthereumProvider.send.mockResolvedValueOnce(
         '0x1234000000000000000000000000000000000000000000000000000000056789',
@@ -903,7 +903,7 @@ describe('contract', function() {
 
       const contract = new TestContract(eth, address);
 
-      var count = 0;
+      let count = 0;
       contract.methods
         .mySend(address, 10)
         .send({ from: address2, gasPrice: '21345678654321' })
@@ -1080,13 +1080,15 @@ describe('contract', function() {
       expect(() => contract.methods.mySend(address)).toThrowError(/Invalid number of parameters/);
     });
 
-    it('should make a call with optional params', function(done) {
+    it('should make a call with optional params', done => {
       const signature = 'balance(address)';
       let count = 0;
 
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
         count++;
-        if (count > 1) return;
+        if (count > 1) {
+          return;
+        }
 
         expect(method).toBe('eth_call');
         expect(params).toEqual([
@@ -1106,13 +1108,13 @@ describe('contract', function() {
       contract.methods
         .balance(address)
         .call({ from: address, gas: 50000 })
-        .then(function(r) {
+        .then(r => {
           expect(r).toBe('50');
           done();
         });
     });
 
-    it('should explicitly make a call with optional params', function(done) {
+    it('should explicitly make a call with optional params', done => {
       const signature = 'balance(address)';
 
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
@@ -1134,14 +1136,14 @@ describe('contract', function() {
       contract.methods
         .balance(address)
         .call({ from: address, gas: 50000 })
-        .then(function(r) {
+        .then(r => {
           expect(r).toBe('50');
           done();
         });
     });
 
-    it('should explicitly make a call with optional params and defaultBlock', function(done) {
-      let signature = 'balance(address)';
+    it('should explicitly make a call with optional params and defaultBlock', done => {
+      const signature = 'balance(address)';
 
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
         expect(method).toBe('eth_call');
@@ -1162,7 +1164,7 @@ describe('contract', function() {
       contract.methods
         .balance(address)
         .call({ from: address, gas: 50000 }, 11)
-        .then(function(r) {
+        .then(r => {
           expect(r).toBe('50');
           done();
         });
@@ -1318,7 +1320,7 @@ describe('contract', function() {
 
         return [
           {
-            address: address,
+            address,
             topics: topic1,
             blockNumber: '0x3',
             transactionHash: '0x1234',
@@ -1330,7 +1332,7 @@ describe('contract', function() {
               '0000000000000000000000000000000000000000000000000000000000000009',
           },
           {
-            address: address,
+            address,
             topics: topic2,
             blockNumber: '0x4',
             transactionHash: '0x1235',
@@ -1353,7 +1355,7 @@ describe('contract', function() {
           event: 'Changed',
           signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
           id: 'log_9ff24cb4',
-          address: address,
+          address,
           blockNumber: 3,
           transactionHash: '0x1234',
           blockHash: '0x1345',
@@ -1380,7 +1382,7 @@ describe('contract', function() {
           event: 'Changed',
           signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
           id: 'log_29c93e15',
-          address: address,
+          address,
           blockNumber: 4,
           transactionHash: '0x1235',
           blockHash: '0x1346',
@@ -1406,7 +1408,7 @@ describe('contract', function() {
       ]);
     });
 
-    it('should call testArr method and properly parse result', function(done) {
+    it('should call testArr method and properly parse result', done => {
       const signature = 'testArr(int[])';
 
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
@@ -1435,7 +1437,7 @@ describe('contract', function() {
       contract.methods
         .testArr([3])
         .call()
-        .then(function(result) {
+        .then(result => {
           expect(result).toBe('5');
           done();
         });
@@ -1467,7 +1469,7 @@ describe('contract', function() {
       expect(result).toEqual(address);
     });
 
-    it('should decode an struct correctly', function(done) {
+    it('should decode an struct correctly', done => {
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
         expect(method).toBe('eth_call');
         expect(params).toEqual([
@@ -1485,10 +1487,10 @@ describe('contract', function() {
       contract.methods
         .listOfNestedStructs(address)
         .call()
-        .then(function(result) {
-          var expectedArray: boolean[] = [];
+        .then(result => {
+          const expectedArray: any = [];
           expectedArray[0] = true;
-          expectedArray['status'] = true;
+          expectedArray.status = true;
 
           expect(result).toEqual(expectedArray);
           done();
@@ -1524,8 +1526,8 @@ describe('contract', function() {
     });
   });
 
-  describe('deploy', function() {
-    it('should deploy a contract and use all promise steps', function(done) {
+  describe('deploy', () => {
+    it('should deploy a contract and use all promise steps', done => {
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
         expect(method).toBe('eth_sendTransaction');
         expect(params).toEqual([

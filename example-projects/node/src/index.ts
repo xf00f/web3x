@@ -1,11 +1,11 @@
-import { sign, recover, fromWei } from 'web3x/utils';
 import { Account } from 'web3x/account';
-import { Wallet } from 'web3x/wallet';
-import { WebsocketProvider } from 'web3x/providers';
-import { Net } from 'web3x/net';
-import { Eth } from 'web3x/eth';
-import { DaiContract } from './contracts/DaiContract';
 import { Address } from 'web3x/address';
+import { Eth } from 'web3x/eth';
+import { Net } from 'web3x/net';
+import { WebsocketProvider } from 'web3x/providers';
+import { fromWei, recover, sign } from 'web3x/utils';
+import { Wallet } from 'web3x/wallet';
+import { DaiContract } from './contracts/DaiContract';
 
 const DAI_CONTRACT_ADDRESS = Address.fromString('0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359');
 

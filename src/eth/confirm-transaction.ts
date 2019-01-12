@@ -15,9 +15,9 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { fireError } from '../utils';
 import { isObject } from 'util';
 import { Eth } from '.';
+import { fireError } from '../utils';
 
 const TIMEOUTBLOCK = 50;
 const POLLINGTIMEOUT = 15 * TIMEOUTBLOCK; // ~average block time (seconds) * TIMEOUTBLOCK
@@ -32,16 +32,16 @@ export async function confirmTransaction(defer, result, payload, eth: Eth, extra
   let confirmationCount = 0;
   let intervalId: any = null;
   let receiptJSON = '';
-  let gasProvided = isObject(payload.params[0]) && payload.params[0].gas ? payload.params[0].gas : null;
-  let isContractDeployment =
+  const gasProvided = isObject(payload.params[0]) && payload.params[0].gas ? payload.params[0].gas : null;
+  const isContractDeployment =
     isObject(payload.params[0]) && payload.params[0].data && payload.params[0].from && !payload.params[0].to;
 
   // fire "receipt" and confirmation events and resolve after
-  var checkConfirmation = async function(existingReceipt, isPolling, sub?) {
+  const checkConfirmation = async (existingReceipt, isPolling, sub?) => {
     // create fake unsubscribe
     if (!sub) {
       sub = {
-        unsubscribe: function() {
+        unsubscribe() {
           clearInterval(intervalId);
         },
       };

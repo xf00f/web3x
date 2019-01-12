@@ -15,12 +15,12 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { outputBlockFormatter } from './output-block-formatter';
 import { Address } from '../address';
+import { outputBlockFormatter } from './output-block-formatter';
 
-describe('formatters', function() {
-  describe('outputBlockFormatter', function() {
-    it('should return the correct value', function() {
+describe('formatters', () => {
+  describe('outputBlockFormatter', () => {
+    it('should return the correct value', () => {
       expect(
         outputBlockFormatter({
           hash: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
@@ -57,7 +57,7 @@ describe('formatters', function() {
         size: 1000,
       });
     });
-    it('should return the correct value, when null values are present', function() {
+    it('should return the correct value, when null values are present', () => {
       expect(
         outputBlockFormatter({
           hash: null,

@@ -15,10 +15,10 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { utf8ToHex, hexToUtf8 } from './hex-utf8';
+import { hexToUtf8, utf8ToHex } from './hex-utf8';
 
-describe('utils', function() {
-  describe('utf8ToHex', function() {
+describe('utils', () => {
+  describe('utf8ToHex', () => {
     const tests = [
       {
         value: 'Heeäööä👅D34ɝɣ24Єͽ-.,äü+#/',
@@ -39,14 +39,14 @@ describe('utils', function() {
       },
     ];
 
-    tests.forEach(function(test) {
-      it('should turn ' + test.value + ' to ' + test.expected, function() {
+    tests.forEach(test => {
+      it('should turn ' + test.value + ' to ' + test.expected, () => {
         expect(utf8ToHex(test.value)).toBe(test.expected);
       });
     });
   });
 
-  describe('hexToUtf8', function() {
+  describe('hexToUtf8', () => {
     const tests = [
       {
         value: '0x486565c3a4c3b6c3b6c3a4f09f9185443334c99dc9a33234d084cdbd2d2e2cc3a4c3bc2b232f',
@@ -61,8 +61,8 @@ describe('utils', function() {
       },
     ];
 
-    tests.forEach(function(test) {
-      it('should turn ' + test.value + ' to ' + test.expected, function() {
+    tests.forEach(test => {
+      it('should turn ' + test.value + ' to ' + test.expected, () => {
         expect(hexToUtf8(test.value)).toBe(test.expected);
       });
     });

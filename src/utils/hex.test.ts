@@ -18,8 +18,8 @@
 import BN from 'bn.js';
 import { toHex } from './hex';
 
-describe('utils', function() {
-  describe('toHex', function() {
+describe('utils', () => {
+  describe('toHex', () => {
     const tests = [
       { value: 1, expected: '0x1' },
       { value: '1', expected: '0x1' },
@@ -77,8 +77,8 @@ describe('utils', function() {
       { value: '내가 제일 잘 나가', expected: '0xeb82b4eab08020eca09cec9dbc20ec9e9820eb8298eab080' },
     ];
 
-    tests.forEach(function(test) {
-      it('should turn ' + test.value + ' to ' + test.expected, function() {
+    tests.forEach(test => {
+      it('should turn ' + test.value + ' to ' + test.expected, () => {
         expect(toHex(test.value)).toBe(test.expected);
       });
     });

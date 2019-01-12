@@ -17,12 +17,12 @@
 
 import { isBoolean } from 'util';
 import { AbiDefinition } from '.';
-import { promiEvent } from '../promievent';
-import { abi } from './abi';
-import { fireError } from '../utils';
-import { Eth, SendTxPromiEvent } from '../eth';
-import { Wallet } from '../wallet';
 import { Address } from '../address';
+import { Eth, SendTxPromiEvent } from '../eth';
+import { promiEvent } from '../promievent';
+import { fireError } from '../utils';
+import { Wallet } from '../wallet';
+import { abi } from './abi';
 
 interface SendOptions {
   from?: Address;
@@ -114,7 +114,7 @@ export class TxDeploy {
    * @param {String} the encoded ABI
    */
   public encodeABI() {
-    let paramsABI = abi.encodeParameters(this.definition.inputs || [], this.args).replace('0x', '');
+    const paramsABI = abi.encodeParameters(this.definition.inputs || [], this.args).replace('0x', '');
     return this.deployData + paramsABI;
   }
 }

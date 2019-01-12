@@ -107,9 +107,9 @@ const tests = [
 ];
 
 describe('formatters', () => {
-  describe('inputTransactionFormatter', function() {
-    tests.forEach(function(test) {
-      it('should return the correct value', function() {
+  describe('inputTransactionFormatter', () => {
+    tests.forEach(test => {
+      it('should return the correct value', () => {
         expect(inputTransactionFormatter(test.input)).toEqual(test.result);
       });
     });

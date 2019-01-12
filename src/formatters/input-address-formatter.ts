@@ -15,9 +15,9 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Iban } from '../iban';
-import { Address } from '../address';
 import { isString } from 'util';
+import { Address } from '../address';
+import { Iban } from '../iban';
 
 export function inputAddressFormatter(address: string | Iban | Address) {
   if (isString(address)) {

@@ -44,7 +44,7 @@ describe('eth', () => {
         });
       });
 
-      it('encodeEventABI should return the encoded event object with topics', function() {
+      it('encodeEventABI should return the encoded event object with topics', () => {
         const result = encodeEventABI(
           {
             signature: '0x1234',
@@ -68,7 +68,7 @@ describe('eth', () => {
         });
       });
 
-      it('encodeEventABI should return the encoded event object with topics and multiple choices', function() {
+      it('encodeEventABI should return the encoded event object with topics and multiple choices', () => {
         const result = encodeEventABI(
           {
             signature: '0x1234',
@@ -109,11 +109,11 @@ describe('eth', () => {
           abi: {
             name: 'event1',
             inputs: [],
-            signature: signature,
+            signature,
           },
           options: {},
           expected: {
-            address: address,
+            address,
             topics: [signature],
           },
         },
@@ -127,7 +127,7 @@ describe('eth', () => {
                 indexed: true,
               },
             ],
-            signature: signature,
+            signature,
           },
           options: {
             filter: {
@@ -135,7 +135,7 @@ describe('eth', () => {
             },
           },
           expected: {
-            address: address,
+            address,
             topics: [signature, '0x0000000000000000000000000000000000000000000000000000000000000010'],
           },
         },
@@ -164,7 +164,7 @@ describe('eth', () => {
                 indexed: true,
               },
             ],
-            signature: signature,
+            signature,
           },
           options: {
             filter: {
@@ -172,7 +172,7 @@ describe('eth', () => {
             },
           },
           expected: {
-            address: address,
+            address,
             topics: [
               signature, // signature
               null, // a
@@ -196,7 +196,7 @@ describe('eth', () => {
                 indexed: true,
               },
             ],
-            signature: signature,
+            signature,
           },
           options: {
             filter: {
@@ -205,7 +205,7 @@ describe('eth', () => {
             },
           },
           expected: {
-            address: address,
+            address,
             topics: [
               signature,
               [
@@ -226,7 +226,7 @@ describe('eth', () => {
                 indexed: true,
               },
             ],
-            signature: signature,
+            signature,
           },
           options: {
             filter: {
@@ -234,7 +234,7 @@ describe('eth', () => {
             },
           },
           expected: {
-            address: address,
+            address,
             topics: [signature, null],
           },
         },
@@ -248,7 +248,7 @@ describe('eth', () => {
                 indexed: true,
               },
             ],
-            signature: signature,
+            signature,
           },
           options: {
             filter: {
@@ -258,7 +258,7 @@ describe('eth', () => {
             toBlock: 'pending',
           },
           expected: {
-            address: address,
+            address,
             fromBlock: 'latest',
             toBlock: 'pending',
             topics: [signature, '0x0000000000000000000000000000000000000000000000000000000000000001'],
@@ -274,7 +274,7 @@ describe('eth', () => {
                 indexed: true,
               },
             ],
-            signature: signature,
+            signature,
           },
           options: {
             filter: {
@@ -284,7 +284,7 @@ describe('eth', () => {
             toBlock: 10,
           },
           expected: {
-            address: address,
+            address,
             fromBlock: '0x4',
             toBlock: '0xa',
             topics: [signature, '0x0000000000000000000000000000000000000000000000000000000000000001'],
@@ -301,7 +301,7 @@ describe('eth', () => {
               },
             ],
             anonymous: true,
-            signature: signature,
+            signature,
           },
           options: {
             filter: {
@@ -309,7 +309,7 @@ describe('eth', () => {
             },
           },
           expected: {
-            address: address,
+            address,
             topics: ['0x0000000000000000000000000000000000000000000000000000000000000001'],
           },
         },
@@ -329,7 +329,7 @@ describe('eth', () => {
               },
             ],
             anonymous: true,
-            signature: signature,
+            signature,
           },
           options: {
             filter: {
@@ -337,7 +337,7 @@ describe('eth', () => {
             },
           },
           expected: {
-            address: address,
+            address,
             topics: [null, '0x0000000000000000000000000000000000000000000000000000000000000001'],
           },
         },

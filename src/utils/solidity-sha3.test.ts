@@ -16,8 +16,8 @@
 */
 
 import BN from 'bn.js';
-import { soliditySha3 } from './solidity-sha3';
 import { isArray } from 'util';
+import { soliditySha3 } from './solidity-sha3';
 
 // each "values" is one kind of parameter of the same type
 const tests = [
@@ -230,11 +230,11 @@ const tests = [
   },
 ];
 
-describe('utils', function() {
-  describe('soliditySha3', function() {
-    tests.forEach(function(test: any) {
+describe('utils', () => {
+  describe('soliditySha3', () => {
+    tests.forEach((test: any) => {
       test.values.forEach((value: any) => {
-        it('should hash "' + JSON.stringify(value) + '" into "' + test.expected + '"', function() {
+        it('should hash "' + JSON.stringify(value) + '" into "' + test.expected + '"', () => {
           if (value.error || isArray(value)) {
             expect(() => soliditySha3(value)).toThrow();
           } else {
@@ -244,7 +244,7 @@ describe('utils', function() {
       });
     });
 
-    it('should hash mixed boolean values in any order', function() {
+    it('should hash mixed boolean values in any order', () => {
       expect(
         soliditySha3(
           tests[0].values[1], // true
@@ -255,7 +255,7 @@ describe('utils', function() {
       ).toBe('0x4ba958c4829ba5d3f9eaa61058ef208aba8bc25c0b6e33044015e0af9fb1c35d');
     });
 
-    it('should hash mixed string and number values in any order', function() {
+    it('should hash mixed string and number values in any order', () => {
       expect(
         soliditySha3(
           tests[2].values[0], // 'Hello!%'
@@ -267,7 +267,7 @@ describe('utils', function() {
       ).toBe('0x7eb45eb9a0e1f6904514bc34c8b43e71c2e1f96f21b45ea284a0418cb351ec69');
     });
 
-    it('should hash mixed number types in any order', function() {
+    it('should hash mixed number types in any order', () => {
       expect(
         soliditySha3(
           tests[5].values[0], // v: '56', t: 'uint8'
@@ -280,7 +280,7 @@ describe('utils', function() {
       ).toBe('0x31d6c48574796dfb1a652f2e5c5a261db0677e39fff5c3032449c50eade4b6b6');
     });
 
-    it('should hash mixed number types addresses and boolean in any order', function() {
+    it('should hash mixed number types addresses and boolean in any order', () => {
       expect(
         soliditySha3(
           tests[5].values[0], // v: '56', t: 'uint8'
@@ -292,7 +292,7 @@ describe('utils', function() {
       ).toBe('0x334086a8fa05e16afb86bed41c614aa74e99ea32eefe8ce0026b4076ce217698');
     });
 
-    it('should hash mixed number arrays addresses and boolean in any order', function() {
+    it('should hash mixed number arrays addresses and boolean in any order', () => {
       expect(
         soliditySha3(
           tests[15].values[1], // v: '0x44222266', t: 'bytes4'

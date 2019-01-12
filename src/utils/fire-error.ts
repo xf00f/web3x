@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { isObject, isArray, isString, isFunction } from 'util';
+import { isArray, isFunction, isObject, isString } from 'util';
 import { PromiEvent } from '../promievent';
 
 /**
@@ -50,17 +50,17 @@ export function fireError(error, emitter: PromiEvent<any>, reject?, callback?) {
     // suppress uncatched error if an error listener is present
     // OR suppress uncatched error if an callback listener is present
     if ((emitter && (isFunction(emitter.listeners) && emitter.listeners('error').length)) || isFunction(callback)) {
-      emitter.catch(function() {});
+      emitter.catch(() => {});
     }
     // reject later, to be able to return emitter
-    setTimeout(function() {
+    setTimeout(() => {
       reject(error);
     }, 1);
   }
 
   if (emitter && isFunction(emitter.emit)) {
     // emit later, to be able to return emitter
-    setTimeout(function() {
+    setTimeout(() => {
       emitter.emit('error', error);
       emitter.removeAllListeners();
     }, 1);

@@ -15,12 +15,12 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { outputTransactionFormatter } from './output-transaction-formatter';
 import { Address } from '../address';
+import { outputTransactionFormatter } from './output-transaction-formatter';
 
-describe('formatters', function() {
-  describe('outputTransactionFormatter', function() {
-    it('should return the correct value', function() {
+describe('formatters', () => {
+  describe('outputTransactionFormatter', () => {
+    it('should return the correct value', () => {
       expect(
         outputTransactionFormatter({
           input: '0x3454645634534',
@@ -56,7 +56,7 @@ describe('formatters', function() {
       });
     });
 
-    it('should return the correct value, when null values are present', function() {
+    it('should return the correct value, when null values are present', () => {
       expect(
         outputTransactionFormatter({
           input: '0x3454645634534',

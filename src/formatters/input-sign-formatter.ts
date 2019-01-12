@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { utf8ToHex, isHexStrict } from '../utils';
+import { isHexStrict, utf8ToHex } from '../utils';
 
 /**
  * Hex encodes the data passed to eth_sign and personal_sign

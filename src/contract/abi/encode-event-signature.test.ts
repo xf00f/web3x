@@ -17,7 +17,7 @@
 
 import { abi } from '.';
 
-var tests = [
+const tests = [
   {
     params: [
       {
@@ -68,9 +68,9 @@ var tests = [
   },
 ];
 
-describe('encodeEventSignature', function() {
-  tests.forEach(function(test) {
-    it('should convert correctly', function() {
+describe('encodeEventSignature', () => {
+  tests.forEach(test => {
+    it('should convert correctly', () => {
       expect(abi.encodeEventSignature.apply(abi, test.params as any)).toEqual(test.result);
     });
   });

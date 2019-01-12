@@ -15,12 +15,12 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { outputLogFormatter } from './output-log-formatter';
 import { Address } from '../address';
+import { outputLogFormatter } from './output-log-formatter';
 
-describe('formatters', function() {
-  describe('outputLogFormatter', function() {
-    it('should return the correct value', function() {
+describe('formatters', () => {
+  describe('outputLogFormatter', () => {
+    it('should return the correct value', () => {
       expect(
         outputLogFormatter({
           transactionIndex: '0x3e8',
@@ -44,7 +44,7 @@ describe('formatters', function() {
         id: 'log_2b801386',
       });
     });
-    it('should return the correct value, when null values are present', function() {
+    it('should return the correct value, when null values are present', () => {
       expect(
         outputLogFormatter({
           transactionIndex: null,

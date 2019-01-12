@@ -1,10 +1,10 @@
+import { ENS } from 'web3x-es/ens';
 import { Eth } from 'web3x-es/eth';
+import { Net } from 'web3x-es/net';
 import { LegacyProvider, LegacyProviderAdapter } from 'web3x-es/providers';
+import { Address } from 'web3x-es/types';
 import { fromWei, toWei } from 'web3x-es/utils';
 import { Wallet } from 'web3x-es/wallet';
-import { Net } from 'web3x-es/net';
-import { Address } from 'web3x-es/types';
-import { ENS } from 'web3x-es/ens';
 import { DaiContract } from './contracts/DaiContract';
 
 declare const web3: {
@@ -149,4 +149,5 @@ function addBr() {
   document.body.appendChild(document.createElement('br'));
 }
 
+// tslint:disable-next-line:no-console
 main().catch(console.error);

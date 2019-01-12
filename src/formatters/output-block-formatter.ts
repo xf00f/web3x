@@ -15,11 +15,11 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { isArray, isString } from 'util';
+import { Address } from '../address';
 import { hexToNumber } from '../utils';
 import { outputBigNumberFormatter } from './output-big-number-formatter';
 import { outputTransactionFormatter } from './output-transaction-formatter';
-import { isString, isArray } from 'util';
-import { Address } from '../address';
 
 /**
  * Formats the output of a block to its proper values
@@ -34,18 +34,28 @@ export function outputBlockFormatter(block) {
   block.gasUsed = hexToNumber(block.gasUsed);
   block.size = hexToNumber(block.size);
   block.timestamp = hexToNumber(block.timestamp);
-  if (block.number !== null) block.number = hexToNumber(block.number);
+  if (block.number !== null) {
+    block.number = hexToNumber(block.number);
+  }
 
-  if (block.difficulty) block.difficulty = outputBigNumberFormatter(block.difficulty);
-  if (block.totalDifficulty) block.totalDifficulty = outputBigNumberFormatter(block.totalDifficulty);
+  if (block.difficulty) {
+    block.difficulty = outputBigNumberFormatter(block.difficulty);
+  }
+  if (block.totalDifficulty) {
+    block.totalDifficulty = outputBigNumberFormatter(block.totalDifficulty);
+  }
 
   if (isArray(block.transactions)) {
-    block.transactions.forEach(function(item) {
-      if (!isString(item)) return outputTransactionFormatter(item);
+    block.transactions.forEach(item => {
+      if (!isString(item)) {
+        return outputTransactionFormatter(item);
+      }
     });
   }
 
-  if (block.miner) block.miner = Address.fromString(block.miner);
+  if (block.miner) {
+    block.miner = Address.fromString(block.miner);
+  }
 
   return block;
 }

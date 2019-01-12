@@ -15,10 +15,10 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { encrypt, decrypt, KeyStore } from './encryption';
 import { Address } from '../address';
+import { decrypt, encrypt, KeyStore } from './encryption';
 
-var staticTests: { json: KeyStore; password: string; priv: string }[] = [
+const staticTests: { json: KeyStore; password: string; priv: string }[] = [
   {
     json: {
       crypto: {
@@ -120,9 +120,9 @@ var staticTests: { json: KeyStore; password: string; priv: string }[] = [
   },
 ];
 
-describe('utils', function() {
-  describe('encryption', function() {
-    staticTests.forEach(function(test, i) {
+describe('utils', () => {
+  describe('encryption', () => {
+    staticTests.forEach(test => {
       it('encrypt staticTests and compare to keystore', async () => {
         const keystore = await encrypt(Buffer.from(test.priv, 'hex'), Address.ZERO, test.password, {
           id: test.json.id,
@@ -134,7 +134,7 @@ describe('utils', function() {
       }, 30000);
     });
 
-    staticTests.forEach(function(test, i) {
+    staticTests.forEach(test => {
       it('decrypt staticTests and compare to private key', async () => {
         const privateKey = await decrypt(test.json, test.password);
         expect(privateKey).toEqual(Buffer.from(test.priv, 'hex'));

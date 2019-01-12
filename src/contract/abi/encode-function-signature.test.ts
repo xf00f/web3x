@@ -17,7 +17,7 @@
 
 import { abi } from '.';
 
-var tests = [
+const tests = [
   {
     params: [
       {
@@ -87,9 +87,9 @@ var tests = [
   },
 ];
 
-describe('encodeFunctionSignature', function() {
-  tests.forEach(function(test) {
-    it('should convert correctly', function() {
+describe('encodeFunctionSignature', () => {
+  tests.forEach(test => {
+    it('should convert correctly', () => {
       expect(abi.encodeFunctionSignature.apply(abi, test.params as any)).toEqual(test.result);
     });
   });

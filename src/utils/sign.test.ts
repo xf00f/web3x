@@ -15,10 +15,10 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { sign, recoverFromSigString, recoverFromSignature, recoverFromVRS, recover } from './sign';
 import { isHexStrict, utf8ToHex } from '.';
 import { hashMessage } from './hash-message';
 import { hexToBuffer } from './hex-buffer';
+import { recover, recoverFromSignature, recoverFromSigString, recoverFromVRS, sign } from './sign';
 
 const tests = [
   {
@@ -44,23 +44,23 @@ const tests = [
   },
 ];
 
-describe('utils', function() {
-  describe('sign', function() {
-    tests.forEach(function(test) {
-      it('sign data using a string', function() {
+describe('utils', () => {
+  describe('sign', () => {
+    tests.forEach(test => {
+      it('sign data using a string', () => {
         const data = sign(test.data, test.privateKey);
 
         expect(data.signature).toBe(test.signature);
       });
 
-      it('sign data using a utf8 encoded hex string', function() {
+      it('sign data using a utf8 encoded hex string', () => {
         const data = isHexStrict(test.data) ? test.data : utf8ToHex(test.data);
         const sig = sign(data, test.privateKey);
 
         expect(sig.signature).toBe(test.signature);
       });
 
-      it('recover signature using a string', function() {
+      it('recover signature using a string', () => {
         const address1 = recoverFromSigString(test.data, test.signature);
         const address2 = recover(test.data, test.signature);
 
@@ -68,20 +68,20 @@ describe('utils', function() {
         expect(address2).toBe(test.address);
       });
 
-      it('recover signature using a string and preFixed', function() {
+      it('recover signature using a string and preFixed', () => {
         const address = recoverFromSigString(hashMessage(test.data), test.signature, true);
 
         expect(address).toBe(test.address);
       });
 
-      it('recover signature using a hash and r s v values and preFixed', function() {
+      it('recover signature using a hash and r s v values and preFixed', () => {
         const sig = sign(test.data, test.privateKey);
         const address = recoverFromVRS(hashMessage(test.data), sig.v, sig.r, sig.s, true);
 
         expect(address).toBe(test.address);
       });
 
-      it('recover signature (pre encoded) using a signature object', function() {
+      it('recover signature (pre encoded) using a signature object', () => {
         const data = isHexStrict(test.data) ? test.data : utf8ToHex(test.data);
         const sig = sign(data, test.privateKey);
         const address = recoverFromSignature(sig);
@@ -89,7 +89,7 @@ describe('utils', function() {
         expect(address).toBe(test.address);
       });
 
-      it('recover signature using a signature object', function() {
+      it('recover signature using a signature object', () => {
         const sig = sign(test.data, test.privateKey);
         const address1 = recoverFromSignature(sig);
         const address2 = recover(sig);
@@ -98,7 +98,7 @@ describe('utils', function() {
         expect(address2).toBe(test.address);
       });
 
-      it('recover signature (pre encoded) using a hash and r s v values', function() {
+      it('recover signature (pre encoded) using a hash and r s v values', () => {
         const data = isHexStrict(test.data) ? test.data : utf8ToHex(test.data);
         const sig = sign(data, test.privateKey);
         const address1 = recoverFromVRS(test.data, sig.v, sig.r, sig.s);
@@ -108,7 +108,7 @@ describe('utils', function() {
         expect(address2).toBe(test.address);
       });
 
-      it('recover signature using a hash and r s v values', function() {
+      it('recover signature using a hash and r s v values', () => {
         const sig = sign(test.data, test.privateKey);
         const address1 = recoverFromVRS(test.data, sig.v, sig.r, sig.s);
 

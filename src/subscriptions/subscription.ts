@@ -15,8 +15,8 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { isArray } from 'util';
 import { EventEmitter } from 'events';
+import { isArray } from 'util';
 import { EthereumProvider } from '../providers/ethereum-provider';
 
 interface SubscriptionParams {
@@ -37,15 +37,15 @@ export class Subscription<Result = any> extends EventEmitter {
     super();
   }
 
-  on(event: 'rawdata' | 'data' | 'changed' | 'error', listener: (result: Result) => void): this {
+  public on(event: 'rawdata' | 'data' | 'changed' | 'error', listener: (result: Result) => void): this {
     return super.on(event, listener);
   }
 
-  once(event: 'rawdata' | 'data' | 'changed' | 'error', listener: (result: Result) => void): this {
+  public once(event: 'rawdata' | 'data' | 'changed' | 'error', listener: (result: Result) => void): this {
     return super.once(event, listener);
   }
 
-  async subscribe() {
+  public async subscribe() {
     if (this.id) {
       this.unsubscribe();
     }
@@ -86,7 +86,7 @@ export class Subscription<Result = any> extends EventEmitter {
     });
   }
 
-  unsubscribe() {
+  public unsubscribe() {
     if (this.listener) {
       this.provider.removeListener('notification', this.listener);
     }

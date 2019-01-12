@@ -19,7 +19,7 @@ import aes from 'browserify-aes';
 import randomBytes from 'randombytes';
 import { isString } from 'util';
 import uuid from 'uuid';
-import { scrypt, sha3, pbkdf2 } from '.';
+import { pbkdf2, scrypt, sha3 } from '.';
 import { Address } from '../address';
 
 interface ScryptKdfParams {
@@ -62,7 +62,7 @@ export async function decrypt(
     throw new Error('No password given.');
   }
 
-  var json = !isString(v3Keystore) ? v3Keystore : JSON.parse(nonStrict ? v3Keystore.toLowerCase() : v3Keystore);
+  const json = !isString(v3Keystore) ? v3Keystore : JSON.parse(nonStrict ? v3Keystore.toLowerCase() : v3Keystore);
 
   if (json.version !== 3) {
     throw new Error('Not a valid V3 wallet');
@@ -156,8 +156,8 @@ export async function encrypt(
         iv: iv.toString('hex'),
       },
       cipher: 'aes-128-ctr',
-      kdf: kdf,
-      kdfparams: kdfparams,
+      kdf,
+      kdfparams,
       mac: mac.toString(),
     },
   };

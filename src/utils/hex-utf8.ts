@@ -25,9 +25,9 @@ import { isHexStrict } from './hex';
  * @param {String} str
  * @returns {String} hex representation of input string
  */
-export var utf8ToHex = function(str: string) {
+export let utf8ToHex = (str: string) => {
   str = utf8.encode(str);
-  var hex = '';
+  let hex = '';
 
   // remove \u0000 padding from either side
   str = str.replace(/^(?:\u0000)*/, '');
@@ -41,10 +41,10 @@ export var utf8ToHex = function(str: string) {
     .reverse()
     .join('');
 
-  for (var i = 0; i < str.length; i++) {
-    var code = str.charCodeAt(i);
+  for (let i = 0; i < str.length; i++) {
+    const code = str.charCodeAt(i);
     // if (code !== 0) {
-    var n = code.toString(16);
+    const n = code.toString(16);
     hex += n.length < 2 ? '0' + n : n;
     // }
   }
@@ -59,11 +59,13 @@ export var utf8ToHex = function(str: string) {
  * @param {String} hex
  * @returns {String} ascii string representation of hex value
  */
-export var hexToUtf8 = function(hex: string) {
-  if (!isHexStrict(hex)) throw new Error('The parameter "' + hex + '" must be a valid HEX string.');
+export let hexToUtf8 = (hex: string) => {
+  if (!isHexStrict(hex)) {
+    throw new Error('The parameter "' + hex + '" must be a valid HEX string.');
+  }
 
-  var str = '';
-  var code = 0;
+  let str = '';
+  let code = 0;
   hex = hex.replace(/^0x/i, '');
 
   // remove 00 padding from either side
@@ -78,9 +80,9 @@ export var hexToUtf8 = function(hex: string) {
     .reverse()
     .join('');
 
-  var l = hex.length;
+  const l = hex.length;
 
-  for (var i = 0; i < l; i += 2) {
+  for (let i = 0; i < l; i += 2) {
     code = parseInt(hex.substr(i, 2), 16);
     // if (code !== 0) {
     str += String.fromCharCode(code);

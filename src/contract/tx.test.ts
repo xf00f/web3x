@@ -15,12 +15,12 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Tx } from './tx';
-import { sha3 } from '../utils';
 import { AbiDefinition } from '.';
+import { Address } from '../address';
 import { Eth } from '../eth';
 import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
-import { Address } from '../address';
+import { sha3 } from '../utils';
+import { Tx } from './tx';
 
 describe('eth', () => {
   describe('contract', () => {
@@ -36,7 +36,7 @@ describe('eth', () => {
         mockEthereumProvider = new MockEthereumProvider();
       });
 
-      it('should emit correct transaction hash and receipt on send', function(done) {
+      it('should emit correct transaction hash and receipt on send', done => {
         const signature = sha3('mySend(address,uint256)').slice(0, 10);
 
         const methodAbi: AbiDefinition = {
@@ -89,11 +89,11 @@ describe('eth', () => {
         const args = [contractAddress, 10];
         const tx = new Tx(new Eth(mockEthereumProvider), methodAbi, contractAddress, args);
 
-        tx.send({ from: from, gasPrice: '100000000000000' })
+        tx.send({ from, gasPrice: '100000000000000' })
           .on('transactionHash', result => {
             expect(result).toBe('0x1234000000000000000000000000000000000000000000000000000000056789');
           })
-          .on('receipt', function(result) {
+          .on('receipt', result => {
             expect(result).toEqual({
               contractAddress,
               cumulativeGasUsed: 10,
@@ -111,7 +111,7 @@ describe('eth', () => {
         const signature = sha3('balance(address)').slice(0, 10);
 
         const methodAbi: AbiDefinition = {
-          signature: signature,
+          signature,
           name: 'balance',
           type: 'function',
           inputs: [

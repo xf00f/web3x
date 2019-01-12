@@ -16,11 +16,11 @@
 */
 
 import BN from 'bn.js';
-import { toBN, isBN, toTwosComplement } from './bn';
+import { isBN, toBN, toTwosComplement } from './bn';
 import { leftPad } from './padding';
 
-describe('utils', function() {
-  describe('toBN', function() {
+describe('utils', () => {
+  describe('toBN', () => {
     const tests = [
       { value: 1, expected: '1' },
       { value: '1', expected: '1' },
@@ -64,35 +64,35 @@ describe('utils', function() {
       { value: new BN(0), expected: '0' },
     ];
 
-    tests.forEach(function(test) {
-      it('should turn ' + test.value + ' to ' + test.expected, function() {
+    tests.forEach(test => {
+      it('should turn ' + test.value + ' to ' + test.expected, () => {
         expect(toBN(test.value).toString(10)).toBe(test.expected);
       });
     });
   });
 
-  describe('utils', function() {
-    describe('isBN', function() {
+  describe('utils', () => {
+    describe('isBN', () => {
       const tests = [
-        { value: function() {}, is: false },
+        { value: () => {}, is: false },
         { value: new Function(), is: false },
         { value: 'function', is: false },
         { value: {}, is: false },
-        { value: new String('hello'), is: false },
+        { value: 'hello', is: false },
         { value: new BN(0), is: true },
         { value: 132, is: false },
         { value: '0x12', is: false },
       ];
 
-      tests.forEach(function(test) {
-        it('shoud test if value is BN: ' + test.is, function() {
+      tests.forEach(test => {
+        it('shoud test if value is BN: ' + test.is, () => {
           expect(isBN(test.value)).toBe(test.is);
         });
       });
     });
   });
 
-  describe('toTwosComplement', function() {
+  describe('toTwosComplement', () => {
     const tests = [
       { value: 1, expected: leftPad(new BN(1).toString(16), 64) },
       { value: '1', expected: leftPad(new BN(1).toString(16), 64) },
@@ -143,8 +143,8 @@ describe('utils', function() {
       { value: new BN(15), expected: leftPad(new BN(15).toString(16), 64) },
     ];
 
-    tests.forEach(function(test) {
-      it('printing ' + test.value, function() {
+    tests.forEach(test => {
+      it('printing ' + test.value, () => {
         expect(toTwosComplement(test.value).replace('0x', '')).toBe(test.expected);
       });
     });

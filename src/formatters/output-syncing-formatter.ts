@@ -15,8 +15,8 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { hexToNumber } from '../utils';
 import { isBoolean } from 'util';
+import { hexToNumber } from '../utils';
 
 export interface Sync {
   startingBlock: number;

@@ -40,7 +40,7 @@ export function outputPostFormatter(post) {
   if (!post.topics) {
     post.topics = [];
   }
-  post.topics = post.topics.map(function(topic) {
+  post.topics = post.topics.map(topic => {
     return hexToUtf8(topic);
   });
 

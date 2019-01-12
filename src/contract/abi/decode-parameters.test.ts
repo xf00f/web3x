@@ -22,7 +22,7 @@ const address1 = Address.fromString('0x407d73d8a49eeb85d32cf465507dd71d507100c1'
 const address2 = Address.fromString('0x407d73d8a49eeb85d32cf465507dd71d507100c3');
 const address3 = Address.fromString('0x1234567890123456789012345678901234567890');
 
-describe('decodeParameters', function() {
+describe('decodeParameters', () => {
   const tests = [
     {
       params: [
@@ -92,8 +92,8 @@ describe('decodeParameters', function() {
       result: { '0': false, __length__: 1 },
     },
   ];
-  tests.forEach(function(test) {
-    it('should convert correctly', function() {
+  tests.forEach(test => {
+    it('should convert correctly', () => {
       expect(abi.decodeParameters.apply(abi, test.params as any)).toEqual(test.result);
     });
   });
@@ -140,21 +140,23 @@ describe('decodeParameters', function() {
     },
   ];
 
-  failures.forEach(function(test) {
-    it('should not convert ' + test.params[1] + ' to ' + test.params[0], function() {
+  failures.forEach(test => {
+    it('should not convert ' + test.params[1] + ' to ' + test.params[0], () => {
       expect(_ => abi.decodeParameters.apply(abi, test.params as any)).toThrow();
     });
   });
 });
 
-describe('decodeParameters', function() {
-  const test = function(t) {
-    it('should decode parameters correctly', function() {
-      var result = abi.decodeParameters(t.types, t.values);
+describe('decodeParameters', () => {
+  const test = t => {
+    it('should decode parameters correctly', () => {
+      const result = abi.decodeParameters(t.types, t.values);
 
-      var resultArray: any = [];
+      const resultArray: any = [];
       Object.entries(result).forEach(([key, res]) => {
-        if (isFinite(+key)) resultArray.push(res);
+        if (isFinite(+key)) {
+          resultArray.push(res);
+        }
       });
 
       expect(resultArray).toEqual(t.expected);

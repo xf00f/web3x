@@ -17,9 +17,9 @@
 
 import { sha3 } from './sha3';
 
-describe('utils', function() {
-  describe('sha3', function() {
-    it('should return sha3 with hex prefix when hex input', function() {
+describe('utils', () => {
+  describe('sha3', () => {
+    it('should return sha3 with hex prefix when hex input', () => {
       expect(sha3('test123')).toBe('0xf81b517a242b218999ec8eec0ea6e2ddbef2a367a14e93f4a32a39e260f686ad');
       expect(sha3('test(int)')).toBe('0xf4d03772bec1e62fbe8c5691e1a9101e520e8f8b5ca612123694632bf3cb51b1');
       expect(sha3('0x80')).toBe('0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421');
