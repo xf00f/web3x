@@ -17,13 +17,13 @@
 
 import { isBoolean } from 'util';
 import { AbiDefinition } from '.';
+import { Address } from '../address';
+import { BlockType, Eth, SendTxPromiEvent } from '../eth';
+import { TransactionReceipt } from '../formatters';
 import { promiEvent } from '../promievent';
 import { fireError } from '../utils';
-import { abi } from './abi';
-import { TransactionReceipt } from '../formatters';
-import { Eth, SendTxPromiEvent, BlockType } from '../eth';
 import { Wallet } from '../wallet';
-import { Address } from '../address';
+import { abi } from './abi';
 
 export type TxFactory = (...args: any[]) => Tx;
 
@@ -166,9 +166,9 @@ export class Tx implements TxCall, TxSend {
    * @param {Mixed} args the arguments to encode
    * @param {String} the encoded ABI
    */
-  encodeABI() {
-    let methodSignature = this.definition.signature;
-    let paramsABI = abi.encodeParameters(this.definition.inputs || [], this.args).replace('0x', '');
+  public encodeABI() {
+    const methodSignature = this.definition.signature;
+    const paramsABI = abi.encodeParameters(this.definition.inputs || [], this.args).replace('0x', '');
     return methodSignature + paramsABI;
   }
 
@@ -186,7 +186,7 @@ export class Tx implements TxCall, TxSend {
     }
 
     returnValues = returnValues.length >= 2 ? returnValues.slice(2) : returnValues;
-    var result = abi.decodeParameters(outputs, returnValues);
+    const result = abi.decodeParameters(outputs, returnValues);
 
     if (result.__length__ === 1) {
       return result[0];

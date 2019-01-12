@@ -319,7 +319,7 @@ describe('contract', function() {
     it('should encode a constructor call with data', function() {
       const contract = new TestContract(eth, address);
 
-      var result = contract.deploy('0x1234', address, 10).encodeABI();
+      var result = contract.deployBytecode('0x1234', address, 10).encodeABI();
 
       expect(result).toBe(
         '0x1234' +
@@ -363,7 +363,7 @@ describe('contract', function() {
 
       const contract = new TestContract(eth, address);
 
-      const res = await contract.deploy('0x1234', address, 50).estimateGas();
+      const res = await contract.deployBytecode('0x1234', address, 50).estimateGas();
       expect(res).toBe(10);
     });
 
@@ -1582,7 +1582,7 @@ describe('contract', function() {
       const contract = new TestContract(eth);
 
       contract
-        .deploy('0x1234567', address, 200)
+        .deployBytecode('0x1234567', address, 200)
         .send({
           from: address,
           gas: 50000,

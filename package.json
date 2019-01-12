@@ -29,10 +29,11 @@
   "sideEffects": false,
   "scripts": {
     "build": "yarn clean && tsc -p tsconfig.cjs.json && tsc -p tsconfig.es.json && node ./package.js",
+    "lint": "tslint --project tsconfig.json 'src/**/*.ts' --fix",
     "test": "jest",
     "cover": "jest --coverage && cat coverage/lcov.info | node_modules/coveralls/bin/coveralls.js",
     "clean": "rm -rf ./dest ./dest-es",
-    "deploy": "yarn cover && yarn build && npm publish dest && npm publish dest-es",
+    "deploy": "yarn jest --clearCache && yarn cover && yarn build && npm publish dest && npm publish dest-es",
     "patch_version": "yarn version --patch"
   },
   "bin": {
@@ -90,6 +91,8 @@
     "jest-dot-reporter": "^1.0.7",
     "ts-jest": "^23.10.1",
     "ts-node": "^7.0.1",
+    "tslint": "^5.12.1",
+    "tslint-config-prettier": "^1.17.0",
     "typescript": "^3.0.3"
   }
 }

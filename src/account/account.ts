@@ -37,7 +37,7 @@ export interface AccountTx {
 }
 
 export class Account {
-  constructor(public address: Address, public privateKey: Buffer, public publicKey: Buffer) {}
+  constructor(readonly address: Address, readonly privateKey: Buffer, readonly publicKey: Buffer) {}
 
   static create(entropy: Buffer = randomHex(32)) {
     const { privateKey, address, publicKey } = create(entropy);

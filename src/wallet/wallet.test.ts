@@ -210,4 +210,33 @@ describe('wallet', function() {
       expect(addressFromKeystore).toEqual(addressFromWallet);
     });
   });
+
+  it('should create correct accounts from mnemonic', () => {
+    const mnemonic = 'profit gather crucial census birth effort clinic roast harvest rebuild hidden bamboo';
+    const addresses = [
+      '0xa97ab6ec66bc2354a7d880bae18fea633752ca85',
+      '0x7048779748e8899c8f8baa9dd6c8973411d0fa17',
+      '0xe8d62adfc3584a444546f17cd1bb3c327767edb0',
+      '0x951afb198aaa10702f456bcc61aa8f59c4f17a2f',
+      '0x0598ce5f520574b5b8bd9651971c7767e4354189',
+      '0xa2e8c16c765ab30900e205a7ea240df7cbe63548',
+      '0x107d4df66df086faaa66690fadd5d3ed1ca630d1',
+      '0x070b4ed7bee40216355cf84d88a7ab2696caf373',
+      '0x87fa6ff918e36b7b73ed99c1ae5e7c3d63edb44b',
+      '0xc174aec38d282396604130e65b59d0096ca53fd7',
+    ];
+
+    const wallet = Wallet.fromMnemonic(mnemonic, 10);
+
+    expect(wallet.accounts.map(a => a.address.toString().toLowerCase())).toEqual(addresses);
+
+    addresses.forEach((address, i) => {
+      expect(
+        wallet
+          .get(i)!
+          .address.toString()
+          .toLowerCase(),
+      ).toBe(address);
+    });
+  });
 });

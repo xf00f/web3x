@@ -109,7 +109,7 @@ export class Contract<T extends ContractDefinition | void = void> {
    *
    * All event listeners will be removed, once the last possible event is fired ("error", or "receipt")
    */
-  deploy(data: Data, ...args: any[]) {
+  deployBytecode(data: Data, ...args: any[]) {
     const constructor: AbiDefinition = this.jsonInterface.find(method => method.type === 'constructor') || {
       type: 'constructor',
     };
