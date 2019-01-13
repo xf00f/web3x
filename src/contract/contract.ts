@@ -93,10 +93,6 @@ export class Contract<T extends ContractDefinition | void = void> {
       from,
     };
 
-    if (address) {
-      this.setAddress(address);
-    }
-
     this.extraFormatters = {
       receiptFormatter: this.receiptFormatter,
       contractDeployFormatter: this.contractDeployFormatter,
@@ -228,10 +224,6 @@ export class Contract<T extends ContractDefinition | void = void> {
       }
       return new Tx(this.eth, definition, this.address, args, this.options, this.wallet, this.extraFormatters);
     };
-  }
-
-  private setAddress(address: Address) {
-    this.address = address;
   }
 
   private getMethods(contractDefinition: ContractAbi) {
@@ -391,7 +383,7 @@ export class Contract<T extends ContractDefinition | void = void> {
   }
 
   private contractDeployFormatter = receipt => {
-    this.setAddress(receipt.contractAddress);
+    this.address = receipt.contractAddress;
     return receipt;
   };
 

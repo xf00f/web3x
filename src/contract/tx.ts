@@ -130,7 +130,7 @@ export class Tx implements TxCall, TxSend {
     const account = this.getAccount(tx.from);
 
     if (account) {
-      return account.sendTransaction(tx, this.extraFormatters);
+      return account.sendTransaction(tx, this.eth, this.extraFormatters);
     } else {
       return this.eth.sendTransaction(tx, this.extraFormatters);
     }
@@ -138,6 +138,12 @@ export class Tx implements TxCall, TxSend {
 
   public getSendRequestPayload(options: SendOptions) {
     return this.eth.request.sendTransaction(this.getTx(options));
+  }
+
+  public encodeABI() {
+    const methodSignature = this.definition.signature;
+    const paramsABI = abi.encodeParameters(this.definition.inputs || [], this.args).replace('0x', '');
+    return methodSignature + paramsABI;
   }
 
   private getAccount(address?: Address) {
@@ -158,28 +164,6 @@ export class Tx implements TxCall, TxSend {
     };
   }
 
-  /**
-   * Encodes an ABI for a method, including signature or the method.
-   * Or when constructor encodes only the constructor parameters.
-   *
-   * @method encodeABI
-   * @param {Mixed} args the arguments to encode
-   * @param {String} the encoded ABI
-   */
-  public encodeABI() {
-    const methodSignature = this.definition.signature;
-    const paramsABI = abi.encodeParameters(this.definition.inputs || [], this.args).replace('0x', '');
-    return methodSignature + paramsABI;
-  }
-
-  /**
-   * Decode method return values
-   *
-   * @method _decodeMethodReturn
-   * @param {Array} outputs
-   * @param {String} returnValues
-   * @return {Object} decoded output return values
-   */
   private decodeMethodReturn(outputs, returnValues) {
     if (!returnValues) {
       return null;
