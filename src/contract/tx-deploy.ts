@@ -15,7 +15,6 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { isBoolean } from 'util';
 import { AbiDefinition } from '.';
 import { Address } from '../address';
 import { Eth, SendTxPromiEvent } from '../eth';
@@ -43,12 +42,6 @@ type DefaultOptions = {
   gas?: number;
 };
 
-/**
- * returns the an object with call, send, estimate functions
- *
- * @method _createTxObject
- * @returns {Object} an object with functions to call the methods
- */
 export class TxDeploy {
   constructor(
     private eth: Eth,
@@ -67,7 +60,7 @@ export class TxDeploy {
   public send(options: SendOptions): SendTxPromiEvent {
     const tx = this.getTx(options);
 
-    if (isBoolean(this.definition.payable) && !this.definition.payable && tx.value && tx.value > 0) {
+    if (this.definition.payable === false && tx.value && tx.value > 0) {
       const defer = promiEvent();
       return fireError(
         new Error('Can not send value to non-payable contract method or constructor'),
@@ -79,7 +72,7 @@ export class TxDeploy {
     const account = this.getAccount(tx.from);
 
     if (account) {
-      return account.sendTransaction(tx, this.extraFormatters);
+      return account.sendTransaction(tx, this.eth, this.extraFormatters);
     } else {
       return this.eth.sendTransaction(tx, this.extraFormatters);
     }
@@ -105,14 +98,7 @@ export class TxDeploy {
       data: this.encodeABI(),
     };
   }
-  /**
-   * Encodes an ABI for a method, including signature or the method.
-   * Or when constructor encodes only the constructor parameters.
-   *
-   * @method encodeABI
-   * @param {Mixed} args the arguments to encode
-   * @param {String} the encoded ABI
-   */
+
   public encodeABI() {
     const paramsABI = abi.encodeParameters(this.definition.inputs || [], this.args).replace('0x', '');
     return this.deployData + paramsABI;
