@@ -1,5 +1,4 @@
 import got from 'got';
-import { Address } from '../../address';
 import { ContractAbiDefinition } from '../../contract';
 
 function getHost(net: string) {
@@ -24,14 +23,14 @@ function getApiHost(net: string) {
   }
 }
 
-async function getAbi(net: string, address: Address): Promise<ContractAbiDefinition> {
+async function getAbi(net: string, address: string): Promise<ContractAbiDefinition> {
   const host = getApiHost(net);
   const abiUrl = `http://${host}/api?module=contract&action=getabi&address=${address}&format=raw`;
   const response = await got(abiUrl, { json: true });
   return response.body;
 }
 
-async function getInitData(net: string, address: Address) {
+async function getInitData(net: string, address: string) {
   const host = getHost(net);
   const response: string = (await got(`https://${host}/address/${address}`)).body;
   const initCodeMd = response.match(/<div id='verifiedbytecode2'>([0-9a-f]+)</);
@@ -57,7 +56,7 @@ async function getInitData(net: string, address: Address) {
   return initCode;
 }
 
-export async function getFromEtherscan(net: string, address: Address) {
+export async function getFromEtherscan(net: string, address: string) {
   const abi = await getAbi(net, address);
   const initData = await getInitData(net, address);
 

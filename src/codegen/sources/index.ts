@@ -1,4 +1,3 @@
-import { Address } from '../../address';
 import { ContractAbiDefinition } from '../../contract';
 import { ContractConfig } from './config';
 import { getFromEtherscan } from './source-etherscan';
@@ -13,7 +12,7 @@ export interface ContractBuildData {
 export async function loadDataFromConfig(contract: ContractConfig): Promise<ContractBuildData> {
   switch (contract.source) {
     case 'etherscan':
-      return await getFromEtherscan(contract.net, Address.fromString(contract.address));
+      return await getFromEtherscan(contract.net, contract.address);
     case 'files':
       return getFromFiles(contract.abiFile, contract.initDataFile);
     case 'truffle':
