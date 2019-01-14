@@ -1,12 +1,12 @@
 import { Address } from '../../address';
-import { ContractAbi } from '../../contract';
+import { ContractAbiDefinition } from '../../contract';
 import { ContractConfig } from './config';
 import { getFromEtherscan } from './source-etherscan';
 import { getFromFiles } from './source-files';
 import { getFromTruffle } from './source-truffle';
 
 export interface ContractBuildData {
-  abi: ContractAbi;
+  abi: ContractAbiDefinition;
   initData?: string;
 }
 

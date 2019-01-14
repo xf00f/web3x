@@ -18,11 +18,10 @@
 import bip39 from 'bip39';
 import hdkey from 'hdkey';
 import { Address } from '../address';
-import { Eth, SendTxPromiEvent } from '../eth';
+import { Eth } from '../eth';
 import { create, fromPrivate } from '../eth-lib/account';
-import { TransactionReceipt } from '../formatters';
-import { promiEvent } from '../promievent';
-import { decrypt, encrypt, fireError, KeyStore, randomHex } from '../utils';
+import { BaseSendTx, SendTx } from '../eth/send-tx';
+import { decrypt, encrypt, KeyStore, randomHex } from '../utils';
 import { sign } from '../utils/sign';
 import { signTransaction } from './sign-transaction';
 
@@ -65,16 +64,8 @@ export class Account {
     return Account.fromPrivate(await decrypt(v3Keystore, password, nonStrict));
   }
 
-  public sendTransaction(tx: AccountTx, eth: Eth, extraformatters?: any): SendTxPromiEvent {
-    const defer = promiEvent<TransactionReceipt>();
-    this.signTransaction(tx, eth)
-      .then(signedTx => {
-        eth.sendSignedTransaction(signedTx.rawTransaction, extraformatters, defer);
-      })
-      .catch(err => {
-        fireError(err, defer.eventEmitter, defer.reject);
-      });
-    return defer.eventEmitter;
+  public sendTransaction(tx: AccountTx, eth: Eth): SendTx {
+    return new SendAccountTx(eth, tx, this.privateKey);
   }
 
   public signTransaction(tx: AccountTx, eth: Eth) {
@@ -87,5 +78,16 @@ export class Account {
 
   public encrypt(password: string, options?: any) {
     return encrypt(this.privateKey, this.address, password, options);
+  }
+}
+
+class SendAccountTx extends BaseSendTx {
+  constructor(eth: Eth, private tx: AccountTx, private privateKey: Buffer) {
+    super(eth);
+  }
+
+  protected async getPayload() {
+    const signedTx = await signTransaction(this.tx, this.privateKey, this.eth);
+    return this.eth.request.sendSignedTransaction(signedTx.rawTransaction);
   }
 }

@@ -5,6 +5,6 @@ import { Subscription } from '../../subscriptions';
 
 export function subscribeForNewPendingTransactions(provider: EthereumProvider): Subscription<Transaction> {
   return new Subscription<Transaction>('eth', 'newPendingTransactions', [], provider, (result, sub) => {
-    sub.emit('data', result);
+    sub.emit('data', result, sub);
   });
 }

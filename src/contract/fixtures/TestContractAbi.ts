@@ -1,5 +1,5 @@
-import { ContractAbi } from '../../contract';
-export default [
+import { ContractAbi} from '../../contract';
+export default new ContractAbi([
   {
     "type": "constructor",
     "inputs": [
@@ -254,4 +254,4 @@ export default [
     "payable": false,
     "stateMutability": "view"
   }
-] as ContractAbi;
+]);

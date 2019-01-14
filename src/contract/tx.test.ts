@@ -15,11 +15,11 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { AbiDefinition } from '.';
 import { Address } from '../address';
 import { Eth } from '../eth';
 import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
 import { sha3 } from '../utils';
+import { ContractAbi } from './abi/contract-abi';
 import { Tx } from './tx';
 
 describe('eth', () => {
@@ -36,25 +36,27 @@ describe('eth', () => {
         mockEthereumProvider = new MockEthereumProvider();
       });
 
-      it('should emit correct transaction hash and receipt on send', done => {
+      it('should emit correct transaction hash and receipt on send', async () => {
         const signature = sha3('mySend(address,uint256)').slice(0, 10);
 
-        const methodAbi: AbiDefinition = {
-          signature,
-          name: 'send',
-          type: 'function',
-          inputs: [
-            {
-              name: 'to',
-              type: 'address',
-            },
-            {
-              name: 'value',
-              type: 'uint256',
-            },
-          ],
-          outputs: [],
-        };
+        const contractAbi = new ContractAbi([
+          {
+            name: 'mySend',
+            type: 'function',
+            inputs: [
+              {
+                name: 'to',
+                type: 'address',
+              },
+              {
+                name: 'value',
+                type: 'uint256',
+              },
+            ],
+            outputs: [],
+          },
+        ]);
+        const methodAbi = contractAbi.functions[0];
 
         mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
           expect(method).toBe('eth_sendTransaction');
@@ -77,6 +79,7 @@ describe('eth', () => {
           expect(method).toBe('eth_getTransactionReceipt');
           expect(params).toEqual(['0x1234000000000000000000000000000000000000000000000000000000056789']);
           return {
+            from: fromAddressLowercase,
             contractAddress: contractAddressLowercase,
             cumulativeGasUsed: '0xa',
             transactionIndex: '0x3',
@@ -87,47 +90,45 @@ describe('eth', () => {
         });
 
         const args = [contractAddress, 10];
-        const tx = new Tx(new Eth(mockEthereumProvider), methodAbi, contractAddress, args);
+        const tx = new Tx(new Eth(mockEthereumProvider), methodAbi, contractAbi, contractAddress, args);
 
-        tx.send({ from, gasPrice: '100000000000000' })
-          .on('transactionHash', result => {
-            expect(result).toBe('0x1234000000000000000000000000000000000000000000000000000000056789');
-          })
-          .on('receipt', result => {
-            expect(result).toEqual({
-              contractAddress,
-              cumulativeGasUsed: 10,
-              transactionIndex: 3,
-              blockNumber: 10,
-              blockHash: '0xbf1234',
-              gasUsed: 0,
-            });
-            done();
-          })
-          .on('error', done);
+        const txSend = tx.send({ from, gasPrice: '100000000000000' });
+
+        expect(await txSend.getTxHash()).toBe('0x1234000000000000000000000000000000000000000000000000000000056789');
+        expect(await txSend.getReceipt()).toEqual({
+          from,
+          contractAddress,
+          cumulativeGasUsed: 10,
+          transactionIndex: 3,
+          blockNumber: 10,
+          blockHash: '0xbf1234',
+          gasUsed: 0,
+        });
       });
 
       it('should return correct result on call', async () => {
         const signature = sha3('balance(address)').slice(0, 10);
 
-        const methodAbi: AbiDefinition = {
-          signature,
-          name: 'balance',
-          type: 'function',
-          inputs: [
-            {
-              name: 'who',
-              type: 'address',
-            },
-          ],
-          constant: true,
-          outputs: [
-            {
-              name: 'value',
-              type: 'uint256',
-            },
-          ],
-        };
+        const contractAbi = new ContractAbi([
+          {
+            name: 'balance',
+            type: 'function',
+            inputs: [
+              {
+                name: 'who',
+                type: 'address',
+              },
+            ],
+            constant: true,
+            outputs: [
+              {
+                name: 'value',
+                type: 'uint256',
+              },
+            ],
+          },
+        ]);
+        const methodAbi = contractAbi.functions[0];
 
         mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
           expect(method).toBe('eth_call');
@@ -143,7 +144,7 @@ describe('eth', () => {
         });
 
         const args = [contractAddress];
-        const tx = new Tx(new Eth(mockEthereumProvider), methodAbi, contractAddress, args);
+        const tx = new Tx(new Eth(mockEthereumProvider), methodAbi, contractAbi, contractAddress, args);
 
         const result = await tx.call({ from });
         expect(result).toBe('10');

@@ -17,17 +17,15 @@
 
 import { Address } from '../address';
 import { GetLogOptions, Log, Sync, Transaction, TransactionReceipt } from '../formatters';
-import { PromiEvent, promiEvent, PromiEventResult } from '../promievent';
 import { LegacyProvider, LegacyProviderAdapter } from '../providers';
 import { EthereumProvider } from '../providers/ethereum-provider';
 import { Subscription } from '../subscriptions';
 import { TransactionHash } from '../types';
 import { Data, Quantity } from '../types';
-import { fireError } from '../utils';
 import { Wallet } from '../wallet';
 import { Block, BlockHash, BlockHeader, BlockType } from './block';
-import { confirmTransaction } from './confirm-transaction';
 import { EthRequestPayloads } from './eth-request-payloads';
+import { SendSignedTransaction, SendTransaction, SendTx } from './send-tx';
 import { subscribeForLogs } from './subscriptions/logs';
 import { subscribeForNewHeads } from './subscriptions/new-heads';
 import { subscribeForNewPendingTransactions } from './subscriptions/new-pending-transactions';
@@ -38,20 +36,9 @@ declare const web3: { currentProvider?: LegacyProvider; ethereumProvider?: Legac
 
 export type TypedSigningData = { type: string; name: string; value: string }[];
 
-export interface SendTxPromiEvent<TxReceipt = TransactionReceipt> extends PromiEvent<TxReceipt> {
-  once(type: 'transactionHash', handler: (transactionHash: string) => void): this;
-  once(type: 'receipt', handler: (receipt: TxReceipt) => void): this;
-  once(type: 'confirmation', handler: (confNumber: number, receipt: TxReceipt) => void): this;
-  once(type: 'error', handler: (error: Error) => void): this;
-  on(type: 'transactionHash', handler: (transactionHash: string) => void): this;
-  on(type: 'receipt', handler: (receipt: TxReceipt) => void): this;
-  on(type: 'confirmation', handler: (confNumber: number, receipt: TxReceipt) => void): this;
-  on(type: 'error', handler: (error: Error) => void): this;
-}
-
 export class Eth {
   public readonly request: EthRequestPayloads;
-  private wallet?: Wallet;
+  public wallet?: Wallet;
 
   constructor(readonly provider: EthereumProvider) {
     this.request = new EthRequestPayloads(undefined, 'latest');
@@ -68,16 +55,12 @@ export class Eth {
     return new Eth(new LegacyProviderAdapter(provider));
   }
 
-  public setWallet(wallet?: Wallet) {
-    this.wallet = wallet;
+  public get defaultFromAddress(): Address | undefined {
+    return this.request.defaultFromAddress;
   }
 
-  public getDefaultFromAddress() {
-    return this.request.getDefaultFromAddress();
-  }
-
-  public setDefaultFromAddress(address?: Address) {
-    this.request.setDefaultFromAddress(address);
+  public set defaultFromAddress(address: Address | undefined) {
+    this.request.defaultFromAddress = address;
   }
 
   private async send({ method, params, format }: { method: string; params?: any[]; format: any }) {
@@ -164,8 +147,8 @@ export class Eth {
     return await this.send(this.request.getTransactionFromBlock(block, index));
   }
 
-  public async getTransactionReceipt(hash: TransactionHash): Promise<TransactionReceipt> {
-    return await this.send(this.request.getTransactionReceipt(hash));
+  public async getTransactionReceipt(txHash: TransactionHash): Promise<TransactionReceipt | null> {
+    return await this.send(this.request.getTransactionReceipt(txHash));
   }
 
   public async getTransactionCount(address: Address, block?: BlockType): Promise<number> {
@@ -176,60 +159,18 @@ export class Eth {
     return await this.send(this.request.signTransaction(tx));
   }
 
-  public sendSignedTransaction(
-    data: Data,
-    extraFormatters?: any,
-    defer?: PromiEventResult<TransactionReceipt>,
-  ): SendTxPromiEvent {
-    defer = defer || promiEvent<TransactionReceipt>();
-    const payload = this.request.sendSignedTransaction(data);
-    this.sendTransactionAndWaitForConfirmation(defer, payload, extraFormatters);
-    return defer.eventEmitter;
+  public sendSignedTransaction(data: Data): SendTx {
+    return new SendSignedTransaction(this, this.request.sendSignedTransaction(data));
   }
 
-  public sendTransaction(tx: Tx, extraFormatters?: any): SendTxPromiEvent {
-    // TODO: Can we remove extraFormatters, which is basically exposing contract internals here, and instead
-    // wrap the returned PromiEvent in another PromiEvent that does the translations upstream?
-    const defer = promiEvent<TransactionReceipt>();
-    this.sendTransactionAsync(defer, tx, extraFormatters).catch(err => {
-      fireError(err, defer.eventEmitter, defer.reject);
-    });
-    return defer.eventEmitter;
+  public sendTransaction(tx: Tx): SendTx {
+    return new SendTransaction(this, tx);
   }
 
   private getAccount(address?: Address) {
-    address = address || this.request.getDefaultFromAddress();
+    address = address || this.defaultFromAddress;
     if (this.wallet && address) {
-      return this.wallet.get(address.toString());
-    }
-  }
-
-  private async sendTransactionAsync(defer, tx: Tx, extraFormatters) {
-    const account = this.getAccount(tx.from);
-
-    if (!tx.gasPrice) {
-      tx.gasPrice = await this.getGasPrice();
-    }
-
-    let payload;
-    if (!account) {
-      payload = this.request.sendTransaction(tx);
-    } else {
-      const { from, ...fromlessTx } = tx;
-      const signedTx = await account.signTransaction(fromlessTx, this);
-      payload = this.request.sendSignedTransaction(signedTx.rawTransaction);
-    }
-
-    this.sendTransactionAndWaitForConfirmation(defer, payload, extraFormatters);
-  }
-
-  private async sendTransactionAndWaitForConfirmation(defer, payload, extraFormatters?) {
-    try {
-      const result = await this.send(payload);
-      defer.eventEmitter.emit('transactionHash', result);
-      confirmTransaction(defer, result, payload, this, extraFormatters);
-    } catch (err) {
-      fireError(err, defer.eventEmitter, defer.reject);
+      return this.wallet.get(address);
     }
   }
 
@@ -248,8 +189,8 @@ export class Eth {
     return await this.send(this.request.signTypedData(address, dataToSign));
   }
 
-  public async call(tx: Tx, block?: BlockType, outputFormatter = result => result): Promise<Data> {
-    return await this.send(this.request.call(tx, block, outputFormatter));
+  public async call(tx: Tx, block?: BlockType): Promise<Data> {
+    return await this.send(this.request.call(tx, block));
   }
 
   public async estimateGas(tx: Tx): Promise<number> {

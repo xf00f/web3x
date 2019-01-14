@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { abi } from '.';
+import { abiCoder } from '.';
 import { Address } from '../../address';
 
 const address1 = Address.fromString('0x407d73d8a49eeb85d32cf465507dd71d507100c1');
@@ -94,7 +94,7 @@ describe('decodeParameters', () => {
   ];
   tests.forEach(test => {
     it('should convert correctly', () => {
-      expect(abi.decodeParameters.apply(abi, test.params as any)).toEqual(test.result);
+      expect(abiCoder.decodeParameters.apply(abiCoder, test.params as any)).toEqual(test.result);
     });
   });
 
@@ -142,7 +142,7 @@ describe('decodeParameters', () => {
 
   failures.forEach(test => {
     it('should not convert ' + test.params[1] + ' to ' + test.params[0], () => {
-      expect(_ => abi.decodeParameters.apply(abi, test.params as any)).toThrow();
+      expect(_ => abiCoder.decodeParameters.apply(abiCoder, test.params as any)).toThrow();
     });
   });
 });
@@ -150,7 +150,7 @@ describe('decodeParameters', () => {
 describe('decodeParameters', () => {
   const test = t => {
     it('should decode parameters correctly', () => {
-      const result = abi.decodeParameters(t.types, t.values);
+      const result = abiCoder.decodeParameters(t.types, t.values);
 
       const resultArray: any = [];
       Object.entries(result).forEach(([key, res]) => {

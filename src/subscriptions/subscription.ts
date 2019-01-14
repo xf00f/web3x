@@ -59,7 +59,7 @@ export class Subscription<Result = any> extends EventEmitter {
       }
     } catch (err) {
       this.unsubscribe();
-      this.emit('error', err);
+      this.emit('error', err, this);
     }
 
     return this;
@@ -73,7 +73,8 @@ export class Subscription<Result = any> extends EventEmitter {
     }
 
     if (result instanceof Error) {
-      this.emit('error', result);
+      this.unsubscribe();
+      this.emit('error', result, this);
       return;
     }
 

@@ -15,13 +15,12 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { AbiDefinition } from '.';
 import { Address } from '../address';
-import { Eth, SendTxPromiEvent } from '../eth';
-import { promiEvent } from '../promievent';
-import { fireError } from '../utils';
-import { Wallet } from '../wallet';
-import { abi } from './abi';
+import { Eth } from '../eth';
+import { SendTx } from '../eth/send-tx';
+import { TransactionReceipt } from '../formatters';
+import { ContractAbi, ContractFunctionEntry } from './abi';
+import { SendContractTx } from './tx';
 
 interface SendOptions {
   from?: Address;
@@ -45,48 +44,30 @@ type DefaultOptions = {
 export class TxDeploy {
   constructor(
     private eth: Eth,
-    private definition: AbiDefinition,
+    private contractEntry: ContractFunctionEntry,
+    private contractAbi: ContractAbi,
     private deployData: string,
     private args: any[] = [],
     private defaultOptions: DefaultOptions = {},
-    private wallet?: Wallet,
-    private extraFormatters?: any,
+    private onDeployed: (address: Address) => void,
   ) {}
 
   public async estimateGas(options: EstimateOptions = {}) {
     return await this.eth.estimateGas(this.getTx(options));
   }
 
-  public send(options: SendOptions): SendTxPromiEvent {
+  public send(options: SendOptions): SendTx {
     const tx = this.getTx(options);
 
-    if (this.definition.payable === false && tx.value && tx.value > 0) {
-      const defer = promiEvent();
-      return fireError(
-        new Error('Can not send value to non-payable contract method or constructor'),
-        defer.eventEmitter,
-        defer.reject,
-      );
+    if (!this.contractEntry.payable && tx.value > 0) {
+      throw new Error('Can not send value to non-payable constructor.');
     }
 
-    const account = this.getAccount(tx.from);
-
-    if (account) {
-      return account.sendTransaction(tx, this.eth, this.extraFormatters);
-    } else {
-      return this.eth.sendTransaction(tx, this.extraFormatters);
-    }
+    return new DeployContractTx(this.eth, tx, this.contractAbi, this.onDeployed);
   }
 
   public getRequestPayload(options: SendOptions) {
     return this.eth.request.sendTransaction(this.getTx(options));
-  }
-
-  private getAccount(address?: Address) {
-    address = address || this.defaultOptions.from;
-    if (this.wallet && address) {
-      return this.wallet.get(address.toString());
-    }
   }
 
   private getTx(options) {
@@ -100,7 +81,29 @@ export class TxDeploy {
   }
 
   public encodeABI() {
-    const paramsABI = abi.encodeParameters(this.definition.inputs || [], this.args).replace('0x', '');
-    return this.deployData + paramsABI;
+    return this.deployData + this.contractEntry.encodeParameters(this.args).replace('0x', '');
+  }
+}
+
+export class DeployContractTx extends SendContractTx {
+  constructor(eth: Eth, tx: any, contractAbi: ContractAbi, private onDeployed: (address: Address) => void) {
+    super(eth, tx, contractAbi);
+  }
+
+  protected async handleReceipt(receipt: TransactionReceipt) {
+    receipt = await super.handleReceipt(receipt);
+
+    if (!receipt.contractAddress) {
+      throw new Error('The contract deployment receipt did not contain a contract address.');
+    }
+
+    const code = await this.eth.getCode(receipt.contractAddress);
+    if (code.length <= 2) {
+      throw new Error('Contract code could not be stored.');
+    }
+
+    this.onDeployed(receipt.contractAddress);
+
+    return receipt;
   }
 }

@@ -18,22 +18,20 @@
 import { isArray } from 'util';
 import { Address } from '../address';
 import { hexToNumber } from '../utils';
-import { Log, outputLogFormatter } from './output-log-formatter';
+import { Log, outputLogFormatter, UnformattedLog } from './output-log-formatter';
 
-export interface TransactionReceipt<Events = void> {
+export interface UnformattedTransactionReceipt {
   transactionHash: string;
-  transactionIndex: number;
+  transactionIndex: string;
   blockHash: string;
-  blockNumber: number;
+  blockNumber: string;
   from: string;
-  to: string;
-  contractAddress: string;
-  cumulativeGasUsed: number;
-  gasUsed: number;
-  logs?: Log[];
-  events?: Events extends void ? { [eventName: string]: EventLog<any>[] } : Events;
-  unnamedEvents?: EventLog<any>[];
-  status: string;
+  to?: string;
+  cumulativeGasUsed: string;
+  gasUsed: string;
+  contractAddress?: string;
+  logs?: UnformattedLog[];
+  status?: string;
 }
 
 export interface EventLog<ReturnValues, Name = string> {
@@ -51,6 +49,22 @@ export interface EventLog<ReturnValues, Name = string> {
   signature: string | null;
 }
 
+export interface TransactionReceipt<Events = void> {
+  transactionHash: string;
+  transactionIndex: number;
+  blockHash: string;
+  blockNumber: number;
+  from: Address;
+  to?: Address;
+  cumulativeGasUsed: number;
+  gasUsed: number;
+  contractAddress?: Address;
+  logs?: Log[];
+  events?: Events extends void ? { [eventName: string]: EventLog<any>[] } : Events;
+  unnamedEvents?: EventLog<any>[];
+  status?: boolean;
+}
+
 /**
  * Formats the output of a transaction receipt to its proper values
  *
@@ -58,34 +72,25 @@ export interface EventLog<ReturnValues, Name = string> {
  * @param {Object} receipt
  * @returns {Object}
  */
-export function outputTransactionReceiptFormatter(receipt) {
+export function outputTransactionReceiptFormatter(receipt?: UnformattedTransactionReceipt): TransactionReceipt | null {
   if (!receipt) {
     return null;
   }
+
   if (typeof receipt !== 'object') {
     throw new Error('Received receipt is invalid: ' + receipt);
   }
 
-  if (receipt.blockNumber !== null) {
-    receipt.blockNumber = hexToNumber(receipt.blockNumber);
-  }
-  if (receipt.transactionIndex !== null) {
-    receipt.transactionIndex = hexToNumber(receipt.transactionIndex);
-  }
-  receipt.cumulativeGasUsed = hexToNumber(receipt.cumulativeGasUsed);
-  receipt.gasUsed = hexToNumber(receipt.gasUsed);
-
-  if (isArray(receipt.logs)) {
-    receipt.logs = receipt.logs.map(outputLogFormatter);
-  }
-
-  if (receipt.contractAddress) {
-    receipt.contractAddress = Address.fromString(receipt.contractAddress);
-  }
-
-  if (typeof receipt.status !== 'undefined') {
-    receipt.status = Boolean(parseInt(receipt.status, 10));
-  }
-
-  return receipt;
+  return {
+    ...receipt,
+    to: receipt.to ? Address.fromString(receipt.to) : undefined,
+    from: Address.fromString(receipt.from),
+    blockNumber: hexToNumber(receipt.blockNumber)!,
+    transactionIndex: hexToNumber(receipt.transactionIndex)!,
+    cumulativeGasUsed: hexToNumber(receipt.cumulativeGasUsed)!,
+    gasUsed: hexToNumber(receipt.gasUsed)!,
+    logs: isArray(receipt.logs) ? receipt.logs.map(outputLogFormatter) : undefined,
+    contractAddress: receipt.contractAddress ? Address.fromString(receipt.contractAddress) : undefined,
+    status: receipt.status ? Boolean(parseInt(receipt.status, 10)) : undefined,
+  };
 }

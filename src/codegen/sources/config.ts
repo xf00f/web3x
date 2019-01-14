@@ -1,4 +1,4 @@
-import { ContractAbi } from '../../contract';
+import { ContractAbiDefinition } from '../../contract/abi';
 
 interface FileSource {
   source: 'files';
@@ -23,7 +23,7 @@ interface TruffleSource {
 interface InlineSource {
   source: 'inline';
   name: string;
-  abi: ContractAbi;
+  abi: ContractAbiDefinition;
   initData?: string;
 }
 
