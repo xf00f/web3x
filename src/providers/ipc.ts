@@ -16,7 +16,6 @@
 */
 
 import { isArray, isFunction } from 'util';
-import { InvalidConnection, InvalidResponse } from '../errors';
 import { LegacyProvider } from './legacy-provider';
 import { LegacyProviderAdapter } from './legacy-provider-adapter';
 
@@ -129,7 +128,7 @@ class LegacyIpcProvider implements LegacyProvider {
         clearTimeout(this.lastChunkTimeout);
         this.lastChunkTimeout = setTimeout(() => {
           this._timeout();
-          throw InvalidResponse(data);
+          throw new Error('Timeout');
         }, 1000 * 15);
 
         return;
@@ -158,7 +157,7 @@ class LegacyIpcProvider implements LegacyProvider {
   private _timeout() {
     for (const key in this.responseCallbacks) {
       if (this.responseCallbacks.hasOwnProperty(key)) {
-        this.responseCallbacks[key](InvalidConnection('on IPC'));
+        this.responseCallbacks[key](new Error(`CONNECTION ERROR: Couldn't connect to node on IPC.`));
         delete this.responseCallbacks[key];
       }
     }

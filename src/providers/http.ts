@@ -16,7 +16,6 @@
 */
 
 import XMLHttpRequest from 'node-http-xhr';
-import { ConnectionTimeout, InvalidConnection, InvalidResponse } from '../errors';
 import { LegacyProvider } from './legacy-provider';
 import { LegacyProviderAdapter } from './legacy-provider-adapter';
 
@@ -77,7 +76,7 @@ class LegacyHttpProvider implements LegacyProvider {
         try {
           result = JSON.parse(result);
         } catch (e) {
-          error = InvalidResponse(request.responseText);
+          error = new Error(`Invalid response: ${request.responseText}`);
         }
 
         this.connected = true;
@@ -87,14 +86,14 @@ class LegacyHttpProvider implements LegacyProvider {
 
     request.ontimeout = () => {
       this.connected = false;
-      callback(ConnectionTimeout(this.timeout));
+      callback(new Error(`CONNECTION TIMEOUT: Timeout of ${this.timeout} ms.`));
     };
 
     try {
       request.send(JSON.stringify(payload));
     } catch (error) {
       this.connected = false;
-      callback(InvalidConnection(this.host));
+      callback(new Error(`CONNECTION ERROR: Couldn't connect to node ${this.host}.`));
     }
   }
 

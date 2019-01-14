@@ -1,5 +1,4 @@
 import { EventEmitter } from 'events';
-import { ErrorResponse, InvalidResponse } from '../errors';
 import { EthereumProvider, EthereumProviderNotifications } from './ethereum-provider';
 import { createJsonRpcPayload, isValidJsonRpcResponse, JsonRpcResponse } from './jsonrpc';
 import { LegacyProvider } from './legacy-provider';
@@ -31,13 +30,21 @@ export class LegacyProviderAdapter implements EthereumProvider {
         if (err) {
           return reject(err);
         }
+        if (!message) {
+          return reject(new Error('No response.'));
+        }
         if (!isValidJsonRpcResponse(message)) {
-          return reject(InvalidResponse(message));
+          const msg =
+            message.error && message.error.message
+              ? message.error.message
+              : 'Invalid JSON RPC response: ' + JSON.stringify(message);
+          return reject(new Error(msg));
         }
         const response = message as JsonRpcResponse;
 
         if (response.error) {
-          return reject(ErrorResponse(message));
+          const message = response.error.message ? response.error.message : JSON.stringify(response);
+          return reject(new Error('Returned error: ' + message));
         }
         if (response.id && payload.id !== response.id) {
           return reject(new Error(`Wrong response id ${payload.id} != ${response.id} in ${JSON.stringify(payload)}`));
