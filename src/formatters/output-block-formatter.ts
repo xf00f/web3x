@@ -34,8 +34,8 @@ export function outputBlockFormatter(block) {
   block.gasUsed = hexToNumber(block.gasUsed);
   block.size = hexToNumber(block.size);
   block.timestamp = hexToNumber(block.timestamp);
-  if (block.number !== null) {
-    block.number = hexToNumber(block.number);
+  if (block.number !== null || block.blockNumber !== null) {
+    block.number = hexToNumber(block.number || block.blockNumber);
   }
 
   if (block.difficulty) {

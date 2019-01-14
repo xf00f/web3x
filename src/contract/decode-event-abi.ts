@@ -17,25 +17,8 @@
 
 import { EventLog } from '../formatters';
 import { Log } from '../formatters/output-log-formatter';
-import { abi } from './abi';
-import { AbiDefinition, ContractAbi } from './contract-abi';
-
-/**
- * Decodes any event log response and its return values.
- *
- * @param contractAbi Abi definition of the contract to which the event belongs.
- * @param log The log response to decode.
- * @returns The decoded event log.
- */
-export function decodeAnyEvent(contractAbi: ContractAbi, log: Log) {
-  const anonymousEvent: AbiDefinition = {
-    type: 'event',
-    anonymous: true,
-    inputs: [],
-  };
-  const event = contractAbi.find(abiDef => abiDef.signature === log.topics[0]) || anonymousEvent;
-  return decodeEvent(event, log);
-}
+import { ContractEntryDefinition } from './abi';
+import { abiCoder } from './abi-coder';
 
 /**
  * Decodes an event log response and its return values.
@@ -44,12 +27,12 @@ export function decodeAnyEvent(contractAbi: ContractAbi, log: Log) {
  * @param log The log response to decode.
  * @returns The decoded event log.
  */
-export function decodeEvent(event: AbiDefinition, log: Log): EventLog<any> {
+export function decodeEvent(event: ContractEntryDefinition, log: Log): EventLog<any> {
   log.data = log.data || '';
   log.topics = log.topics || [];
 
   const argTopics = event.anonymous ? log.topics : log.topics.slice(1);
-  const returnValues = abi.decodeLog(event.inputs, log.data, argTopics);
+  const returnValues = abiCoder.decodeLog(event.inputs, log.data, argTopics);
   delete returnValues.__length__;
 
   const { data, topics, ...formattedLog } = log;

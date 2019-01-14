@@ -15,12 +15,13 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { AbiDefinition, Contract } from '.';
 import { Address } from '../address';
 import { Eth } from '../eth/eth';
 import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
+import { ContractAbi } from './abi/contract-abi';
+import { Contract } from './contract';
 
-const abi: AbiDefinition[] = [
+const abi = new ContractAbi([
   {
     constant: true,
     inputs: [
@@ -44,7 +45,7 @@ const abi: AbiDefinition[] = [
     type: 'function',
     stateMutability: 'view',
   },
-];
+]);
 
 describe('eth', () => {
   describe('contract', () => {

@@ -17,19 +17,15 @@
 
 import { Address } from '../address';
 import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
+import { numberToHex } from '../utils';
 import { Eth } from './eth';
 
 describe('eth', () => {
+  const from = Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe');
   const contractAddress = Address.fromString('0x1234567890123456789012345678901234567891');
   const basicTx = {
-    from: Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe'),
+    from,
     to: Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe'),
-    data: '0xa123456',
-    gasPrice: 100,
-    gas: 100,
-  };
-  const deployTx = {
-    from: Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe'),
     data: '0xa123456',
     gasPrice: 100,
     gas: 100,
@@ -64,18 +60,6 @@ describe('eth', () => {
     });
   });
 
-  it('should return an error, if the outputFormatter throws an error', async () => {
-    const eth = new Eth(mockEthereumProvider);
-
-    mockEthereumProvider.send.mockResolvedValue('0x1234567453543456321456321');
-
-    await expect(
-      eth.call(basicTx, undefined, _ => {
-        throw new Error('Error!');
-      }),
-    ).rejects.toBeInstanceOf(Error);
-  });
-
   it('should fill in gasPrice if not given', async () => {
     const eth = new Eth(mockEthereumProvider);
 
@@ -87,7 +71,7 @@ describe('eth', () => {
     mockEthereumProvider.send.mockResolvedValueOnce({ blockHash: '0x1234' });
 
     const { gasPrice, ...gasPricelessTx } = basicTx;
-    await eth.sendTransaction(gasPricelessTx);
+    await eth.sendTransaction(gasPricelessTx).getTxHash();
 
     expect(mockEthereumProvider.send.mock.calls[0][0]).toBe('eth_gasPrice');
 
@@ -108,10 +92,10 @@ describe('eth', () => {
   it('should fail to send transaction when from not specified', async () => {
     const eth = new Eth(mockEthereumProvider);
     const { from, ...fromlessTx } = basicTx;
-    await expect(eth.sendTransaction(fromlessTx)).rejects.toThrowError('"from" field must be defined');
+    await expect(eth.sendTransaction(fromlessTx).getReceipt()).rejects.toThrowError('"from" field must be defined');
   });
 
-  const bootstrap1 = (address: string | null = contractAddress.toString()) => {
+  it('should get receipt', async () => {
     mockEthereumProvider.send.mockImplementationOnce(async method => {
       expect(method).toBe('eth_sendTransaction');
       return '0x1234567453543456321456321';
@@ -140,7 +124,8 @@ describe('eth', () => {
     mockEthereumProvider.send.mockImplementationOnce(async method => {
       expect(method).toBe('eth_getTransactionReceipt');
       return {
-        contractAddress: address,
+        from: from.toString(),
+        contractAddress: contractAddress.toString(),
         cumulativeGasUsed: '0xa',
         transactionIndex: '0x3',
         blockNumber: '0xa',
@@ -149,15 +134,12 @@ describe('eth', () => {
       };
     });
 
-    return new Eth(mockEthereumProvider);
-  };
+    const eth = new Eth(mockEthereumProvider);
 
-  it('should use promise when subscribing and checking for receipt', async () => {
-    const eth = bootstrap1();
-
-    const result = await eth.sendTransaction(basicTx);
+    const result = await eth.sendTransaction(basicTx).getReceipt();
 
     expect(result).toEqual({
+      from,
       contractAddress,
       cumulativeGasUsed: 10,
       transactionIndex: 3,
@@ -167,117 +149,7 @@ describe('eth', () => {
     });
   });
 
-  it('should use emitter when subscribing and checking for receipt', done => {
-    const eth = bootstrap1();
-
-    eth
-      .sendTransaction(basicTx)
-      .on('receipt', result => {
-        expect(result).toEqual({
-          contractAddress,
-          cumulativeGasUsed: 10,
-          transactionIndex: 3,
-          blockNumber: 10,
-          blockHash: '0xafff',
-          gasUsed: 0,
-        });
-
-        done();
-      })
-      .on('error', done);
-  });
-
-  it('should use promise when subscribing and checking for deployed contract', async () => {
-    const eth = bootstrap1();
-
-    mockEthereumProvider.send.mockImplementationOnce(async method => {
-      expect(method).toBe('eth_getCode');
-      return '0x321';
-    });
-
-    const result = await eth.sendTransaction(deployTx);
-
-    expect(result).toEqual({
-      contractAddress,
-      cumulativeGasUsed: 10,
-      transactionIndex: 3,
-      blockNumber: 10,
-      blockHash: '0xafff',
-      gasUsed: 0,
-    });
-  });
-
-  it('should use emitter when subscribing and checking deployed contract', done => {
-    const eth = bootstrap1();
-
-    mockEthereumProvider.send.mockImplementationOnce(async method => {
-      expect(method).toBe('eth_getCode');
-      return '0x321';
-    });
-
-    eth
-      .sendTransaction(deployTx)
-      .on('receipt', result => {
-        expect(result).toEqual({
-          contractAddress,
-          cumulativeGasUsed: 10,
-          transactionIndex: 3,
-          blockNumber: 10,
-          blockHash: '0xafff',
-          gasUsed: 0,
-        });
-
-        done();
-      })
-      .catch(done);
-  });
-
-  it('should fail with promise when deploying contract (empty code)', async () => {
-    const eth = bootstrap1();
-
-    mockEthereumProvider.send.mockImplementationOnce(async method => {
-      expect(method).toBe('eth_getCode');
-      return '0x';
-    });
-
-    await expect(eth.sendTransaction(deployTx)).rejects.toBeInstanceOf(Error);
-  });
-
-  it('should fail with emitter when deploying contract (empty code)', done => {
-    const eth = bootstrap1();
-
-    mockEthereumProvider.send.mockImplementationOnce(async method => {
-      expect(method).toBe('eth_getCode');
-      return '0x';
-    });
-
-    eth.sendTransaction(deployTx).on('error', error => {
-      expect(error).toBeInstanceOf(Error);
-      done();
-    });
-  });
-
-  it('should fail with promise when deploying contract (no address)', async () => {
-    const eth = bootstrap1(null);
-
-    await expect(eth.sendTransaction(deployTx)).rejects.toBeInstanceOf(Error);
-  });
-
-  it('should fail with emitter when deploying contract (no address)', done => {
-    const eth = bootstrap1(null);
-
-    eth
-      .sendTransaction(deployTx)
-      .on('error', error => {
-        expect(error).toBeInstanceOf(Error);
-      })
-      .catch(error => {
-        expect(error).toBeInstanceOf(Error);
-        done();
-      });
-  });
-
-  const failOnTimeout = () => {
+  it('should fail after no receipt after 50 blocks', async () => {
     mockEthereumProvider.send.mockImplementationOnce(async method => {
       expect(method).toBe('eth_sendTransaction');
       return '0x1234567453543456321456321';
@@ -306,25 +178,12 @@ describe('eth', () => {
       return '0x1234567';
     });
 
-    return new Eth(mockEthereumProvider);
-  };
+    const eth = new Eth(mockEthereumProvider);
 
-  it('should fail with promise after no receipt after 50 blocks', async () => {
-    const eth = failOnTimeout();
-
-    await expect(eth.sendTransaction(basicTx)).rejects.toBeInstanceOf(Error);
+    await expect(eth.sendTransaction(basicTx).getReceipt()).rejects.toBeInstanceOf(Error);
   });
 
-  it('should fail with emitter after no receipt after 50 blocks', done => {
-    const eth = failOnTimeout();
-
-    eth.sendTransaction(basicTx).on('error', error => {
-      expect(error).toBeInstanceOf(Error);
-      done();
-    });
-  });
-
-  it('should receive emitted confirmation receipts', done => {
+  it('should receive emitted confirmation receipts', async () => {
     mockEthereumProvider.send.mockImplementationOnce(async method => {
       expect(method).toBe('eth_sendTransaction');
       return '0x1234567453543456321456321';
@@ -344,7 +203,7 @@ describe('eth', () => {
           mockEthereumProvider.emit('notification', {
             subscription: '0x1234567',
             result: {
-              blockNumber: '0x10',
+              blockNumber: numberToHex(16 + i),
             },
           });
         }, i * 10);
@@ -355,10 +214,11 @@ describe('eth', () => {
 
     mockEthereumProvider.send.mockImplementation(async () => {
       return {
+        from: from.toString(),
         contractAddress: null,
         cumulativeGasUsed: '0xa',
         transactionIndex: '0x3',
-        blockNumber: '0xa',
+        blockNumber: '0x10',
         blockHash: '0xafff',
         gasUsed: '0x0',
       };
@@ -366,40 +226,26 @@ describe('eth', () => {
 
     const eth = new Eth(mockEthereumProvider);
 
-    let countConf = 0;
+    let confCount = 0;
 
-    eth
-      .sendTransaction(basicTx)
-      .on('transactionHash', result => {
-        expect(result).toBe('0x1234567453543456321456321');
-      })
-      .on('receipt', result => {
-        expect(result).toEqual({
-          contractAddress: null,
-          cumulativeGasUsed: 10,
-          transactionIndex: 3,
-          blockNumber: 10,
-          blockHash: '0xafff',
-          gasUsed: 0,
-        });
-      })
-      .on('confirmation', (conf, receipt) => {
-        expect(receipt).toEqual({
-          contractAddress: null,
-          cumulativeGasUsed: 10,
-          transactionIndex: 3,
-          blockNumber: 10,
-          blockHash: '0xafff',
-          gasUsed: 0,
-        });
+    const sendTx = eth.sendTransaction(basicTx);
+    expect(await sendTx.getTxHash()).toBe('0x1234567453543456321456321');
 
-        expect(conf).toBe(countConf);
-
-        countConf++;
-
-        if (conf === 9) {
-          done();
-        }
+    await sendTx.getReceipt(10, (conf, receipt) => {
+      expect(receipt).toEqual({
+        from,
+        cumulativeGasUsed: 10,
+        transactionIndex: 3,
+        blockNumber: 16,
+        blockHash: '0xafff',
+        gasUsed: 0,
       });
+
+      confCount++;
+
+      expect(conf).toBe(confCount);
+    });
+
+    expect(confCount).toBe(10);
   });
 });

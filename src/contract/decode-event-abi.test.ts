@@ -27,7 +27,6 @@ describe('eth', () => {
         const signature = 'Changed(address,uint256,uint256,uint256)';
         const result = decodeEvent(
           {
-            signature: sha3(signature),
             name: 'Changed',
             type: 'event',
             inputs: [

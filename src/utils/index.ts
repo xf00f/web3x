@@ -19,7 +19,6 @@ export { unitMap } from './units-ethjs-unit';
 export * from './bloom';
 export * from './bn';
 export * from './encryption';
-export * from './fire-error';
 export * from './hash-message';
 export * from './hex-ascii';
 export * from './hex-buffer';

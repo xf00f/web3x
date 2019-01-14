@@ -39,16 +39,14 @@ import { Tx } from './tx';
 
 const identity = result => result;
 
+export interface EthRequestPayload {
+  method: string;
+  params: any[];
+  format: (result: any) => any;
+}
+
 export class EthRequestPayloads {
-  constructor(private defaultFromAddress?: Address, private defaultBlock: BlockType = 'latest') {}
-
-  public getDefaultFromAddress() {
-    return this.defaultFromAddress;
-  }
-
-  public setDefaultFromAddress(address?: Address) {
-    this.defaultFromAddress = address;
-  }
+  constructor(public defaultFromAddress?: Address, private defaultBlock: BlockType = 'latest') {}
 
   public getDefaultBlock() {
     return this.defaultBlock;
@@ -269,11 +267,11 @@ export class EthRequestPayloads {
     };
   }
 
-  public call(callObject: Tx, block?: BlockType, outputFormatter = result => result) {
+  public call(callObject: Tx, block?: BlockType) {
     return {
       method: 'eth_call',
       params: [inputCallFormatter(callObject), inputBlockNumberFormatter(this.resolveBlock(block))],
-      format: outputFormatter,
+      format: identity,
     };
   }
 

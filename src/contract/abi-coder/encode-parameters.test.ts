@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { abi } from '.';
+import { abiCoder } from '.';
 
 describe('encodeParameters', () => {
   const tests = [
@@ -46,7 +46,7 @@ describe('encodeParameters', () => {
 
   tests.forEach(test => {
     it('should convert correctly', () => {
-      expect(abi.encodeParameters.apply(abi, test.params as any)).toEqual(test.result);
+      expect(abiCoder.encodeParameters.apply(abiCoder, test.params as any)).toEqual(test.result);
     });
   });
 });
@@ -54,7 +54,7 @@ describe('encodeParameters', () => {
 describe('encodeParameters', () => {
   const test = t => {
     it('should correct encode paramters', () => {
-      expect(abi.encodeParameters(t.types, t.values).replace('0x', '')).toBe(t.expected);
+      expect(abiCoder.encodeParameters(t.types, t.values).replace('0x', '')).toBe(t.expected);
     });
   };
 

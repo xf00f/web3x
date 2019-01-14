@@ -1,6 +1,6 @@
 import got from 'got';
 import { Address } from '../../address';
-import { ContractAbi } from '../../contract';
+import { ContractAbiDefinition } from '../../contract';
 
 function getHost(net: string) {
   switch (net) {
@@ -24,7 +24,7 @@ function getApiHost(net: string) {
   }
 }
 
-async function getAbi(net: string, address: Address): Promise<ContractAbi> {
+async function getAbi(net: string, address: Address): Promise<ContractAbiDefinition> {
   const host = getApiHost(net);
   const abiUrl = `http://${host}/api?module=contract&action=getabi&address=${address}&format=raw`;
   const response = await got(abiUrl, { json: true });

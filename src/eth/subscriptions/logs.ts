@@ -13,7 +13,7 @@ export function subscribeForLogs(eth: Eth, options: GetLogOptions = {}): Subscri
     eth.provider,
     (result, sub) => {
       const output = outputLogFormatter(result);
-      sub.emit(output.removed ? 'changed' : 'data', output);
+      sub.emit(output.removed ? 'changed' : 'data', output, sub);
     },
     false,
   );
@@ -22,11 +22,11 @@ export function subscribeForLogs(eth: Eth, options: GetLogOptions = {}): Subscri
     eth
       .getPastLogs(options)
       .then(logs => {
-        logs.forEach(log => subscription.emit('rawdata', log));
+        logs.forEach(log => subscription.emit('data', log, subscription));
         subscription.subscribe();
       })
       .catch(err => {
-        subscription.emit('error', err);
+        subscription.emit('error', err, subscription);
       });
   } else {
     subscription.subscribe();

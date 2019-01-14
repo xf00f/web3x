@@ -15,63 +15,82 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { abi } from '.';
+import { abiCoder } from '.';
 
 const tests = [
   {
     params: [
       {
-        name: 'myEvent',
-        type: 'event',
+        name: 'myMethod',
+        type: 'function',
         inputs: [
           {
             type: 'uint256',
             name: 'myNumber',
           },
           {
-            type: 'bytes32',
-            name: 'myBytes',
+            type: 'string',
+            name: 'myString',
           },
         ],
       },
     ],
-    result: '0xf2eeb729e636a8cb783be044acf6b7b1e2c5863735b60d6daae84c366ee87d97',
+    result: '0x24ee0097',
   },
   {
     params: [
       {
-        name: 'SomeEvent',
-        type: 'event',
+        name: 'myMethod',
+        type: 'function',
         inputs: [
           {
-            type: 'bytes',
-            name: 'somebytes',
+            type: 'string',
+            name: 'myNumber',
           },
           {
-            type: 'byte16',
-            name: 'myBytes',
+            type: 'bytes8',
+            name: 'myString',
           },
         ],
       },
     ],
-    result: '0xab132b6cdd50f8d4d2ea33c3f140a9b3cf40f451540c69765c4842508bb13838',
+    result: '0x27b00c93',
   },
   {
     params: [
       {
-        name: 'AnotherEvent',
-        type: 'event',
+        name: 'Somthing',
+        type: 'function',
+        inputs: [
+          {
+            type: 'uint16',
+            name: 'myNumber',
+          },
+          {
+            type: 'bytes',
+            name: 'myString',
+          },
+        ],
+      },
+    ],
+    result: '0x724ff7a1',
+  },
+  {
+    params: [
+      {
+        name: 'something',
+        type: 'function',
         inputs: [],
       },
     ],
-    result: '0x601d819e31a3cd164f83f7a7cf9cb5042ab1acff87b773c68f63d059c0af2dc0',
+    result: '0xa7a0d537',
   },
 ];
 
-describe('encodeEventSignature', () => {
+describe('encodeFunctionSignature', () => {
   tests.forEach(test => {
     it('should convert correctly', () => {
-      expect(abi.encodeEventSignature.apply(abi, test.params as any)).toEqual(test.result);
+      expect(abiCoder.encodeFunctionSignature.apply(abiCoder, test.params as any)).toEqual(test.result);
     });
   });
 });

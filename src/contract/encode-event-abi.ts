@@ -17,7 +17,7 @@
 
 import { isArray } from 'util';
 import { inputBlockNumberFormatter } from '../formatters';
-import { abi } from './abi';
+import { abiCoder } from './abi-coder';
 
 /**
  * Should be used to encode indexed params and options to one final object
@@ -70,10 +70,10 @@ export function encodeEventABI(event, address?: string, options?) {
 
           if (isArray(value)) {
             return value.map(v => {
-              return abi.encodeParameter(i.type, v);
+              return abiCoder.encodeParameter(i.type, v);
             });
           }
-          return abi.encodeParameter(i.type, value);
+          return abiCoder.encodeParameter(i.type, value);
         });
 
       result.topics = result.topics.concat(indexedTopics);

@@ -19,7 +19,7 @@
 import fs from 'fs';
 import mkdirp from 'mkdirp';
 import ts, { ClassElement } from 'typescript';
-import { AbiDefinition, AbiInput, AbiOutput, ContractAbi } from '../contract';
+import { AbiInput, AbiOutput, ContractAbiDefinition, ContractEntryDefinition } from '../contract';
 import { ContractBuildData, loadDataFromConfig } from './sources';
 import { Config } from './sources/config';
 
@@ -90,7 +90,7 @@ function makeImports(name: string, web3xPath: string) {
   ];
 }
 
-function makeEventType(definition: AbiDefinition) {
+function makeEventType(definition: ContractEntryDefinition) {
   const props = ts.createTypeLiteralNode(
     definition.inputs!.map(input =>
       ts.createPropertySignature(undefined, input.name, undefined, getTsTypeFromSolidityType(input, true), undefined),
@@ -106,11 +106,11 @@ function makeEventType(definition: AbiDefinition) {
   );
 }
 
-function makeEventTypes(abi: ContractAbi) {
+function makeEventTypes(abi: ContractAbiDefinition) {
   return abi.filter(def => def.type === 'event').map(makeEventType);
 }
 
-function makeEventLogInterface(definition: AbiDefinition) {
+function makeEventLogInterface(definition: ContractEntryDefinition) {
   const eventName = `${definition.name!}Event`;
   return ts.createInterfaceDeclaration(
     undefined,
@@ -132,11 +132,11 @@ function makeEventLogInterface(definition: AbiDefinition) {
   );
 }
 
-function makeEventLogInterfaces(abi: ContractAbi) {
+function makeEventLogInterfaces(abi: ContractAbiDefinition) {
   return abi.filter(def => def.type === 'event').map(makeEventLogInterface);
 }
 
-function makeEventsInterface(name: string, abi: ContractAbi) {
+function makeEventsInterface(name: string, abi: ContractAbiDefinition) {
   const events = abi.filter(def => def.type === 'event').map(event => event.name!);
   return ts.createInterfaceDeclaration(
     undefined,
@@ -158,7 +158,7 @@ function makeEventsInterface(name: string, abi: ContractAbi) {
   );
 }
 
-function makeEventLogsInterface(name: string, abi: ContractAbi) {
+function makeEventLogsInterface(name: string, abi: ContractAbiDefinition) {
   const events = abi.filter(def => def.type === 'event').map(event => event.name!);
   return ts.createInterfaceDeclaration(
     undefined,
@@ -178,7 +178,7 @@ function makeEventLogsInterface(name: string, abi: ContractAbi) {
   );
 }
 
-function makeTxEventLogsInterface(name: string, abi: ContractAbi) {
+function makeTxEventLogsInterface(name: string, abi: ContractAbiDefinition) {
   const events = abi.filter(def => def.type === 'event').map(event => event.name!);
   return ts.createInterfaceDeclaration(
     undefined,
@@ -281,7 +281,7 @@ function getCallReturnType(outputs: AbiOutput[]) {
   }
 }
 
-function getOutputType(name: string, definition: AbiDefinition) {
+function getOutputType(name: string, definition: ContractEntryDefinition) {
   if (!definition.stateMutability) {
     if (definition.outputs && definition.outputs.length) {
       return getCallReturnType(definition.outputs);
@@ -300,7 +300,7 @@ function getOutputType(name: string, definition: AbiDefinition) {
   }
 }
 
-function makeMethodSignature(name: string, definition: AbiDefinition) {
+function makeMethodSignature(name: string, definition: ContractEntryDefinition) {
   return ts.createMethodSignature(
     undefined,
     definition.inputs!.map(makeParameter),
@@ -310,12 +310,12 @@ function makeMethodSignature(name: string, definition: AbiDefinition) {
   );
 }
 
-function makeMethodsInterface(name: string, abi: ContractAbi) {
+function makeMethodsInterface(name: string, abi: ContractAbiDefinition) {
   const methods = abi.filter(def => def.type === 'function').map(def => makeMethodSignature(name, def));
   return ts.createInterfaceDeclaration(undefined, undefined, `${name}Methods`, undefined, undefined, methods);
 }
 
-function makeContract(name: string, initData: string | undefined, abi: ContractAbi) {
+function makeContract(name: string, initData: string | undefined, abi: ContractAbiDefinition) {
   const members: ClassElement[] = [];
 
   const ctor = ts.createConstructor(
@@ -449,7 +449,7 @@ function makeAbiExport(name: string) {
   );
 }
 
-function makeFile(name: string, abi: ContractAbi, initData: string | undefined, web3xPath: string) {
+function makeFile(name: string, abi: ContractAbiDefinition, initData: string | undefined, web3xPath: string) {
   const imports = makeImports(name, web3xPath);
   const eventTypes = makeEventTypes(abi);
   const eventLogTypes = makeEventLogInterfaces(abi);
@@ -477,13 +477,13 @@ function makeFile(name: string, abi: ContractAbi, initData: string | undefined, 
   ]);
 }
 
-async function makeAndWriteAbi(outputPath: string, name: string, abi: ContractAbi, web3xPath: string) {
+async function makeAndWriteAbi(outputPath: string, name: string, abi: ContractAbiDefinition, web3xPath: string) {
   const abiOutputFile = `${outputPath}/${name}Abi.ts`;
-  const output = `import { ContractAbi } from '${web3xPath}/contract';\nexport default ${JSON.stringify(
+  const output = `import { ContractAbi} from '${web3xPath}/contract';\nexport default new ContractAbi(${JSON.stringify(
     abi,
     undefined,
     2,
-  )} as ContractAbi;`;
+  )});`;
   fs.writeFileSync(abiOutputFile, output);
 }
 
