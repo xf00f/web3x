@@ -127,6 +127,8 @@ export class SendContractTx extends SendTransaction {
   }
 
   protected async handleReceipt(receipt: TransactionReceipt) {
+    receipt = await super.handleReceipt(receipt);
+
     if (!isArray(receipt.logs)) {
       return receipt;
     }

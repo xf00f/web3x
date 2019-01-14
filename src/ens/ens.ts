@@ -75,7 +75,7 @@ export class ENS {
    */
   public async setAddress(name: string, address: Address, sendOptions: SendOptions) {
     const resolver = await this.registry.resolver(name);
-    return await resolver.methods.setAddr(namehash(name), address.toString()).send(sendOptions);
+    return await resolver.methods.setAddr(namehash(name), address).send(sendOptions);
   }
 
   /**

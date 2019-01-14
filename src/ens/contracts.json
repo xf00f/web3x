@@ -1,7 +1,13 @@
 {
   "web3xPath": "../..",
   "contracts": {
-    "EnsRegistry": "./abi/registry.json",
-    "EnsResolver": "./abi/resolver.json"
+    "EnsRegistry": {
+      "source": "files",
+      "abiFile": "./abi/registry.json"
+    },
+    "EnsResolver": {
+      "source": "files",
+      "abiFile": "./abi/resolver.json"
+    }
   }
 }

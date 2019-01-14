@@ -1,12 +1,12 @@
 import BN from "bn.js";
 import { Address } from "../../address";
 import { EventLog, TransactionReceipt } from "../../formatters";
-import { Contract, ContractOptions, TxCall, TxSend, EventSubscriptionFactory } from "../../contract";
+import { Contract, ContractOptions, TxCall, TxSend, TxDeploy, EventSubscriptionFactory } from "../../contract";
 import { Eth } from "../../eth";
 import abi from "./EnsResolverAbi";
 export type AddrChangedEvent = {
     node: string;
-    a: string;
+    a: Address;
 };
 export type ContentChangedEvent = {
     node: string;
@@ -65,13 +65,13 @@ interface EnsResolverMethods {
     multihash(node: string): TxCall<string>;
     setPubkey(node: string, x: string, y: string): TxSend<EnsResolverTransactionReceipt>;
     content(node: string): TxCall<string>;
-    addr(node: string): TxCall<string>;
+    addr(node: string): TxCall<Address>;
     setABI(node: string, contentType: number | string | BN, data: string): TxSend<EnsResolverTransactionReceipt>;
     name(node: string): TxCall<string>;
     setName(node: string, name: string): TxSend<EnsResolverTransactionReceipt>;
     setContent(node: string, hash: string): TxSend<EnsResolverTransactionReceipt>;
     pubkey(node: string): TxCall<[string, string]>;
-    setAddr(node: string, addr: string): TxSend<EnsResolverTransactionReceipt>;
+    setAddr(node: string, addr: Address): TxSend<EnsResolverTransactionReceipt>;
 }
 export interface EnsResolverDefinition {
     methods: EnsResolverMethods;

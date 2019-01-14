@@ -58,6 +58,6 @@ export class Registry {
   public async resolver(name: string) {
     const contract = await this.contract;
     const address = await contract.methods.resolver(namehash(name)).call();
-    return new EnsResolver(this.ens.eth, Address.fromString(address));
+    return new EnsResolver(this.ens.eth, address);
   }
 }

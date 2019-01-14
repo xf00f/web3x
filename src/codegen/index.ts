@@ -17,7 +17,7 @@
 */
 
 import fs from 'fs';
-import mkdirp from 'mkdirp';
+import { ensureDirSync } from 'fs-extra';
 import ts, { ClassElement } from 'typescript';
 import { AbiInput, AbiOutput, ContractAbiDefinition, ContractEntryDefinition } from '../contract';
 import { ContractBuildData, loadDataFromConfig } from './sources';
@@ -513,7 +513,7 @@ async function main() {
   const config = JSON.parse(fs.readFileSync(configFile).toString()) as Config;
   const { outputPath = './contracts', web3xPath = getWeb3xPath() } = config;
 
-  mkdirp.sync(outputPath);
+  ensureDirSync(outputPath);
 
   await Promise.all(
     Object.entries(config.contracts).map(async entry => {

@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { isArray } from 'util';
+import { isArray, isString } from 'util';
 import { Address } from '../address';
 import { hexToNumber } from '../utils';
 import { Log, outputLogFormatter, UnformattedLog } from './output-log-formatter';
@@ -73,7 +73,7 @@ export interface TransactionReceipt<Events = void> {
  * @returns {Object}
  */
 export function outputTransactionReceiptFormatter(receipt?: UnformattedTransactionReceipt): TransactionReceipt | null {
-  if (!receipt) {
+  if (!receipt || !receipt.blockHash) {
     return null;
   }
 
@@ -91,6 +91,6 @@ export function outputTransactionReceiptFormatter(receipt?: UnformattedTransacti
     gasUsed: hexToNumber(receipt.gasUsed)!,
     logs: isArray(receipt.logs) ? receipt.logs.map(outputLogFormatter) : undefined,
     contractAddress: receipt.contractAddress ? Address.fromString(receipt.contractAddress) : undefined,
-    status: receipt.status ? Boolean(parseInt(receipt.status, 10)) : undefined,
+    status: isString(receipt.status) ? Boolean(hexToNumber(receipt.status)) : undefined,
   };
 }

@@ -133,10 +133,9 @@ export class Shh {
   }
 
   public subscribeMessages(options: SubscriptionOptions): Subscription<string> {
-    const subscription = new Subscription<string>('shh', 'messages', [options], this.provider);
-    subscription.on('rawdata', message => subscription.emit('data', message));
-    subscription.subscribe();
-    return subscription;
+    return new Subscription<string>('shh', 'messages', [options], this.provider, (message, sub) =>
+      sub.emit('data', message),
+    );
   }
 
   public subscribe(type: 'messages', options: SubscriptionOptions): Subscription<any> {
