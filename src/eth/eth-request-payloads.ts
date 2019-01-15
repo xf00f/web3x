@@ -267,10 +267,11 @@ export class EthRequestPayloads {
     };
   }
 
-  public call(callObject: Tx, block?: BlockType) {
+  public call(tx: Tx, block?: BlockType) {
+    tx.from = tx.from || this.defaultFromAddress;
     return {
       method: 'eth_call',
-      params: [inputCallFormatter(callObject), inputBlockNumberFormatter(this.resolveBlock(block))],
+      params: [inputCallFormatter(tx), inputBlockNumberFormatter(this.resolveBlock(block))],
       format: identity,
     };
   }

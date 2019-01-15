@@ -35,15 +35,19 @@ web3x solves the above issues.
 - It's pure TypeScript and generates contract types from ABIs.
 - It's small, with a minimum sized contract interaction weighing in at ~150k uncompressed.
 
+web3x also adopts a lean, functional design, and resolves many out the outstanding issues in the web3.js repository.
+It is under active development, view the [CHANGELOG](CHANGELOG.md) to see updates and planned roadmap.
+
 ## Usage
 
 There are two builds of the library. `web3x` uses CommonJS style imports and is best used for Node.js backends. `web3x-es` uses ES6 imports and is best used for ES6 aware tools like Webpack.
 
 ### Using inbuilt providers
 
-The inbuilt providers are all EIP-1193 compatible, and are used as follows:
+The inbuilt providers are all [EIP-1193](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1193.md) compatible, and are used as follows:
 
 ```typescript
+import { Address } from 'web3x-es/address';
 import { WebsocketProvider } from 'web3x-es/providers';
 import { Eth } from 'web3x-es/eth';
 import { fromWei } from 'web3x-es/utils';
@@ -51,7 +55,7 @@ import { fromWei } from 'web3x-es/utils';
 async function main() {
   const provider = new WebsocketProvider('wss://mainnet.infura.io/ws');
   const eth = new Eth(provider);
-  const balance = await eth.getBalance('0x0000000000000000000000000000000000000000');
+  const balance = await eth.getBalance(Address.ZERO);
   document.body.innerText = `Balance of 0 address ETH: ${fromWei(balance, 'ether')}`;
 }
 
@@ -80,7 +84,7 @@ import { Eth } from 'web3x-es/eth';
 const eth = Eth.fromCurrentProvider();
 ```
 
-See example projects for more complex examples.
+See [example projects](example-projects) for more complex usage examples.
 
 ## Contract type safety
 
@@ -122,13 +126,13 @@ The generator will create 3 contracts:
 
 - For the first it uses etherscan to download the contract ABI and initialisation code at the given address, and generates the interface at `./src/contracts/DaiContract.ts`.
 - For the second it specifies a truffle build output and generates its interface at `./src/contracts/MyTruffleContract.ts`.
-- For the third it reads a raw ABI file and compilied initialisation code from local files, and generates its interface at `./src/contracts/MyRawAbiContract.ts`. The `initDataFile` property is optional but you won't be able to easily deploy the contract without it.
+- For the third it reads a raw ABI file and compiled initialisation code from local files, and generates its interface at `./src/contracts/MyRawAbiContract.ts`. The `initDataFile` property is optional but you won't be able to easily deploy the contract without it.
 
 For an example of the code generated, take a look at this [example](example-projects/node/src/contracts/DaiContract.ts).
 
 ### Using generated contracts
 
-The following code demonstrates how to use the generated contract class. It's the exact same API as used in web3.js, only now with type safety.
+The following code demonstrates how to use the generated contract class. It's a similar API as used in web3.js, only now with type safety.
 
 ```typescript
 import { Address } from 'web3x/address';
@@ -137,7 +141,7 @@ import { WebsocketProvider } from 'web3x/providers';
 import { Eth } from 'web3x/eth';
 import { DaiContract } from './contracts/DaiContract';
 
-const DAI_CONTRACT_ADDRESS = '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359';
+const DAI_CONTRACT_ADDRESS = Address.fromString('0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359');
 
 async function main() {
   const provider = new WebsocketProvider('wss://mainnet.infura.io/ws');
@@ -155,7 +159,7 @@ async function main() {
 main().catch(console.error);
 ```
 
-Deploying contracts is trivial as well, as the bytecode is imported by web3x-codegen and included as part of the contract class.
+Deploying contracts is trivial as well, as the bytecode is imported by `web3x-codegen` and included as part of the contract class.
 The following code deploys an exact replica of the DAI contract on mainnet, only now you can mint your own funds.
 
 ```typescript
@@ -173,8 +177,14 @@ async function main() {
 
   try {
     const contract = new DaiContract(eth);
-    await contract.deploy('xf00f token').send({ from, gasPrice });
-    await contract.methods.mint(toWei(1000, 'ether')).send({ from, gasPrice });
+    await contract
+      .deploy('xf00f token')
+      .send({ from, gasPrice })
+      .getReceipt();
+    await contract.methods
+      .mint(toWei(1000, 'ether'))
+      .send({ from, gasPrice })
+      .getReceipt();
     const balance = await contract.methods.balanceOf(from).call();
     console.log(`Balance of ${from}: ${fromWei(balance, 'ether')}`);
   } finally {
@@ -190,6 +200,7 @@ main().catch(console.error);
 This is not a perfect drop in replacement for web3.js, there are small differences.
 
 - Callbacks for request/response style calls no longer supported, promises only.
+- PromiEvent interface has been removed, in favour of `getTxHash()`, `getReceipt()` methods.
 - Address objects must be used insead of strings. e.g. `Address.fromString('0x903ddd91207f737255ca93eb5885c0e087be0fc3')`
 - Buffers are often used instead of `0x` prefixed strings.
 - You should explicitly import parts of the library rather then accessing them via the web3 object.
