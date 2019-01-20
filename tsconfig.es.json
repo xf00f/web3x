@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "esnext",
     "module": "es6",
     "moduleResolution": "node",
-    "lib": ["dom", "es6", "es2017.object"],
+    "lib": ["dom", "esnext", "es2017.object"],
     "outDir": "dest-es",
     "strict": true,
     "declaration": true,

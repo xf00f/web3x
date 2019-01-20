@@ -15,6 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import BN from 'bn.js';
 import { abiCoder } from '.';
 import { Address } from '../../address';
 
@@ -43,6 +44,18 @@ describe('encodeParameter', () => {
 });
 
 describe('encodeParameter', () => {
+  it('should correctly encode a BN', () => {
+    expect(abiCoder.encodeParameter('uint256', new BN('1000'))).toBe(
+      '0x00000000000000000000000000000000000000000000000000000000000003e8',
+    );
+  });
+
+  it('should correctly encode a number', () => {
+    expect(abiCoder.encodeParameter('uint256', 1000)).toBe(
+      '0x00000000000000000000000000000000000000000000000000000000000003e8',
+    );
+  });
+
   const test = t => {
     it('should correctly encode parameter', () => {
       expect(abiCoder.encodeParameter(t.type, t.value).replace('0x', '')).toBe(t.expected);

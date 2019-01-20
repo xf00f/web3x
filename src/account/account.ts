@@ -21,7 +21,7 @@ import { Address } from '../address';
 import { Eth } from '../eth';
 import { create, fromPrivate } from '../eth-lib/account';
 import { BaseSendTx, SendTx } from '../eth/send-tx';
-import { decrypt, encrypt, KeyStore, randomHex } from '../utils';
+import { decrypt, encrypt, KeyStore, randomBuffer } from '../utils';
 import { sign } from '../utils/sign';
 import { signTransaction } from './sign-transaction';
 
@@ -38,7 +38,7 @@ export interface AccountTx {
 export class Account {
   constructor(readonly address: Address, readonly privateKey: Buffer, readonly publicKey: Buffer) {}
 
-  public static create(entropy: Buffer = randomHex(32)) {
+  public static create(entropy: Buffer = randomBuffer(32)) {
     const { privateKey, address, publicKey } = create(entropy);
     return new Account(Address.fromString(address), privateKey, publicKey);
   }
