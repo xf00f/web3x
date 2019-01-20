@@ -84,7 +84,15 @@ export function toHex(value: string | number | BN | boolean | object, returnType
   return returnType ? (value < 0 ? 'int256' : 'uint256') : numberToHex(value);
 }
 
-export function randomHex(size): Buffer {
+export function randomHex(size): string {
+  if (size > 65536) {
+    throw new Error('Requested too many random bytes.');
+  }
+
+  return '0x' + randomBytes(size).toString('hex');
+}
+
+export function randomBuffer(size): Buffer {
   if (size > 65536) {
     throw new Error('Requested too many random bytes.');
   }

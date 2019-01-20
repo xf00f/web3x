@@ -195,6 +195,9 @@ export class BigNumber implements Hexable {
 }
 
 export function bigNumberify(value: BigNumberish): BigNumber {
+  if (BN.isBN(value)) {
+    return new BigNumber(value.toString());
+  }
   if (BigNumber.isBigNumber(value)) {
     return value;
   }

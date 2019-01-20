@@ -15,7 +15,6 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export { unitMap } from './units-ethjs-unit';
 export * from './bloom';
 export * from './bn';
 export * from './encryption';
