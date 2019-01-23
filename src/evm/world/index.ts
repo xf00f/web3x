@@ -1,66 +1,11 @@
-import { toBigIntBE, toBufferBE } from 'bigint-buffer';
-import BN from 'bn.js';
+import { toBufferBE } from 'bigint-buffer';
 import { LevelUp } from 'levelup';
-import * as rlp from 'rlp';
 import { Address } from '../../address';
-import { sha3Buffer } from '../../utils';
 import { EvmContext } from '../evm-context';
 import { run } from '../run';
 import { Trie } from '../trie';
-
-export class AccountState {
-  constructor(public nonce: number, public balance: bigint, public storageRoot: Buffer, public codeHash: Buffer) {}
-
-  public static fromRlp(data: Buffer) {
-    const account: Buffer[] = rlp.decode(data) as any;
-    return new AccountState(
-      account[0].length ? account[0].readUIntBE(0, account[0].length) : 0,
-      toBigIntBE(account[1]),
-      account[2],
-      account[3],
-    );
-  }
-
-  public toRlp() {
-    return rlp.encode([this.nonce, new BN(this.balance.toString()), this.storageRoot, this.codeHash]);
-  }
-}
-
-export class EvmAccount {
-  constructor(public address: Address, public state: AccountState, public storage: Trie, public code: Buffer) {}
-
-  public static fromNew(db: LevelUp, address: Address, value: bigint = BigInt(0), nonce: number = 0) {
-    const state = new AccountState(nonce, value, Buffer.of(), sha3Buffer(''));
-    const storage = new Trie(db);
-    const code = Buffer.of();
-    return new EvmAccount(address, state, storage, code);
-  }
-
-  public static async load(address: Address, worldState: WorldState) {
-    const fromAccountRlp = await worldState.accounts.get(address.toBuffer());
-
-    if (!fromAccountRlp) {
-      throw new Error('Account not found.');
-    }
-
-    const state = AccountState.fromRlp(fromAccountRlp);
-    const storage = new Trie(worldState.db, state.storageRoot);
-    const code = (await storage.get(state.codeHash)) || Buffer.of();
-
-    return new EvmAccount(address, state, storage, code);
-  }
-
-  public async store(worldState: WorldState) {
-    this.state.codeHash = sha3Buffer(this.code);
-    await this.storage.put(this.state.codeHash, this.code);
-    this.state.storageRoot = this.storage.root;
-    await worldState.accounts.put(this.address.toBuffer(), this.state.toRlp());
-  }
-
-  public nextContractAddress() {
-    return new Address(sha3Buffer(rlp.encode([this.address.toBuffer(), this.state.nonce])).slice(12));
-  }
-}
+import { TxSubstrate } from '../tx/tx-substrate';
+import { EvmAccount, EvmEcdsaRecoveryAccount } from './evm-account';
 
 export class WorldState {
   constructor(public db: LevelUp, public accounts: Trie) {}
@@ -75,16 +20,18 @@ export class WorldState {
     };
     const stateRoot = await getStateRoot();
     const trie = new Trie(db, stateRoot);
-    return new WorldState(db, trie);
+    const worldState = new WorldState(db, trie);
+    await worldState.installPrecompiledContracts();
+    return worldState;
+  }
+
+  private async installPrecompiledContracts() {
+    const ecdsaRecovery = EvmEcdsaRecoveryAccount.fromNew(this.accounts);
+    await ecdsaRecovery.store();
   }
 
   private async saveStateRoot() {
     await this.db.put('stateRoot', this.accounts.root);
-  }
-
-  public async loadAccount(address: Address | bigint) {
-    const key = address instanceof Address ? address : new Address(toBufferBE(address, 20));
-    return await EvmAccount.load(key, this);
   }
 
   public async createSimpleAccount(address: Address, value: bigint) {
@@ -94,64 +41,96 @@ export class WorldState {
       throw new Error('Account already exists.');
     }
 
-    const newAccount = EvmAccount.fromNew(this.db, address, value);
-    await newAccount.store(this);
+    const newAccount = EvmAccount.fromNew(this.db, this.accounts, address, value);
+    await newAccount.store();
     await this.saveStateRoot();
     return newAccount;
   }
 
   public async getOrCreateAccount(address: Address) {
     try {
-      return await this.loadAccount(address);
+      return await EvmAccount.load(address, this.accounts);
     } catch (_) {
-      return EvmAccount.fromNew(this.db, address, BigInt(0));
+      return EvmAccount.fromNew(this.db, this.accounts, address, BigInt(0));
     }
   }
 
   public async createContractAccount(from: Address, code: Buffer, value: bigint) {
-    const fromAccount = await this.loadAccount(from);
+    const fromAccount = await EvmAccount.load(from, this.accounts);
     const contractAddr = fromAccount.nextContractAddress();
-    const contractAccount = EvmAccount.fromNew(this.db, contractAddr, value, 1);
-    const context = new EvmContext(
-      this,
-      code,
-      Buffer.of(),
-      from,
-      from,
-      contractAddr,
-      BigInt(0),
-      BigInt(0),
-      contractAccount.storage,
-    );
+    const contractAccount = EvmAccount.fromNew(this.db, this.accounts, contractAddr, value, 1);
 
     fromAccount.state.nonce++;
 
-    await run(context);
+    const context = await run(
+      new EvmContext(
+        this.accounts,
+        code,
+        Buffer.of(),
+        from,
+        from,
+        contractAddr,
+        BigInt(0),
+        BigInt(0),
+        contractAccount.storage,
+      ),
+    );
+
+    if (context.reverted) {
+      throw new Error(`Contract creation transaction reverted at ip: ${context.ip}`);
+    }
+
     contractAccount.code = context.returned;
 
-    await contractAccount.store(this);
-    await fromAccount.store(this);
+    await contractAccount.store();
+    await fromAccount.store();
     await this.saveStateRoot();
 
     return contractAddr.toString();
   }
 
   public async runTransaction(from: Address, to: Address, data: Buffer, value: bigint) {
-    const fromAccount = await EvmAccount.load(from, this);
+    const fromAccount = await EvmAccount.load(from, this.accounts);
     const toAccount = await this.getOrCreateAccount(to);
+
+    const txSubstrate = new TxSubstrate();
+    txSubstrate.touchedAccounts[from.toString()] = fromAccount;
+    txSubstrate.touchedAccounts[to.toString()] = toAccount;
 
     fromAccount.state.nonce++;
 
-    const returnValue =
-      toAccount.code.length > 0
-        ? await run(new EvmContext(this, toAccount.code, data, from, from, to, BigInt(0), BigInt(0), toAccount.storage))
-        : Buffer.of();
+    if (toAccount.code.length > 0) {
+      const context = await run(
+        new EvmContext(
+          this.accounts,
+          toAccount.code,
+          data,
+          from,
+          from,
+          to,
+          BigInt(0),
+          BigInt(0),
+          toAccount.storage,
+          txSubstrate,
+        ),
+      );
 
-    await fromAccount.store(this);
-    await toAccount.store(this);
-    await this.saveStateRoot();
+      if (context.reverted) {
+        throw new Error(`Transaction reverted at ip: ${context.ip}`);
+      }
 
-    return returnValue;
+      await fromAccount.store();
+      await toAccount.store();
+      await this.saveStateRoot();
+
+      return context.returned;
+    } else {
+      await fromAccount.store();
+      await toAccount.store();
+      await this.saveStateRoot();
+
+      return Buffer.of();
+    }
   }
 
   public async call(from: Address, to: Address, data: Buffer) {
@@ -159,7 +138,7 @@ export class WorldState {
 
     if (toAccount.code.length > 0) {
       const context = new EvmContext(
-        this,
+        this.accounts,
         toAccount.code,
         data,
         from,
@@ -177,7 +156,7 @@ export class WorldState {
   }
 
   public async getAccountCode(address: Address) {
-    const account = await EvmAccount.load(address, this);
+    const account = await EvmAccount.load(address, this.accounts);
     return account.code;
   }
 }

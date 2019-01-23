@@ -1,3 +1,4 @@
+import { toBufferBE } from 'bigint-buffer';
 import { OpCode } from '.';
 import { EvmContext } from '../evm-context';
 
@@ -19,17 +20,15 @@ class LogOp implements OpCode {
   }
 
   public handle(context: EvmContext) {
-    for (let i = 0; i < this.topics + 2; i++) {
-      context.stack.pop();
+    context.stack.pop();
+    context.stack.pop();
+    const args: string[] = [];
+    for (let i = 0; i < this.topics; i++) {
+      args.push(toBufferBE(context.stack.pop(), 32).toString('hex'));
     }
+    // console.log(`${this.mnemonic}: ${args}`);
     context.ip += this.bytes;
   }
 }
 
-export const Log0 = new LogOp(0xa0, 0);
-export const Log1 = new LogOp(0xa1, 1);
-export const Log2 = new LogOp(0xa2, 2);
-export const Log3 = new LogOp(0xa3, 3);
-export const Log4 = new LogOp(0xa4, 4);
-
-export const LogOps = [Log1, Log2, Log3, Log4];
+export const LogOps = new Array(5).fill(0).map((_, i) => new LogOp(0xa0 + i, i));

@@ -2,7 +2,7 @@ import { toBufferBE } from 'bigint-buffer';
 import { OpCode } from '.';
 import { Address } from '../../address';
 import { EvmContext } from '../evm-context';
-import { run } from '../run';
+import { EvmAccount } from '../world/evm-account';
 
 class CallOp implements OpCode {
   public readonly code = 0xf1;
@@ -24,23 +24,14 @@ class CallOp implements OpCode {
     const retOffset = context.stack.pop();
     const retSize = context.stack.pop();
 
-    const address = new Address(toBufferBE(addr, 20));
-    const account = await context.worldState.loadAccount(address);
-    const data = context.memory.loadN(inOffset, Number(inOffset + inSize));
+    const { sender, executor, txSubstrate } = context;
 
-    const { sender, executor } = context;
-    const callContext = new EvmContext(
-      context.worldState,
-      account.code,
-      data,
-      sender,
-      executor,
-      address,
-      value,
-      gas,
-      account.storage,
-    );
-    await run(callContext);
+    const address = new Address(toBufferBE(addr, 20));
+    const account =
+      txSubstrate.touchedAccounts[address.toString()] || (await EvmAccount.load(address, context.accounts));
+    const calldata = context.memory.loadN(inOffset, Number(inSize));
+
+    const callContext = await account.run(calldata, sender, executor, value, gas, txSubstrate);
 
     const hasErrored = callContext.reverted || !callContext.halt;
     if (hasErrored) {
@@ -48,7 +39,7 @@ class CallOp implements OpCode {
     } else {
       context.stack.push(BigInt(1));
 
-      context.memory.storeN(retOffset, callContext.returned.slice(Number(retSize)));
+      context.memory.storeN(retOffset, callContext.returned.slice(0, Number(retSize)));
       context.lastReturned = callContext.returned;
     }
 
