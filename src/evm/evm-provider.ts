@@ -1,7 +1,7 @@
 import levelup, { LevelUp } from 'levelup';
 import { Address } from '../address';
 import { EthereumProvider, EthereumProviderNotifications } from '../providers';
-import { bufferToHex, hexToBuffer, randomHex } from '../utils';
+import { bufferToHex, hexToBuffer, numberToHex, randomHex } from '../utils';
 import { WorldState } from './world';
 
 const leveljs = require('level-js');
@@ -87,8 +87,11 @@ export class EvmProvider implements EthereumProvider {
 
     if (method === 'eth_getCode') {
       const code = await this.worldState.getAccountCode(Address.fromString(params![0]));
-      const codeStr = '0x' + code.toString('hex');
-      return codeStr;
+      return bufferToHex(code);
+    }
+
+    if (method === 'eth_gasPrice') {
+      return numberToHex(50000);
     }
   }
 

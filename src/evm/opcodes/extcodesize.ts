@@ -1,5 +1,6 @@
 import { OpCode } from '.';
 import { EvmContext } from '../evm-context';
+import { EvmAccount } from '../world/evm-account';
 
 class ExtCodeSizeOp implements OpCode {
   public readonly code = 0x3b;
@@ -14,7 +15,7 @@ class ExtCodeSizeOp implements OpCode {
 
   public async handle(context: EvmContext) {
     const address = context.stack.pop() % BigInt(2) ** BigInt(160);
-    const account = await context.worldState.loadAccount(address);
+    const account = await EvmAccount.load(address, context.accounts);
     context.stack.push(BigInt(account.code.length));
     context.ip += this.bytes;
   }

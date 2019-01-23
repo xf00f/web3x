@@ -1,14 +1,15 @@
 import { toBigIntBE } from 'bigint-buffer';
-import { LevelUp } from 'levelup';
+import levelup from 'levelup';
+import memdown from 'memdown';
 import { sha3 } from '../../utils';
 import { EvmContext } from '../evm-context';
 import { WorldState } from '../world';
 import { Sha3 } from './sha3';
 
 describe('opcodes', () => {
-  it('sha3', () => {
-    const db = new LevelUp();
-    const context = new EvmContext(new WorldState(db));
+  it('sha3', async () => {
+    const db = levelup(memdown());
+    const context = new EvmContext(await WorldState.fromDb(db));
 
     const buffer1 = Buffer.from('00112233445566778899aabbccddeeff000102030405060708090a0b0c0d0e0f', 'hex');
     const buffer2 = Buffer.from('deadbeef00000000000000000000000000000000000000000000000000000000', 'hex');

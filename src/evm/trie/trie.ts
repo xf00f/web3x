@@ -4,7 +4,7 @@ import MerklePatriciaTree from 'merkle-patricia-tree';
 export class Trie {
   private trie: MerklePatriciaTree;
 
-  constructor(private db?: LevelUp, stateRoot?: Buffer) {
+  constructor(public db?: LevelUp, stateRoot?: Buffer) {
     this.trie = new MerklePatriciaTree(db, stateRoot);
   }
 

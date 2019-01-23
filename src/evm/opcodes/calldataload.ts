@@ -14,7 +14,7 @@ class CallDataLoadOp implements OpCode {
   }
 
   public handle(context: EvmContext) {
-    const offset = +context.stack.pop()!.toString();
+    const offset = Number(context.stack.pop());
     const buf = Buffer.alloc(32);
     context.calldata.copy(buf, 0, offset, offset + 32);
     const word = toBigIntBE(buf);

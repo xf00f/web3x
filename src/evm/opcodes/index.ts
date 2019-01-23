@@ -3,6 +3,7 @@ import { Add } from './add';
 import { AddMod } from './addmod';
 import { Address } from './address';
 import { And } from './and';
+import { Byte } from './byte';
 import { Call } from './call';
 import { CallDataCopy } from './calldatacopy';
 import { CallDataLoad } from './calldataload';
@@ -25,6 +26,7 @@ import { Jumpi } from './jumpi';
 import { LogOps } from './log';
 import { Lt } from './lt';
 import { Mload } from './mload';
+import { Mod } from './mod';
 import { Mstore } from './mstore';
 import { Mul } from './mul';
 import { Not } from './not';
@@ -32,14 +34,19 @@ import { Or } from './or';
 import { Pop } from './pop';
 import { PushOps } from './push';
 import { Return } from './return';
+import { ReturnDataCopy } from './returndatacopy';
 import { ReturnDataSize } from './returndatasize';
 import { Revert } from './revert';
+import { Sgt } from './sgt';
 import { Sha3 } from './sha3';
 import { Sload } from './sload';
+import { Slt } from './slt';
 import { Sstore } from './sstore';
 import { Stop } from './stop';
 import { Sub } from './sub';
 import { SwapOps } from './swap';
+import { Timestamp } from './timestamp';
+import { Xor } from './xor';
 
 export interface OpCode {
   readonly code: number;
@@ -61,6 +68,7 @@ const opCodes: OpCode[] = [
   AddMod,
   Address,
   And,
+  Byte,
   Call,
   Caller,
   CallDataCopy,
@@ -81,12 +89,17 @@ const opCodes: OpCode[] = [
   Jumpi,
   Lt,
   Mul,
+  Mod,
   Or,
   Pop,
+  Sgt,
+  Slt,
+  Timestamp,
   Mload,
   Mstore,
   Not,
   Return,
+  ReturnDataCopy,
   ReturnDataSize,
   Revert,
   Sha3,
@@ -94,6 +107,7 @@ const opCodes: OpCode[] = [
   Sload,
   Sstore,
   Sub,
+  Xor,
 ];
 
 export const OpCodes: { [code: number]: OpCode } = opCodes.reduce((a, c) => ({ ...a, [c.code]: c }), {});
