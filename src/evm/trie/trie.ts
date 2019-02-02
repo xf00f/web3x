@@ -4,6 +4,10 @@ import MerklePatriciaTree from 'merkle-patricia-tree';
 export class Trie {
   private trie: MerklePatriciaTree;
 
+  get isCheckpoint() {
+    return this.trie.isCheckpoint;
+  }
+
   constructor(public db?: LevelUp, stateRoot?: Buffer) {
     this.trie = new MerklePatriciaTree(db, stateRoot);
   }
@@ -34,5 +38,17 @@ export class Trie {
         }
       }),
     );
+  }
+
+  public checkpoint() {
+    this.trie.checkpoint();
+  }
+
+  public commit() {
+    return new Promise(resolve => this.trie.commit(resolve));
+  }
+
+  public revert() {
+    return new Promise(resolve => this.trie.revert(resolve));
   }
 }

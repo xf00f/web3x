@@ -17,17 +17,6 @@
 
 import { Address } from '../address';
 
-export interface Tx {
-  nonce?: string | number;
-  chainId?: string | number;
-  from?: Address;
-  to?: Address;
-  data?: string;
-  value?: string | number;
-  gas: string | number;
-  gasPrice?: string | number;
-}
-
 export interface SignedTransaction {
   raw: string;
   tx: {

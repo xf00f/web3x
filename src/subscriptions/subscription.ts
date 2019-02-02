@@ -24,7 +24,7 @@ interface SubscriptionParams {
   result: any;
 }
 
-export class Subscription<Result = any> extends EventEmitter {
+export class Subscription<Result = any, RawResult = Result> extends EventEmitter {
   private id?: string;
   private listener?: (result: any) => void;
 
@@ -33,7 +33,7 @@ export class Subscription<Result = any> extends EventEmitter {
     readonly subscription: string,
     readonly params: any[],
     private provider: EthereumProvider,
-    private callback: (result: Result, sub: Subscription<Result>) => void,
+    private callback: (result: RawResult, sub: Subscription<Result, RawResult>) => void,
     subscribeImmediately: boolean = true,
   ) {
     super();

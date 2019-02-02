@@ -2,8 +2,8 @@ import { toBigIntBE } from 'bigint-buffer';
 import levelup from 'levelup';
 import memdown from 'memdown';
 import { sha3 } from '../../utils';
-import { EvmContext } from '../evm-context';
-import { WorldState } from '../world';
+import { EvmContext } from '../vm/evm-context';
+import { WorldState } from '../world/world-state';
 import { Sha3 } from './sha3';
 
 describe('opcodes', () => {

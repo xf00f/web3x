@@ -16,7 +16,7 @@
 */
 
 import { EventLog } from '../formatters';
-import { Log } from '../formatters/output-log-formatter';
+import { LogResponse } from '../formatters/log-response-formatter';
 import { ContractEntryDefinition } from './abi';
 import { abiCoder } from './abi-coder';
 
@@ -27,7 +27,7 @@ import { abiCoder } from './abi-coder';
  * @param log The log response to decode.
  * @returns The decoded event log.
  */
-export function decodeEvent(event: ContractEntryDefinition, log: Log): EventLog<any> {
+export function decodeEvent(event: ContractEntryDefinition, log: LogResponse): EventLog<any> {
   log.data = log.data || '';
   log.topics = log.topics || [];
 

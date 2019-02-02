@@ -1,5 +1,5 @@
+import { OpCodes } from '../opcodes';
 import { EvmContext } from './evm-context';
-import { OpCodes } from './opcodes';
 
 export async function run(context: EvmContext, printOpcodes: boolean = false) {
   while (!context.halt) {
@@ -31,7 +31,8 @@ export async function run(context: EvmContext, printOpcodes: boolean = false) {
       }
       bytes += opCode.bytes;
     }
-    throw new Error(`Execution reverted at instruction ${instruction}.`);
+    // tslint:disable-next-line:no-console
+    console.error(`Execution reverted at instruction ${instruction}.`);
   }
 
   return context;

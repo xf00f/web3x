@@ -81,7 +81,7 @@ export function toHex(value: string | number | BN | boolean | object, returnType
     }
   }
 
-  return returnType ? (value < 0 ? 'int256' : 'uint256') : numberToHex(value);
+  return returnType ? (value < 0 ? 'int256' : 'uint256') : numberToHex(value as number);
 }
 
 export function randomHex(size): string {

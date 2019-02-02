@@ -1,5 +1,5 @@
 import { OpCode, OpCodes } from '.';
-import { EvmContext } from '../evm-context';
+import { EvmContext } from '../vm/evm-context';
 
 class JumpiOp implements OpCode {
   public readonly code = 0x57;

@@ -15,12 +15,12 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Transaction } from '../../formatters';
+import { TransactionResponse } from '../../formatters';
 import { EthereumProvider } from '../../providers';
 import { Subscription } from '../../subscriptions';
 
-export function subscribeForNewPendingTransactions(provider: EthereumProvider): Subscription<Transaction> {
-  return new Subscription<Transaction>('eth', 'newPendingTransactions', [], provider, (result, sub) => {
+export function subscribeForNewPendingTransactions(provider: EthereumProvider): Subscription<TransactionResponse> {
+  return new Subscription<TransactionResponse>('eth', 'newPendingTransactions', [], provider, (result, sub) => {
     sub.emit('data', result, sub);
   });
 }

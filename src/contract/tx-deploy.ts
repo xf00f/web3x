@@ -19,8 +19,9 @@ import { Address } from '../address';
 import { Eth } from '../eth';
 import { SendTx } from '../eth/send-tx';
 import { TransactionReceipt } from '../formatters';
+import { hexToBuffer } from '../utils';
 import { ContractAbi, ContractFunctionEntry } from './abi';
-import { SendContractTx } from './tx';
+import { SendContractTx, TxSend } from './tx';
 
 interface SendOptions {
   from?: Address;
@@ -41,7 +42,7 @@ type DefaultOptions = {
   gas?: number;
 };
 
-export class TxDeploy {
+export class TxDeploy implements TxSend {
   constructor(
     private eth: Eth,
     private contractEntry: ContractFunctionEntry,
@@ -66,7 +67,7 @@ export class TxDeploy {
     return new DeployContractTx(this.eth, tx, this.contractAbi, this.onDeployed);
   }
 
-  public getRequestPayload(options: SendOptions) {
+  public getSendRequestPayload(options: SendOptions) {
     return this.eth.request.sendTransaction(this.getTx(options));
   }
 
@@ -81,7 +82,7 @@ export class TxDeploy {
   }
 
   public encodeABI() {
-    return this.deployData + this.contractEntry.encodeParameters(this.args).replace('0x', '');
+    return hexToBuffer(this.deployData + this.contractEntry.encodeParameters(this.args).replace('0x', ''));
   }
 }
 

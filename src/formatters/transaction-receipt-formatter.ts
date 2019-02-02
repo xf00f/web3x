@@ -17,10 +17,10 @@
 
 import { isArray, isString } from 'util';
 import { Address } from '../address';
-import { hexToNumber } from '../utils';
-import { Log, outputLogFormatter, UnformattedLog } from './output-log-formatter';
+import { hexToNumber, numberToHex } from '../utils';
+import { fromRawLogResponse, LogResponse, RawLogResponse, toRawLogResponse } from './log-response-formatter';
 
-export interface UnformattedTransactionReceipt {
+export interface RawTransactionReceipt {
   transactionHash: string;
   transactionIndex: string;
   blockHash: string;
@@ -30,7 +30,7 @@ export interface UnformattedTransactionReceipt {
   cumulativeGasUsed: string;
   gasUsed: string;
   contractAddress?: string;
-  logs?: UnformattedLog[];
+  logs?: RawLogResponse[];
   status?: string;
 }
 
@@ -59,26 +59,15 @@ export interface TransactionReceipt<Events = void> {
   cumulativeGasUsed: number;
   gasUsed: number;
   contractAddress?: Address;
-  logs?: Log[];
+  logs?: LogResponse[];
   events?: Events extends void ? { [eventName: string]: EventLog<any>[] } : Events;
   unnamedEvents?: EventLog<any>[];
   status?: boolean;
 }
 
-/**
- * Formats the output of a transaction receipt to its proper values
- *
- * @method outputTransactionReceiptFormatter
- * @param {Object} receipt
- * @returns {Object}
- */
-export function outputTransactionReceiptFormatter(receipt?: UnformattedTransactionReceipt): TransactionReceipt | null {
+export function fromRawTransactionReceipt(receipt?: RawTransactionReceipt): TransactionReceipt | null {
   if (!receipt || !receipt.blockHash) {
     return null;
-  }
-
-  if (typeof receipt !== 'object') {
-    throw new Error('Received receipt is invalid: ' + receipt);
   }
 
   return {
@@ -89,8 +78,23 @@ export function outputTransactionReceiptFormatter(receipt?: UnformattedTransacti
     transactionIndex: hexToNumber(receipt.transactionIndex)!,
     cumulativeGasUsed: hexToNumber(receipt.cumulativeGasUsed)!,
     gasUsed: hexToNumber(receipt.gasUsed)!,
-    logs: isArray(receipt.logs) ? receipt.logs.map(outputLogFormatter) : undefined,
+    logs: isArray(receipt.logs) ? receipt.logs.map(fromRawLogResponse) : undefined,
     contractAddress: receipt.contractAddress ? Address.fromString(receipt.contractAddress) : undefined,
     status: isString(receipt.status) ? Boolean(hexToNumber(receipt.status)) : undefined,
+  };
+}
+
+export function toRawTransactionReceipt(receipt: TransactionReceipt): RawTransactionReceipt {
+  return {
+    ...receipt,
+    to: receipt.to ? receipt.to.toString() : undefined,
+    from: receipt.from.toString(),
+    blockNumber: numberToHex(receipt.blockNumber)!,
+    transactionIndex: numberToHex(receipt.transactionIndex)!,
+    cumulativeGasUsed: numberToHex(receipt.cumulativeGasUsed)!,
+    gasUsed: numberToHex(receipt.gasUsed)!,
+    logs: isArray(receipt.logs) ? receipt.logs.map(toRawLogResponse) : undefined,
+    contractAddress: receipt.contractAddress ? receipt.contractAddress.toString() : undefined,
+    status: receipt.status !== undefined ? numberToHex(receipt.status ? 1 : 0) : undefined,
   };
 }

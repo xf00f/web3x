@@ -1,4 +1,4 @@
-import { OpCodes } from './opcodes';
+import { OpCodes } from '../opcodes';
 
 export function printCode(code: Buffer) {
   let ip = 0;

@@ -19,7 +19,7 @@ import { isArray, isString } from 'util';
 import { Address } from '../address';
 import { hexToNumber } from '../utils';
 import { outputBigNumberFormatter } from './output-big-number-formatter';
-import { outputTransactionFormatter } from './output-transaction-formatter';
+import { fromRawTransactionResponse } from './transaction-response-formatter';
 
 /**
  * Formats the output of a block to its proper values
@@ -48,7 +48,7 @@ export function outputBlockFormatter(block) {
   if (isArray(block.transactions)) {
     block.transactions.forEach(item => {
       if (!isString(item)) {
-        return outputTransactionFormatter(item);
+        return fromRawTransactionResponse(item);
       }
     });
   }

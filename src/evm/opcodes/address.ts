@@ -1,6 +1,6 @@
 import { toBigIntBE } from 'bigint-buffer';
 import { OpCode } from '.';
-import { EvmContext } from '../evm-context';
+import { EvmContext } from '../vm/evm-context';
 
 class AddressOp implements OpCode {
   public readonly code = 0x30;

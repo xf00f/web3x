@@ -23,15 +23,15 @@ import { create, fromPrivate } from '../eth-lib/account';
 import { BaseSendTx, SendTx } from '../eth/send-tx';
 import { decrypt, encrypt, KeyStore, randomBuffer } from '../utils';
 import { sign } from '../utils/sign';
-import { signTransaction } from './sign-transaction';
+import { signTransaction, SignTransactionRequest } from './sign-transaction';
 
 export interface AccountTx {
   nonce?: string | number;
   chainId?: string | number;
   to?: Address;
-  data?: string;
+  data?: Buffer;
   value?: string | number;
-  gas: string | number;
+  gas?: string | number;
   gasPrice?: string | number;
 }
 
@@ -82,7 +82,7 @@ export class Account {
 }
 
 class SendAccountTx extends BaseSendTx {
-  constructor(eth: Eth, private tx: AccountTx, private privateKey: Buffer) {
+  constructor(eth: Eth, private tx: SignTransactionRequest, private privateKey: Buffer) {
     super(eth);
   }
 

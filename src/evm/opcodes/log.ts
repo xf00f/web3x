@@ -1,6 +1,6 @@
 import { toBufferBE } from 'bigint-buffer';
 import { OpCode } from '.';
-import { EvmContext } from '../evm-context';
+import { EvmContext } from '../vm/evm-context';
 
 class LogOp implements OpCode {
   public readonly mnemonic: string;
@@ -20,13 +20,16 @@ class LogOp implements OpCode {
   }
 
   public handle(context: EvmContext) {
-    context.stack.pop();
-    context.stack.pop();
-    const args: string[] = [];
+    const offset = context.stack.pop();
+    const length = context.stack.pop();
+    const data = context.memory.loadN(offset, Number(length));
+
+    const topics: Buffer[] = [];
     for (let i = 0; i < this.topics; i++) {
-      args.push(toBufferBE(context.stack.pop(), 32).toString('hex'));
+      topics.push(toBufferBE(context.stack.pop(), 32));
     }
-    // console.log(`${this.mnemonic}: ${args}`);
+
+    context.txSubstrate.logs.push({ data, topics, address: context.executor });
     context.ip += this.bytes;
   }
 }

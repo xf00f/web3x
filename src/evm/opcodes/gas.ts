@@ -1,5 +1,5 @@
 import { OpCode } from '.';
-import { EvmContext } from '../evm-context';
+import { EvmContext } from '../vm/evm-context';
 
 class GasOp implements OpCode {
   public readonly code = 0x5a;

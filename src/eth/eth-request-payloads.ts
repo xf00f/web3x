@@ -18,24 +18,27 @@
 import { isString } from 'util';
 import { Address } from '../address';
 import {
-  GetLogOptions,
+  CallRequest,
+  EstimateRequest,
+  fromRawLogResponse,
+  fromRawTransactionReceipt,
+  fromRawTransactionResponse,
   inputBlockNumberFormatter,
-  inputCallFormatter,
-  inputLogFormatter,
   inputSignFormatter,
-  inputTransactionFormatter,
+  LogRequest,
   outputBigNumberFormatter,
   outputBlockFormatter,
-  outputLogFormatter,
   outputSyncingFormatter,
-  outputTransactionFormatter,
-  outputTransactionReceiptFormatter,
+  toRawCallRequest,
+  toRawEstimateRequest,
+  toRawLogRequest,
+  toRawTransactionRequest,
+  TransactionRequest,
 } from '../formatters';
 import { TransactionHash } from '../types';
 import { Data } from '../types';
 import { hexToNumber, isHexStrict, numberToHex } from '../utils';
 import { BlockHash, BlockType } from './block';
-import { Tx } from './tx';
 
 const identity = result => result;
 
@@ -194,7 +197,7 @@ export class EthRequestPayloads {
     return {
       method: 'eth_getTransactionByHash',
       params: [hash],
-      format: outputTransactionFormatter,
+      format: fromRawTransactionResponse,
     };
   }
 
@@ -205,7 +208,7 @@ export class EthRequestPayloads {
           ? 'eth_getTransactionByBlockHashAndIndex'
           : 'eth_getTransactionByBlockNumberAndIndex',
       params: [inputBlockNumberFormatter(block), numberToHex(index)],
-      format: outputTransactionFormatter,
+      format: fromRawTransactionResponse,
     };
   }
 
@@ -213,7 +216,7 @@ export class EthRequestPayloads {
     return {
       method: 'eth_getTransactionReceipt',
       params: [hash],
-      format: outputTransactionReceiptFormatter,
+      format: fromRawTransactionReceipt,
     };
   }
 
@@ -225,11 +228,11 @@ export class EthRequestPayloads {
     };
   }
 
-  public signTransaction(tx: Tx) {
+  public signTransaction(tx: TransactionRequest) {
     tx.from = tx.from || this.defaultFromAddress;
     return {
       method: 'eth_signTransaction',
-      params: [inputTransactionFormatter(tx)],
+      params: [toRawTransactionRequest(tx)],
       format: identity,
     };
   }
@@ -242,11 +245,11 @@ export class EthRequestPayloads {
     };
   }
 
-  public sendTransaction(tx: Tx) {
+  public sendTransaction(tx: TransactionRequest) {
     tx.from = tx.from || this.defaultFromAddress;
     return {
       method: 'eth_sendTransaction',
-      params: [inputTransactionFormatter(tx)],
+      params: [toRawTransactionRequest(tx)],
       format: identity,
     };
   }
@@ -267,20 +270,20 @@ export class EthRequestPayloads {
     };
   }
 
-  public call(tx: Tx, block?: BlockType) {
+  public call(tx: CallRequest, block?: BlockType) {
     tx.from = tx.from || this.defaultFromAddress;
     return {
       method: 'eth_call',
-      params: [inputCallFormatter(tx), inputBlockNumberFormatter(this.resolveBlock(block))],
+      params: [toRawCallRequest(tx), inputBlockNumberFormatter(this.resolveBlock(block))],
       format: identity,
     };
   }
 
-  public estimateGas(tx: Tx) {
+  public estimateGas(tx: EstimateRequest) {
     tx.from = tx.from || this.defaultFromAddress;
     return {
       method: 'eth_estimateGas',
-      params: [inputCallFormatter(tx)],
+      params: [toRawEstimateRequest(tx)],
       format: hexToNumber,
     };
   }
@@ -300,11 +303,11 @@ export class EthRequestPayloads {
     };
   }
 
-  public getPastLogs(options: GetLogOptions) {
+  public getPastLogs(options: LogRequest) {
     return {
       method: 'eth_getLogs',
-      params: [inputLogFormatter(options)],
-      format: result => result.map(outputLogFormatter),
+      params: [toRawLogRequest(options)],
+      format: result => result.map(fromRawLogResponse),
     };
   }
 

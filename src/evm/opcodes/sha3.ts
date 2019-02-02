@@ -1,7 +1,7 @@
 import { toBigIntBE } from 'bigint-buffer';
 import { OpCode } from '.';
 import { sha3 } from '../../utils';
-import { EvmContext } from '../evm-context';
+import { EvmContext } from '../vm/evm-context';
 
 class Sha3Op implements OpCode {
   public readonly code = 0x20;

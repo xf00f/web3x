@@ -15,6 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { hexToBuffer } from '../../utils';
 import { abiCoder } from '../abi-coder';
 import { ContractEntryDefinition } from './contract-abi-definition';
 import { ContractEntry } from './contract-entry';
@@ -55,7 +56,7 @@ export class ContractFunctionEntry extends ContractEntry {
   }
 
   public encodeABI(args: any[]) {
-    return this.signature + this.encodeParameters(args).replace('0x', '');
+    return hexToBuffer(this.signature + this.encodeParameters(args).replace('0x', ''));
   }
 
   public encodeParameters(args: any[]) {

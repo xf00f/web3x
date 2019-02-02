@@ -374,14 +374,19 @@ function makeContract(name: string, initData: string | undefined, abi: ContractA
       undefined,
       undefined,
       ctorDef.inputs!.map(makeParameter),
-      ts.createTypeReferenceNode('TxDeploy', undefined),
+      undefined,
       ts.createBlock(
         [
           ts.createReturn(
-            ts.createCall(ts.createPropertyAccess(ts.createSuper(), 'deployBytecode'), undefined, [
-              ts.createStringLiteral(initData),
-              ...ctorDef.inputs!.map(input => ts.createIdentifier(input.name)),
-            ]),
+            ts.createAsExpression(
+              ts.createCall(ts.createPropertyAccess(ts.createSuper(), 'deployBytecode'), undefined, [
+                ts.createStringLiteral(initData),
+                ...ctorDef.inputs!.map(input => ts.createIdentifier(input.name)),
+              ]),
+              ts.createTypeReferenceNode('TxSend', [
+                ts.createTypeReferenceNode(`${name}TransactionReceipt`, undefined),
+              ]),
+            ),
           ),
         ],
         true,

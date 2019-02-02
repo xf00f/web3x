@@ -18,8 +18,7 @@
 import { Address } from '../address';
 import { Eth } from '../eth/eth';
 import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
-import { sha3 } from '../utils';
-import { ContractAbi } from './abi';
+import { bufferToHex, sha3 } from '../utils';
 import { Contract } from './contract';
 import { TestContract, TestContractAbi } from './fixtures/TestContract';
 
@@ -312,7 +311,9 @@ describe('contract', () => {
 
       const result = contract.methods.balance(address).encodeABI();
 
-      expect(result).toBe(sha3(signature).slice(0, 10) + '000000000000000000000000' + addressUnprefixedLowercase);
+      expect(bufferToHex(result)).toBe(
+        sha3(signature).slice(0, 10) + '000000000000000000000000' + addressUnprefixedLowercase,
+      );
     });
 
     it('should encode a constructor call with data', () => {
@@ -320,7 +321,7 @@ describe('contract', () => {
 
       const result = contract.deployBytecode('0x1234', address, 10).encodeABI();
 
-      expect(result).toBe(
+      expect(bufferToHex(result)).toBe(
         '0x1234' +
           '000000000000000000000000' +
           addressLowercase.replace('0x', '') +
