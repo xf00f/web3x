@@ -18,9 +18,9 @@
 import { isString } from 'util';
 import { Address } from '../address';
 import { Data, TransactionHash } from '../types';
-import { hexToNumber, sha3 } from '../utils';
+import { hexToNumber, numberToHex, sha3 } from '../utils';
 
-export interface UnformattedLog {
+export interface RawLogResponse {
   id?: string;
   removed?: boolean;
   logIndex: string | null;
@@ -33,7 +33,7 @@ export interface UnformattedLog {
   topics: string[];
 }
 
-export interface Log {
+export interface LogResponse {
   id: string | null;
   removed?: boolean;
   logIndex: number | null;
@@ -46,14 +46,7 @@ export interface Log {
   topics: string[];
 }
 
-/**
- * Formats the output of a log
- *
- * @method outputLogFormatter
- * @param {Object} log object
- * @returns {Object} log
- */
-export function outputLogFormatter(log: UnformattedLog | Log): Log {
+export function fromRawLogResponse(log: RawLogResponse): LogResponse {
   let id: string | null = log.id || null;
 
   // generate a custom log id
@@ -74,4 +67,16 @@ export function outputLogFormatter(log: UnformattedLog | Log): Log {
   const address = isString(log.address) ? Address.fromString(log.address) : log.address;
 
   return { ...log, id, blockNumber, transactionIndex, logIndex, address };
+}
+
+export function toRawLogResponse(log: LogResponse): RawLogResponse {
+  const { id, blockNumber, transactionIndex, logIndex, address } = log;
+  return {
+    ...log,
+    id: id ? id : undefined,
+    blockNumber: blockNumber ? numberToHex(blockNumber) : null,
+    transactionIndex: transactionIndex ? numberToHex(transactionIndex) : null,
+    logIndex: logIndex ? numberToHex(logIndex) : null,
+    address: address.toString().toLowerCase(),
+  };
 }

@@ -16,12 +16,11 @@
 */
 
 import { Address } from '../address';
-import { TransactionReceipt } from '../formatters';
+import { TransactionReceipt, TransactionRequest } from '../formatters';
 import { TransactionHash } from '../types';
 import { BlockHeader } from './block';
 import { Eth } from './eth';
 import { EthRequestPayload } from './eth-request-payloads';
-import { Tx } from './tx';
 
 export interface SendTx<TxReceipt = TransactionReceipt> {
   getTxHash(): Promise<TransactionHash>;
@@ -126,7 +125,7 @@ export abstract class BaseSendTx implements SendTx {
 }
 
 export class SendTransaction extends BaseSendTx {
-  constructor(eth: Eth, private tx: Tx) {
+  constructor(eth: Eth, private tx: TransactionRequest) {
     super(eth);
   }
 

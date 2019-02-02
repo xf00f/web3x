@@ -16,18 +16,12 @@
 */
 
 import { Address } from '../address';
+import { TransactionRequest } from '../formatters';
 import { EthereumProvider } from '../providers/ethereum-provider';
 import { Data, Quantity, TransactionHash } from '../types';
 import { PersonalRequestPayloads } from './personal-request-payloads';
 
-export interface Transaction {
-  from: Address;
-  to?: Address;
-  gas?: Quantity;
-  gasPrice?: Quantity;
-  value?: Quantity;
-  data?: Data;
-  nonce?: Quantity;
+export interface Transaction extends TransactionRequest {
   condition?: { block: number } | { time: number } | null;
 }
 

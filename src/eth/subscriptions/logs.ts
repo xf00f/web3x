@@ -16,20 +16,20 @@
 */
 
 import { Eth } from '..';
-import { GetLogOptions, inputLogFormatter, Log, outputLogFormatter } from '../../formatters';
+import { fromRawLogResponse, LogRequest, LogResponse, RawLogResponse, toRawLogRequest } from '../../formatters';
 import { Subscription } from '../../subscriptions';
 
-export function subscribeForLogs(eth: Eth, options: GetLogOptions = {}): Subscription<Log> {
-  const { fromBlock, ...subLogOptions } = options;
-  const params = [inputLogFormatter(subLogOptions)];
+export function subscribeForLogs(eth: Eth, logRequest: LogRequest = {}) {
+  const { fromBlock, ...subscriptionLogRequest } = logRequest;
+  const params = [toRawLogRequest(subscriptionLogRequest)];
 
-  const subscription = new Subscription<Log>(
+  const subscription = new Subscription<LogResponse, RawLogResponse>(
     'eth',
     'logs',
     params,
     eth.provider,
     (result, sub) => {
-      const output = outputLogFormatter(result);
+      const output = fromRawLogResponse(result);
       sub.emit(output.removed ? 'changed' : 'data', output, sub);
     },
     false,
@@ -37,7 +37,7 @@ export function subscribeForLogs(eth: Eth, options: GetLogOptions = {}): Subscri
 
   if (fromBlock !== undefined) {
     eth
-      .getPastLogs(options)
+      .getPastLogs(logRequest)
       .then(logs => {
         logs.forEach(log => subscription.emit('data', log, subscription));
         subscription.subscribe();

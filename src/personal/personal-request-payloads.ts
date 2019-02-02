@@ -16,7 +16,7 @@
 */
 
 import { Address } from '../address';
-import { inputSignFormatter, inputTransactionFormatter } from '../formatters';
+import { inputSignFormatter, toRawTransactionRequest } from '../formatters';
 import { Data, Quantity } from '../types';
 import { Transaction } from './personal';
 
@@ -65,7 +65,7 @@ export class PersonalRequestPayloads {
   public sendTransaction(tx: Transaction, password: string) {
     return {
       method: 'personal_sendTransaction',
-      params: [inputTransactionFormatter(tx), password],
+      params: [{ ...toRawTransactionRequest(tx), condition: tx.condition }, password],
       format: identity,
     };
   }
@@ -73,7 +73,7 @@ export class PersonalRequestPayloads {
   public signTransaction(tx: Transaction, password: string) {
     return {
       method: 'personal_signTransaction',
-      params: [inputTransactionFormatter(tx), password],
+      params: [{ ...toRawTransactionRequest(tx), condition: tx.condition }, password],
       format: identity,
     };
   }

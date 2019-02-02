@@ -16,5 +16,5 @@
 */
 
 export * from './eth';
-export * from './tx';
+export * from './signed-transaction';
 export * from './block';

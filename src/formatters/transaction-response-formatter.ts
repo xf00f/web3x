@@ -16,10 +16,10 @@
 */
 
 import { Address } from '../address';
-import { hexToNumber } from '../utils';
+import { hexToNumber, numberToHex } from '../utils';
 import { outputBigNumberFormatter } from './output-big-number-formatter';
 
-export interface UnformattedTransaction {
+export interface RawTransactionResponse {
   blockHash: string | null;
   blockNumber: string | null;
   from: string;
@@ -36,7 +36,7 @@ export interface UnformattedTransaction {
   s: string;
 }
 
-export interface Transaction {
+export interface TransactionResponse {
   blockHash: string | null;
   blockNumber: number | null;
   from: Address;
@@ -53,14 +53,7 @@ export interface Transaction {
   s: string;
 }
 
-/**
- * Formats the output of a transaction to its proper values
- *
- * @method outputTransactionFormatter
- * @param {Object} tx
- * @returns {Object}
- */
-export function outputTransactionFormatter(tx: UnformattedTransaction): Transaction {
+export function fromRawTransactionResponse(tx: RawTransactionResponse): TransactionResponse {
   return {
     ...tx,
     blockNumber: tx.blockNumber ? hexToNumber(tx.blockNumber) : null,
@@ -71,5 +64,19 @@ export function outputTransactionFormatter(tx: UnformattedTransaction): Transact
     value: outputBigNumberFormatter(tx.value),
     to: tx.to ? Address.fromString(tx.to) : null,
     from: Address.fromString(tx.from),
+  };
+}
+
+export function toRawTransactionResponse(tx: TransactionResponse): RawTransactionResponse {
+  return {
+    ...tx,
+    blockNumber: tx.blockNumber ? numberToHex(tx.blockNumber) : null,
+    transactionIndex: tx.transactionIndex ? numberToHex(tx.transactionIndex) : null,
+    nonce: numberToHex(tx.nonce)!,
+    gas: numberToHex(tx.gas)!,
+    gasPrice: numberToHex(tx.gasPrice),
+    value: numberToHex(tx.value),
+    to: tx.to ? tx.to.toString() : null,
+    from: tx.from.toString(),
   };
 }

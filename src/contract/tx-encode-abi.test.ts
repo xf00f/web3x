@@ -18,6 +18,7 @@
 import { Address } from '../address';
 import { Eth } from '../eth/eth';
 import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
+import { bufferToHex } from '../utils';
 import { ContractAbi } from './abi/contract-abi';
 import { Contract } from './contract';
 
@@ -59,7 +60,7 @@ describe('eth', () => {
 
         const result = contract.methods.takesTwoBytes32('0xaa', '0xbb').encodeABI();
 
-        expect(result).toBe(
+        expect(bufferToHex(result)).toBe(
           [
             '0x1323517e',
             'aa00000000000000000000000000000000000000000000000000000000000000',
@@ -75,7 +76,7 @@ describe('eth', () => {
           .takesTwoBytes32('0x'.concat('a'.repeat(62)), '0x'.concat('b'.repeat(62)))
           .encodeABI();
 
-        expect(result).toBe(
+        expect(bufferToHex(result)).toBe(
           [
             '0x1323517e',
             'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa00',
@@ -100,7 +101,7 @@ describe('eth', () => {
           .takesTwoBytes32('0x'.concat('a'.repeat(64)), '0x'.concat('b'.repeat(64)))
           .encodeABI();
 
-        expect(result).toBe(
+        expect(bufferToHex(result)).toBe(
           [
             '0x1323517e',
             'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',

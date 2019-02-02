@@ -16,7 +16,7 @@
 */
 
 import { isArray } from 'util';
-import { EventLog, Log } from '../../formatters';
+import { EventLog, LogResponse } from '../../formatters';
 import { abiCoder } from '../abi-coder';
 import { decodeEvent } from '../decode-event-abi';
 import { ContractEntryDefinition } from './contract-abi-definition';
@@ -58,7 +58,7 @@ export class ContractEventEntry extends ContractEntry {
     return [...topics, ...indexedTopics];
   }
 
-  public decodeEvent(log: Log): EventLog<any> {
+  public decodeEvent(log: LogResponse): EventLog<any> {
     return decodeEvent(this.entry, log);
   }
 }

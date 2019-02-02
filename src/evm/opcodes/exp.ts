@@ -1,5 +1,5 @@
 import { OpCode } from '.';
-import { EvmContext } from '../evm-context';
+import { EvmContext } from '../vm/evm-context';
 
 class ExpOp implements OpCode {
   public readonly code = 0x0a;

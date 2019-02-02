@@ -18,10 +18,10 @@
 import { isArray } from 'util';
 import { Address } from '../address';
 import { BlockType } from '../eth';
-import { utf8ToHex } from '../utils';
+import { hexToNumber, hexToNumberString, hexToUtf8, utf8ToHex } from '../utils';
 import { inputBlockNumberFormatter } from './input-block-number-formatter';
 
-export interface GetLogOptions {
+export interface LogRequest {
   filter?: { [k: string]: any };
   toBlock?: BlockType;
   fromBlock?: BlockType;
@@ -29,33 +29,26 @@ export interface GetLogOptions {
   topics?: (string | string[] | null)[];
 }
 
-export interface FormattedGetLogOptions {
+export interface RawLogRequest {
   toBlock?: string;
   fromBlock?: string;
   address?: string | string[];
   topics?: (string | string[])[];
 }
 
-/**
- * Formats the input of a log
- *
- * @method inputLogFormatter
- * @param {Object} log object
- * @returns {Object} log
- */
-export function inputLogFormatter(options: GetLogOptions = {}): FormattedGetLogOptions {
-  const formattedLogOptions: FormattedGetLogOptions = {};
+export function toRawLogRequest(logRequest: LogRequest = {}): RawLogRequest {
+  const rawLogRequest: RawLogRequest = {};
 
-  if (options.fromBlock !== undefined) {
-    formattedLogOptions.fromBlock = inputBlockNumberFormatter(options.fromBlock);
+  if (logRequest.fromBlock !== undefined) {
+    rawLogRequest.fromBlock = inputBlockNumberFormatter(logRequest.fromBlock);
   }
 
-  if (options.toBlock !== undefined) {
-    formattedLogOptions.toBlock = inputBlockNumberFormatter(options.toBlock);
+  if (logRequest.toBlock !== undefined) {
+    rawLogRequest.toBlock = inputBlockNumberFormatter(logRequest.toBlock);
   }
 
   // Convert topics to hex.
-  formattedLogOptions.topics = (options.topics || []).map(topic => {
+  rawLogRequest.topics = (logRequest.topics || []).map(topic => {
     const toTopic = value => {
       if (value === null || typeof value === 'undefined') {
         return null;
@@ -66,11 +59,21 @@ export function inputLogFormatter(options: GetLogOptions = {}): FormattedGetLogO
     return isArray(topic) ? topic.map(toTopic) : toTopic(topic);
   });
 
-  if (options.address) {
-    formattedLogOptions.address = isArray(options.address)
-      ? options.address.map(a => a.toString().toLowerCase())
-      : options.address.toString().toLowerCase();
+  if (logRequest.address) {
+    rawLogRequest.address = isArray(logRequest.address)
+      ? logRequest.address.map(a => a.toString().toLowerCase())
+      : logRequest.address.toString().toLowerCase();
   }
 
-  return formattedLogOptions;
+  return rawLogRequest;
+}
+
+export function fromRawLogRequest(rawLogRequest: RawLogRequest): LogRequest {
+  const { toBlock, fromBlock, address, topics } = rawLogRequest;
+  return {
+    toBlock: toBlock ? hexToNumber(toBlock)! : undefined,
+    fromBlock: fromBlock ? hexToNumber(fromBlock)! : undefined,
+    address: address ? (isArray(address) ? address.map(Address.fromString) : Address.fromString(address)) : undefined,
+    topics: topics ? topics.map(topic => (isArray(topic) ? topic.map(hexToUtf8) : hexToUtf8(topic))) : undefined,
+  };
 }

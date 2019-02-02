@@ -17,7 +17,7 @@
 
 import { Address } from '../address';
 import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
-import { numberToHex } from '../utils';
+import { hexToBuffer, numberToHex } from '../utils';
 import { Eth } from './eth';
 
 describe('eth', () => {
@@ -26,7 +26,7 @@ describe('eth', () => {
   const basicTx = {
     from,
     to: Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe'),
-    data: '0xa123456',
+    data: hexToBuffer('0xa123456'),
     gasPrice: 100,
     gas: 100,
   };
@@ -87,12 +87,6 @@ describe('eth', () => {
         },
       ],
     ]);
-  });
-
-  it('should fail to send transaction when from not specified', async () => {
-    const eth = new Eth(mockEthereumProvider);
-    const { from, ...fromlessTx } = basicTx;
-    await expect(eth.sendTransaction(fromlessTx).getReceipt()).rejects.toThrowError('"from" field must be defined');
   });
 
   it('should get receipt', async () => {

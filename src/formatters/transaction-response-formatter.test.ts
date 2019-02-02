@@ -16,13 +16,13 @@
 */
 
 import { Address } from '../address';
-import { outputTransactionFormatter } from './output-transaction-formatter';
+import { fromRawTransactionResponse } from './transaction-response-formatter';
 
 describe('formatters', () => {
-  describe('outputTransactionFormatter', () => {
+  describe('transactionResponseFormatter', () => {
     it('should return the correct value', () => {
       expect(
-        outputTransactionFormatter({
+        fromRawTransactionResponse({
           input: '0x3454645634534',
           from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
           to: '0x11f4d0a3c12e86b4b5f39b213f7e19d048276dae',
@@ -58,7 +58,7 @@ describe('formatters', () => {
 
     it('should return the correct value, when null values are present', () => {
       expect(
-        outputTransactionFormatter({
+        fromRawTransactionResponse({
           input: '0x3454645634534',
           from: '0x11f4d0a3c12e86b4b5f39b213f7e19d048276dae',
           to: null,

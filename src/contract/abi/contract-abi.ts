@@ -16,7 +16,7 @@
 */
 
 import { ContractAbiDefinition, ContractEventEntry, ContractFunctionEntry } from '.';
-import { Log } from '../../formatters';
+import { LogResponse } from '../../formatters';
 
 export class ContractAbi {
   public functions: ContractFunctionEntry[];
@@ -43,7 +43,7 @@ export class ContractAbi {
     }
   }
 
-  public decodeAnyEvent(log: Log) {
+  public decodeAnyEvent(log: LogResponse) {
     const event = this.events.find(abiDef => abiDef.signature === log.topics[0]) || ContractAbi.anonymousEvent;
     return event.decodeEvent(log);
   }

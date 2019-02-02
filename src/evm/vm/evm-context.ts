@@ -1,8 +1,9 @@
-import { Address } from '../address';
-import { EvmMemory } from './memory';
-import { Stack } from './stack';
-import { Trie } from './trie/trie';
-import { TxSubstrate } from './tx/tx-substrate';
+import { Address } from '../../address';
+import { EvmMemory } from '../memory';
+import { Stack } from '../stack';
+import { Trie } from '../trie';
+import { TxSubstrate } from '../tx/tx-substrate';
+import { WorldState } from '../world/world-state';
 
 export class EvmContext {
   public stack = new Stack<bigint>();
@@ -14,15 +15,17 @@ export class EvmContext {
   public lastReturned = Buffer.of();
 
   constructor(
-    public accounts: Trie,
+    public worldState: WorldState,
     public code: Buffer = Buffer.of(),
     public calldata: Buffer = Buffer.of(),
-    public sender: Address = Address.ZERO,
+    public origin: Address = Address.ZERO,
     public caller: Address = Address.ZERO,
     public executor: Address = Address.ZERO,
     public value: bigint = BigInt(0),
     public gas: bigint = BigInt(0),
     public storage: Trie = new Trie(),
+    public callDepth: number = 0,
+    public modify: boolean = true,
     public txSubstrate: TxSubstrate = new TxSubstrate(),
   ) {}
 }

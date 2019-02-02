@@ -16,14 +16,24 @@
 */
 
 import { Address } from '../address';
-import { Eth, Tx } from '../eth';
+import { Eth } from '../eth';
 import Account from '../eth-lib/account';
 import Bytes from '../eth-lib/bytes';
 import Hash from '../eth-lib/hash';
 import Nat from '../eth-lib/nat';
 import RLP from '../eth-lib/rlp';
-import { inputCallFormatter } from '../formatters';
-import { numberToHex } from '../utils';
+import { inputAddressFormatter } from '../formatters';
+import { bufferToHex, numberToHex } from '../utils';
+
+export interface SignTransactionRequest {
+  chainId?: number | string;
+  to?: Address;
+  gas?: string | number;
+  gasPrice?: string | number;
+  value?: string | number;
+  data?: Buffer;
+  nonce?: string | number;
+}
 
 export interface SignedTx {
   messageHash: string;
@@ -36,7 +46,7 @@ export interface SignedTx {
   nonce?: number;
 }
 
-export async function signTransaction(tx: Tx, privateKey: Buffer, eth: Eth): Promise<SignedTx> {
+export async function signTransaction(tx: SignTransactionRequest, privateKey: Buffer, eth: Eth): Promise<SignedTx> {
   if (!tx.gas) {
     throw new Error('gas is missing or 0');
   }
@@ -74,32 +84,30 @@ export function recoverTransaction(rawTx: string): string {
   return Account.recover(Hash.keccak256(signingDataHex), signature);
 }
 
-function sign(tx: Tx, privateKey: Buffer): SignedTx {
-  if (tx.nonce! < 0 || tx.gas < 0 || tx.gasPrice! < 0 || tx.chainId! < 0) {
+function sign(tx: SignTransactionRequest, privateKey: Buffer): SignedTx {
+  if (tx.nonce! < 0 || tx.gas! < 0 || tx.gasPrice! < 0 || tx.chainId! < 0) {
     throw new Error('gas, gasPrice, nonce or chainId is lower than 0');
   }
 
-  tx = inputCallFormatter(tx);
-  tx.chainId = numberToHex(tx.chainId);
+  const chainId = numberToHex(tx.chainId!);
 
-  const rlpEncoded = RLP.encode([
-    Bytes.fromNat(tx.nonce),
-    Bytes.fromNat(tx.gasPrice),
-    Bytes.fromNat(tx.gas),
-    tx.to ? tx.to.toString().toLowerCase() : '0x',
-    Bytes.fromNat(tx.value || '0x'),
-    tx.data || '0x',
-    Bytes.fromNat(tx.chainId || '0x1'),
+  const toEncode = [
+    Bytes.fromNat(numberToHex(tx.nonce!)),
+    Bytes.fromNat(numberToHex(tx.gasPrice!)),
+    Bytes.fromNat(numberToHex(tx.gas!)),
+    tx.to ? inputAddressFormatter(tx.to) : '0x',
+    Bytes.fromNat(tx.value ? numberToHex(tx.value) : '0x'),
+    tx.data ? bufferToHex(tx.data) : '0x',
+    Bytes.fromNat(chainId || '0x1'),
     '0x',
     '0x',
-  ]);
+  ];
+
+  const rlpEncoded = RLP.encode(toEncode);
 
   const messageHash = Hash.keccak256(rlpEncoded);
 
-  const signature = Account.makeSigner(Nat.toNumber(tx.chainId || '0x1') * 2 + 35)(
-    Hash.keccak256(rlpEncoded),
-    privateKey,
-  );
+  const signature = Account.makeSigner(Nat.toNumber(chainId || '0x1') * 2 + 35)(Hash.keccak256(rlpEncoded), privateKey);
 
   const rawTx = RLP.decode(rlpEncoded)
     .slice(0, 6)

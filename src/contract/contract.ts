@@ -17,7 +17,7 @@
 
 import { Address } from '../address';
 import { Eth } from '../eth';
-import { EventLog, GetLogOptions, inputLogFormatter, Log } from '../formatters';
+import { EventLog, LogRequest, LogResponse, toRawLogRequest } from '../formatters';
 import { Subscription } from '../subscriptions';
 import { Data } from '../types';
 import { ContractAbi, ContractFunctionEntry } from './abi';
@@ -106,7 +106,7 @@ export class Contract<T extends ContractDefinition | void = void> {
     },
     callback: (err, res: GetEventLog<T, Event>, sub) => void,
   );
-  public once(event: Events<T>, options: GetLogOptions, callback: (err, res, sub) => void): void {
+  public once(event: Events<T>, options: LogRequest, callback: (err, res, sub) => void): void {
     this.on(event, options, (err, res, sub) => {
       sub.unsubscribe();
       callback(err, res, sub);
@@ -115,21 +115,21 @@ export class Contract<T extends ContractDefinition | void = void> {
 
   public async getPastEvents<Event extends Events<T>>(
     event: Event,
-    options: GetLogOptions,
+    options: LogRequest,
   ): Promise<GetEventLog<T, Event>[]>;
-  public async getPastEvents(event: 'allevents', options: GetLogOptions): Promise<EventLog<any>[]>;
-  public async getPastEvents(event: Events<T> & 'allevents', options: GetLogOptions = {}): Promise<EventLog<any>[]> {
+  public async getPastEvents(event: 'allevents', options: LogRequest): Promise<EventLog<any>[]>;
+  public async getPastEvents(event: Events<T> & 'allevents', options: LogRequest = {}): Promise<EventLog<any>[]> {
     const logOptions = this.getLogOptions(event, options);
     const result = await this.eth.getPastLogs(logOptions);
     return result.map(log => this.contractAbi.decodeAnyEvent(log));
   }
 
-  private on(event: string, options: GetLogOptions = {}, callback?: (err, res, sub) => void) {
+  private on(event: string, options: LogRequest = {}, callback?: (err, res, sub) => void) {
     const logOptions = this.getLogOptions(event, options);
     const { fromBlock, ...subLogOptions } = logOptions;
-    const params = [inputLogFormatter(subLogOptions)];
+    const params = [toRawLogRequest(subLogOptions)];
 
-    const subscription = new Subscription<Log>(
+    const subscription = new Subscription<LogResponse>(
       'eth',
       'logs',
       params,
@@ -229,7 +229,7 @@ export class Contract<T extends ContractDefinition | void = void> {
     return events;
   }
 
-  private getLogOptions(eventName: string = 'allevents', options: GetLogOptions): GetLogOptions {
+  private getLogOptions(eventName: string = 'allevents', options: LogRequest): LogRequest {
     if (!this.address) {
       throw new Error('No contract address.');
     }

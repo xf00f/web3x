@@ -16,13 +16,13 @@
 */
 
 import { Address } from '../address';
-import { outputLogFormatter } from './output-log-formatter';
+import { fromRawLogResponse } from './log-response-formatter';
 
 describe('formatters', () => {
   describe('outputLogFormatter', () => {
     it('should return the correct value', () => {
       expect(
-        outputLogFormatter({
+        fromRawLogResponse({
           transactionIndex: '0x3e8',
           logIndex: '0x3e8',
           blockNumber: '0x3e8',
@@ -44,9 +44,10 @@ describe('formatters', () => {
         id: 'log_2b801386',
       });
     });
+
     it('should return the correct value, when null values are present', () => {
       expect(
-        outputLogFormatter({
+        fromRawLogResponse({
           transactionIndex: null,
           logIndex: null,
           blockNumber: null,

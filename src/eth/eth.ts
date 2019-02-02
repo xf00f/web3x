@@ -16,7 +16,16 @@
 */
 
 import { Address } from '../address';
-import { GetLogOptions, Log, Sync, Transaction, TransactionReceipt } from '../formatters';
+import {
+  CallRequest,
+  EstimateRequest,
+  LogRequest,
+  LogResponse,
+  Sync,
+  TransactionReceipt,
+  TransactionRequest,
+  TransactionResponse,
+} from '../formatters';
 import { LegacyProvider, LegacyProviderAdapter } from '../providers';
 import { EthereumProvider } from '../providers/ethereum-provider';
 import { Subscription } from '../subscriptions';
@@ -26,11 +35,11 @@ import { Wallet } from '../wallet';
 import { Block, BlockHash, BlockHeader, BlockType } from './block';
 import { EthRequestPayloads } from './eth-request-payloads';
 import { SendSignedTransaction, SendTransaction, SendTx } from './send-tx';
+import { SignedTransaction } from './signed-transaction';
 import { subscribeForLogs } from './subscriptions/logs';
 import { subscribeForNewHeads } from './subscriptions/new-heads';
 import { subscribeForNewPendingTransactions } from './subscriptions/new-pending-transactions';
 import { subscribeForSyncing } from './subscriptions/syncing';
-import { SignedTransaction, Tx } from './tx';
 
 declare const web3: { currentProvider?: LegacyProvider; ethereumProvider?: LegacyProvider } | undefined;
 
@@ -139,11 +148,11 @@ export class Eth {
     return await this.send(this.request.getBlockUncleCount(block));
   }
 
-  public async getTransaction(hash: TransactionHash): Promise<Transaction> {
+  public async getTransaction(hash: TransactionHash): Promise<TransactionResponse> {
     return await this.send(this.request.getTransaction(hash));
   }
 
-  public async getTransactionFromBlock(block: BlockType | BlockHash, index: number): Promise<Transaction> {
+  public async getTransactionFromBlock(block: BlockType | BlockHash, index: number): Promise<TransactionResponse> {
     return await this.send(this.request.getTransactionFromBlock(block, index));
   }
 
@@ -155,7 +164,7 @@ export class Eth {
     return await this.send(this.request.getTransactionCount(address, block));
   }
 
-  public async signTransaction(tx: Tx): Promise<SignedTransaction> {
+  public async signTransaction(tx: TransactionRequest): Promise<SignedTransaction> {
     return await this.send(this.request.signTransaction(tx));
   }
 
@@ -163,7 +172,7 @@ export class Eth {
     return new SendSignedTransaction(this, this.request.sendSignedTransaction(data));
   }
 
-  public sendTransaction(tx: Tx): SendTx {
+  public sendTransaction(tx: TransactionRequest): SendTx {
     return new SendTransaction(this, tx);
   }
 
@@ -189,11 +198,11 @@ export class Eth {
     return await this.send(this.request.signTypedData(address, dataToSign));
   }
 
-  public async call(tx: Tx, block?: BlockType): Promise<Data> {
+  public async call(tx: CallRequest, block?: BlockType): Promise<Data> {
     return await this.send(this.request.call(tx, block));
   }
 
-  public async estimateGas(tx: Tx): Promise<number> {
+  public async estimateGas(tx: EstimateRequest): Promise<number> {
     return await this.send(this.request.estimateGas(tx));
   }
 
@@ -205,14 +214,14 @@ export class Eth {
     return await this.send(this.request.getWork());
   }
 
-  public async getPastLogs(options: GetLogOptions): Promise<Log[]> {
+  public async getPastLogs(options: LogRequest): Promise<LogResponse[]> {
     return await this.send(this.request.getPastLogs(options));
   }
 
-  public subscribe(type: 'logs', options?: GetLogOptions): Subscription<Log>;
+  public subscribe(type: 'logs', options?: LogRequest): Subscription<LogResponse>;
   public subscribe(type: 'syncing'): Subscription<object | boolean>;
   public subscribe(type: 'newBlockHeaders'): Subscription<BlockHeader>;
-  public subscribe(type: 'pendingTransactions'): Subscription<Transaction>;
+  public subscribe(type: 'pendingTransactions'): Subscription<TransactionResponse>;
   public subscribe(
     type: 'pendingTransactions' | 'newBlockHeaders' | 'syncing' | 'logs',
     ...args: any[]

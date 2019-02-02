@@ -16,6 +16,9 @@ declare module 'merkle-patricia-tree' {
     createReadStream(): Readable;
     batch(ops: { type: 'get' | 'put' | 'del'; key: Buffer | string; value?: Buffer | string }[], cb: () => void): void;
     checkRoot(root: Buffer, cb: (exists: boolean) => void): void;
+    checkpoint(): void;
+    commit(cb: () => void): void;
+    revert(cb: () => void): void;
 
     static prove(trie: Trie, key: string, cb: (err: Error, proof: any[]) => void): void;
     static verifyProof(rootHash: Buffer, key: string, proof: any[], cb: (err: Error, value: string) => void): void;

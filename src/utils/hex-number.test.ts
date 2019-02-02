@@ -84,9 +84,6 @@ describe('utils', () => {
     it('should return the correct value', () => {
       expect(hexToNumberString('0x3e8')).toBe('1000');
       expect(hexToNumberString('0x1f0fe294a36')).toBe('2134567897654');
-      // allow compatiblity
-      expect(hexToNumberString(100000)).toBe('100000');
-      expect(hexToNumberString('100000')).toBe('100000');
     });
   });
 });

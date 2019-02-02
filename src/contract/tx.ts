@@ -54,14 +54,14 @@ export interface TxCall<Return = any> {
   call(options?: CallOptions, block?: BlockType): Promise<Return>;
   getCallRequestPayload(options?: CallOptions, block?: number);
   estimateGas(options?: EstimateOptions): Promise<number>;
-  encodeABI(): string;
+  encodeABI(): Buffer;
 }
 
 export interface TxSend<TxReceipt = TransactionReceipt> {
   send(options?: SendOptions): SendTx<TxReceipt>;
   getSendRequestPayload(options?: SendOptions);
   estimateGas(options?: EstimateOptions): Promise<number>;
-  encodeABI(): string;
+  encodeABI(): Buffer;
 }
 
 export class Tx implements TxCall, TxSend {

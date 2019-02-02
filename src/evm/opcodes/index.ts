@@ -1,4 +1,4 @@
-import { EvmContext } from '../evm-context';
+import { EvmContext } from '../vm/evm-context';
 import { Add } from './add';
 import { AddMod } from './addmod';
 import { Address } from './address';
