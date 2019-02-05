@@ -19,6 +19,7 @@ describe('evm provider e2e tests', () => {
 
     provider.worldState.checkpoint();
     await provider.worldState.createAccount(account1, BigInt(10) * BigInt(10) ** BigInt(18));
+    await provider.worldState.createAccount(account2, BigInt(10) * BigInt(10) ** BigInt(18));
     await provider.worldState.commit();
 
     const deployReceipt = await daiContract
@@ -45,13 +46,39 @@ describe('evm provider e2e tests', () => {
 
     expect(await daiContract.methods.allowance(account1, account2).call()).toBe(toWei('1000', 'ether'));
 
-    // Transfer to account2.
+    // Transfer 600 to account2.
     await daiContract.methods
-      .transfer(account2, toWei('1000', 'ether'))
-      .send({ from: account1, gasPrice })
+      .transferFrom(account1, account2, toWei('600', 'ether'))
+      .send({ from: account2, gasPrice })
       .getReceipt();
 
+    expect(await daiContract.methods.allowance(account1, account2).call()).toBe(toWei('400', 'ether'));
+    expect(await daiContract.methods.balanceOf(account1).call()).toBe(toWei('400', 'ether'));
+    expect(await daiContract.methods.balanceOf(account2).call()).toBe(toWei('600', 'ether'));
+
+    // Transfer 400 to account2.
+    const transferReceipt = await daiContract.methods
+      .transferFrom(account1, account2, toWei('400', 'ether'))
+      .send({ from: account2, gasPrice })
+      .getReceipt();
+
+    const transferEvent = transferReceipt.events!.Transfer[0].returnValues;
+    expect(transferEvent.src).toEqual(account1);
+    expect(transferEvent.dst).toEqual(account2);
+    expect(transferEvent.wad).toEqual(toWei('400', 'ether'));
+
+    expect(await daiContract.methods.allowance(account1, account2).call()).toBe(toWei('0', 'ether'));
     expect(await daiContract.methods.balanceOf(account1).call()).toBe('0');
     expect(await daiContract.methods.balanceOf(account2).call()).toBe(toWei('1000', 'ether'));
+
+    const logs = await daiContract.getPastEvents('Transfer', { fromBlock: 0 });
+
+    expect(logs).toHaveLength(2);
+    expect(logs[0].returnValues.src).toEqual(account1);
+    expect(logs[0].returnValues.dst).toEqual(account2);
+    expect(logs[0].returnValues.wad).toEqual(toWei('600', 'ether'));
+    expect(logs[1].returnValues.src).toEqual(account1);
+    expect(logs[1].returnValues.dst).toEqual(account2);
+    expect(logs[1].returnValues.wad).toEqual(toWei('400', 'ether'));
   });
 });

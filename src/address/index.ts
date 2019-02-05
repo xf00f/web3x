@@ -4,7 +4,13 @@ export class Address {
   public static ZERO = new Address(Buffer.alloc(20));
 
   constructor(private buffer: Buffer) {
-    if (buffer.length !== 20) {
+    if (buffer.length === 32) {
+      if (!buffer.slice(0, 12).equals(Buffer.of(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))) {
+        throw new Error('Invalid address buffer.');
+      } else {
+        this.buffer = buffer.slice(12);
+      }
+    } else if (buffer.length !== 20) {
       throw new Error('Invalid address buffer.');
     }
   }
@@ -78,5 +84,11 @@ export class Address {
 
   public toBuffer() {
     return this.buffer;
+  }
+
+  public toBuffer32() {
+    const buffer = Buffer.alloc(32);
+    this.buffer.copy(buffer, 12);
+    return buffer;
   }
 }

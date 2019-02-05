@@ -18,13 +18,12 @@ import { handleGetTransactionReceipt } from './handle-get-transaction-receipt';
 import { handleSendTransaction } from './handle-send-transaction';
 
 export class EvmProvider implements EthereumProvider {
-  private blockchain = new Blockchain();
-
-  constructor(public readonly worldState: WorldState) {}
+  constructor(public readonly worldState: WorldState, private readonly blockchain: Blockchain) {}
 
   public static async fromDb(db: LevelUp) {
     const worldState = await WorldState.fromDb(db);
-    return new EvmProvider(worldState);
+    const blockchain = await Blockchain.fromDb(db);
+    return new EvmProvider(worldState, blockchain);
   }
 
   public static async fromLocalDb(name: string) {
@@ -55,7 +54,7 @@ export class EvmProvider implements EthereumProvider {
       case 'eth_getCode':
         return bufferToHex(await getAccountCode(this.worldState, Address.fromString(params![0])));
       case 'eth_getLogs':
-        return (await getLogs(this.worldState, fromRawLogRequest(params![0]))).map(toRawLogResponse);
+        return (await getLogs(this.blockchain, fromRawLogRequest(params![0]))).map(toRawLogResponse);
     }
   }
 
