@@ -74,6 +74,6 @@ export function fromRawLogRequest(rawLogRequest: RawLogRequest): LogRequest {
     toBlock: toBlock ? hexToNumber(toBlock)! : undefined,
     fromBlock: fromBlock ? hexToNumber(fromBlock)! : undefined,
     address: address ? (isArray(address) ? address.map(Address.fromString) : Address.fromString(address)) : undefined,
-    topics: topics ? topics.map(topic => (isArray(topic) ? topic.map(hexToUtf8) : hexToUtf8(topic))) : undefined,
+    topics,
   };
 }

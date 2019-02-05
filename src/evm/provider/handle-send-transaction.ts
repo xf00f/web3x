@@ -1,6 +1,6 @@
 import { TransactionRequest } from '../../formatters';
 import { TransactionHash } from '../../types';
-import { randomHex } from '../../utils';
+import { bufferToHex } from '../../utils';
 import { Blockchain } from '../blockchain';
 import { Tx, TxReceipt } from '../tx';
 import { executeTransaction } from '../vm';
@@ -12,9 +12,6 @@ export async function handleSendTransaction(
   txRequest: TransactionRequest,
 ): Promise<TransactionHash> {
   const { from, to, gas = 200000, gasPrice, value = 0, data, nonce } = txRequest;
-
-  // TODO: Generate from tx.
-  const transactionHash = randomHex(32);
 
   const tx: Tx = {
     nonce: nonce ? BigInt(nonce) : await worldState.getTransactionCount(from),
@@ -31,16 +28,13 @@ export async function handleSendTransaction(
   const result = await executeTransaction(worldState, from, tx);
 
   const receipt: TxReceipt = {
-    from,
-    to,
     cumulativeGasUsed: BigInt(gas) - result.remainingGas,
-    gasUsed: BigInt(gas) - result.remainingGas,
-    contractAddress: result.contractAddress,
     logs: result.txSubstrate.logs,
+    logsBloomFilter: Buffer.of(),
     status: result.status,
   };
 
-  blockchain.receipts[transactionHash] = receipt;
+  const txHashes = await blockchain.mineTransactions(await worldState.getStateRoot(), [tx], [receipt]);
 
-  return transactionHash;
+  return bufferToHex(txHashes[0]);
 }

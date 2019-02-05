@@ -38,6 +38,14 @@ export class WorldState {
     await this.db.put(Buffer.from('stateRoot'), this.accounts.root);
   }
 
+  public async getStateRoot() {
+    try {
+      return await this.db.get(Buffer.from('stateRoot'));
+    } catch (err) {
+      return null;
+    }
+  }
+
   public async createAccount(address: Address, value: bigint, nonce: bigint = BigInt(0), code: Buffer = Buffer.of()) {
     if (this.checkpoints.length === 0) {
       throw new Error('You must checkpoint before potentially modifying state.');

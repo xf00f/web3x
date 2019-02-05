@@ -1,13 +1,20 @@
+import { toBufferBE } from 'bigint-buffer';
+import * as rlp from 'rlp';
+import { Address } from '../../address';
 import { TransactionReceipt } from '../../formatters';
 import { TransactionHash } from '../../types';
-import { bufferToHex } from '../../utils';
+import { bufferToHex, sha3Buffer } from '../../utils';
 import { Blockchain } from '../blockchain';
 
 export async function handleGetTransactionReceipt(
   blockchain: Blockchain,
   transactionHash: TransactionHash,
 ): Promise<TransactionReceipt> {
-  const { from, to, cumulativeGasUsed, gasUsed, contractAddress, logs, status } = blockchain.receipts[transactionHash];
+  // TODO: To be recovered from tx.
+  const from = Address.fromString('0xd7b2c3559672e470dc637a56962378f3b81030d3');
+  const txHash = Buffer.from(transactionHash.slice(2), 'hex');
+  const { to, nonce } = await blockchain.getMinedTransaction(txHash);
+  const { cumulativeGasUsed, logs, status } = await blockchain.getTransactionReceipt(txHash);
 
   const receiptLogs = logs.map((log, logIndex) => ({
     id: null,
@@ -30,9 +37,13 @@ export async function handleGetTransactionReceipt(
     from,
     to,
     cumulativeGasUsed: Number(cumulativeGasUsed),
-    gasUsed: Number(gasUsed),
-    contractAddress,
+    gasUsed: Number(cumulativeGasUsed),
+    contractAddress: !to ? getContractAddress(from, nonce) : undefined,
     logs: receiptLogs,
     status,
   };
+}
+
+function getContractAddress(from: Address, nonce: bigint) {
+  return new Address(sha3Buffer(rlp.encode([from.toBuffer(), toBufferBE(nonce, 32)])).slice(12));
 }
