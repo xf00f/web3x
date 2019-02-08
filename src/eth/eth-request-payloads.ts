@@ -29,6 +29,7 @@ import {
   outputBigNumberFormatter,
   outputBlockFormatter,
   outputSyncingFormatter,
+  PartialTransactionRequest,
   toRawCallRequest,
   toRawEstimateRequest,
   toRawLogRequest,
@@ -245,11 +246,14 @@ export class EthRequestPayloads {
     };
   }
 
-  public sendTransaction(tx: TransactionRequest) {
-    tx.from = tx.from || this.defaultFromAddress;
+  public sendTransaction(tx: PartialTransactionRequest) {
+    const from = tx.from || this.defaultFromAddress;
+    if (!from) {
+      throw new Error('No from addres specified.');
+    }
     return {
       method: 'eth_sendTransaction',
-      params: [toRawTransactionRequest(tx)],
+      params: [toRawTransactionRequest({ ...tx, from })],
       format: identity,
     };
   }

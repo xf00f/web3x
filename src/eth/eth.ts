@@ -21,6 +21,7 @@ import {
   EstimateRequest,
   LogRequest,
   LogResponse,
+  PartialTransactionRequest,
   Sync,
   TransactionReceipt,
   TransactionRequest,
@@ -172,7 +173,7 @@ export class Eth {
     return new SendSignedTransaction(this, this.request.sendSignedTransaction(data));
   }
 
-  public sendTransaction(tx: TransactionRequest): SendTx {
+  public sendTransaction(tx: PartialTransactionRequest): SendTx {
     return new SendTransaction(this, tx);
   }
 

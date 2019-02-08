@@ -9,26 +9,51 @@ import {
 } from '../../formatters';
 import { EthereumProvider, EthereumProviderNotifications } from '../../providers';
 import { bufferToHex, numberToHex } from '../../utils';
+import { Wallet } from '../../wallet';
 import { Blockchain } from '../blockchain';
 import { getAccountCode } from '../vm';
-import { WorldState } from '../world/world-state';
+import { WorldState } from '../world';
 import { handleCall } from './handle-call';
 import { getLogs } from './handle-get-logs';
 import { handleGetTransactionReceipt } from './handle-get-transaction-receipt';
 import { handleSendTransaction } from './handle-send-transaction';
 
 export class EvmProvider implements EthereumProvider {
-  constructor(public readonly worldState: WorldState, private readonly blockchain: Blockchain) {}
+  constructor(
+    public readonly worldState: WorldState,
+    private readonly blockchain: Blockchain,
+    public readonly wallet: Wallet,
+  ) {}
+
+  public static async create(worldState: WorldState, blockchain: Blockchain) {
+    const wallet = new Wallet();
+    wallet.create(10);
+    worldState.checkpoint();
+    for (const address of wallet.currentAddresses()) {
+      await worldState.createAccount(address, BigInt(10) * BigInt(10) ** BigInt(18));
+    }
+    await worldState.commit();
+    return new EvmProvider(worldState, blockchain, wallet);
+  }
 
   public static async fromDb(db: LevelUp) {
     const worldState = await WorldState.fromDb(db);
     const blockchain = await Blockchain.fromDb(db);
-    return new EvmProvider(worldState, blockchain);
+    return await EvmProvider.create(worldState, blockchain);
   }
 
   public static async fromLocalDb(name: string) {
     const leveljs = require('level-js');
     return await EvmProvider.fromDb(levelup(leveljs(name)));
+  }
+
+  public static async eraseLocalDb(name: string) {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.deleteDatabase(`level-js-${name}`);
+      req.onsuccess = resolve;
+      req.onerror = reject;
+      req.onblocked = reject;
+    });
   }
 
   public async send(method: string, params?: any[] | undefined): Promise<any> {
@@ -46,7 +71,12 @@ export class EvmProvider implements EthereumProvider {
 
     switch (method) {
       case 'eth_sendTransaction':
-        return await handleSendTransaction(this.worldState, this.blockchain, fromRawTransactionRequest(params[0]));
+        return await handleSendTransaction(
+          this.worldState,
+          this.blockchain,
+          fromRawTransactionRequest(params[0]),
+          this.wallet,
+        );
       case 'eth_call':
         return bufferToHex(await handleCall(this.worldState, fromRawCallRequest(params[0])));
       case 'eth_getTransactionReceipt':

@@ -142,6 +142,7 @@ describe('account', () => {
 
     it('should create correct signature', async () => {
       const tx = await signTransaction(testData.transaction, testData.privateKey, mockEthereum);
+      expect(tx.messageHash).toBe('0x2c7903a33b55caf582d170f21595f1a7e598df3fa61b103ea0cd9d6b2a92565d');
       expect(tx.rawTransaction).toBe(testData.rawTransaction);
     });
 

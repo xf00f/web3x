@@ -1,4 +1,4 @@
-import { isHexStrict } from './hex';
+import { isHexStrict, trimHexLeadingZero } from './hex';
 import { leftPad } from './padding';
 
 export function hexToBuffer(value: string) {
@@ -16,5 +16,5 @@ export function bufferToHex(value: Buffer) {
 }
 
 export function bufferToMinimalHex(value: Buffer) {
-  return '0x' + value.toString('hex').replace(/^0*/, '');
+  return trimHexLeadingZero('0x' + value.toString('hex'));
 }

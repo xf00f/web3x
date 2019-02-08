@@ -1,6 +1,5 @@
 import levelup from 'levelup';
 import memdown from 'memdown';
-import { Address } from '../../address';
 import { Eth } from '../../eth';
 import { toWei, utf8ToHex } from '../../utils';
 import { EvmProvider } from './evm-provider';
@@ -11,16 +10,11 @@ describe('evm provider e2e tests', () => {
     const provider = await EvmProvider.fromDb(levelup(memdown()));
     const eth = new Eth(provider);
     const daiContract = new DaiContract(eth);
-    const account1 = Address.fromString('0xd7b2c3559672e470dc637a56962378f3b81030d3');
-    const account2 = Address.fromString('0x019967dbe06f658caff098b819d2d91fab73a3b2');
+    const account1 = provider.wallet.get(0)!.address;
+    const account2 = provider.wallet.get(1)!.address;
     const gasPrice = 50000;
 
     eth.defaultFromAddress = account1;
-
-    provider.worldState.checkpoint();
-    await provider.worldState.createAccount(account1, BigInt(10) * BigInt(10) ** BigInt(18));
-    await provider.worldState.createAccount(account2, BigInt(10) * BigInt(10) ** BigInt(18));
-    await provider.worldState.commit();
 
     const deployReceipt = await daiContract
       .deploy(utf8ToHex('xf00f'))
@@ -80,5 +74,5 @@ describe('evm provider e2e tests', () => {
     expect(logs[1].returnValues.src).toEqual(account1);
     expect(logs[1].returnValues.dst).toEqual(account2);
     expect(logs[1].returnValues.wad).toEqual(toWei('400', 'ether'));
-  });
+  }, 10000);
 });

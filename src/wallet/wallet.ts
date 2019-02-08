@@ -155,8 +155,11 @@ export class Wallet {
     return pointer;
   }
 
-  private currentIndexes() {
-    const keys = Object.keys(this.accounts);
-    return keys.map(key => +key);
+  public currentIndexes() {
+    return Object.keys(this.accounts).map(key => +key);
+  }
+
+  public currentAddresses() {
+    return Object.entries(this.accounts).map(([, account]) => account.address);
   }
 }

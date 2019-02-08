@@ -24,7 +24,11 @@ export class WorldState {
     const stateRoot = await getStateRoot();
     const trie = new Trie(db, stateRoot);
     const worldState = new WorldState(db, trie);
-    // await worldState.installPrecompiledContracts();
+
+    if (!stateRoot) {
+      await worldState.installPrecompiledContracts();
+    }
+
     return worldState;
   }
 
