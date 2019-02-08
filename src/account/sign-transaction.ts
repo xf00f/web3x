@@ -15,15 +15,15 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { decode, encode } from 'rlp';
 import { Address } from '../address';
 import { Eth } from '../eth';
 import Account from '../eth-lib/account';
 import Bytes from '../eth-lib/bytes';
-import Hash from '../eth-lib/hash';
 import Nat from '../eth-lib/nat';
 import RLP from '../eth-lib/rlp';
 import { inputAddressFormatter } from '../formatters';
-import { bufferToHex, numberToHex } from '../utils';
+import { bufferToHex, makeHexEven, numberToHex, sha3, trimHexLeadingZero } from '../utils';
 
 export interface SignTransactionRequest {
   chainId?: number | string;
@@ -81,10 +81,10 @@ export function recoverTransaction(rawTx: string): string {
   const extraData = recovery < 35 ? [] : [Bytes.fromNumber((recovery - 35) >> 1), '0x', '0x'];
   const signingData = values.slice(0, 6).concat(extraData);
   const signingDataHex = RLP.encode(signingData);
-  return Account.recover(Hash.keccak256(signingDataHex), signature);
+  return Account.recover(sha3(signingDataHex), signature);
 }
 
-function sign(tx: SignTransactionRequest, privateKey: Buffer): SignedTx {
+export function sign(tx: SignTransactionRequest, privateKey: Buffer): SignedTx {
   if (tx.nonce! < 0 || tx.gas! < 0 || tx.gasPrice! < 0 || tx.chainId! < 0) {
     throw new Error('gas, gasPrice, nonce or chainId is lower than 0');
   }
@@ -103,47 +103,31 @@ function sign(tx: SignTransactionRequest, privateKey: Buffer): SignedTx {
     '0x',
   ];
 
-  const rlpEncoded = RLP.encode(toEncode);
+  const rlpEncoded = encode(toEncode);
 
-  const messageHash = Hash.keccak256(rlpEncoded);
+  const messageHash = sha3(rlpEncoded);
 
-  const signature = Account.makeSigner(Nat.toNumber(chainId || '0x1') * 2 + 35)(Hash.keccak256(rlpEncoded), privateKey);
+  const signature = Account.makeSigner(Nat.toNumber(chainId || '0x1') * 2 + 35)(messageHash, privateKey);
 
-  const rawTx = RLP.decode(rlpEncoded)
-    .slice(0, 6)
-    .concat(Account.decodeSignature(signature));
+  const rawTx: any[] = [...decode(rlpEncoded).slice(0, 6), ...Account.decodeSignature(signature)];
 
-  rawTx[6] = makeEven(trimLeadingZero(rawTx[6]));
-  rawTx[7] = makeEven(trimLeadingZero(rawTx[7]));
-  rawTx[8] = makeEven(trimLeadingZero(rawTx[8]));
+  rawTx[6] = makeHexEven(trimHexLeadingZero(rawTx[6]));
+  rawTx[7] = makeHexEven(trimHexLeadingZero(rawTx[7]));
+  rawTx[8] = makeHexEven(trimHexLeadingZero(rawTx[8]));
 
-  const rawTransaction = RLP.encode(rawTx);
+  const rawTransaction = encode(rawTx);
 
-  const values = RLP.decode(rawTransaction);
+  const values = decode(rawTransaction) as any;
 
   return {
     messageHash,
-    v: trimLeadingZero(values[6]),
-    r: trimLeadingZero(values[7]),
-    s: trimLeadingZero(values[8]),
-    rawTransaction,
+    v: trimHexLeadingZero(bufferToHex(values[6])),
+    r: trimHexLeadingZero(bufferToHex(values[7])),
+    s: trimHexLeadingZero(bufferToHex(values[8])),
+    rawTransaction: bufferToHex(rawTransaction),
   };
 }
 
 function isNot(value) {
   return value === undefined || value === null;
-}
-
-function trimLeadingZero(hex) {
-  while (hex && hex.startsWith('0x0')) {
-    hex = '0x' + hex.slice(3);
-  }
-  return hex;
-}
-
-function makeEven(hex) {
-  if (hex.length % 2 === 1) {
-    hex = hex.replace('0x', '0x0');
-  }
-  return hex;
 }

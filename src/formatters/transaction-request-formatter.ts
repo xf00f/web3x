@@ -18,6 +18,16 @@
 import { Address } from '../address';
 import { bufferToMinimalHex, hexToBuffer, hexToNumberString, numberToHex } from '../utils';
 
+export interface PartialTransactionRequest {
+  from?: Address;
+  to?: Address;
+  gas?: string | number;
+  gasPrice?: string | number;
+  value?: string | number;
+  data?: Buffer;
+  nonce?: string | number;
+}
+
 export interface TransactionRequest {
   from: Address;
   to?: Address;

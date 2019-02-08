@@ -18,13 +18,23 @@ export async function messageCall(
   worldState.checkpoint();
 
   const senderAccount = (await worldState.loadAccount(sender))!;
-  const codeAccount = (await worldState.loadAccount(codeFrom))!;
   const recipientAccount = await worldState.loadOrCreateAccount(recipient);
+  const codeAccount = (await worldState.loadAccount(codeFrom))!;
+  const txSubstrate = new TxSubstrate();
 
   recipientAccount.balance += value;
   senderAccount.balance -= value;
 
-  const txSubstrate = new TxSubstrate();
+  if (codeAccount.code.length === 0) {
+    await worldState.commit();
+    return {
+      remainingGas: gas,
+      txSubstrate,
+      status: true,
+      returned: Buffer.of(),
+    };
+  }
+
   const callContext = new EvmContext(
     worldState,
     codeAccount.code,

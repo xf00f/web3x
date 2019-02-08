@@ -1,6 +1,7 @@
 import { Address } from '../../address';
-import { Tx, TxSubstrate } from '../tx';
-import { WorldState } from '../world/world-state';
+import { recoverTransaction, Tx } from '../tx/tx';
+import { TxSubstrate } from '../tx/tx-substrate';
+import { WorldState } from '../world';
 import { contractCreation } from './contract-creation';
 import { Gas } from './gas';
 import { messageCall } from './message-call';
@@ -13,10 +14,11 @@ interface ExTxResult {
   status: boolean;
 }
 
-export async function executeTransaction(worldState: WorldState, sender: Address, tx: Tx): Promise<ExTxResult> {
+export async function executeTransaction(worldState: WorldState, tx: Tx, sender?: Address): Promise<ExTxResult> {
   const { to, dataOrInit, value, gasPrice, gasLimit } = tx;
+  sender = sender || recoverTransaction(tx);
 
-  validateTx(worldState, sender, tx);
+  await validateTx(worldState, sender, tx);
 
   worldState.checkpoint();
   const senderAccount = (await worldState.loadAccount(sender))!;
@@ -33,10 +35,9 @@ export async function executeTransaction(worldState: WorldState, sender: Address
 async function validateTx(worldState: WorldState, sender: Address, tx: Tx) {
   const { to, dataOrInit, value, nonce, gasLimit, gasPrice } = tx;
 
-  // TODO: sender should be recovered from tx signature.
   const senderAccount = await worldState.loadImmutableAccount(sender);
   if (!senderAccount) {
-    throw new Error('Sender account not found.');
+    throw new Error(`Sender account not found: ${sender}`);
   }
 
   if (senderAccount.nonce !== nonce) {
@@ -44,7 +45,9 @@ async function validateTx(worldState: WorldState, sender: Address, tx: Tx) {
   }
 
   const intrinsicGas =
-    (dataOrInit.length ? Gas.GTXDATANONZERO : Gas.GTXDATANONZERO) + (to ? 0 : Gas.GTXCREATE) + Gas.GTRANSACTION;
+    (dataOrInit && dataOrInit.length ? Gas.GTXDATANONZERO : Gas.GTXDATANONZERO) +
+    (to ? 0 : Gas.GTXCREATE) +
+    Gas.GTRANSACTION;
   if (gasLimit < intrinsicGas) {
     throw new Error(`Gas limit ${gasLimit} is less than intrinsic gas ${intrinsicGas} for this transaction.`);
   }

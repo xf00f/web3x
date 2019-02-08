@@ -19,7 +19,7 @@ import { isArray } from 'util';
 import { Address } from '../address';
 import { BlockType, Eth } from '../eth';
 import { SendTransaction, SendTx } from '../eth/send-tx';
-import { TransactionReceipt } from '../formatters';
+import { PartialTransactionRequest, TransactionReceipt } from '../formatters';
 import { ContractAbi, ContractFunctionEntry } from './abi';
 
 export type TxFactory = (...args: any[]) => Tx;
@@ -94,7 +94,7 @@ export class Tx implements TxCall, TxSend {
   public send(options: SendOptions): SendTx {
     const tx = this.getTx(options);
 
-    if (!this.contractEntry.payable && tx.value > 0) {
+    if (!this.contractEntry.payable && tx.value !== undefined && tx.value > 0) {
       throw new Error('Can not send value to non-payable contract method.');
     }
 
@@ -122,7 +122,7 @@ export class Tx implements TxCall, TxSend {
 }
 
 export class SendContractTx extends SendTransaction {
-  constructor(eth: Eth, tx: any, private contractAbi: ContractAbi) {
+  constructor(eth: Eth, tx: PartialTransactionRequest, private contractAbi: ContractAbi) {
     super(eth, tx);
   }
 

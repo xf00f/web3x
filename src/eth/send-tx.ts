@@ -16,7 +16,7 @@
 */
 
 import { Address } from '../address';
-import { TransactionReceipt, TransactionRequest } from '../formatters';
+import { PartialTransactionRequest, TransactionReceipt, TransactionRequest } from '../formatters';
 import { TransactionHash } from '../types';
 import { BlockHeader } from './block';
 import { Eth } from './eth';
@@ -125,7 +125,7 @@ export abstract class BaseSendTx implements SendTx {
 }
 
 export class SendTransaction extends BaseSendTx {
-  constructor(eth: Eth, private tx: TransactionRequest) {
+  constructor(eth: Eth, private tx: PartialTransactionRequest) {
     super(eth);
   }
 

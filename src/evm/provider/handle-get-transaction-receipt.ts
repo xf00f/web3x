@@ -3,17 +3,19 @@ import * as rlp from 'rlp';
 import { Address } from '../../address';
 import { TransactionReceipt } from '../../formatters';
 import { TransactionHash } from '../../types';
-import { bufferToHex, sha3Buffer } from '../../utils';
+import { bufferToHex, hexToBuffer, sha3Buffer } from '../../utils';
 import { Blockchain } from '../blockchain';
+import { recoverTransaction } from '../tx';
 
 export async function handleGetTransactionReceipt(
   blockchain: Blockchain,
   transactionHash: TransactionHash,
 ): Promise<TransactionReceipt> {
-  // TODO: To be recovered from tx.
-  const from = Address.fromString('0xd7b2c3559672e470dc637a56962378f3b81030d3');
-  const txHash = Buffer.from(transactionHash.slice(2), 'hex');
-  const { to, nonce } = await blockchain.getMinedTransaction(txHash);
+  const txHash = hexToBuffer(transactionHash);
+  const tx = await blockchain.getMinedTransaction(txHash);
+  const { to, nonce } = tx;
+  // TODO: Store from in tx so no need to recover? This is slow.
+  const from = recoverTransaction(tx);
   const { cumulativeGasUsed, logs, status } = await blockchain.getTransactionReceipt(txHash);
 
   const receiptLogs = logs.map((log, logIndex) => ({
@@ -29,7 +31,7 @@ export async function handleGetTransactionReceipt(
     topics: log.topics.map(bufferToHex),
   }));
 
-  return {
+  const txReceipt = {
     transactionHash,
     transactionIndex: 0,
     blockHash: '0',
@@ -42,6 +44,8 @@ export async function handleGetTransactionReceipt(
     logs: receiptLogs,
     status,
   };
+
+  return txReceipt;
 }
 
 function getContractAddress(from: Address, nonce: bigint) {

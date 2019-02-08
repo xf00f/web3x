@@ -89,6 +89,9 @@ export class Blockchain {
       let block = deserializeBlockHeader(await db.get(chainTip));
       while (true) {
         blocks.unshift(block);
+        if (block.parentHash.length === 0) {
+          break;
+        }
         block = deserializeBlockHeader(await db.get(block.parentHash));
       }
     }
