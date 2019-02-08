@@ -71,7 +71,7 @@ var tests = [
 describe('encodeEventSignature', function() {
   tests.forEach(function(test) {
     it('should convert correctly', function() {
-      expect(abi.encodeEventSignature.apply(abi, test.params)).toEqual(test.result);
+      expect(abi.encodeEventSignature.apply(abi, test.params as any)).toEqual(test.result);
     });
   });
 });

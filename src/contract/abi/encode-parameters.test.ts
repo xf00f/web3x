@@ -46,7 +46,7 @@ describe('encodeParameters', function() {
 
   tests.forEach(function(test) {
     it('should convert correctly', function() {
-      expect(abi.encodeParameters.apply(abi, test.params)).toEqual(test.result);
+      expect(abi.encodeParameters.apply(abi, test.params as any)).toEqual(test.result);
     });
   });
 });

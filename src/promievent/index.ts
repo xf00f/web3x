@@ -48,6 +48,15 @@ export class PromiEvent<T> implements Promise<T>, EventEmitter {
     return new PromiEvent(this.promise.catch(onrejected), this.emitter);
   }
 
+  finally(onfinally?: (() => void) | undefined | null): Promise<T> {
+    const promise: any = this.promise;
+    if (promise.finally) {
+      return new PromiEvent(promise.finally(onfinally), this.emitter);
+    } else {
+      throw new Error('Underlying Promise library does not support finally.');
+    }
+  }
+
   addListener(event: string | symbol, listener: (...args: any[]) => void): this {
     this.emitter.addListener(event, listener);
     return this;

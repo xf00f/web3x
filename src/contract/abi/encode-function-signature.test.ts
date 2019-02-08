@@ -90,7 +90,7 @@ var tests = [
 describe('encodeFunctionSignature', function() {
   tests.forEach(function(test) {
     it('should convert correctly', function() {
-      expect(abi.encodeFunctionSignature.apply(abi, test.params)).toEqual(test.result);
+      expect(abi.encodeFunctionSignature.apply(abi, test.params as any)).toEqual(test.result);
     });
   });
 });

@@ -89,7 +89,7 @@ describe('decodeParameters', function() {
   ];
   tests.forEach(function(test) {
     it('should convert correctly', function() {
-      expect(abi.decodeParameters.apply(abi, test.params)).toEqual(test.result);
+      expect(abi.decodeParameters.apply(abi, test.params as any)).toEqual(test.result);
     });
   });
 
@@ -137,7 +137,7 @@ describe('decodeParameters', function() {
 
   failures.forEach(function(test) {
     it('should not convert ' + test.params[1] + ' to ' + test.params[0], function() {
-      expect(_ => abi.decodeParameters.apply(abi, test.params)).toThrow();
+      expect(_ => abi.decodeParameters.apply(abi, test.params as any)).toThrow();
     });
   });
 });

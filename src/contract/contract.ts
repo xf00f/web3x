@@ -147,7 +147,7 @@ export class Contract<T extends ContractDefinition | void = void> {
   /**
    * Adds event listeners and creates a subscription.
    */
-  private on(event: Events<T>, options: GetLogOptions = {}, callback?: (err, res, sub) => void) {
+  private on(event: string, options: GetLogOptions = {}, callback?: (err, res, sub) => void) {
     const logOptions = this.getLogOptions(event, options);
     const { fromBlock, ...subLogOptions } = logOptions;
 
@@ -264,7 +264,7 @@ export class Contract<T extends ContractDefinition | void = void> {
       .forEach(method => {
         const name = method.name!;
         const funcName = abiMethodToString(method);
-        const event = this.on.bind(this, method.signature);
+        const event = this.on.bind(this, method.signature!);
 
         // add method only if not already exists
         if (!events[name] || events[name].name === 'bound ') events[name] = event;
