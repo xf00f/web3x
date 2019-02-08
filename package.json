@@ -1,6 +1,6 @@
 {
   "name": "web3x",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "license": "LGPL-3.0",
   "description": "Typescript port of web3.js",
   "repository": {
