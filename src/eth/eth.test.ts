@@ -30,6 +30,27 @@ describe('eth', () => {
     gasPrice: 100,
     gas: 100,
   };
+  const blockHeader = {
+    hash: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
+    parentHash: '0x83ffb245cfced97ccc5c75253d6960376d6c6dea93647397a543a72fdaea5265',
+    miner: '0xdcc6960376d6c6dea93647383ffb245cfced97cf',
+    stateRoot: '0x54dda68af07643f68739a6e9612ad157a26ae7e2ce81f77842bb5835fbcde583',
+    transactionsRoot: '0x64dda68af07643f68739a6e9612ad157a26ae7e2ce81f77842bb5835fbcde583',
+    receiptsRoot: '0x74dda68af07643f68739a6e9612ad157a26ae7e2ce81f77842bb5835fbcde583',
+    sha3Uncles: '0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347',
+    logsBloom: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
+    difficulty: '0x3e8',
+    totalDifficulty: '0x3e8',
+    number: '0x11',
+    gasLimit: '0x3e8',
+    gasUsed: '0x3e8',
+    timestamp: '0x3e8',
+    extraData: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
+    nonce: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
+    size: '0x3e8',
+    transactions: [],
+    uncles: [],
+  };
   let mockEthereumProvider: MockEthereumProvider;
 
   beforeEach(() => {
@@ -106,9 +127,7 @@ describe('eth', () => {
       setTimeout(() => {
         mockEthereumProvider.emit('notification', {
           subscription: '0x1234567',
-          result: {
-            blockNumber: '0x10',
-          },
+          result: blockHeader,
         });
       }, 100);
 
@@ -162,9 +181,7 @@ describe('eth', () => {
         setTimeout(() => {
           mockEthereumProvider.emit('notification', {
             subscription: '0x1234567',
-            result: {
-              blockNumber: '0x10',
-            },
+            result: blockHeader,
           });
         }, i * 10);
       }
@@ -197,7 +214,8 @@ describe('eth', () => {
           mockEthereumProvider.emit('notification', {
             subscription: '0x1234567',
             result: {
-              blockNumber: numberToHex(16 + i),
+              ...blockHeader,
+              number: numberToHex(16 + i),
             },
           });
         }, i * 10);

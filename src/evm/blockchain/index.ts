@@ -11,8 +11,8 @@ import { deserializeTxReceipt, serializeTxReceipt, TxReceipt } from '../tx/tx-re
 
 export interface BlockHeader {
   parentHash: Buffer;
-  uncleHash: Buffer;
-  beneficiary: Address;
+  sha3Uncles: Buffer;
+  miner: Address;
   stateRoot: Buffer;
   transactionsRoot: Buffer;
   receiptsRoot: Buffer;
@@ -55,8 +55,8 @@ export function deserializeBlockHeader(data: Buffer) {
   const bufs: Buffer[] = rlp.decode(data) as any;
   return {
     parentHash: bufs[0],
-    uncleHash: Buffer.of(),
-    beneficiary: Address.ZERO,
+    sha3Uncles: Buffer.of(),
+    miner: Address.ZERO,
     stateRoot: bufs[1],
     transactionsRoot: bufs[2],
     receiptsRoot: bufs[3],
@@ -69,7 +69,7 @@ export function deserializeBlockHeader(data: Buffer) {
     extraData: Buffer.of(),
     mixHash: Buffer.of(),
     nonce: 0,
-  };
+  } as BlockHeader;
 }
 
 export class Blockchain extends EventEmitter {
@@ -114,8 +114,8 @@ export class Blockchain extends EventEmitter {
 
     const block = {
       parentHash: parentBlock ? sha3Buffer(serializeBlockHeader(parentBlock)) : Buffer.of(),
-      uncleHash: Buffer.of(),
-      beneficiary: Address.ZERO,
+      sha3Uncles: Buffer.of(),
+      miner: Address.ZERO,
       stateRoot,
       transactionsRoot: txTrie.root,
       receiptsRoot: receiptTrie.root,
@@ -128,7 +128,7 @@ export class Blockchain extends EventEmitter {
       extraData: Buffer.of(),
       mixHash: Buffer.of(),
       nonce: 0,
-    };
+    } as BlockHeader;
 
     this.blocks.push(block);
 
@@ -145,7 +145,7 @@ export class Blockchain extends EventEmitter {
       txHashes.map((txHash, i) => this.db.put(txHash, rlp.encode([blockHash, sha3Buffer(i.toString())]))),
     );
 
-    this.emit('newBlock', block);
+    this.emit('newHeads', block, blockHash);
 
     txReceipts.forEach((receipt, transactionIndex) => {
       const transactionHash = txHashes[transactionIndex];
@@ -171,10 +171,14 @@ export class Blockchain extends EventEmitter {
   }
 
   public async getTransactionReceipt(txHash: Buffer) {
-    const lookup: Buffer[] = rlp.decode(await this.db.get(txHash)) as any;
-    const blockHeader = deserializeBlockHeader(await this.db.get(lookup[0]));
-    const receiptTrie = new Trie(this.db, blockHeader.receiptsRoot);
-    return deserializeTxReceipt(await receiptTrie.get(lookup[1]));
+    try {
+      const lookup: Buffer[] = rlp.decode(await this.db.get(txHash)) as any;
+      const blockHeader = deserializeBlockHeader(await this.db.get(lookup[0]));
+      const receiptTrie = new Trie(this.db, blockHeader.receiptsRoot);
+      return deserializeTxReceipt(await receiptTrie.get(lookup[1]));
+    } catch (err) {
+      return null;
+    }
   }
 
   private async indexKeyedTrieToArray(trie: Trie) {

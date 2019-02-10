@@ -15,14 +15,13 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { BlockHeader } from '..';
-import { outputBlockFormatter } from '../../formatters';
+import { fromRawBlockHeaderResponse, RawBlockHeaderResponse } from '../../formatters';
 import { EthereumProvider } from '../../providers';
 import { Subscription } from '../../subscriptions';
 
-export function subscribeForNewHeads(provider: EthereumProvider): Subscription<BlockHeader> {
-  return new Subscription<BlockHeader>('eth', 'newHeads', [], provider, (result, sub) => {
-    const output = outputBlockFormatter(result);
+export function subscribeForNewHeads(provider: EthereumProvider): Subscription<RawBlockHeaderResponse> {
+  return new Subscription<RawBlockHeaderResponse>('eth', 'newHeads', [], provider, (result, sub) => {
+    const output = fromRawBlockHeaderResponse(result);
     sub.emit('data', output, sub);
   });
 }

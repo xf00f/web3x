@@ -1,10 +1,10 @@
 import { sign } from '../../account/sign-transaction';
 import { TransactionRequest } from '../../formatters';
 import { TransactionHash } from '../../types';
-import { bufferToHex } from '../../utils';
+import { bufferToHex, sha3 } from '../../utils';
 import { Wallet } from '../../wallet';
 import { Blockchain } from '../blockchain';
-import { Tx, TxReceipt } from '../tx';
+import { serializeTx, Tx, TxReceipt } from '../tx';
 import { executeTransaction } from '../vm';
 import { WorldState } from '../world';
 
@@ -13,6 +13,7 @@ export async function handleSendTransaction(
   blockchain: Blockchain,
   txRequest: TransactionRequest,
   wallet: Wallet,
+  blockDelay: number = 0,
 ): Promise<TransactionHash> {
   const { from, to, gas = 200000, gasPrice, value = 0, data } = txRequest;
   const nonce = txRequest.nonce ? BigInt(txRequest.nonce) : await worldState.getTransactionCount(from);
@@ -47,16 +48,20 @@ export async function handleSendTransaction(
     s,
   };
 
-  const result = await executeTransaction(worldState, tx, from);
+  const txHash = sha3(serializeTx(tx));
 
-  const receipt: TxReceipt = {
-    cumulativeGasUsed: BigInt(gas) - result.remainingGas,
-    logs: result.txSubstrate.logs,
-    logsBloomFilter: Buffer.of(),
-    status: result.status,
-  };
+  setTimeout(async () => {
+    const result = await executeTransaction(worldState, tx, from);
 
-  const txHashes = await blockchain.mineTransactions(await worldState.getStateRoot(), [tx], [receipt]);
+    const receipt: TxReceipt = {
+      cumulativeGasUsed: BigInt(gas) - result.remainingGas,
+      logs: result.txSubstrate.logs,
+      logsBloomFilter: Buffer.of(),
+      status: result.status,
+    };
 
-  return bufferToHex(txHashes[0]);
+    await blockchain.mineTransactions(await worldState.getStateRoot(), [tx], [receipt]);
+  }, blockDelay);
+
+  return txHash;
 }
