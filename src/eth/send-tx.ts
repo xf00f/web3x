@@ -15,12 +15,10 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Address } from '../address';
-import { PartialTransactionRequest, TransactionReceipt, TransactionRequest } from '../formatters';
+import { TransactionReceipt } from '../formatters';
 import { TransactionHash } from '../types';
 import { BlockHeader } from './block';
 import { Eth } from './eth';
-import { EthRequestPayload } from './eth-request-payloads';
 
 export interface SendTx<TxReceipt = TransactionReceipt> {
   getTxHash(): Promise<TransactionHash>;
@@ -30,21 +28,14 @@ export interface SendTx<TxReceipt = TransactionReceipt> {
   ): Promise<TxReceipt>;
 }
 
-export abstract class BaseSendTx implements SendTx {
-  private txHash?: string;
+export class SentTransaction implements SendTx {
   private receipt?: TransactionReceipt | null;
   private blocksSinceSent = 0;
 
-  constructor(protected eth: Eth) {}
+  constructor(protected eth: Eth, protected txHashPromise: Promise<TransactionHash>) {}
 
   public async getTxHash(): Promise<TransactionHash> {
-    if (this.txHash) {
-      return this.txHash;
-    }
-
-    const { method, params, format } = await this.getPayload();
-    this.txHash = format(await this.eth.provider.send(method, params));
-    return this.txHash!;
+    return this.txHashPromise;
   }
 
   public async getReceipt(
@@ -114,51 +105,10 @@ export abstract class BaseSendTx implements SendTx {
     });
   }
 
-  protected abstract async getPayload(): Promise<EthRequestPayload>;
-
   protected async handleReceipt(receipt: TransactionReceipt) {
     if (receipt.status === false) {
       throw new Error('Transaction has been reverted by the EVM.');
     }
     return receipt;
-  }
-}
-
-export class SendTransaction extends BaseSendTx {
-  constructor(eth: Eth, private tx: PartialTransactionRequest) {
-    super(eth);
-  }
-
-  public async getPayload() {
-    const account = this.getAccount(this.tx.from);
-
-    if (!this.tx.gasPrice) {
-      this.tx.gasPrice = await this.eth.getGasPrice();
-    }
-
-    if (!account) {
-      return this.eth.request.sendTransaction(this.tx);
-    } else {
-      const { from, ...fromlessTx } = this.tx;
-      const signedTx = await account.signTransaction(fromlessTx, this.eth);
-      return this.eth.request.sendSignedTransaction(signedTx.rawTransaction);
-    }
-  }
-
-  private getAccount(address?: Address) {
-    address = address || this.eth.defaultFromAddress;
-    if (this.eth.wallet && address) {
-      return this.eth.wallet.get(address.toString());
-    }
-  }
-}
-
-export class SendSignedTransaction extends BaseSendTx {
-  constructor(eth: Eth, private payload: EthRequestPayload) {
-    super(eth);
-  }
-
-  public async getPayload() {
-    return this.payload;
   }
 }

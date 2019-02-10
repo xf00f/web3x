@@ -78,12 +78,7 @@ describe('account', () => {
   it('should send transaction', async () => {
     const mockEthereum = {
       getTransactionReceipt: jest.fn(),
-      request: {
-        sendSignedTransaction: jest.fn(),
-      },
-      provider: {
-        send: jest.fn(),
-      },
+      sendSignedTransaction: jest.fn(),
     };
 
     const tx = {
@@ -96,18 +91,15 @@ describe('account', () => {
     };
     const testAccount = Account.create();
 
-    mockEthereum.request.sendSignedTransaction.mockReturnValue({
-      method: 'eth_sendRawTransaction',
-      params: [],
-      format: x => x,
+    mockEthereum.sendSignedTransaction.mockReturnValue({
+      getTxHash: jest.fn().mockResolvedValue('0x1234'),
     });
 
     mockEthereum.getTransactionReceipt.mockResolvedValue({});
 
     await testAccount.sendTransaction(tx, mockEthereum as any).getReceipt();
 
-    expect(mockEthereum.request.sendSignedTransaction).toHaveBeenCalled();
-    expect(mockEthereum.provider.send).toHaveBeenCalled();
+    expect(mockEthereum.sendSignedTransaction).toHaveBeenCalled();
   });
 
   it('should throw error if sending bad transaction', async () => {

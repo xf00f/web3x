@@ -20,7 +20,8 @@ import hdkey from 'hdkey';
 import { Address } from '../address';
 import { Eth } from '../eth';
 import { create, fromPrivate } from '../eth-lib/account';
-import { BaseSendTx, SendTx } from '../eth/send-tx';
+import { SendTx, SentTransaction } from '../eth/send-tx';
+import { TransactionHash } from '../types';
 import { decrypt, encrypt, KeyStore, randomBuffer } from '../utils';
 import { sign } from '../utils/sign';
 import { signTransaction, SignTransactionRequest } from './sign-transaction';
@@ -65,7 +66,15 @@ export class Account {
   }
 
   public sendTransaction(tx: AccountTx, eth: Eth): SendTx {
-    return new SendAccountTx(eth, tx, this.privateKey);
+    const promise = new Promise<TransactionHash>(async (resolve, reject) => {
+      try {
+        const signedTx = await signTransaction(tx, this.privateKey, eth);
+        resolve(await eth.sendSignedTransaction(signedTx.rawTransaction).getTxHash());
+      } catch (err) {
+        reject(err);
+      }
+    });
+    return new SentTransaction(eth, promise);
   }
 
   public signTransaction(tx: AccountTx, eth: Eth) {
@@ -78,16 +87,5 @@ export class Account {
 
   public encrypt(password: string, options?: any) {
     return encrypt(this.privateKey, this.address, password, options);
-  }
-}
-
-class SendAccountTx extends BaseSendTx {
-  constructor(eth: Eth, private tx: SignTransactionRequest, private privateKey: Buffer) {
-    super(eth);
-  }
-
-  protected async getPayload() {
-    const signedTx = await signTransaction(this.tx, this.privateKey, this.eth);
-    return this.eth.request.sendSignedTransaction(signedTx.rawTransaction);
   }
 }

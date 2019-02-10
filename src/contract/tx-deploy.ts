@@ -19,6 +19,7 @@ import { Address } from '../address';
 import { Eth } from '../eth';
 import { SendTx } from '../eth/send-tx';
 import { TransactionReceipt } from '../formatters';
+import { TransactionHash } from '../types';
 import { hexToBuffer } from '../utils';
 import { ContractAbi, ContractFunctionEntry } from './abi';
 import { SendContractTx, TxSend } from './tx';
@@ -64,7 +65,9 @@ export class TxDeploy implements TxSend {
       throw new Error('Can not send value to non-payable constructor.');
     }
 
-    return new DeployContractTx(this.eth, tx, this.contractAbi, this.onDeployed);
+    const promise = this.eth.sendTransaction(tx).getTxHash();
+
+    return new DeployContractTx(this.eth, this.contractAbi, promise, this.onDeployed);
   }
 
   public getSendRequestPayload(options: SendOptions) {
@@ -87,8 +90,13 @@ export class TxDeploy implements TxSend {
 }
 
 export class DeployContractTx extends SendContractTx {
-  constructor(eth: Eth, tx: any, contractAbi: ContractAbi, private onDeployed: (address: Address) => void) {
-    super(eth, tx, contractAbi);
+  constructor(
+    eth: Eth,
+    contractAbi: ContractAbi,
+    promise: Promise<TransactionHash>,
+    private onDeployed: (address: Address) => void,
+  ) {
+    super(eth, contractAbi, promise);
   }
 
   protected async handleReceipt(receipt: TransactionReceipt) {
