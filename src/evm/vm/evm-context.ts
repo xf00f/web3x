@@ -11,6 +11,7 @@ export class EvmContext {
   public ip = 0;
   public halt = false;
   public reverted = false;
+  public revertInstruction = 0;
   public returned = Buffer.of();
   public lastReturned = Buffer.of();
 

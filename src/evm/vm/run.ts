@@ -31,6 +31,7 @@ export async function run(context: EvmContext, printOpcodes: boolean = false) {
       }
       bytes += opCode.bytes;
     }
+    context.revertInstruction = instruction;
     // tslint:disable-next-line:no-console
     console.error(`Execution reverted at instruction ${instruction}.`);
   }
