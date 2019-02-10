@@ -35,7 +35,7 @@ import { Data, Quantity } from '../types';
 import { Wallet } from '../wallet';
 import { Block, BlockHash, BlockHeader, BlockType } from './block';
 import { EthRequestPayloads } from './eth-request-payloads';
-import { SendSignedTransaction, SendTransaction, SendTx } from './send-tx';
+import { SendTx, SentTransaction } from './send-tx';
 import { SignedTransaction } from './signed-transaction';
 import { subscribeForLogs } from './subscriptions/logs';
 import { subscribeForNewHeads } from './subscriptions/new-heads';
@@ -170,11 +170,36 @@ export class Eth {
   }
 
   public sendSignedTransaction(data: Data): SendTx {
-    return new SendSignedTransaction(this, this.request.sendSignedTransaction(data));
+    const promise = new Promise<TransactionHash>(async resolve => {
+      const { method, params, format } = this.request.sendSignedTransaction(data);
+      const txHash = format(await this.provider.send(method, params));
+      resolve(txHash);
+    });
+    return new SentTransaction(this, promise);
   }
 
   public sendTransaction(tx: PartialTransactionRequest): SendTx {
-    return new SendTransaction(this, tx);
+    const promise = new Promise<TransactionHash>(async resolve => {
+      if (!tx.gasPrice) {
+        tx.gasPrice = await this.getGasPrice();
+      }
+
+      const account = this.getAccount(tx.from);
+
+      if (!account) {
+        const { method, params, format } = this.request.sendTransaction(tx);
+        const txHash = format(await this.provider.send(method, params));
+        resolve(txHash);
+      } else {
+        const { from, ...fromlessTx } = tx;
+        const signedTx = await account.signTransaction(fromlessTx, this);
+        const { method, params, format } = this.request.sendSignedTransaction(signedTx.rawTransaction);
+        const txHash = format(await this.provider.send(method, params));
+        resolve(txHash);
+      }
+    });
+
+    return new SentTransaction(this, promise);
   }
 
   private getAccount(address?: Address) {
