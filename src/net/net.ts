@@ -16,6 +16,7 @@
 */
 
 import { Eth } from '../eth';
+import { bufferToHex } from '../utils';
 import { NetRequestPayloads } from './net-request-payloads';
 
 export class Net {
@@ -43,7 +44,7 @@ export class Net {
 
   public async getNetworkType() {
     const block = await this.eth.getBlock(0);
-    const genesisHash = block.hash;
+    const genesisHash = bufferToHex(block.hash!);
     const id = await this.getId();
 
     if (genesisHash === '0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3' && id === 1) {

@@ -22,13 +22,33 @@ import { bufferToHex, sha3 } from '../utils';
 import { Contract } from './contract';
 import { TestContract, TestContractAbi } from './fixtures/TestContract';
 
-const address = Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe');
-const addressLowercase = address.toString().toLowerCase();
-const addressUnprefixedLowercase = addressLowercase.slice(2);
-const address2 = Address.fromString('0x5555567890123456789012345678901234567891');
-const address2Lowercase = address2.toString().toLowerCase();
-
 describe('contract', () => {
+  const address = Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe');
+  const addressLowercase = address.toString().toLowerCase();
+  const addressUnprefixedLowercase = addressLowercase.slice(2);
+  const address2 = Address.fromString('0x5555567890123456789012345678901234567891');
+  const address2Lowercase = address2.toString().toLowerCase();
+  const blockHeader = {
+    hash: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
+    parentHash: '0x83ffb245cfced97ccc5c75253d6960376d6c6dea93647397a543a72fdaea5265',
+    miner: '0xdcc6960376d6c6dea93647383ffb245cfced97cf',
+    stateRoot: '0x54dda68af07643f68739a6e9612ad157a26ae7e2ce81f77842bb5835fbcde583',
+    transactionsRoot: '0x64dda68af07643f68739a6e9612ad157a26ae7e2ce81f77842bb5835fbcde583',
+    receiptsRoot: '0x74dda68af07643f68739a6e9612ad157a26ae7e2ce81f77842bb5835fbcde583',
+    sha3Uncles: '0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347',
+    logsBloom: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
+    difficulty: '0x3e8',
+    totalDifficulty: '0x3e8',
+    number: '0x11',
+    gasLimit: '0x3e8',
+    gasUsed: '0x3e8',
+    timestamp: '0x3e8',
+    extraData: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
+    nonce: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
+    size: '0x3e8',
+    transactions: [],
+    uncles: [],
+  };
   let eth: Eth;
   let mockEthereumProvider: MockEthereumProvider;
 
@@ -887,6 +907,7 @@ describe('contract', () => {
         mockEthereumProvider.emit('notification', {
           subscription: '0x123',
           result: {
+            ...blockHeader,
             number: '0xa',
           },
         });
@@ -896,6 +917,7 @@ describe('contract', () => {
         mockEthereumProvider.emit('notification', {
           subscription: '0x123',
           result: {
+            ...blockHeader,
             number: '0xb',
           },
         });
@@ -1561,9 +1583,7 @@ describe('contract', () => {
         setTimeout(() => {
           mockEthereumProvider.emit('notification', {
             subscription: '0x123',
-            result: {
-              blockNumber: '0x10',
-            },
+            result: blockHeader,
           });
         }, 100);
 

@@ -24,7 +24,7 @@ export * from './input-post-formatter';
 export * from './input-sign-formatter';
 export * from './transaction-request-formatter';
 export * from './output-big-number-formatter';
-export * from './output-block-formatter';
+export * from './block-response-formatter';
 export * from './log-response-formatter';
 export * from './output-post-formatter';
 export * from './output-syncing-formatter';

@@ -17,6 +17,8 @@
 
 import { Address } from '../address';
 import {
+  BlockHeaderResponse,
+  BlockResponse,
   CallRequest,
   EstimateRequest,
   LogRequest,
@@ -33,7 +35,7 @@ import { Subscription } from '../subscriptions';
 import { TransactionHash } from '../types';
 import { Data, Quantity } from '../types';
 import { Wallet } from '../wallet';
-import { Block, BlockHash, BlockHeader, BlockType } from './block';
+import { BlockHash, BlockType } from './block';
 import { EthRequestPayloads } from './eth-request-payloads';
 import { SendTx, SentTransaction } from './send-tx';
 import { SignedTransaction } from './signed-transaction';
@@ -129,7 +131,10 @@ export class Eth {
     return await this.send(this.request.getCode(address, block));
   }
 
-  public async getBlock(block: BlockType | BlockHash, returnTransactionObjects: boolean = false): Promise<Block> {
+  public async getBlock(
+    block: BlockType | BlockHash,
+    returnTransactionObjects: boolean = false,
+  ): Promise<BlockResponse> {
     return await this.send(this.request.getBlock(block, returnTransactionObjects));
   }
 
@@ -137,7 +142,7 @@ export class Eth {
     block: BlockType | BlockHash,
     uncleIndex: number,
     returnTransactionObjects: boolean = false,
-  ): Promise<Block> {
+  ): Promise<BlockResponse> {
     return await this.send(this.request.getUncle(block, uncleIndex, returnTransactionObjects));
   }
 
@@ -246,7 +251,7 @@ export class Eth {
 
   public subscribe(type: 'logs', options?: LogRequest): Subscription<LogResponse>;
   public subscribe(type: 'syncing'): Subscription<object | boolean>;
-  public subscribe(type: 'newBlockHeaders'): Subscription<BlockHeader>;
+  public subscribe(type: 'newBlockHeaders'): Subscription<BlockHeaderResponse>;
   public subscribe(type: 'pendingTransactions'): Subscription<TransactionResponse>;
   public subscribe(
     type: 'pendingTransactions' | 'newBlockHeaders' | 'syncing' | 'logs',

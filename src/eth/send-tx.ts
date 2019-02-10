@@ -15,9 +15,8 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { TransactionReceipt } from '../formatters';
+import { BlockHeaderResponse, TransactionReceipt } from '../formatters';
 import { TransactionHash } from '../types';
-import { BlockHeader } from './block';
 import { Eth } from './eth';
 
 export interface SendTx<TxReceipt = TransactionReceipt> {
@@ -64,7 +63,7 @@ export class SentTransaction implements SendTx {
 
         this.eth
           .subscribe('newBlockHeaders')
-          .on('data', async (blockHeader: BlockHeader, sub) => {
+          .on('data', async (blockHeader: BlockHeaderResponse, sub) => {
             try {
               this.blocksSinceSent++;
 
@@ -83,7 +82,7 @@ export class SentTransaction implements SendTx {
                 return;
               }
 
-              const confirmations = 1 + blockHeader.number - this.receipt.blockNumber;
+              const confirmations = 1 + blockHeader.number! - this.receipt.blockNumber;
 
               if (confirmationCallback) {
                 confirmationCallback(confirmations, this.receipt);

@@ -20,6 +20,7 @@ import { Address } from '../address';
 import {
   CallRequest,
   EstimateRequest,
+  fromRawBlockResponse,
   fromRawLogResponse,
   fromRawTransactionReceipt,
   fromRawTransactionResponse,
@@ -27,7 +28,6 @@ import {
   inputSignFormatter,
   LogRequest,
   outputBigNumberFormatter,
-  outputBlockFormatter,
   outputSyncingFormatter,
   PartialTransactionRequest,
   toRawCallRequest,
@@ -162,7 +162,7 @@ export class EthRequestPayloads {
     return {
       method: isString(block) && isHexStrict(block) ? 'eth_getBlockByHash' : 'eth_getBlockByNumber',
       params: [inputBlockNumberFormatter(this.resolveBlock(block)), returnTransactionObjects],
-      format: outputBlockFormatter,
+      format: fromRawBlockResponse,
     };
   }
 
@@ -171,7 +171,7 @@ export class EthRequestPayloads {
       method:
         isString(block) && isHexStrict(block) ? 'eth_getUncleByBlockHashAndIndex' : 'eth_getUncleByBlockNumberAndIndex',
       params: [inputBlockNumberFormatter(this.resolveBlock(block)), numberToHex(uncleIndex), returnTransactionObjects],
-      format: outputBlockFormatter,
+      format: fromRawBlockResponse,
     };
   }
 
