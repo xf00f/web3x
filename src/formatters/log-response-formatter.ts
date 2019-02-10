@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { isString } from 'util';
+import { isNumber, isString } from 'util';
 import { Address } from '../address';
 import { Data, TransactionHash } from '../types';
 import { hexToNumber, numberToHex, sha3 } from '../utils';
@@ -33,6 +33,7 @@ export interface RawLogResponse {
   topics: string[];
 }
 
+// TODO: Make blockHash, transactionHash and topics be Buffers
 export interface LogResponse {
   id: string | null;
   removed?: boolean;
@@ -49,7 +50,7 @@ export interface LogResponse {
 export function fromRawLogResponse(log: RawLogResponse): LogResponse {
   let id: string | null = log.id || null;
 
-  // generate a custom log id
+  // Generate a custom log id.
   if (
     typeof log.blockHash === 'string' &&
     typeof log.transactionHash === 'string' &&
@@ -74,9 +75,9 @@ export function toRawLogResponse(log: LogResponse): RawLogResponse {
   return {
     ...log,
     id: id ? id : undefined,
-    blockNumber: blockNumber ? numberToHex(blockNumber) : null,
-    transactionIndex: transactionIndex ? numberToHex(transactionIndex) : null,
-    logIndex: logIndex ? numberToHex(logIndex) : null,
+    blockNumber: isNumber(blockNumber) ? numberToHex(blockNumber) : null,
+    transactionIndex: isNumber(transactionIndex) ? numberToHex(transactionIndex) : null,
+    logIndex: isNumber(logIndex) ? numberToHex(logIndex) : null,
     address: address.toString().toLowerCase(),
   };
 }

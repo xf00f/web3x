@@ -1,10 +1,9 @@
 import BN from 'bn.js';
+import { EventEmitter } from 'events';
 import { LevelUp } from 'levelup';
 import * as rlp from 'rlp';
-import { isArray } from 'util';
 import { Address } from '../../address';
-import { LogResponse } from '../../formatters';
-import { bufferToHex, sha3, sha3Buffer } from '../../utils';
+import { bufferToHex, sha3Buffer } from '../../utils';
 import { Trie } from '../trie';
 import { Log } from '../tx';
 import { deserializeTx, serializeTx, Tx } from '../tx/tx';
@@ -44,6 +43,7 @@ export type GetLogsResult = {
 
 export function serializeBlockHeader(blockHeader: BlockHeader) {
   return rlp.encode([
+    blockHeader.parentHash,
     blockHeader.stateRoot,
     blockHeader.transactionsRoot,
     blockHeader.receiptsRoot,
@@ -54,15 +54,15 @@ export function serializeBlockHeader(blockHeader: BlockHeader) {
 export function deserializeBlockHeader(data: Buffer) {
   const bufs: Buffer[] = rlp.decode(data) as any;
   return {
-    parentHash: Buffer.of(),
+    parentHash: bufs[0],
     uncleHash: Buffer.of(),
     beneficiary: Address.ZERO,
-    stateRoot: bufs[0],
-    transactionsRoot: bufs[1],
-    receiptsRoot: bufs[2],
+    stateRoot: bufs[1],
+    transactionsRoot: bufs[2],
+    receiptsRoot: bufs[3],
     logsBloom: Buffer.of(),
     difficulty: BigInt(0),
-    number: new BN(bufs[3]).toNumber(),
+    number: new BN(bufs[4]).toNumber(),
     gasLimit: BigInt(0),
     gasUsed: BigInt(0),
     timestamp: new Date().getTime(),
@@ -72,8 +72,10 @@ export function deserializeBlockHeader(data: Buffer) {
   };
 }
 
-export class Blockchain {
-  constructor(public db: LevelUp, private blocks: BlockHeader[]) {}
+export class Blockchain extends EventEmitter {
+  constructor(public db: LevelUp, private blocks: BlockHeader[]) {
+    super();
+  }
 
   public static async fromDb(db: LevelUp) {
     const getChainTip = async () => {
@@ -83,16 +85,16 @@ export class Blockchain {
         return null;
       }
     };
-    const chainTip = await getChainTip();
+    let blockHash = await getChainTip();
     const blocks: BlockHeader[] = [];
-    if (chainTip) {
-      let block = deserializeBlockHeader(await db.get(chainTip));
+    if (blockHash) {
       while (true) {
+        const block = deserializeBlockHeader(await db.get(blockHash));
         blocks.unshift(block);
         if (block.parentHash.length === 0) {
           break;
         }
-        block = deserializeBlockHeader(await db.get(block.parentHash));
+        blockHash = block.parentHash;
       }
     }
     return new Blockchain(db, blocks);
@@ -142,6 +144,21 @@ export class Blockchain {
     await Promise.all(
       txHashes.map((txHash, i) => this.db.put(txHash, rlp.encode([blockHash, sha3Buffer(i.toString())]))),
     );
+
+    this.emit('newBlock', block);
+
+    txReceipts.forEach((receipt, transactionIndex) => {
+      const transactionHash = txHashes[transactionIndex];
+      const result = {
+        blockHash: bufferToHex(blockHash),
+        blockNumber,
+        transactionIndex,
+        transactionHash: bufferToHex(transactionHash),
+      };
+      receipt.logs.forEach(({ data, address, topics }, logIndex) => {
+        this.emit('logs', { ...result, logIndex, data: bufferToHex(data), address, topics: topics.map(bufferToHex) });
+      });
+    });
 
     return txHashes;
   }

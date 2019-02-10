@@ -1,9 +1,11 @@
+import { EventEmitter } from 'events';
 import levelup, { LevelUp } from 'levelup';
 import { Address } from '../../address';
 import {
   fromRawCallRequest,
   fromRawLogRequest,
   fromRawTransactionRequest,
+  LogResponse,
   toRawLogResponse,
   toRawTransactionReceipt,
 } from '../../formatters';
@@ -18,28 +20,23 @@ import { getLogs } from './handle-get-logs';
 import { handleGetTransactionReceipt } from './handle-get-transaction-receipt';
 import { handleSendTransaction } from './handle-send-transaction';
 
-export class EvmProvider implements EthereumProvider {
-  constructor(
-    public readonly worldState: WorldState,
-    private readonly blockchain: Blockchain,
-    public readonly wallet: Wallet,
-  ) {}
+export class EvmProvider extends EventEmitter implements EthereumProvider {
+  public wallet?: Wallet;
+  private subscriptions: { [id: string]: any } = {};
+  private nextSubscriptionId = 0;
 
-  public static async create(worldState: WorldState, blockchain: Blockchain) {
-    const wallet = new Wallet();
-    wallet.create(10);
-    worldState.checkpoint();
-    for (const address of wallet.currentAddresses()) {
-      await worldState.createAccount(address, BigInt(10) * BigInt(10) ** BigInt(18));
-    }
-    await worldState.commit();
-    return new EvmProvider(worldState, blockchain, wallet);
+  constructor(public readonly worldState: WorldState, private readonly blockchain: Blockchain) {
+    super();
+  }
+
+  public static fromEvmProvider(provider: EvmProvider) {
+    return new EvmProvider(provider.worldState, provider.blockchain);
   }
 
   public static async fromDb(db: LevelUp) {
     const worldState = await WorldState.fromDb(db);
     const blockchain = await Blockchain.fromDb(db);
-    return await EvmProvider.create(worldState, blockchain);
+    return new EvmProvider(worldState, blockchain);
   }
 
   public static async fromLocalDb(name: string) {
@@ -71,6 +68,9 @@ export class EvmProvider implements EthereumProvider {
 
     switch (method) {
       case 'eth_sendTransaction':
+        if (!this.wallet) {
+          throw new Error('No wallet available for signing transactions.');
+        }
         return await handleSendTransaction(
           this.worldState,
           this.blockchain,
@@ -85,7 +85,37 @@ export class EvmProvider implements EthereumProvider {
         return bufferToHex(await getAccountCode(this.worldState, Address.fromString(params![0])));
       case 'eth_getLogs':
         return (await getLogs(this.blockchain, fromRawLogRequest(params![0]))).map(toRawLogResponse);
+      case 'eth_subscribe':
+        return numberToHex(this.subscribe(params[0], params[1]));
+      case 'eth_unsubscribe':
+        return this.unsubscribe(params[0]);
     }
+  }
+
+  private subscribe(event: string, params: any) {
+    const id = numberToHex(this.nextSubscriptionId++);
+
+    if (event === 'logs') {
+      const listener = logs => this.handleLogs(id, logs);
+      this.blockchain.on('logs', listener);
+      this.subscriptions[id] = { event, params, listener };
+    }
+
+    return id;
+  }
+
+  private unsubscribe(id: string) {
+    const sub = this.subscriptions[id];
+    if (!sub) {
+      return false;
+    }
+    delete this.subscriptions[id];
+    this.blockchain.removeListener(sub.event, sub.listener);
+    return true;
+  }
+
+  private handleLogs(subscription: string, logResponse: LogResponse) {
+    this.emit('notification', { subscription, result: toRawLogResponse(logResponse) });
   }
 
   public on(notification: 'notification', listener: (result: any) => void): this;
@@ -94,7 +124,7 @@ export class EvmProvider implements EthereumProvider {
   public on(notification: 'networkChanged', listener: (networkId: string) => void): this;
   public on(notification: 'accountsChanged', listener: (accounts: string[]) => void): this;
   public on(notification: any, listener: any): this {
-    throw new Error('Method not implemented.');
+    return super.on(notification, listener);
   }
 
   public removeListener(notification: 'notification', listener: (result: any) => void): this;
@@ -103,10 +133,10 @@ export class EvmProvider implements EthereumProvider {
   public removeListener(notification: 'networkChanged', listener: (networkId: string) => void): this;
   public removeListener(notification: 'accountsChanged', listener: (accounts: string[]) => void): this;
   public removeListener(notification: any, listener: any): this {
-    throw new Error('Method not implemented.');
+    return super.removeListener(notification, listener);
   }
 
   public removeAllListeners(notification: EthereumProviderNotifications): any {
-    throw new Error('Method not implemented.');
+    return super.removeAllListeners(notification);
   }
 }

@@ -31,6 +31,9 @@ export class EvmAccount {
   }
 
   public async run(context: EvmContext) {
+    if (context.code.length === 0) {
+      return context;
+    }
     return await run(context);
   }
 

@@ -55,10 +55,9 @@ export class Subscription<Result = any, RawResult = Result> extends EventEmitter
       this.id = await this.provider.send(`${this.type}_subscribe`, [this.subscription, ...this.params]);
 
       if (!this.id) {
-        throw new Error('No result');
+        throw new Error(`Failed to subscribe to ${this.subscription}.`);
       }
     } catch (err) {
-      this.unsubscribe();
       this.emit('error', err, this);
     }
 
@@ -89,7 +88,9 @@ export class Subscription<Result = any, RawResult = Result> extends EventEmitter
     if (this.listener) {
       this.provider.removeListener('notification', this.listener);
     }
-    this.provider.send(`${this.type}_unsubscribe`, [this.id]);
+    if (this.id) {
+      this.provider.send(`${this.type}_unsubscribe`, [this.id]);
+    }
     this.id = undefined;
     this.listener = undefined;
   }

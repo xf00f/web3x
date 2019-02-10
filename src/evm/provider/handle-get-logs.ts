@@ -1,6 +1,6 @@
 import { isArray } from 'util';
 import { BlockType } from '../../eth';
-import { LogRequest, LogResponse } from '../../formatters';
+import { LogRequest, LogResponse, toRawLogResponse } from '../../formatters';
 import { bufferToHex, hexToBuffer } from '../../utils';
 import { Blockchain, BlockHeader } from '../blockchain';
 

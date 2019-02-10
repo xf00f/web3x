@@ -2,20 +2,36 @@ import levelup from 'levelup';
 import memdown from 'memdown';
 import { Eth } from '../../eth';
 import { toWei, utf8ToHex } from '../../utils';
+import { Wallet } from '../../wallet';
 import { EvmProvider } from './evm-provider';
 import { DaiContract } from './fixtures/DaiContract';
 
 describe('evm provider e2e tests', () => {
-  it('should execute contract code', async () => {
-    const provider = await EvmProvider.fromDb(levelup(memdown()));
-    const eth = new Eth(provider);
-    const daiContract = new DaiContract(eth);
-    const account1 = provider.wallet.get(0)!.address;
-    const account2 = provider.wallet.get(1)!.address;
-    const gasPrice = 50000;
+  const wallet = new Wallet(10);
+  const account1 = wallet.get(0)!.address;
+  const account2 = wallet.get(1)!.address;
+  const gasPrice = 50000;
+  let provider!: EvmProvider;
+  let eth!: Eth;
+  let daiContract!: DaiContract;
+
+  beforeEach(async () => {
+    provider = await EvmProvider.fromDb(levelup(memdown()));
+    provider.wallet = wallet;
+
+    provider.worldState.checkpoint();
+    for (const addr of wallet.currentAddresses()) {
+      await provider.worldState.createAccount(addr, BigInt(10) * BigInt(10) ** BigInt(18));
+    }
+    await provider.worldState.commit();
+
+    eth = new Eth(provider);
+    daiContract = new DaiContract(eth);
 
     eth.defaultFromAddress = account1;
+  });
 
+  it('should execute contract code', async () => {
     const deployReceipt = await daiContract
       .deploy(utf8ToHex('xf00f'))
       .send({ gasPrice })
@@ -75,4 +91,32 @@ describe('evm provider e2e tests', () => {
     expect(logs[1].returnValues.dst).toEqual(account2);
     expect(logs[1].returnValues.wad).toEqual(toWei('400', 'ether'));
   }, 10000);
+
+  it('should receive Transfer event', async done => {
+    await daiContract
+      .deploy(utf8ToHex('xf00f'))
+      .send({ gasPrice })
+      .getReceipt();
+
+    await daiContract.methods
+      .mint(toWei('1000', 'ether'))
+      .send({ gasPrice })
+      .getReceipt();
+
+    const sub = daiContract.events.Transfer({}, (err, log) => {
+      if (err) {
+        done(err);
+      }
+      expect(log.returnValues.src).toEqual(account1);
+      expect(log.returnValues.dst).toEqual(account2);
+      expect(log.returnValues.wad).toEqual(toWei('600', 'ether'));
+      sub.unsubscribe();
+      done();
+    });
+
+    await daiContract.methods
+      .transfer(account2, toWei('600', 'ether'))
+      .send({ gasPrice })
+      .getReceipt();
+  });
 });

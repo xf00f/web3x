@@ -17,7 +17,7 @@
 
 import { Address } from '../address';
 import { Eth } from '../eth';
-import { EventLog, LogRequest, LogResponse, toRawLogRequest } from '../formatters';
+import { EventLog, fromRawLogResponse, LogRequest, LogResponse, RawLogResponse, toRawLogRequest } from '../formatters';
 import { Subscription } from '../subscriptions';
 import { Data } from '../types';
 import { ContractAbi, ContractFunctionEntry } from './abi';
@@ -129,16 +129,17 @@ export class Contract<T extends ContractDefinition | void = void> {
     const { fromBlock, ...subLogOptions } = logOptions;
     const params = [toRawLogRequest(subLogOptions)];
 
-    const subscription = new Subscription<LogResponse>(
+    const subscription = new Subscription<LogResponse, RawLogResponse>(
       'eth',
       'logs',
       params,
       this.eth.provider,
       (result, sub) => {
-        const output = this.contractAbi.decodeAnyEvent(result);
-        sub.emit(output.removed ? 'changed' : 'data', output);
+        const output = fromRawLogResponse(result);
+        const eventLog = this.contractAbi.decodeAnyEvent(output);
+        sub.emit(output.removed ? 'changed' : 'data', eventLog);
         if (callback) {
-          callback(undefined, output, sub);
+          callback(undefined, eventLog, sub);
         }
       },
       false,

@@ -25,6 +25,10 @@ export class Wallet {
   public length: number = 0;
   public accounts: Account[] = [];
 
+  constructor(numberOfAccounts: number = 0) {
+    this.create(numberOfAccounts);
+  }
+
   public static fromMnemonic(mnemonic: string, numberOfAccounts: number) {
     const wallet = new Wallet();
     for (let i = 0; i < numberOfAccounts; ++i) {
@@ -51,19 +55,19 @@ export class Wallet {
 
   public static async fromLocalStorage(password: string, keyName: string = this.defaultKeyName) {
     if (!localStorage) {
-      return new Wallet();
+      return;
     }
 
     const keystoreStr = localStorage.getItem(keyName);
 
     if (!keystoreStr) {
-      return new Wallet();
+      return;
     }
 
     try {
       return Wallet.fromKeystores(JSON.parse(keystoreStr), password);
     } catch (e) {
-      return new Wallet();
+      return;
     }
   }
 
@@ -138,7 +142,7 @@ export class Wallet {
     return this.accounts;
   }
 
-  public async save(password: string, keyName: string = Wallet.defaultKeyName) {
+  public async saveToLocalStorage(password: string, keyName: string = Wallet.defaultKeyName) {
     if (!localStorage) {
       return false;
     }
