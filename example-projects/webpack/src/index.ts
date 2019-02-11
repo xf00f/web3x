@@ -81,7 +81,7 @@ async function addSendingExamples(eth: Eth) {
   const wallet = (await Wallet.fromLocalStorage('my_password')) || new Wallet();
   if (!wallet.length) {
     wallet.create(1);
-    await wallet.save('my_password');
+    await wallet.saveToLocalStorage('my_password');
   }
 
   // Make eth aware of wallet so it can use accounts for sending etc.

@@ -65,11 +65,9 @@ export class EvmEcdsaRecoveryAccount extends EvmAccount {
     const r = calldata.slice(64, 96);
     const s = calldata.slice(96, 128);
 
-    const result = hexToBuffer(recover(bufferToHex(h), bufferToHex(v), bufferToHex(r), bufferToHex(s), true));
-    const buf = Buffer.alloc(32);
-    result.copy(buf, 12);
+    const result = recover(bufferToHex(h), bufferToHex(v), bufferToHex(r), bufferToHex(s), true).toBuffer32();
     callContext.halt = true;
-    callContext.returned = buf;
+    callContext.returned = result;
 
     return callContext;
   }

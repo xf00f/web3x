@@ -16,13 +16,11 @@
 */
 
 import { Address } from '../address';
-import { Eth } from '../eth';
-import { SendTx } from '../eth/send-tx';
-import { TransactionReceipt } from '../formatters';
-import { TransactionHash } from '../types';
+import { Eth, SendTx } from '../eth';
 import { hexToBuffer } from '../utils';
 import { ContractAbi, ContractFunctionEntry } from './abi';
-import { SendContractTx, TxSend } from './tx';
+import { SentDeployContractTx } from './sent-deploy-contract-tx';
+import { TxSend } from './tx';
 
 interface SendOptions {
   from?: Address;
@@ -67,7 +65,7 @@ export class TxDeploy implements TxSend {
 
     const promise = this.eth.sendTransaction(tx).getTxHash();
 
-    return new DeployContractTx(this.eth, this.contractAbi, promise, this.onDeployed);
+    return new SentDeployContractTx(this.eth, this.contractAbi, promise, this.onDeployed);
   }
 
   public getSendRequestPayload(options: SendOptions) {
@@ -86,33 +84,5 @@ export class TxDeploy implements TxSend {
 
   public encodeABI() {
     return hexToBuffer(this.deployData + this.contractEntry.encodeParameters(this.args).replace('0x', ''));
-  }
-}
-
-export class DeployContractTx extends SendContractTx {
-  constructor(
-    eth: Eth,
-    contractAbi: ContractAbi,
-    promise: Promise<TransactionHash>,
-    private onDeployed: (address: Address) => void,
-  ) {
-    super(eth, contractAbi, promise);
-  }
-
-  protected async handleReceipt(receipt: TransactionReceipt) {
-    receipt = await super.handleReceipt(receipt);
-
-    if (!receipt.contractAddress) {
-      throw new Error('The contract deployment receipt did not contain a contract address.');
-    }
-
-    const code = await this.eth.getCode(receipt.contractAddress);
-    if (code.length <= 2) {
-      throw new Error('Contract code could not be stored.');
-    }
-
-    this.onDeployed(receipt.contractAddress);
-
-    return receipt;
   }
 }

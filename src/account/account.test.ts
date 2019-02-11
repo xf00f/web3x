@@ -52,7 +52,7 @@ describe('account', () => {
     const account = Account.fromPrivate(privateKey);
     const signedData = account.sign('data to sign');
     const address = recover(signedData);
-    expect(address).toBe(account.address.toString());
+    expect(address).toEqual(account.address);
   });
 
   it('should sign transaction', async () => {

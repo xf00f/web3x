@@ -20,8 +20,9 @@ import { Account } from '../account';
 import { Address } from '../address';
 import { decrypt, KeyStore } from '../utils/encryption';
 
+const DEFAULT_KEY_NAME = 'web3js_wallet';
+
 export class Wallet {
-  public static readonly defaultKeyName = 'web3js_wallet';
   public length: number = 0;
   public accounts: Account[] = [];
 
@@ -53,7 +54,7 @@ export class Wallet {
     return wallet;
   }
 
-  public static async fromLocalStorage(password: string, keyName: string = this.defaultKeyName) {
+  public static async fromLocalStorage(password: string, keyName: string = DEFAULT_KEY_NAME) {
     if (!localStorage) {
       return;
     }
@@ -142,7 +143,7 @@ export class Wallet {
     return this.accounts;
   }
 
-  public async saveToLocalStorage(password: string, keyName: string = Wallet.defaultKeyName) {
+  public async saveToLocalStorage(password: string, keyName: string = DEFAULT_KEY_NAME) {
     if (!localStorage) {
       return false;
     }
