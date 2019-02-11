@@ -5,24 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [3.0.0] - 2019-02-11
 
 ### Added
 
 - `Address` class. Used everywhere where previously there were `0x` prefixed strings. Significantly safer.
 - `web3x-codegen` now supports typesafe deployments and includes the compiled bytecode automatically.
-- `EvmProvider`. An in memory EVM for rapid development against smart contracts without any third party software.
+- `EvmProvider`. An inline EVM for rapid development against smart contracts without any third party software. Considered alpha as not all opcodes yet implmented.
 - Linting with `ts-lint`.
 
 ### Changed
 
 - Refactor subscription code in favour of new leaner code.
-- Refactor confirm transaction code into `SendTx` hierarchy.
+- Sending transactions uses a new `getTxHash()` and `getReceipt()` interface.
+- Refactor confirm transaction code.
 - Refactor ABI defintion code for better encapsulation e.g. `ContractAbi`.
 
 ### Removed
 
-- PromiEvent interface in favour of `getTxHash()` and `getReceipt()`;
+- PromiEvent interface in favour of `getTxHash()` and `getReceipt()`.
+
+## [2.0.4] - 2019-01-08
+
+### Fixed
+
+- Added `finally()` to PromiEvent.
 
 ## [2.0.3] - 2019-01-11
 
@@ -132,7 +139,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release of Typescript port from web3.js.
 
-[unreleased]: https://github.com/xf00f/web3x/compare/v2.0.3...xf/v3.0.0
+[3.0.0]: https://github.com/xf00f/web3x/compare/v2.0.4...v3.0.0
+[2.0.4]: https://github.com/xf00f/web3x/compare/v2.0.3...v2.0.4
 [2.0.3]: https://github.com/xf00f/web3x/compare/v2.0.2...v2.0.3
 [2.0.2]: https://github.com/xf00f/web3x/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/xf00f/web3x/compare/v2.0.0...v2.0.1

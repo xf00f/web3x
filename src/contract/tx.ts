@@ -15,13 +15,12 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { isArray } from 'util';
 import { Address } from '../address';
 import { BlockType, Eth } from '../eth';
-import { SendTx, SentTransaction } from '../eth/send-tx';
-import { PartialTransactionRequest, TransactionReceipt } from '../formatters';
-import { TransactionHash } from '../types';
+import { SendTx } from '../eth/send-tx';
+import { TransactionReceipt } from '../formatters';
 import { ContractAbi, ContractFunctionEntry } from './abi';
+import { SentContractTx } from './sent-contract-tx';
 
 export type TxFactory = (...args: any[]) => Tx;
 
@@ -101,7 +100,7 @@ export class Tx implements TxCall, TxSend {
 
     const promise = this.eth.sendTransaction(tx).getTxHash();
 
-    return new SendContractTx(this.eth, this.contractAbi, promise);
+    return new SentContractTx(this.eth, this.contractAbi, promise);
   }
 
   public getSendRequestPayload(options: SendOptions) {
@@ -121,35 +120,5 @@ export class Tx implements TxCall, TxSend {
       value: options.value,
       data: this.encodeABI(),
     };
-  }
-}
-
-export class SendContractTx extends SentTransaction {
-  constructor(eth: Eth, private contractAbi: ContractAbi, promise: Promise<TransactionHash>) {
-    super(eth, promise);
-  }
-
-  protected async handleReceipt(receipt: TransactionReceipt) {
-    receipt = await super.handleReceipt(receipt);
-
-    if (!isArray(receipt.logs)) {
-      return receipt;
-    }
-
-    const decodedEvents = receipt.logs.map(log => this.contractAbi.decodeAnyEvent(log));
-
-    receipt.events = {};
-    receipt.unnamedEvents = [];
-    for (const ev of decodedEvents) {
-      if (ev.event) {
-        const events = receipt.events[ev.event] || [];
-        receipt.events[ev.event] = [...events, ev];
-      } else {
-        receipt.unnamedEvents = [...receipt.unnamedEvents, ev];
-      }
-    }
-    delete receipt.logs;
-
-    return receipt;
   }
 }

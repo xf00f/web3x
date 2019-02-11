@@ -41,10 +41,10 @@ async function main() {
     wallet.create(2);
 
     // If you want eth to use your accounts for signing transaction, set the wallet.
-    eth.setWallet(wallet);
+    eth.wallet = wallet;
 
     // Optionally you can specify a default 'from' address.
-    eth.setDefaultFromAddress(account.address);
+    eth.defaultFromAddress = account.address;
 
     const encryptedWallet = await wallet.encrypt(password);
     const decryptedWallet = await Wallet.fromKeystores(encryptedWallet, password);
@@ -59,10 +59,10 @@ async function main() {
 
     // Verify message was signed by account.
     const address = recover(msg, sig.signature);
-    if (address === signingAccount.address) {
+    if (address.equals(signingAccount.address)) {
       console.log(`Message was signed by: ${address}`);
     } else {
-      console.error('Incorrect signature for message.');
+      console.error(`Incorrect signature for message ${address}.`);
     }
   } finally {
     provider.disconnect();

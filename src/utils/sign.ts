@@ -15,6 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { Address } from '../address';
 import { decodeSignature, encodeSignature, recover as ethLibRecover, sign as ethLibSign } from '../eth-lib/account';
 import { hashMessage } from './hash-message';
 
@@ -41,12 +42,12 @@ export function sign(data: string, privateKey: Buffer): Signature {
   };
 }
 
-export function recoverFromSignature(signature: Signature): string {
+export function recoverFromSignature(signature: Signature) {
   const { messageHash, v, r, s } = signature;
   return recoverFromSigString(messageHash, encodeSignature([v, r, s]), true);
 }
 
-export function recoverFromVRS(message: string, v: string, r: string, s: string, prefixed: boolean = false): string {
+export function recoverFromVRS(message: string, v: string, r: string, s: string, prefixed: boolean = false) {
   if (!prefixed) {
     message = hashMessage(message);
   }
@@ -58,13 +59,13 @@ export function recoverFromSigString(message: string, signature: string, preFixe
     message = hashMessage(message);
   }
 
-  return ethLibRecover(message, signature);
+  return Address.fromString(ethLibRecover(message, signature));
 }
 
-export function recover(signature: Signature): string;
-export function recover(message: string, v: string, r: string, s: string, prefixed?: boolean): string;
-export function recover(message: string, signature: string, preFixed?: boolean);
-export function recover(...args: any[]): string {
+export function recover(signature: Signature): Address;
+export function recover(message: string, v: string, r: string, s: string, prefixed?: boolean): Address;
+export function recover(message: string, signature: string, preFixed?: boolean): Address;
+export function recover(...args: any[]): Address {
   switch (args.length) {
     case 1:
       return recoverFromSignature(args[0]);
