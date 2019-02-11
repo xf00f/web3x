@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "esnext",
     "module": "commonjs",
     "moduleResolution": "node",
-    "lib": ["dom", "es6", "es2017.object"],
+    "lib": ["dom", "esnext", "es2017.object"],
     "outDir": "dest",
     "strict": true,
     "declaration": true,
@@ -16,5 +16,5 @@
     "importHelpers": true
   },
   "include": ["src"],
-  "exclude": ["src/**/*.test.ts", "src/**/mock-*.ts"]
+  "exclude": ["src/**/*.test.ts", "src/**/mock-*.ts", "src/**/fixtures/*"]
 }

@@ -15,11 +15,14 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Contract, AbiDefinition } from '.';
+import { Address } from '../address';
 import { Eth } from '../eth/eth';
 import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
+import { bufferToHex } from '../utils';
+import { ContractAbi } from './abi/contract-abi';
+import { Contract } from './contract';
 
-const abi: AbiDefinition[] = [
+const abi = new ContractAbi([
   {
     constant: true,
     inputs: [
@@ -43,23 +46,21 @@ const abi: AbiDefinition[] = [
     type: 'function',
     stateMutability: 'view',
   },
-];
+]);
 
-describe('eth', function() {
-  describe('contract', function() {
-    describe('encodeABI', function() {
-      const contractAddress = '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe';
+describe('eth', () => {
+  describe('contract', () => {
+    describe('encodeABI', () => {
+      const contractAddress = Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe');
       const mockEthereumProvider = new MockEthereumProvider();
       const eth = new Eth(mockEthereumProvider);
 
-      it('should handle bytes32 arrays that only contain 1 byte', function() {
+      it('should handle bytes32 arrays that only contain 1 byte', () => {
         const contract = new Contract(eth, abi, contractAddress);
 
-        const result = contract.methods
-          .takesTwoBytes32('0x'.concat('a'.repeat(2)), '0x'.concat('b'.repeat(2)))
-          .encodeABI();
+        const result = contract.methods.takesTwoBytes32('0xaa', '0xbb').encodeABI();
 
-        expect(result).toBe(
+        expect(bufferToHex(result)).toBe(
           [
             '0x1323517e',
             'aa00000000000000000000000000000000000000000000000000000000000000',
@@ -68,14 +69,14 @@ describe('eth', function() {
         );
       });
 
-      it('should handle bytes32 arrays that are short 1 byte', function() {
+      it('should handle bytes32 arrays that are short 1 byte', () => {
         const contract = new Contract(eth, abi, contractAddress);
 
         const result = contract.methods
           .takesTwoBytes32('0x'.concat('a'.repeat(62)), '0x'.concat('b'.repeat(62)))
           .encodeABI();
 
-        expect(result).toBe(
+        expect(bufferToHex(result)).toBe(
           [
             '0x1323517e',
             'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa00',
@@ -84,7 +85,7 @@ describe('eth', function() {
         );
       });
 
-      it('should throw an exception on bytes32 arrays that have an invalid length', function() {
+      it('should throw an exception on bytes32 arrays that have an invalid length', () => {
         const contract = new Contract(eth, abi, contractAddress);
 
         const test = () =>
@@ -93,14 +94,14 @@ describe('eth', function() {
         expect(test).toThrow();
       });
 
-      it('should handle bytes32 arrays that are full', function() {
+      it('should handle bytes32 arrays that are full', () => {
         const contract = new Contract(eth, abi, contractAddress);
 
         const result = contract.methods
           .takesTwoBytes32('0x'.concat('a'.repeat(64)), '0x'.concat('b'.repeat(64)))
           .encodeABI();
 
-        expect(result).toBe(
+        expect(bufferToHex(result)).toBe(
           [
             '0x1323517e',
             'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
@@ -109,7 +110,7 @@ describe('eth', function() {
         );
       });
 
-      it('should throw an exception on bytes32 arrays that are too long', function() {
+      it('should throw an exception on bytes32 arrays that are too long', () => {
         const contract = new Contract(eth, abi, contractAddress);
 
         const test = () =>

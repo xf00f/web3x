@@ -1,5 +1,5 @@
-import { ContractAbi } from '../../contract';
-export default [
+import { ContractAbi} from '../../contract';
+export default new ContractAbi([
   {
     "constant": true,
     "inputs": [
@@ -199,4 +199,4 @@ export default [
     "name": "NewTTL",
     "type": "event"
   }
-] as ContractAbi;
+]);

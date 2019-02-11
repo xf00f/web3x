@@ -15,20 +15,16 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import randomBytes from 'randombytes';
-import { isAddress } from './address';
-import { isBoolean, isObject, isString } from 'util';
-import { isBN } from './bn';
-import { utf8ToHex } from './hex-utf8';
-import { numberToHex } from './hex-number';
 import BN from 'bn.js';
+import randomBytes from 'randombytes';
+import { isBoolean, isObject, isString } from 'util';
+import { Address } from '../address';
+import { isBN } from './bn';
+import { numberToHex } from './hex-number';
+import { utf8ToHex } from './hex-utf8';
 
 /**
  * Check if string is HEX, requires a 0x in front
- *
- * @method isHexStrict
- * @param {String} hex to be checked
- * @returns {Boolean}
  */
 export function isHexStrict(hex: string) {
   return /^(-)?0x[0-9a-f]*$/i.test(hex);
@@ -36,10 +32,6 @@ export function isHexStrict(hex: string) {
 
 /**
  * Check if string is HEX
- *
- * @method isHex
- * @param {String} hex to be checked
- * @returns {Boolean}
  */
 export function isHex(hex: string) {
   return /^(-0x|0x)?[0-9a-f]*$/i.test(hex);
@@ -47,18 +39,11 @@ export function isHex(hex: string) {
 
 /**
  * Auto converts any given value into it's hex representation.
- *
- * And even stringifys objects before.
- *
- * @method toHex
- * @param {String|Number|BN|Object} value
- * @param {Boolean} returnType
- * @return {String}
  */
 export function toHex(value: string | number | BN | boolean | object, returnType?: any) {
   /*jshint maxcomplexity: false */
 
-  if (isAddress(value)) {
+  if (isString(value) && Address.isAddress(value)) {
     return returnType ? 'address' : '0x' + (value as string).toLowerCase().replace(/^0x/i, '');
   }
 
@@ -81,13 +66,29 @@ export function toHex(value: string | number | BN | boolean | object, returnType
     }
   }
 
-  return returnType ? (value < 0 ? 'int256' : 'uint256') : numberToHex(value);
+  return returnType ? (value < 0 ? 'int256' : 'uint256') : numberToHex(value as number);
 }
 
-export function randomHex(size): Buffer {
+export function randomHex(size): string {
+  if (size > 65536) {
+    throw new Error('Requested too many random bytes.');
+  }
+
+  return '0x' + randomBytes(size).toString('hex');
+}
+
+export function randomBuffer(size): Buffer {
   if (size > 65536) {
     throw new Error('Requested too many random bytes.');
   }
 
   return randomBytes(size);
+}
+
+export function trimHexLeadingZero(hex: string) {
+  return hex.replace(/^0x0*/, '0x');
+}
+
+export function makeHexEven(hex: string) {
+  return hex.length % 2 === 1 ? hex.replace('0x', '0x0') : hex;
 }

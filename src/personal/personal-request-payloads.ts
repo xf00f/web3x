@@ -15,46 +15,46 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { toChecksumAddress } from '../utils';
-import { inputAddressFormatter, inputTransactionFormatter, inputSignFormatter } from '../formatters';
-import { Address, Quantity, Data } from '../types';
+import { Address } from '../address';
+import { inputSignFormatter, toRawTransactionRequest } from '../formatters';
+import { Data, Quantity } from '../types';
 import { Transaction } from './personal';
 
 const identity = result => result;
 
 export class PersonalRequestPayloads {
-  getAccounts() {
+  public getAccounts() {
     return {
       method: 'personalListAccounts',
-      format: result => result.map(toChecksumAddress),
+      format: result => result.map(Address.fromString),
     };
   }
 
-  newAccount(password: string) {
+  public newAccount(password: string) {
     return {
       method: 'personalListAccounts',
       params: [password],
-      format: toChecksumAddress,
+      format: Address.fromString,
     };
   }
 
-  unlockAccount(address: Address, password: string, duration: Quantity) {
+  public unlockAccount(address: Address, password: string, duration: Quantity) {
     return {
       method: 'personal_unlockAccount',
-      params: [inputAddressFormatter(address), password, duration],
+      params: [address, password, duration],
       format: identity,
     };
   }
 
-  lockAccount(address: Address) {
+  public lockAccount(address: Address) {
     return {
       method: 'personal_lockAccount',
-      params: [inputAddressFormatter(address)],
+      params: [address],
       format: identity,
     };
   }
 
-  importRawKey(privateKey: Data, password: string) {
+  public importRawKey(privateKey: Data, password: string) {
     return {
       method: 'personal_importRawKey',
       params: [privateKey, password],
@@ -62,31 +62,31 @@ export class PersonalRequestPayloads {
     };
   }
 
-  sendTransaction(tx: Transaction, password: string) {
+  public sendTransaction(tx: Transaction, password: string) {
     return {
       method: 'personal_sendTransaction',
-      params: [inputTransactionFormatter(tx), password],
+      params: [{ ...toRawTransactionRequest(tx), condition: tx.condition }, password],
       format: identity,
     };
   }
 
-  signTransaction(tx: Transaction, password: string) {
+  public signTransaction(tx: Transaction, password: string) {
     return {
       method: 'personal_signTransaction',
-      params: [inputTransactionFormatter(tx), password],
+      params: [{ ...toRawTransactionRequest(tx), condition: tx.condition }, password],
       format: identity,
     };
   }
 
-  sign(data: Data, address: Address, password: string) {
+  public sign(data: Data, address: Address, password: string) {
     return {
       method: 'personal_sign',
-      params: [inputSignFormatter(data), inputAddressFormatter(address), password],
+      params: [inputSignFormatter(data), address, password],
       format: identity,
     };
   }
 
-  ecRecover(data: Data, signedData: Data) {
+  public ecRecover(data: Data, signedData: Data) {
     return {
       method: 'personal_ecRecover',
       params: [inputSignFormatter(data), signedData],

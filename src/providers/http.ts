@@ -15,9 +15,8 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { LegacyProvider } from './legacy-provider';
 import XMLHttpRequest from 'node-http-xhr';
-import { InvalidResponse, ConnectionTimeout, InvalidConnection } from '../errors';
+import { LegacyProvider } from './legacy-provider';
 import { LegacyProviderAdapter } from './legacy-provider-adapter';
 
 export class HttpProvider extends LegacyProviderAdapter {
@@ -43,7 +42,7 @@ class LegacyHttpProvider implements LegacyProvider {
   }
 
   private _prepareRequest() {
-    var request = new XMLHttpRequest();
+    const request = new XMLHttpRequest();
 
     request.open('POST', this.host, true);
     request.setRequestHeader('Content-Type', 'application/json');
@@ -51,7 +50,7 @@ class LegacyHttpProvider implements LegacyProvider {
     request.withCredentials = true;
 
     if (this.headers) {
-      this.headers.forEach(function(header) {
+      this.headers.forEach(header => {
         request.setRequestHeader(header.name, header.value);
       });
     }
@@ -66,38 +65,37 @@ class LegacyHttpProvider implements LegacyProvider {
    * @param {Object} payload
    * @param {Function} callback triggered on end with (err, result)
    */
-  send(payload, callback) {
-    var _this = this;
-    var request = this._prepareRequest();
+  public send(payload, callback) {
+    const request = this._prepareRequest();
 
-    request.onreadystatechange = function() {
+    request.onreadystatechange = () => {
       if (request.readyState === 4 && request.timeout !== 1) {
-        var result = request.responseText;
-        var error: any = null;
+        let result = request.responseText;
+        let error: any = null;
 
         try {
           result = JSON.parse(result);
         } catch (e) {
-          error = InvalidResponse(request.responseText);
+          error = new Error(`Invalid response: ${request.responseText}`);
         }
 
-        _this.connected = true;
+        this.connected = true;
         callback(error, result);
       }
     };
 
-    request.ontimeout = function() {
-      _this.connected = false;
-      callback(ConnectionTimeout(this.timeout));
+    request.ontimeout = () => {
+      this.connected = false;
+      callback(new Error(`CONNECTION TIMEOUT: Timeout of ${this.timeout} ms.`));
     };
 
     try {
       request.send(JSON.stringify(payload));
     } catch (error) {
       this.connected = false;
-      callback(InvalidConnection(this.host));
+      callback(new Error(`CONNECTION ERROR: Couldn't connect to node ${this.host}.`));
     }
   }
 
-  disconnect() {}
+  public disconnect() {}
 }

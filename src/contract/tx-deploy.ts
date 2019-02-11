@@ -15,110 +15,74 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { isBoolean } from 'util';
-import { AbiDefinition } from '.';
-import { promiEvent } from '../promievent';
-import { abi } from './abi';
-import { toChecksumAddress, fireError } from '../utils';
-import { inputAddressFormatter } from '../formatters';
-import { Eth, SendTxPromiEvent } from '../eth';
-import { Wallet } from '../wallet';
+import { Address } from '../address';
+import { Eth, SendTx } from '../eth';
+import { hexToBuffer } from '../utils';
+import { ContractAbi, ContractFunctionEntry } from './abi';
+import { SentDeployContractTx } from './sent-deploy-contract-tx';
+import { TxSend } from './tx';
 
 interface SendOptions {
-  from: string;
+  from?: Address;
   gasPrice?: string | number;
   gas?: number;
   value?: number | string;
 }
 
 interface EstimateOptions {
-  from?: string;
+  from?: Address;
   gasPrice?: string;
   value?: number | string;
 }
 
 type DefaultOptions = {
-  from?: string;
+  from?: Address;
   gasPrice?: string;
   gas?: number;
 };
 
-/**
- * returns the an object with call, send, estimate functions
- *
- * @method _createTxObject
- * @returns {Object} an object with functions to call the methods
- */
-export class TxDeploy {
+export class TxDeploy implements TxSend {
   constructor(
     private eth: Eth,
-    private definition: AbiDefinition,
+    private contractEntry: ContractFunctionEntry,
+    private contractAbi: ContractAbi,
     private deployData: string,
     private args: any[] = [],
     private defaultOptions: DefaultOptions = {},
-    private wallet?: Wallet,
-    private extraFormatters?: any,
-  ) {
-    if (this.defaultOptions.from) {
-      this.defaultOptions.from = toChecksumAddress(inputAddressFormatter(this.defaultOptions.from));
-    }
-  }
+    private onDeployed: (address: Address) => void,
+  ) {}
 
   public async estimateGas(options: EstimateOptions = {}) {
     return await this.eth.estimateGas(this.getTx(options));
   }
 
-  public send(options: SendOptions): SendTxPromiEvent {
+  public send(options: SendOptions): SendTx {
     const tx = this.getTx(options);
 
-    if (isBoolean(this.definition.payable) && !this.definition.payable && tx.value && tx.value > 0) {
-      const defer = promiEvent();
-      return fireError(
-        new Error('Can not send value to non-payable contract method or constructor'),
-        defer.eventEmitter,
-        defer.reject,
-      );
+    if (!this.contractEntry.payable && tx.value > 0) {
+      throw new Error('Can not send value to non-payable constructor.');
     }
 
-    const account = this.getAccount(tx.from);
+    const promise = this.eth.sendTransaction(tx).getTxHash();
 
-    if (account) {
-      return account.sendTransaction(tx, this.extraFormatters);
-    } else {
-      return this.eth.sendTransaction(tx, this.extraFormatters);
-    }
+    return new SentDeployContractTx(this.eth, this.contractAbi, promise, this.onDeployed);
   }
 
-  public getRequestPayload(options: SendOptions) {
+  public getSendRequestPayload(options: SendOptions) {
     return this.eth.request.sendTransaction(this.getTx(options));
-  }
-
-  private getAccount(address?: string) {
-    address = address || this.defaultOptions.from;
-    if (this.wallet && address) {
-      return this.wallet.get(address);
-    }
   }
 
   private getTx(options) {
     return {
-      from: options.from ? toChecksumAddress(inputAddressFormatter(options.from)) : this.defaultOptions.from,
+      from: options.from || this.defaultOptions.from,
       gasPrice: options.gasPrice || this.defaultOptions.gasPrice,
       gas: options.gas || this.defaultOptions.gas,
       value: options.value,
       data: this.encodeABI(),
     };
   }
-  /**
-   * Encodes an ABI for a method, including signature or the method.
-   * Or when constructor encodes only the constructor parameters.
-   *
-   * @method encodeABI
-   * @param {Mixed} args the arguments to encode
-   * @param {String} the encoded ABI
-   */
+
   public encodeABI() {
-    let paramsABI = abi.encodeParameters(this.definition.inputs || [], this.args).replace('0x', '');
-    return this.deployData + paramsABI;
+    return hexToBuffer(this.deployData + this.contractEntry.encodeParameters(this.args).replace('0x', ''));
   }
 }

@@ -15,10 +15,11 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { ENS } from '../ens';
-import { namehash } from './namehash';
+import { Address } from '../../address';
 import { EnsRegistry } from '../contracts/EnsRegistry';
 import { EnsResolver } from '../contracts/EnsResolver';
+import { ENS } from '../ens';
+import { namehash } from './namehash';
 
 /**
  * A wrapper around the ENS registry contract.
@@ -42,7 +43,7 @@ export class Registry {
    * @param {function} callback
    * @return {Promise<any>}
    */
-  async owner(name: string) {
+  public async owner(name: string) {
     const contract = await this.contract;
     return await contract.methods.owner(namehash(name)).call();
   }
@@ -54,7 +55,7 @@ export class Registry {
    * @param {string} name
    * @return {Promise<Contract>}
    */
-  async resolver(name: string) {
+  public async resolver(name: string) {
     const contract = await this.contract;
     const address = await contract.methods.resolver(namehash(name)).call();
     return new EnsResolver(this.ens.eth, address);

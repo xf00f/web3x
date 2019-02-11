@@ -15,9 +15,9 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { abi } from './abi';
-import { inputBlockNumberFormatter } from '../formatters';
 import { isArray } from 'util';
+import { inputBlockNumberFormatter } from '../formatters';
+import { abiCoder } from './abi-coder';
 
 /**
  * Should be used to encode indexed params and options to one final object
@@ -29,8 +29,8 @@ import { isArray } from 'util';
  */
 export function encodeEventABI(event, address?: string, options?) {
   options = options || {};
-  var filter = options.filter || {},
-    result: any = {};
+  const filter = options.filter || {};
+  const result: any = {};
 
   ['fromBlock', 'toBlock']
     .filter(f => {
@@ -55,12 +55,12 @@ export function encodeEventABI(event, address?: string, options?) {
 
     // add event topics (indexed arguments)
     if (event.name !== 'ALLEVENTS') {
-      var indexedTopics = event.inputs
+      const indexedTopics = event.inputs
         .filter(i => {
           return i.indexed === true;
         })
         .map(i => {
-          var value = filter[i.name];
+          const value = filter[i.name];
           if (!value) {
             return null;
           }
@@ -70,16 +70,18 @@ export function encodeEventABI(event, address?: string, options?) {
 
           if (isArray(value)) {
             return value.map(v => {
-              return abi.encodeParameter(i.type, v);
+              return abiCoder.encodeParameter(i.type, v);
             });
           }
-          return abi.encodeParameter(i.type, value);
+          return abiCoder.encodeParameter(i.type, value);
         });
 
       result.topics = result.topics.concat(indexedTopics);
     }
 
-    if (!result.topics.length) delete result.topics;
+    if (!result.topics.length) {
+      delete result.topics;
+    }
   }
 
   if (address) {

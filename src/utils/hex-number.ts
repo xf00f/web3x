@@ -40,10 +40,7 @@ export function hexToNumber(value: string | number): number | null {
  * @param {String|Number|BN} value
  * @return {String}
  */
-export function hexToNumberString(value: string | number | undefined): string | null {
-  if (value === undefined || value === null) {
-    return null;
-  }
+export function hexToNumberString(value: string): string {
   return toBN(value).toString(10);
 }
 
@@ -54,13 +51,9 @@ export function hexToNumberString(value: string | number | undefined): string | 
  * @param {String|Number|BN} value
  * @return {String}
  */
-export function numberToHex(value): string {
-  if (!isFinite(value) && !isHexStrict(value)) {
-    throw new Error('Given input "' + value + '" is not a number.');
-  }
+export function numberToHex(value: string | number | BN): string {
+  const num = toBN(value);
+  const result = num.toString(16);
 
-  var number = toBN(value);
-  var result = number.toString(16);
-
-  return number.lt(new BN(0)) ? '-0x' + result.substr(1) : '0x' + result;
+  return num.lt(new BN(0)) ? '-0x' + result.substr(1) : '0x' + result;
 }

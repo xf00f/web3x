@@ -15,17 +15,40 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Contract } from '.';
-import { TestContract, TestContractAbi } from './fixtures/TestContract';
-import { sha3 } from '../utils';
+import { Address } from '../address';
 import { Eth } from '../eth/eth';
 import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
+import { bufferToHex, sha3 } from '../utils';
+import { Contract } from './contract';
+import { TestContract, TestContractAbi } from './fixtures/TestContract';
 
-const address = '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe';
-const addressLowercase = '0x11f4d0a3c12e86b4b5f39b213f7e19d048276dae';
-const address2 = '0x5555567890123456789012345678901234567891';
-
-describe('contract', function() {
+describe('contract', () => {
+  const address = Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe');
+  const addressLowercase = address.toString().toLowerCase();
+  const addressUnprefixedLowercase = addressLowercase.slice(2);
+  const address2 = Address.fromString('0x5555567890123456789012345678901234567891');
+  const address2Lowercase = address2.toString().toLowerCase();
+  const blockHeader = {
+    hash: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
+    parentHash: '0x83ffb245cfced97ccc5c75253d6960376d6c6dea93647397a543a72fdaea5265',
+    miner: '0xdcc6960376d6c6dea93647383ffb245cfced97cf',
+    stateRoot: '0x54dda68af07643f68739a6e9612ad157a26ae7e2ce81f77842bb5835fbcde583',
+    transactionsRoot: '0x64dda68af07643f68739a6e9612ad157a26ae7e2ce81f77842bb5835fbcde583',
+    receiptsRoot: '0x74dda68af07643f68739a6e9612ad157a26ae7e2ce81f77842bb5835fbcde583',
+    sha3Uncles: '0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347',
+    logsBloom: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
+    difficulty: '0x3e8',
+    totalDifficulty: '0x3e8',
+    number: '0x11',
+    gasLimit: '0x3e8',
+    gasUsed: '0x3e8',
+    timestamp: '0x3e8',
+    extraData: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
+    nonce: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
+    size: '0x3e8',
+    transactions: [],
+    uncles: [],
+  };
   let eth: Eth;
   let mockEthereumProvider: MockEthereumProvider;
 
@@ -34,32 +57,19 @@ describe('contract', function() {
     eth = new Eth(mockEthereumProvider);
   });
 
-  describe('instantiation', function() {
-    it('should transform address from checksum addressess', function() {
+  describe('instantiation', () => {
+    it('should transform address from checksum addressess', () => {
       const contract = new TestContract(eth, address);
       expect(contract.address).toBe(address);
     });
 
-    it('should transform address to checksum address', function() {
+    it('should transform address to checksum address', () => {
       const contract = new TestContract(eth, address);
       expect(contract.address).toBe(address);
-    });
-
-    it('should fail on invalid address', function() {
-      const test = () => new TestContract(eth, '0x11F4D0A3c12e86B4b5F39B213F7E19D048276DAe');
-      expect(test).toThrow();
-    });
-
-    it('should fail on invalid address as options.from', function() {
-      var test = () =>
-        new TestContract(eth, address, {
-          from: '0x11F4D0A3c12e86B4b5F39B213F7E19D048276DAe',
-        });
-      expect(test).toThrow();
     });
   });
 
-  describe('event', function() {
+  describe('event', () => {
     const signature = 'Changed(address,uint256,uint256,uint256)';
 
     function emitData(delayMs: number = 0, extend?: object) {
@@ -90,7 +100,7 @@ describe('contract', function() {
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
         expect(method).toBe('eth_subscribe');
         expect(params[1]).toEqual({
-          topics: [sha3(signature), '0x000000000000000000000000' + addressLowercase.replace('0x', ''), null],
+          topics: [sha3(signature), '0x000000000000000000000000' + addressUnprefixedLowercase, null],
           address: addressLowercase,
         });
 
@@ -100,13 +110,16 @@ describe('contract', function() {
       });
     }
 
-    it('should create event subscription', function(done) {
+    it('should create event subscription', done => {
       mockEthSubscribe();
 
       const contract = new TestContract(eth, address);
 
-      const event = contract.events.Changed({ filter: { from: address } }, function(_, result) {
-        expect(result.returnValues.from).toBe(address);
+      const event = contract.events.Changed({ filter: { from: address } }, (err, result) => {
+        if (err) {
+          return done(err);
+        }
+        expect(result.returnValues.from).toEqual(address);
         expect(result.returnValues.amount).toBe('1');
         expect(result.returnValues.t1).toBe('1');
         expect(result.returnValues.t2).toBe('8');
@@ -116,15 +129,15 @@ describe('contract', function() {
       });
     });
 
-    it('should create event from the events object using a signature and callback', function(done) {
+    it('should create event from the events object using a signature and callback', done => {
       mockEthSubscribe();
 
       const contract = new TestContract(eth, address);
 
       const event = contract.events['0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651'](
         { filter: { from: address } },
-        function(err, result) {
-          expect(result.returnValues.from).toBe(address);
+        (err, result) => {
+          expect(result.returnValues.from).toEqual(address);
           expect(result.returnValues.amount).toBe('1');
           expect(result.returnValues.t1).toBe('1');
           expect(result.returnValues.t2).toBe('8');
@@ -135,13 +148,13 @@ describe('contract', function() {
       );
     });
 
-    it('should create event from the events object using event name and parameters', function(done) {
+    it('should create event from the events object using event name and parameters', done => {
       mockEthSubscribe();
 
       const contract = new TestContract(eth, address);
 
-      var event = contract.events[signature]({ filter: { from: address } }, function(err, result) {
-        expect(result.returnValues.from).toBe(address);
+      const event = contract.events[signature]({ filter: { from: address } }, (err, result) => {
+        expect(result.returnValues.from).toEqual(address);
         expect(result.returnValues.amount).toBe('1');
         expect(result.returnValues.t1).toBe('1');
         expect(result.returnValues.t2).toBe('8');
@@ -151,7 +164,7 @@ describe('contract', function() {
       });
     });
 
-    it('should create event from the events object and use the fromBlock option', function(done) {
+    it('should create event from the events object and use the fromBlock option', done => {
       mockEthereumProvider.send.mockImplementationOnce(method => {
         expect(method).toBe('eth_getLogs');
         return [
@@ -193,23 +206,23 @@ describe('contract', function() {
       const contract = new TestContract(eth, address);
       let count = 0;
 
-      let event = contract.events.Changed({ fromBlock: 0, filter: { from: address } }).on('data', result => {
+      const event = contract.events.Changed({ fromBlock: 0, filter: { from: address } }).on('data', result => {
         count++;
 
         if (count === 1) {
-          expect(result.returnValues.from).toBe(address);
+          expect(result.returnValues.from).toEqual(address);
           expect(result.returnValues.amount).toBe('2');
           expect(result.returnValues.t1).toBe('2');
           expect(result.returnValues.t2).toBe('9');
         }
         if (count === 2) {
-          expect(result.returnValues.from).toBe(address);
+          expect(result.returnValues.from).toEqual(address);
           expect(result.returnValues.amount).toBe('3');
           expect(result.returnValues.t1).toBe('4');
           expect(result.returnValues.t2).toBe('5');
         }
         if (count === 3) {
-          expect(result.returnValues.from).toBe(address);
+          expect(result.returnValues.from).toEqual(address);
           expect(result.returnValues.amount).toBe('1');
           expect(result.returnValues.t1).toBe('1');
           expect(result.returnValues.t2).toBe('8');
@@ -228,7 +241,7 @@ describe('contract', function() {
       const contract = new TestContract(eth, address);
 
       await new Promise(resolve => {
-        contract.once('Changed', { filter: { from: address } }, function(err, result, sub) {
+        contract.once('Changed', { filter: { from: address } }, (err, result, sub) => {
           count++;
           resolve();
         });
@@ -245,7 +258,7 @@ describe('contract', function() {
       expect(count).toBe(1);
     });
 
-    it('should create event subscription and fire the changed event, if log.removed = true', function(done) {
+    it('should create event subscription and fire the changed event, if log.removed = true', done => {
       mockEthSubscribe();
       emitData(200, { removed: true });
 
@@ -254,18 +267,18 @@ describe('contract', function() {
 
       contract.events
         .Changed({ filter: { from: address } })
-        .on('data', function(result) {
+        .on('data', result => {
           expect(count).toBe(1);
           count++;
         })
-        .on('changed', function(result) {
+        .on('changed', result => {
           expect(result.removed).toBe(true);
           expect(count).toBe(2);
           done();
         });
     });
 
-    it('should create all event filter and receive two logs', function(done) {
+    it('should create all event filter and receive two logs', done => {
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
         expect(method).toBe('eth_subscribe');
         expect(params[1]).toEqual({
@@ -278,7 +291,7 @@ describe('contract', function() {
           topics: [
             sha3('Unchanged(uint256,address,uint256)'),
             '0x0000000000000000000000000000000000000000000000000000000000000002',
-            '0x000000000000000000000000' + address.replace('0x', ''),
+            '0x000000000000000000000000' + address.toString().replace('0x', ''),
           ],
           data: '0x0000000000000000000000000000000000000000000000000000000000000005',
         });
@@ -289,17 +302,17 @@ describe('contract', function() {
       const contract = new TestContract(eth, address);
 
       let count = 0;
-      let event = contract.events.allEvents({}, function(_, result) {
+      const event = contract.events.allEvents({}, (_, result) => {
         count++;
 
         if (count === 1 && result.event === 'Changed') {
-          expect(result.returnValues.from).toBe(address);
+          expect(result.returnValues.from).toEqual(address);
           expect(result.returnValues.amount).toBe('1');
           expect(result.returnValues.t1).toBe('1');
           expect(result.returnValues.t2).toBe('8');
         }
         if (count === 2 && result.event === 'Unchanged') {
-          expect(result.returnValues.addressFrom).toBe(address);
+          expect(result.returnValues.addressFrom).toEqual(address);
           expect(result.returnValues.value).toBe('2');
           expect(result.returnValues.t1).toBe('5');
 
@@ -313,22 +326,22 @@ describe('contract', function() {
   describe('balance call', () => {
     const signature = 'balance(address)';
 
-    it('should encode a function call', function() {
+    it('should encode a function call', () => {
       const contract = new TestContract(eth, address);
 
       const result = contract.methods.balance(address).encodeABI();
 
-      expect(result).toBe(
-        sha3(signature).slice(0, 10) + '000000000000000000000000' + addressLowercase.replace('0x', ''),
+      expect(bufferToHex(result)).toBe(
+        sha3(signature).slice(0, 10) + '000000000000000000000000' + addressUnprefixedLowercase,
       );
     });
 
-    it('should encode a constructor call with data', function() {
+    it('should encode a constructor call with data', () => {
       const contract = new TestContract(eth, address);
 
-      var result = contract.deploy('0x1234', address, 10).encodeABI();
+      const result = contract.deployBytecode('0x1234', address, 10).encodeABI();
 
-      expect(result).toBe(
+      expect(bufferToHex(result)).toBe(
         '0x1234' +
           '000000000000000000000000' +
           addressLowercase.replace('0x', '') +
@@ -370,7 +383,7 @@ describe('contract', function() {
 
       const contract = new TestContract(eth, address);
 
-      const res = await contract.deploy('0x1234', address, 50).estimateGas();
+      const res = await contract.deployBytecode('0x1234', address, 50).estimateGas();
       expect(res).toBe(10);
     });
 
@@ -393,7 +406,7 @@ describe('contract', function() {
       const res = await contract.methods
         .hasALotOfParams('0x24545345', '0xff24545345', ['0xff24545345', '0x5345', '0x4545', '0x453345'])
         .call();
-      expect(res).toBe(address);
+      expect(res).toEqual(address);
     });
 
     it('should send overload functions with zero parameters', async () => {
@@ -518,7 +531,7 @@ describe('contract', function() {
       ]);
 
       expect(m1).toBe('10');
-      expect(m2).toBe('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe');
+      expect(m2).toEqual(address);
       expect(m3).toBe('Hello!%!');
     });
 
@@ -552,7 +565,7 @@ describe('contract', function() {
           {
             data: sha3(signature).slice(0, 10),
             to: addressLowercase,
-            from: address2,
+            from: address2.toString().toLowerCase(),
           },
           'latest',
         ]);
@@ -577,6 +590,7 @@ describe('contract', function() {
 
       // eth_getTransactionReceipt
       mockEthereumProvider.send.mockResolvedValueOnce({
+        from: address2Lowercase,
         contractAddress: null,
         cumulativeGasUsed: '0xa',
         transactionIndex: '0x3',
@@ -586,7 +600,7 @@ describe('contract', function() {
         gasUsed: '0x0',
         logs: [
           {
-            address: address,
+            address: addressLowercase,
             topics: [
               sha3('Unchanged(uint256,address,uint256)'),
               '0x0000000000000000000000000000000000000000000000000000000000000002',
@@ -600,7 +614,7 @@ describe('contract', function() {
             data: '0x0000000000000000000000000000000000000000000000000000000000000005',
           },
           {
-            address: address,
+            address: addressLowercase,
             topics: [
               sha3('Changed(address,uint256,uint256,uint256)'),
               '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
@@ -619,91 +633,89 @@ describe('contract', function() {
       });
     }
 
-    it('should sendTransaction and check for receipts with formatted logs', function(done) {
+    it('should sendTransaction and check for receipts with formatted logs', async () => {
       bootstrap();
 
       const contract = new TestContract(eth, address);
 
-      contract.methods
+      const receipt = await contract.methods
         .mySend(address, 10)
         .send({ from: address2, gasPrice: '21345678654321' })
-        .on('receipt', receipt => {
-          expect(receipt).toEqual({
-            contractAddress: null,
-            cumulativeGasUsed: 10,
-            transactionIndex: 3,
-            transactionHash: '0x1234',
-            blockNumber: 10,
-            blockHash: '0x1234',
-            gasUsed: 0,
-            unnamedEvents: [],
-            events: {
-              Unchanged: [
-                {
-                  address: address,
-                  blockNumber: 10,
-                  transactionHash: '0x1234',
-                  blockHash: '0x1345',
-                  logIndex: 4,
-                  id: 'log_9ff24cb4',
-                  transactionIndex: 0,
-                  returnValues: {
-                    0: '2',
-                    1: address,
-                    2: '5',
-                    value: '2',
-                    addressFrom: address,
-                    t1: '5',
-                  },
-                  event: 'Unchanged',
-                  signature: '0xf359668f205d0b5cfdc20d11353e05f633f83322e96f15486cbb007d210d66e5',
-                  raw: {
-                    topics: [
-                      '0xf359668f205d0b5cfdc20d11353e05f633f83322e96f15486cbb007d210d66e5',
-                      '0x0000000000000000000000000000000000000000000000000000000000000002',
-                      '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
-                    ],
-                    data: '0x0000000000000000000000000000000000000000000000000000000000000005',
-                  },
-                },
-              ],
-              Changed: [
-                {
-                  address: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-                  blockNumber: 10,
-                  transactionHash: '0x1234',
-                  blockHash: '0x1345',
-                  logIndex: 4,
-                  id: 'log_9ff24cb4',
-                  transactionIndex: 0,
-                  returnValues: {
-                    0: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-                    1: '1',
-                    2: '1',
-                    3: '8',
-                    from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-                    amount: '1',
-                    t1: '1',
-                    t2: '8',
-                  },
-                  event: 'Changed',
-                  signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
-                  raw: {
-                    topics: [
-                      '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
-                      '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
-                      '0x0000000000000000000000000000000000000000000000000000000000000001',
-                    ],
-                    data:
-                      '0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000008',
-                  },
-                },
-              ],
-            },
-          });
+        .getReceipt();
 
-          done();
-        });
+      expect(receipt).toEqual({
+        from: address2,
+        cumulativeGasUsed: 10,
+        transactionIndex: 3,
+        transactionHash: '0x1234',
+        blockNumber: 10,
+        blockHash: '0x1234',
+        gasUsed: 0,
+        unnamedEvents: [],
+        events: {
+          Unchanged: [
+            {
+              address,
+              blockNumber: 10,
+              transactionHash: '0x1234',
+              blockHash: '0x1345',
+              logIndex: 4,
+              id: 'log_9ff24cb4',
+              transactionIndex: 0,
+              returnValues: {
+                0: '2',
+                1: address,
+                2: '5',
+                value: '2',
+                addressFrom: address,
+                t1: '5',
+              },
+              event: 'Unchanged',
+              signature: '0xf359668f205d0b5cfdc20d11353e05f633f83322e96f15486cbb007d210d66e5',
+              raw: {
+                topics: [
+                  '0xf359668f205d0b5cfdc20d11353e05f633f83322e96f15486cbb007d210d66e5',
+                  '0x0000000000000000000000000000000000000000000000000000000000000002',
+                  '0x000000000000000000000000' + addressUnprefixedLowercase,
+                ],
+                data: '0x0000000000000000000000000000000000000000000000000000000000000005',
+              },
+            },
+          ],
+          Changed: [
+            {
+              address,
+              blockNumber: 10,
+              transactionHash: '0x1234',
+              blockHash: '0x1345',
+              logIndex: 4,
+              id: 'log_9ff24cb4',
+              transactionIndex: 0,
+              returnValues: {
+                0: address,
+                1: '1',
+                2: '1',
+                3: '8',
+                from: address,
+                amount: '1',
+                t1: '1',
+                t2: '8',
+              },
+              event: 'Changed',
+              signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
+              raw: {
+                topics: [
+                  '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
+                  '0x000000000000000000000000' + addressUnprefixedLowercase,
+                  '0x0000000000000000000000000000000000000000000000000000000000000001',
+                ],
+                data:
+                  '0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000008',
+              },
+            },
+          ],
+        },
+      });
     });
 
     it('should sendTransaction and check returnValues on resolved receipt', async () => {
@@ -711,14 +723,17 @@ describe('contract', function() {
 
       const contract = new TestContract(eth, address);
 
-      const receipt = await contract.methods.mySend(address, 10).send({ from: address2, gasPrice: '21345678654321' });
+      const receipt = await contract.methods
+        .mySend(address, 10)
+        .send({ from: address2, gasPrice: '21345678654321' })
+        .getReceipt();
 
       expect(receipt.events!.Changed[0].returnValues).toEqual({
-        0: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+        0: address,
         1: '1',
         2: '1',
         3: '8',
-        from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+        from: address,
         amount: '1',
         t1: '1',
         t2: '8',
@@ -734,12 +749,13 @@ describe('contract', function() {
       });
     });
 
-    it('should sendTransaction and check for receipts with formatted logs when multiple of same event', function(done) {
+    it('should sendTransaction and check for receipts with formatted logs when multiple of same event', async () => {
       mockEthereumProvider.send.mockResolvedValueOnce(
         '0x1234000000000000000000000000000000000000000000000000000000056789',
       );
 
       mockEthereumProvider.send.mockResolvedValueOnce({
+        from: address2Lowercase,
         contractAddress: null,
         cumulativeGasUsed: '0xa',
         transactionIndex: '0x3',
@@ -749,7 +765,7 @@ describe('contract', function() {
         gasUsed: '0x0',
         logs: [
           {
-            address: address,
+            address,
             topics: [
               sha3('Changed(address,uint256,uint256,uint256)'),
               '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
@@ -765,7 +781,7 @@ describe('contract', function() {
               '0000000000000000000000000000000000000000000000000000000000000008',
           },
           {
-            address: address,
+            address,
             topics: [
               sha3('Changed(address,uint256,uint256,uint256)'),
               '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
@@ -785,91 +801,88 @@ describe('contract', function() {
 
       const contract = new TestContract(eth, address);
 
-      contract.methods
+      const receipt = await contract.methods
         .mySend(address, 10)
         .send({ from: address2, gasPrice: '21345678654321' })
-        .on('receipt', function(receipt) {
-          // wont throw if it errors ?! nope: causes a timeout
-          expect(receipt).toEqual({
-            contractAddress: null,
-            cumulativeGasUsed: 10,
-            transactionIndex: 3,
-            transactionHash: '0x1234',
-            blockNumber: 10,
-            blockHash: '0x1234',
-            gasUsed: 0,
-            unnamedEvents: [],
-            events: {
-              Changed: [
-                {
-                  address: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-                  blockNumber: 10,
-                  transactionHash: '0x1234',
-                  blockHash: '0x1345',
-                  logIndex: 4,
-                  id: 'log_9ff24cb4',
-                  transactionIndex: 0,
-                  returnValues: {
-                    0: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-                    1: '1',
-                    2: '1',
-                    3: '8',
-                    from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-                    amount: '1',
-                    t1: '1',
-                    t2: '8',
-                  },
-                  event: 'Changed',
-                  signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
-                  raw: {
-                    topics: [
-                      '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
-                      '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
-                      '0x0000000000000000000000000000000000000000000000000000000000000001',
-                    ],
-                    data:
-                      '0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000008',
-                  },
-                },
-                {
-                  address: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-                  blockNumber: 10,
-                  transactionHash: '0x1234',
-                  blockHash: '0x1345',
-                  logIndex: 5,
-                  id: 'log_8b8a2b7f',
-                  transactionIndex: 0,
-                  returnValues: {
-                    0: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-                    1: '2',
-                    2: '1',
-                    3: '8',
-                    from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
-                    amount: '2',
-                    t1: '1',
-                    t2: '8',
-                  },
-                  event: 'Changed',
-                  signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
-                  raw: {
-                    topics: [
-                      '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
-                      '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
-                      '0x0000000000000000000000000000000000000000000000000000000000000002',
-                    ],
-                    data:
-                      '0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000008',
-                  },
-                },
-              ],
-            },
-          });
+        .getReceipt();
 
-          done();
-        });
+      expect(receipt).toEqual({
+        from: address2,
+        cumulativeGasUsed: 10,
+        transactionIndex: 3,
+        transactionHash: '0x1234',
+        blockNumber: 10,
+        blockHash: '0x1234',
+        gasUsed: 0,
+        unnamedEvents: [],
+        events: {
+          Changed: [
+            {
+              address,
+              blockNumber: 10,
+              transactionHash: '0x1234',
+              blockHash: '0x1345',
+              logIndex: 4,
+              id: 'log_9ff24cb4',
+              transactionIndex: 0,
+              returnValues: {
+                0: address,
+                1: '1',
+                2: '1',
+                3: '8',
+                from: address,
+                amount: '1',
+                t1: '1',
+                t2: '8',
+              },
+              event: 'Changed',
+              signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
+              raw: {
+                topics: [
+                  '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
+                  '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
+                  '0x0000000000000000000000000000000000000000000000000000000000000001',
+                ],
+                data:
+                  '0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000008',
+              },
+            },
+            {
+              address,
+              blockNumber: 10,
+              transactionHash: '0x1234',
+              blockHash: '0x1345',
+              logIndex: 5,
+              id: 'log_8b8a2b7f',
+              transactionIndex: 0,
+              returnValues: {
+                0: address,
+                1: '2',
+                2: '1',
+                3: '8',
+                from: address,
+                amount: '2',
+                t1: '1',
+                t2: '8',
+              },
+              event: 'Changed',
+              signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
+              raw: {
+                topics: [
+                  '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
+                  '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
+                  '0x0000000000000000000000000000000000000000000000000000000000000002',
+                ],
+                data:
+                  '0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000008',
+              },
+            },
+          ],
+        },
+      });
     });
 
-    it('should sendTransaction and receive multiple confirmations', function(done) {
+    it('should sendTransaction and receive multiple confirmations', done => {
       // eth_sendTransaction
       mockEthereumProvider.send.mockResolvedValueOnce(
         '0x1234000000000000000000000000000000000000000000000000000000056789',
@@ -877,7 +890,7 @@ describe('contract', function() {
 
       // eth_getTransactionReceipt
       mockEthereumProvider.send.mockResolvedValueOnce({
-        contractAddress: null,
+        from: address2Lowercase,
         cumulativeGasUsed: '0xa',
         transactionIndex: '0x3',
         transactionHash: '0x1234',
@@ -894,7 +907,8 @@ describe('contract', function() {
         mockEthereumProvider.emit('notification', {
           subscription: '0x123',
           result: {
-            blockNumber: '0x10',
+            ...blockHeader,
+            number: '0xa',
           },
         });
       }, 100);
@@ -903,37 +917,23 @@ describe('contract', function() {
         mockEthereumProvider.emit('notification', {
           subscription: '0x123',
           result: {
-            blockNumber: '0x11',
+            ...blockHeader,
+            number: '0xb',
           },
         });
       }, 200);
 
       const contract = new TestContract(eth, address);
 
-      var count = 0;
+      let count = 0;
       contract.methods
         .mySend(address, 10)
         .send({ from: address2, gasPrice: '21345678654321' })
-        .on('confirmation', (confirmationNumber, receipt) => {
+        .getReceipt(2, (confirmationNumber, receipt) => {
           count++;
           if (count === 1) {
             expect(receipt).toEqual({
-              contractAddress: null,
-              cumulativeGasUsed: 10,
-              transactionIndex: 3,
-              transactionHash: '0x1234',
-              blockNumber: 10,
-              blockHash: '0x1234',
-              gasUsed: 0,
-              unnamedEvents: [],
-              events: {},
-            });
-
-            expect(confirmationNumber).toBe(0);
-          }
-          if (count === 2) {
-            expect(receipt).toEqual({
-              contractAddress: null,
+              from: address2,
               cumulativeGasUsed: 10,
               transactionIndex: 3,
               transactionHash: '0x1234',
@@ -945,10 +945,25 @@ describe('contract', function() {
             });
 
             expect(confirmationNumber).toBe(1);
+          }
+          if (count === 2) {
+            expect(receipt).toEqual({
+              from: address2,
+              cumulativeGasUsed: 10,
+              transactionIndex: 3,
+              transactionHash: '0x1234',
+              blockNumber: 10,
+              blockHash: '0x1234',
+              gasUsed: 0,
+              unnamedEvents: [],
+              events: {},
+            });
+
+            expect(confirmationNumber).toBe(2);
             done();
           }
         })
-        .on('error', done);
+        .catch(done);
     });
 
     it('should sendTransaction to contract function', async () => {
@@ -981,9 +996,9 @@ describe('contract', function() {
     it('should throw error when trying to send ether to a non payable contract function', async () => {
       const contract = new TestContract(eth, address);
 
-      await expect(
+      await expect(() =>
         contract.methods.myDisallowedSend(address, 17).send({ from: address, value: 123 }),
-      ).rejects.toThrowError(/non-payable/);
+      ).toThrowError(/non-payable/);
     });
 
     it('should not throw error when trying to not send ether to a non payable contract function', async () => {
@@ -1034,10 +1049,12 @@ describe('contract', function() {
 
       const contract = new TestContract(eth, address);
 
-      await contract.methods['mySend(address,uint256)'](address, 17).send({
-        from: address,
-        gasPrice: '23456787654321',
-      });
+      await contract.methods['mySend(address,uint256)'](address, 17)
+        .send({
+          from: address,
+          gasPrice: '23456787654321',
+        })
+        .getTxHash();
 
       expect(mockEthereumProvider.send).toHaveBeenCalledWith('eth_sendTransaction', [
         {
@@ -1066,7 +1083,9 @@ describe('contract', function() {
 
       const contract = new TestContract(eth, address);
 
-      await contract.methods[signature](address, 17).send({ from: address, gasPrice: '1230000000' });
+      await contract.methods[signature](address, 17)
+        .send({ from: address, gasPrice: '1230000000' })
+        .getTxHash();
 
       expect(mockEthereumProvider.send).toHaveBeenCalledWith('eth_sendTransaction', [
         {
@@ -1084,16 +1103,18 @@ describe('contract', function() {
 
     it('should throw when trying to create a tx object and wrong amount of params', () => {
       const contract = new Contract(eth, TestContractAbi, address);
-      expect(() => contract.methods.mySend(address)).toThrowError(/Invalid number of parameters/);
+      expect(() => contract.methods.mySend(address)).toThrowError('No matching method with 1 arguments for mySend.');
     });
 
-    it('should make a call with optional params', function(done) {
+    it('should make a call with optional params', done => {
       const signature = 'balance(address)';
       let count = 0;
 
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
         count++;
-        if (count > 1) return;
+        if (count > 1) {
+          return;
+        }
 
         expect(method).toBe('eth_call');
         expect(params).toEqual([
@@ -1113,13 +1134,13 @@ describe('contract', function() {
       contract.methods
         .balance(address)
         .call({ from: address, gas: 50000 })
-        .then(function(r) {
+        .then(r => {
           expect(r).toBe('50');
           done();
         });
     });
 
-    it('should explicitly make a call with optional params', function(done) {
+    it('should explicitly make a call with optional params', done => {
       const signature = 'balance(address)';
 
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
@@ -1141,14 +1162,14 @@ describe('contract', function() {
       contract.methods
         .balance(address)
         .call({ from: address, gas: 50000 })
-        .then(function(r) {
+        .then(r => {
           expect(r).toBe('50');
           done();
         });
     });
 
-    it('should explicitly make a call with optional params and defaultBlock', function(done) {
-      let signature = 'balance(address)';
+    it('should explicitly make a call with optional params and defaultBlock', done => {
+      const signature = 'balance(address)';
 
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
         expect(method).toBe('eth_call');
@@ -1169,7 +1190,7 @@ describe('contract', function() {
       contract.methods
         .balance(address)
         .call({ from: address, gas: 50000 }, 11)
-        .then(function(r) {
+        .then(r => {
           expect(r).toBe('50');
           done();
         });
@@ -1301,12 +1322,12 @@ describe('contract', function() {
 
       const topic1 = [
         sha3(signature),
-        '0x000000000000000000000000' + address.replace('0x', ''),
+        '0x000000000000000000000000' + address.toString().replace('0x', ''),
         '0x000000000000000000000000000000000000000000000000000000000000000a',
       ];
       const topic2 = [
         sha3(signature),
-        '0x000000000000000000000000' + address.replace('0x', ''),
+        '0x000000000000000000000000' + address.toString().replace('0x', ''),
         '0x0000000000000000000000000000000000000000000000000000000000000003',
       ];
 
@@ -1317,7 +1338,7 @@ describe('contract', function() {
             address: addressLowercase,
             topics: [
               '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
-              '0x000000000000000000000000' + address2.replace('0x', ''),
+              '0x000000000000000000000000' + address2.toString().replace('0x', ''),
               null,
             ],
           },
@@ -1325,7 +1346,7 @@ describe('contract', function() {
 
         return [
           {
-            address: address,
+            address,
             topics: topic1,
             blockNumber: '0x3',
             transactionHash: '0x1234',
@@ -1337,7 +1358,7 @@ describe('contract', function() {
               '0000000000000000000000000000000000000000000000000000000000000009',
           },
           {
-            address: address,
+            address,
             topics: topic2,
             blockNumber: '0x4',
             transactionHash: '0x1235',
@@ -1360,7 +1381,7 @@ describe('contract', function() {
           event: 'Changed',
           signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
           id: 'log_9ff24cb4',
-          address: address,
+          address,
           blockNumber: 3,
           transactionHash: '0x1234',
           blockHash: '0x1345',
@@ -1387,7 +1408,7 @@ describe('contract', function() {
           event: 'Changed',
           signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
           id: 'log_29c93e15',
-          address: address,
+          address,
           blockNumber: 4,
           transactionHash: '0x1235',
           blockHash: '0x1346',
@@ -1413,7 +1434,7 @@ describe('contract', function() {
       ]);
     });
 
-    it('should call testArr method and properly parse result', function(done) {
+    it('should call testArr method and properly parse result', done => {
       const signature = 'testArr(int[])';
 
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
@@ -1442,7 +1463,7 @@ describe('contract', function() {
       contract.methods
         .testArr([3])
         .call()
-        .then(function(result) {
+        .then(result => {
           expect(result).toBe('5');
           done();
         });
@@ -1471,15 +1492,15 @@ describe('contract', function() {
       const contract = new TestContract(eth, address);
 
       const result = await contract.methods.owner().call();
-      expect(result).toBe(address);
+      expect(result).toEqual(address);
     });
 
-    it('should decode an struct correctly', function(done) {
+    it('should decode an struct correctly', done => {
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
         expect(method).toBe('eth_call');
         expect(params).toEqual([
           {
-            data: '0x2a4aedd50000000000000000000000009cc9a2c777605af16872e0997b3aeb91d96d5d8c',
+            data: '0x2a4aedd5000000000000000000000000' + addressUnprefixedLowercase,
             to: addressLowercase,
           },
           'latest',
@@ -1490,12 +1511,12 @@ describe('contract', function() {
       const contract = new TestContract(eth, address);
 
       contract.methods
-        .listOfNestedStructs('0x9CC9a2c777605Af16872E0997b3Aeb91d96D5D8c')
+        .listOfNestedStructs(address)
         .call()
-        .then(function(result) {
-          var expectedArray: boolean[] = [];
+        .then(result => {
+          const expectedArray: any = [];
           expectedArray[0] = true;
-          expectedArray['status'] = true;
+          expectedArray.status = true;
 
           expect(result).toEqual(expectedArray);
           done();
@@ -1531,15 +1552,15 @@ describe('contract', function() {
     });
   });
 
-  describe('deploy', function() {
-    it('should deploy a contract and use all promise steps', function(done) {
+  describe('deploy', () => {
+    it('should deploy a contract and use all promise steps', async () => {
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
         expect(method).toBe('eth_sendTransaction');
         expect(params).toEqual([
           {
             data:
               '0x1234567000000000000000000000000' +
-              addressLowercase.replace('0x', '') +
+              addressUnprefixedLowercase +
               '00000000000000000000000000000000000000000000000000000000000000c8',
             from: addressLowercase,
             gas: '0xc350',
@@ -1562,9 +1583,7 @@ describe('contract', function() {
         setTimeout(() => {
           mockEthereumProvider.emit('notification', {
             subscription: '0x123',
-            result: {
-              blockNumber: '0x10',
-            },
+            result: blockHeader,
           });
         }, 100);
 
@@ -1575,37 +1594,93 @@ describe('contract', function() {
         expect(method).toBe('eth_getTransactionReceipt');
         expect(params).toEqual(['0x5550000000000000000000000000000000000000000000000000000000000032']);
         return {
-          contractAddress: addressLowercase,
+          from: addressLowercase,
+          contractAddress: address2Lowercase,
           blockHash: '0xffdd',
         };
       });
 
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
         expect(method).toBe('eth_getCode');
-        expect(params).toEqual([addressLowercase, 'latest']);
+        expect(params).toEqual([address2Lowercase, 'latest']);
         return '0x321';
+      });
+
+      mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
+        expect(method).toBe('eth_unsubscribe');
+        expect(params).toEqual(['0x123']);
+        return '0x1';
       });
 
       const contract = new TestContract(eth);
 
-      contract
-        .deploy('0x1234567', address, 200)
-        .send({
-          from: address,
-          gas: 50000,
-          gasPrice: 3000,
-        })
-        .on('transactionHash', value => {
-          expect('0x5550000000000000000000000000000000000000000000000000000000000032').toBe(value);
-        })
-        .on('receipt', receipt => {
-          expect(address).toBe(receipt.contractAddress);
-          expect(contract.address).toBeUndefined();
-        })
-        .then(_ => {
-          expect(contract.address).toBe(address);
-          done();
-        });
+      const sendTx = contract.deployBytecode('0x1234567', address, 200).send({
+        from: address,
+        gas: 50000,
+        gasPrice: 3000,
+      });
+
+      const txHash = await sendTx.getTxHash();
+      const receipt = await sendTx.getReceipt();
+
+      expect(txHash).toBe('0x5550000000000000000000000000000000000000000000000000000000000032');
+      expect(receipt.contractAddress).toEqual(address2);
+    });
+
+    it('should fail deployment if cannot retreive code', async () => {
+      // eth_sendTransaction
+      mockEthereumProvider.send.mockResolvedValueOnce(
+        '0x5550000000000000000000000000000000000000000000000000000000000032',
+      );
+
+      // eth_getTransactionReceipt
+      mockEthereumProvider.send.mockResolvedValueOnce({
+        from: addressLowercase,
+        contractAddress: address2Lowercase,
+        blockHash: '0xffdd',
+      });
+
+      // eth_getCode
+      mockEthereumProvider.send.mockResolvedValueOnce('0x');
+
+      // eth_unsubscribe
+      mockEthereumProvider.send.mockResolvedValueOnce('0x1');
+
+      const contract = new TestContract(eth);
+
+      const sendTx = contract.deployBytecode('0x1234567', address, 200).send({
+        from: address,
+        gas: 50000,
+        gasPrice: 3000,
+      });
+
+      await expect(sendTx.getReceipt()).rejects.toThrowError('code could not be stored');
+    });
+
+    it('should fail deployment if no contract address in receipt', async () => {
+      // eth_sendTransaction
+      mockEthereumProvider.send.mockResolvedValueOnce(
+        '0x5550000000000000000000000000000000000000000000000000000000000032',
+      );
+
+      // eth_getTransactionReceipt
+      mockEthereumProvider.send.mockResolvedValueOnce({
+        from: addressLowercase,
+        blockHash: '0xffdd',
+      });
+
+      // eth_unsubscribe
+      mockEthereumProvider.send.mockResolvedValueOnce('0x1');
+
+      const contract = new TestContract(eth);
+
+      const sendTx = contract.deployBytecode('0x1234567', address, 200).send({
+        from: address,
+        gas: 50000,
+        gasPrice: 3000,
+      });
+
+      await expect(sendTx.getReceipt()).rejects.toThrowError('contract address');
     });
   });
 });

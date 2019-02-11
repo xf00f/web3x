@@ -15,19 +15,30 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { isString } from 'util';
+import { Address } from '../address';
 import { Iban } from '../iban';
-import { isAddress } from '../utils';
 
-export function inputAddressFormatter(address) {
-  const iban = new Iban(address);
-  if (iban.isValid() && iban.isDirect()) {
-    return iban.toAddress().toLowerCase();
-  } else if (isAddress(address)) {
-    return '0x' + address.toLowerCase().replace('0x', '');
+export function inputAddressFormatter(address: string | Iban | Address) {
+  if (isString(address)) {
+    const iban = new Iban(address);
+    if (iban.isValid() && iban.isDirect()) {
+      return iban
+        .toAddress()
+        .toString()
+        .toLowerCase();
+    } else if (Address.isAddress(address)) {
+      return Address.fromString(address)
+        .toString()
+        .toLowerCase();
+    }
+    throw new Error(`Address ${address} is invalid, the checksum failed, or its an indrect IBAN address.`);
+  } else if (address instanceof Iban) {
+    return address
+      .toAddress()
+      .toString()
+      .toLowerCase();
+  } else {
+    return address.toString().toLowerCase();
   }
-  throw new Error(
-    'Provided address "' +
-      address +
-      '" is invalid, the capitalization checksum test failed, or its an indrect IBAN address which can\'t be converted.',
-  );
 }

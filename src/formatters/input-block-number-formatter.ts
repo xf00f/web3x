@@ -15,9 +15,9 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { isHexStrict, numberToHex } from '../utils';
 import { isString } from 'util';
-import { BlockType, BlockHash } from '../eth';
+import { BlockHash, BlockType } from '../eth';
+import { isHexStrict, numberToHex } from '../utils';
 
 export function inputBlockNumberFormatter(block: BlockType | BlockHash | undefined): string | undefined {
   if (block === undefined) {

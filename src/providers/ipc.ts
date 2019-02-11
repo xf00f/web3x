@@ -17,7 +17,6 @@
 
 import { isArray, isFunction } from 'util';
 import { LegacyProvider } from './legacy-provider';
-import { InvalidResponse, InvalidConnection } from '../errors';
 import { LegacyProviderAdapter } from './legacy-provider-adapter';
 
 export class IpcProvider extends LegacyProviderAdapter {
@@ -45,13 +44,15 @@ class LegacyIpcProvider implements LegacyProvider {
     this.addDefaultEvents();
 
     // LISTEN FOR CONNECTION RESPONSES
-    var callback = function(result) {
-      var id: any = null;
+    const callback = function(result) {
+      let id: any = null;
 
       // get the id which matches the returned id
       if (isArray(result)) {
         result.forEach(load => {
-          if (this.responseCallbacks[load.id]) id = load.id;
+          if (this.responseCallbacks[load.id]) {
+            id = load.id;
+          }
         });
       } else {
         id = result.id;
@@ -60,7 +61,9 @@ class LegacyIpcProvider implements LegacyProvider {
       // notification
       if (!id && result.method.indexOf('_subscription') !== -1) {
         this.notificationCallbacks.forEach(callback => {
-          if (isFunction(callback)) callback(result);
+          if (isFunction(callback)) {
+            callback(result);
+          }
         });
 
         // fire the callback
@@ -75,12 +78,7 @@ class LegacyIpcProvider implements LegacyProvider {
     });
   }
 
-  /**
-  Will add the error and end event to timeout existing calls
-
-  @method addDefaultEvents
-  */
-  addDefaultEvents() {
+  public addDefaultEvents() {
     this.connection.on('connect', () => {
       this.connected = true;
     });
@@ -102,19 +100,11 @@ class LegacyIpcProvider implements LegacyProvider {
     });
   }
 
-  /**
- Will parse the response and make an array out of it.
-
- NOTE, this exists for backwards compatibility reasons.
-
- @method _parseResponse
- @param {String} data
- */
   private _parseResponse(data) {
     const returnValues = [];
 
     // DE-CHUNKER
-    var dechunkedData = data
+    const dechunkedData = data
       .replace(/\}[\n\r]?\{/g, '}|--|{') // }{
       .replace(/\}\][\n\r]?\[\{/g, '}]|--|[{') // }][{
       .replace(/\}[\n\r]?\[\{/g, '}|--|[{') // }[{
@@ -123,9 +113,11 @@ class LegacyIpcProvider implements LegacyProvider {
 
     dechunkedData.forEach(data => {
       // prepend the last chunk
-      if (this.lastChunk) data = this.lastChunk + data;
+      if (this.lastChunk) {
+        data = this.lastChunk + data;
+      }
 
-      var result = null;
+      let result = null;
 
       try {
         result = JSON.parse(data);
@@ -136,7 +128,7 @@ class LegacyIpcProvider implements LegacyProvider {
         clearTimeout(this.lastChunkTimeout);
         this.lastChunkTimeout = setTimeout(() => {
           this._timeout();
-          throw InvalidResponse(data);
+          throw new Error('Timeout');
         }, 1000 * 15);
 
         return;
@@ -146,66 +138,49 @@ class LegacyIpcProvider implements LegacyProvider {
       clearTimeout(this.lastChunkTimeout);
       this.lastChunk = null;
 
-      if (result) returnValues.push(result);
+      if (result) {
+        returnValues.push(result);
+      }
     });
 
     return returnValues;
   }
 
-  /**
-Get the adds a callback to the responseCallbacks object,
-which will be called if a response matching the response Id will arrive.
-
-@method _addResponseCallback
-*/
   private _addResponseCallback(payload, callback) {
-    var id = payload.id || payload[0].id;
-    var method = payload.method || payload[0].method;
+    const id = payload.id || payload[0].id;
+    const method = payload.method || payload[0].method;
 
     this.responseCallbacks[id] = callback;
     this.responseCallbacks[id].method = method;
   }
 
-  /**
-Timeout all requests when the end/error event is fired
-
-@method _timeout
-*/
   private _timeout() {
-    for (var key in this.responseCallbacks) {
+    for (const key in this.responseCallbacks) {
       if (this.responseCallbacks.hasOwnProperty(key)) {
-        this.responseCallbacks[key](InvalidConnection('on IPC'));
+        this.responseCallbacks[key](new Error(`CONNECTION ERROR: Couldn't connect to node on IPC.`));
         delete this.responseCallbacks[key];
       }
     }
   }
 
-  /**
- Try to reconnect
-
- @method reconnect
- */
-  reconnect() {
+  public reconnect() {
     this.connection.connect({ path: this.path });
   }
 
-  send(payload, callback) {
+  public send(payload, callback) {
     // try reconnect, when connection is gone
-    if (!this.connection.writable) this.connection.connect({ path: this.path });
+    if (!this.connection.writable) {
+      this.connection.connect({ path: this.path });
+    }
 
     this.connection.write(JSON.stringify(payload));
     this._addResponseCallback(payload, callback);
   }
 
-  /**
-Subscribes to provider events.provider
-
-@method on
-@param {String} type    'notification', 'connect', 'error', 'end' or 'data'
-@param {Function} callback   the callback to call
-*/
-  on(type, callback) {
-    if (typeof callback !== 'function') throw new Error('The second parameter callback must be a function.');
+  public on(type, callback) {
+    if (typeof callback !== 'function') {
+      throw new Error('The second parameter callback must be a function.');
+    }
 
     switch (type) {
       case 'data':
@@ -219,33 +194,21 @@ Subscribes to provider events.provider
     }
   }
 
-  /**
- Subscribes to provider events.provider
-
- @method on
- @param {String} type    'connect', 'error', 'end' or 'data'
- @param {Function} callback   the callback to call
- */
-  once(type, callback) {
-    if (typeof callback !== 'function') throw new Error('The second parameter callback must be a function.');
+  public once(type, callback) {
+    if (typeof callback !== 'function') {
+      throw new Error('The second parameter callback must be a function.');
+    }
 
     this.connection.once(type, callback);
   }
 
-  /**
-Removes event listener
-
-@method removeListener
-@param {String} type    'data', 'connect', 'error', 'end' or 'data'
-@param {Function} callback   the callback to call
-*/
-  removeListener(type, callback) {
-    var _this = this;
-
+  public removeListener(type, callback) {
     switch (type) {
       case 'data':
-        this.notificationCallbacks.forEach(function(cb, index) {
-          if (cb === callback) _this.notificationCallbacks.splice(index, 1);
+        this.notificationCallbacks.forEach((cb, index) => {
+          if (cb === callback) {
+            this.notificationCallbacks.splice(index, 1);
+          }
         });
         break;
 
@@ -255,13 +218,7 @@ Removes event listener
     }
   }
 
-  /**
-Removes all event listeners
-
-@method removeAllListeners
-@param {String} type    'data', 'connect', 'error', 'end' or 'data'
-*/
-  removeAllListeners(type) {
+  public removeAllListeners(type) {
     switch (type) {
       case 'data':
         this.notificationCallbacks = [];
@@ -273,12 +230,7 @@ Removes all event listeners
     }
   }
 
-  /**
-Resets the providers, clears all callbacks
-
-@method reset
-*/
-  reset() {
+  public reset() {
     this._timeout();
     this.notificationCallbacks = [];
 
@@ -289,7 +241,7 @@ Resets the providers, clears all callbacks
     this.addDefaultEvents();
   }
 
-  disconnect() {
+  public disconnect() {
     this.connection.close();
   }
 }

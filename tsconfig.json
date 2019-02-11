@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "esnext",
     "module": "commonjs",
     "moduleResolution": "node",
-    "lib": ["dom", "es6", "es2017.object"],
+    "lib": ["dom", "esnext", "es2017.object"],
     "noEmit": true,
     "strict": true,
     "noImplicitAny": false,

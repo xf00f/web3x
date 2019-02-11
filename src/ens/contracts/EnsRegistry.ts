@@ -1,20 +1,21 @@
 import BN from "bn.js";
+import { Address } from "../../address";
 import { EventLog, TransactionReceipt } from "../../formatters";
-import { Contract, ContractOptions, ContractAbi, TxCall, TxSend, EventSubscriptionFactory } from "../../contract";
+import { Contract, ContractOptions, TxCall, TxSend, TxDeploy, EventSubscriptionFactory } from "../../contract";
 import { Eth } from "../../eth";
 import abi from "./EnsRegistryAbi";
 export type TransferEvent = {
     node: string;
-    owner: string;
+    owner: Address;
 };
 export type NewOwnerEvent = {
     node: string;
     label: string;
-    owner: string;
+    owner: Address;
 };
 export type NewResolverEvent = {
     node: string;
-    resolver: string;
+    resolver: Address;
 };
 export type NewTTLEvent = {
     node: string;
@@ -49,13 +50,13 @@ interface EnsRegistryTxEventLogs {
 export interface EnsRegistryTransactionReceipt extends TransactionReceipt<EnsRegistryTxEventLogs> {
 }
 interface EnsRegistryMethods {
-    resolver(node: string): TxCall<string>;
-    owner(node: string): TxCall<string>;
-    setSubnodeOwner(node: string, label: string, owner: string): TxSend<EnsRegistryTransactionReceipt>;
+    resolver(node: string): TxCall<Address>;
+    owner(node: string): TxCall<Address>;
+    setSubnodeOwner(node: string, label: string, owner: Address): TxSend<EnsRegistryTransactionReceipt>;
     setTTL(node: string, ttl: number | string | BN): TxSend<EnsRegistryTransactionReceipt>;
     ttl(node: string): TxCall<string>;
-    setResolver(node: string, resolver: string): TxSend<EnsRegistryTransactionReceipt>;
-    setOwner(node: string, owner: string): TxSend<EnsRegistryTransactionReceipt>;
+    setResolver(node: string, resolver: Address): TxSend<EnsRegistryTransactionReceipt>;
+    setOwner(node: string, owner: Address): TxSend<EnsRegistryTransactionReceipt>;
 }
 export interface EnsRegistryDefinition {
     methods: EnsRegistryMethods;
@@ -63,7 +64,7 @@ export interface EnsRegistryDefinition {
     eventLogs: EnsRegistryEventLogs;
 }
 export class EnsRegistry extends Contract<EnsRegistryDefinition> {
-    constructor(eth: Eth, address?: string, options?: ContractOptions) {
+    constructor(eth: Eth, address?: Address, options?: ContractOptions) {
         super(eth, abi, address, options);
     }
 }

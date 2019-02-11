@@ -15,9 +15,10 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { encrypt, decrypt, KeyStore } from './encryption';
+import { Address } from '../address';
+import { decrypt, encrypt, KeyStore } from './encryption';
 
-var staticTests: { json: KeyStore; password: string; priv: string }[] = [
+const staticTests: { json: KeyStore; password: string; priv: string }[] = [
   {
     json: {
       crypto: {
@@ -36,7 +37,7 @@ var staticTests: { json: KeyStore; password: string; priv: string }[] = [
         },
         mac: '2103ac29920d71da29f15d75b4a16dbe95cfd7ff8faea1056c33131d846e3097',
       },
-      address: '1234',
+      address: '0000000000000000000000000000000000000000',
       id: '3198bc9c-6672-5ab3-d995-4942343ae5b6',
       version: 3,
     },
@@ -61,7 +62,7 @@ var staticTests: { json: KeyStore; password: string; priv: string }[] = [
         },
         mac: 'd5e116151c6aa71470e67a7d42c9620c75c4d23229847dcc127794f0732b0db5',
       },
-      address: '1234',
+      address: '0000000000000000000000000000000000000000',
       id: 'fecfc4ce-e956-48fd-953b-30f8b52ed66c',
       version: 3,
     },
@@ -86,7 +87,7 @@ var staticTests: { json: KeyStore; password: string; priv: string }[] = [
         },
         mac: '75d0e6759f7b3cefa319c3be41680ab6beea7d8328653474bd06706d4cc67420',
       },
-      address: '1234',
+      address: '0000000000000000000000000000000000000000',
       id: 'a37e1559-5955-450d-8075-7b8931b392b2',
       version: 3,
     },
@@ -110,7 +111,7 @@ var staticTests: { json: KeyStore; password: string; priv: string }[] = [
         },
         mac: '517ead924a9d0dc3124507e3393d175ce3ff7c1e96529c6c555ce9e51205e9b2',
       },
-      address: '1234',
+      address: '0000000000000000000000000000000000000000',
       id: '3198bc9c-6672-5ab3-d995-4942343ae5b6',
       version: 3,
     },
@@ -119,11 +120,11 @@ var staticTests: { json: KeyStore; password: string; priv: string }[] = [
   },
 ];
 
-describe('utils', function() {
-  describe('encryption', function() {
-    staticTests.forEach(function(test, i) {
+describe('utils', () => {
+  describe('encryption', () => {
+    staticTests.forEach(test => {
       it('encrypt staticTests and compare to keystore', async () => {
-        const keystore = await encrypt(Buffer.from(test.priv, 'hex'), test.json.address!, test.password, {
+        const keystore = await encrypt(Buffer.from(test.priv, 'hex'), Address.ZERO, test.password, {
           id: test.json.id,
           iv: test.json.crypto.cipherparams.iv,
           kdf: test.json.crypto.kdf,
@@ -133,7 +134,7 @@ describe('utils', function() {
       }, 30000);
     });
 
-    staticTests.forEach(function(test, i) {
+    staticTests.forEach(test => {
       it('decrypt staticTests and compare to private key', async () => {
         const privateKey = await decrypt(test.json, test.password);
         expect(privateKey).toEqual(Buffer.from(test.priv, 'hex'));

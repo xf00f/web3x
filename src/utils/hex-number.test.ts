@@ -15,8 +15,8 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { numberToHex, hexToNumberString, hexToNumber } from './hex-number';
 import { toBN } from './bn';
+import { hexToNumber, hexToNumberString, numberToHex } from './hex-number';
 
 describe('utils', () => {
   describe('numberToHex', () => {
@@ -64,14 +64,14 @@ describe('utils', () => {
     ];
 
     tests.forEach(test => {
-      it('should turn ' + test.value + ' to ' + test.expected, function() {
+      it('should turn ' + test.value + ' to ' + test.expected, () => {
         expect(numberToHex(test.value)).toBe(test.expected);
       });
     });
   });
 
-  describe('hexToNumber', function() {
-    it('should return the correct value', function() {
+  describe('hexToNumber', () => {
+    it('should return the correct value', () => {
       expect(hexToNumber('0x3e8')).toBe(1000);
       expect(hexToNumber('0x1f0fe294a36')).toBe(2134567897654);
       // allow compatiblity
@@ -80,13 +80,10 @@ describe('utils', () => {
     });
   });
 
-  describe('hexToNumberString', function() {
-    it('should return the correct value', function() {
+  describe('hexToNumberString', () => {
+    it('should return the correct value', () => {
       expect(hexToNumberString('0x3e8')).toBe('1000');
       expect(hexToNumberString('0x1f0fe294a36')).toBe('2134567897654');
-      // allow compatiblity
-      expect(hexToNumberString(100000)).toBe('100000');
-      expect(hexToNumberString('100000')).toBe('100000');
     });
   });
 });

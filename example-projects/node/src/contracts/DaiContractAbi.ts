@@ -1,5 +1,5 @@
-import { ContractAbi } from 'web3x/contract';
-export default [
+import { ContractAbi} from 'web3x/contract';
+export default new ContractAbi([
   {
     "constant": true,
     "inputs": [],
@@ -564,4 +564,4 @@ export default [
     "name": "Transfer",
     "type": "event"
   }
-] as ContractAbi;
+]);

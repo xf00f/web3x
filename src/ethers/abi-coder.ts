@@ -17,6 +17,8 @@ import { deepCopy, defineReadOnly, shallowCopy } from './properties';
 
 import { Arrayish } from './bytes';
 import { BigNumberish } from './bignumber';
+import { Address } from '../address';
+import { isString } from 'util';
 
 ///////////////////////////////
 // Exported Types
@@ -618,12 +620,13 @@ class CoderAddress extends Coder {
   constructor(coerceFunc: CoerceFunc, localName: string) {
     super(coerceFunc, 'address', 'address', localName, false);
   }
-  encode(value: string): Uint8Array {
+  encode(value: Address | string): Uint8Array {
     let result = new Uint8Array(32);
+    value = isString(value) ? Address.fromString(value) : value;
     try {
-      result.set(arrayify(getAddress(value)), 12);
+      result.set(arrayify(value.toBuffer()), 12);
     } catch (error) {
-      errors.throwError('invalid address', errors.INVALID_ARGUMENT, {
+      errors.throwError(`invalid address (${error.message})`, errors.INVALID_ARGUMENT, {
         arg: this.localName,
         coderType: 'address',
         value: value,

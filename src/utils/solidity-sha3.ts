@@ -15,16 +15,16 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { isArray, isObject } from 'util';
 import BN from 'bn.js';
+import { isArray, isObject } from 'util';
+import { Address } from '../address';
+import { isBN } from './bn';
 import { isHexStrict, toHex } from './hex';
 import { utf8ToHex } from './hex-utf8';
-import { isAddress } from './address';
 import { leftPad, rightPad } from './padding';
 import { sha3 } from './sha3';
-import { isBN } from './bn';
 
-var _elementaryName = function(name) {
+const elementaryName = name => {
   /*jshint maxcomplexity:false */
 
   if (name.startsWith('int[')) {
@@ -48,19 +48,19 @@ var _elementaryName = function(name) {
 };
 
 // Parse N from type<N>
-var _parseTypeN = function(type) {
-  var typesize = /^\D+(\d+).*$/.exec(type);
+const parseTypeN = type => {
+  const typesize = /^\D+(\d+).*$/.exec(type);
   return typesize ? parseInt(typesize[1], 10) : null;
 };
 
 // Parse N from type[<N>]
-var _parseTypeNArray = function(type) {
-  var arraySize = /^\D+\d*\[(\d+)\]$/.exec(type);
+const parseTypeNArray = type => {
+  const arraySize = /^\D+\d*\[(\d+)\]$/.exec(type);
   return arraySize ? parseInt(arraySize[1], 10) : null;
 };
 
-var _parseNumber = function(arg) {
-  var type = typeof arg;
+const parseNumber = arg => {
+  const type = typeof arg;
   if (type === 'string') {
     if (isHexStrict(arg)) {
       return new BN(arg.replace(/0x/i, ''), 16);
@@ -76,11 +76,12 @@ var _parseNumber = function(arg) {
   }
 };
 
-var _solidityPack = function(type, value, arraySize) {
+const solidityPack = (type, value, arraySize) => {
   /*jshint maxcomplexity:false */
 
-  var size, num;
-  type = _elementaryName(type);
+  let size;
+  let num;
+  type = elementaryName(type);
 
   if (type === 'bytes') {
     if (value.replace(/^0x/i, '').length % 2 !== 0) {
@@ -99,14 +100,14 @@ var _solidityPack = function(type, value, arraySize) {
       size = 40;
     }
 
-    if (!isAddress(value)) {
+    if (!Address.isAddress(value)) {
       throw new Error(value + ' is not a valid address, or the checksum is invalid.');
     }
 
     return leftPad(value.toLowerCase(), size);
   }
 
-  size = _parseTypeN(type);
+  size = parseTypeN(type);
 
   if (type.startsWith('bytes')) {
     if (!size) {
@@ -128,7 +129,7 @@ var _solidityPack = function(type, value, arraySize) {
       throw new Error('Invalid uint' + size + ' size');
     }
 
-    num = _parseNumber(value);
+    num = parseNumber(value);
     if (num.bitLength() > size) {
       throw new Error('Supplied uint exceeds width: ' + size + ' vs ' + num.bitLength());
     }
@@ -143,7 +144,7 @@ var _solidityPack = function(type, value, arraySize) {
       throw new Error('Invalid int' + size + ' size');
     }
 
-    num = _parseNumber(value);
+    num = parseNumber(value);
     if (num.bitLength() > size) {
       throw new Error('Supplied int exceeds width: ' + size + ' vs ' + num.bitLength());
     }
@@ -159,16 +160,17 @@ var _solidityPack = function(type, value, arraySize) {
   }
 };
 
-var _processSoliditySha3Args = function(arg) {
+const processSoliditySha3Args = arg => {
   /*jshint maxcomplexity:false */
 
   if (isArray(arg)) {
     throw new Error('Autodetection of array types is not supported.');
   }
 
-  var type;
-  var value: any = '';
-  var hexArg, arraySize;
+  let type;
+  let value: any = '';
+  let hexArg;
+  let arraySize;
 
   // if type is given
   if (
@@ -194,7 +196,7 @@ var _processSoliditySha3Args = function(arg) {
 
   // get the array size
   if (isArray(value)) {
-    arraySize = _parseTypeNArray(type);
+    arraySize = parseTypeNArray(type);
     if (arraySize && value.length !== arraySize) {
       throw new Error(type + ' is not matching the given array ' + JSON.stringify(value));
     } else {
@@ -203,14 +205,14 @@ var _processSoliditySha3Args = function(arg) {
   }
 
   if (isArray(value)) {
-    hexArg = value.map(function(val) {
-      return _solidityPack(type, val, arraySize)
+    hexArg = value.map(val => {
+      return solidityPack(type, val, arraySize)
         .toString('hex')
         .replace('0x', '');
     });
     return hexArg.join('');
   } else {
-    hexArg = _solidityPack(type, value, arraySize);
+    hexArg = solidityPack(type, value, arraySize);
     return hexArg.toString('hex').replace('0x', '');
   }
 };
@@ -221,10 +223,10 @@ var _processSoliditySha3Args = function(arg) {
  * @method soliditySha3
  * @return {Object} the sha3
  */
-export var soliditySha3 = function(...args: any[]) {
+export let soliditySha3 = (...args: any[]) => {
   /*jshint maxcomplexity:false */
 
-  var hexArgs = args.map(_processSoliditySha3Args);
+  const hexArgs = args.map(processSoliditySha3Args);
 
   // console.log(args, hexArgs);
   // console.log('0x'+ hexArgs.join(''));

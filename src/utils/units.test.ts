@@ -17,9 +17,9 @@
 
 import { fromWei, toWei } from './units';
 
-describe('utils', function() {
-  describe('fromWei', function() {
-    it('should return the correct value', function() {
+describe('utils', () => {
+  describe('fromWei', () => {
+    it('should return the correct value', () => {
       expect(fromWei('1000000000000000000', 'wei')).toBe('1000000000000000000');
       expect(fromWei('1000000000000000000', 'kwei')).toBe('1000000000000000');
       expect(fromWei('1000000000000000000', 'mwei')).toBe('1000000000000');
@@ -35,8 +35,8 @@ describe('utils', function() {
     });
   });
 
-  describe('toWei', function() {
-    it('should return the correct value', function() {
+  describe('toWei', () => {
+    it('should return the correct value', () => {
       expect(toWei('1', 'wei')).toBe('1');
       expect(toWei('1', 'kwei')).toBe('1000');
       expect(toWei('1', 'Kwei')).toBe('1000');

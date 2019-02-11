@@ -17,74 +17,75 @@
 
 import bip39 from 'bip39';
 import hdkey from 'hdkey';
+import { Address } from '../address';
+import { Eth } from '../eth';
 import { create, fromPrivate } from '../eth-lib/account';
-import { randomHex, encrypt, KeyStore, decrypt, fireError } from '../utils';
+import { SendTx, SentTransaction } from '../eth/send-tx';
+import { TransactionHash } from '../types';
+import { decrypt, encrypt, KeyStore, randomBuffer } from '../utils';
 import { sign } from '../utils/sign';
-import { signTransaction } from './sign-transaction';
-import { Eth, SendTxPromiEvent } from '../eth';
-import { promiEvent } from '../promievent';
-import { TransactionReceipt } from '../formatters';
+import { signTransaction, SignTransactionRequest } from './sign-transaction';
 
 export interface AccountTx {
   nonce?: string | number;
   chainId?: string | number;
-  to?: string;
-  data?: string;
+  to?: Address;
+  data?: Buffer;
   value?: string | number;
-  gas: string | number;
+  gas?: string | number;
   gasPrice?: string | number;
 }
 
 export class Account {
-  constructor(public address: string, public privateKey: Buffer, public publicKey) {}
+  constructor(readonly address: Address, readonly privateKey: Buffer, readonly publicKey: Buffer) {}
 
-  static create(entropy: Buffer = randomHex(32)) {
+  public static create(entropy: Buffer = randomBuffer(32)) {
     const { privateKey, address, publicKey } = create(entropy);
-    return new Account(address, privateKey, publicKey);
+    return new Account(Address.fromString(address), privateKey, publicKey);
   }
 
-  static fromPrivate(privateKey: Buffer) {
+  public static fromPrivate(privateKey: Buffer) {
     const { address, publicKey } = fromPrivate(privateKey);
-    return new Account(address, privateKey, publicKey);
+    return new Account(Address.fromString(address), privateKey, publicKey);
   }
 
-  static createFromMnemonicAndPath(mnemonic: string, derivationPath: string) {
+  public static createFromMnemonicAndPath(mnemonic: string, derivationPath: string) {
     const seed = bip39.mnemonicToSeed(mnemonic);
     return Account.createFromSeedAndPath(seed, derivationPath);
   }
 
-  static createFromSeedAndPath(seed: Buffer, derivationPath: string) {
+  public static createFromSeedAndPath(seed: Buffer, derivationPath: string) {
     const root = hdkey.fromMasterSeed(seed);
     const addrNode = root.derive(derivationPath);
     const privateKey = addrNode.privateKey;
     return Account.fromPrivate(privateKey);
   }
 
-  static async fromKeystore(v3Keystore: KeyStore | string, password: string, nonStrict = false) {
+  public static async fromKeystore(v3Keystore: KeyStore | string, password: string, nonStrict = false) {
     return Account.fromPrivate(await decrypt(v3Keystore, password, nonStrict));
   }
 
-  sendTransaction(tx: AccountTx, eth: Eth, extraformatters?: any): SendTxPromiEvent {
-    const defer = promiEvent<TransactionReceipt>();
-    this.signTransaction(tx, eth)
-      .then(signedTx => {
-        eth.sendSignedTransaction(signedTx.rawTransaction, extraformatters, defer);
-      })
-      .catch(err => {
-        fireError(err, defer.eventEmitter, defer.reject);
-      });
-    return defer.eventEmitter;
+  public sendTransaction(tx: AccountTx, eth: Eth): SendTx {
+    const promise = new Promise<TransactionHash>(async (resolve, reject) => {
+      try {
+        const signedTx = await signTransaction(tx, this.privateKey, eth);
+        resolve(await eth.sendSignedTransaction(signedTx.rawTransaction).getTxHash());
+      } catch (err) {
+        reject(err);
+      }
+    });
+    return new SentTransaction(eth, promise);
   }
 
-  signTransaction(tx: AccountTx, eth: Eth) {
+  public signTransaction(tx: AccountTx, eth: Eth) {
     return signTransaction(tx, this.privateKey, eth);
   }
 
-  sign(data: string) {
+  public sign(data: string) {
     return sign(data, this.privateKey);
   }
 
-  encrypt(password: string, options?: any) {
+  public encrypt(password: string, options?: any) {
     return encrypt(this.privateKey, this.address, password, options);
   }
 }

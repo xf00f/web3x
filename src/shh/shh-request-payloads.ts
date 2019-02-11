@@ -40,21 +40,21 @@ interface Post {
 const identity = result => result;
 
 class ShhRequestPayloads {
-  getVersion() {
+  public getVersion() {
     return {
       method: 'shh_version',
       format: identity,
     };
   }
 
-  getInfo() {
+  public getInfo() {
     return {
       method: 'shh_info',
       format: identity,
     };
   }
 
-  setMaxMessageSize(size: number) {
+  public setMaxMessageSize(size: number) {
     return {
       method: 'shh_setMaxMessageSize',
       params: [size],
@@ -62,7 +62,7 @@ class ShhRequestPayloads {
     };
   }
 
-  setMinPoW(pow: number) {
+  public setMinPoW(pow: number) {
     return {
       method: 'shh_setMinPow',
       params: [pow],
@@ -70,7 +70,7 @@ class ShhRequestPayloads {
     };
   }
 
-  markTrustedPeer(enode: string) {
+  public markTrustedPeer(enode: string) {
     return {
       method: 'shh_markTrustedPeer',
       params: [enode],
@@ -78,14 +78,14 @@ class ShhRequestPayloads {
     };
   }
 
-  newKeyPair() {
+  public newKeyPair() {
     return {
       method: 'shh_newKeyPair',
       format: identity,
     };
   }
 
-  addPrivateKey(privateKey: string) {
+  public addPrivateKey(privateKey: string) {
     return {
       method: 'shh_addPrivateKey',
       params: [privateKey],
@@ -93,7 +93,7 @@ class ShhRequestPayloads {
     };
   }
 
-  deleteKeyPair(id: string) {
+  public deleteKeyPair(id: string) {
     return {
       method: 'shh_deleteKeyPair',
       params: [id],
@@ -101,7 +101,7 @@ class ShhRequestPayloads {
     };
   }
 
-  hasKeyPair(id: string) {
+  public hasKeyPair(id: string) {
     return {
       method: 'shh_hasKeyPair',
       params: [id],
@@ -109,7 +109,7 @@ class ShhRequestPayloads {
     };
   }
 
-  getPublicKey(id: string) {
+  public getPublicKey(id: string) {
     return {
       method: 'shh_getPublicKey',
       params: [id],
@@ -117,7 +117,7 @@ class ShhRequestPayloads {
     };
   }
 
-  getPrivateKey(id: string) {
+  public getPrivateKey(id: string) {
     return {
       method: 'shh_getPrivateKey',
       params: [id],
@@ -125,14 +125,14 @@ class ShhRequestPayloads {
     };
   }
 
-  newSymKey() {
+  public newSymKey() {
     return {
       method: 'shh_newSymKey',
       format: identity,
     };
   }
 
-  addSymKey(symKey: string) {
+  public addSymKey(symKey: string) {
     return {
       method: 'shh_addSymKey',
       params: [symKey],
@@ -140,7 +140,7 @@ class ShhRequestPayloads {
     };
   }
 
-  generateSymKeyFromPassword(password: string) {
+  public generateSymKeyFromPassword(password: string) {
     return {
       method: 'shh_generateSymKeyFromPassword',
       params: [password],
@@ -148,7 +148,7 @@ class ShhRequestPayloads {
     };
   }
 
-  hasSymKey(id: string) {
+  public hasSymKey(id: string) {
     return {
       method: 'shh_hasSymKey',
       params: [id],
@@ -156,7 +156,7 @@ class ShhRequestPayloads {
     };
   }
 
-  getSymKey(id: string) {
+  public getSymKey(id: string) {
     return {
       method: 'shh_getSymKey',
       params: [id],
@@ -164,7 +164,7 @@ class ShhRequestPayloads {
     };
   }
 
-  deleteSymKey(id: string) {
+  public deleteSymKey(id: string) {
     return {
       method: 'shh_deleteSymKey',
       params: [id],
@@ -172,7 +172,7 @@ class ShhRequestPayloads {
     };
   }
 
-  newMessageFilter(options: SubscriptionOptions) {
+  public newMessageFilter(options: SubscriptionOptions) {
     return {
       method: 'shh_newMessageFilter',
       params: [options],
@@ -180,7 +180,7 @@ class ShhRequestPayloads {
     };
   }
 
-  getFilterMessages(id: string) {
+  public getFilterMessages(id: string) {
     return {
       method: 'shh_getFilterMessages',
       params: [id],
@@ -188,7 +188,7 @@ class ShhRequestPayloads {
     };
   }
 
-  deleteMessageFilter(id: string) {
+  public deleteMessageFilter(id: string) {
     return {
       method: 'shh_deleteMessageFilter',
       params: [id],
@@ -196,7 +196,7 @@ class ShhRequestPayloads {
     };
   }
 
-  post(post: Post) {
+  public post(post: Post) {
     return {
       method: 'shh_post',
       params: [post],
@@ -204,7 +204,7 @@ class ShhRequestPayloads {
     };
   }
 
-  unsubscribe(id: string) {
+  public unsubscribe(id: string) {
     return {
       method: 'shh_unsubscribe',
       params: [id],

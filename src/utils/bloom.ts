@@ -15,9 +15,9 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { Address, isAddress } from './address';
-import { isTopic } from './topic';
+import { Address } from '../address';
 import { sha3 } from './sha3';
+import { isTopic } from './topic';
 
 /**
  * Ethereum bloom filter support.
@@ -44,19 +44,19 @@ function codePointToInt(codePoint) {
     return codePoint - 87;
   }
 
-  throw 'invalid bloom';
+  throw new Error('invalid bloom');
 }
 
 function testBytes(bloom, bytes: string) {
-  var hash = sha3(bytes).replace('0x', '');
+  const hash = sha3(bytes).replace('0x', '');
 
-  for (var i = 0; i < 12; i += 4) {
+  for (let i = 0; i < 12; i += 4) {
     // calculate bit position in bloom filter that must be active
-    var bitpos = ((parseInt(hash.substr(i, 2), 16) << 8) + parseInt(hash.substr(i + 2, 2), 16)) & 2047;
+    const bitpos = ((parseInt(hash.substr(i, 2), 16) << 8) + parseInt(hash.substr(i + 2, 2), 16)) & 2047;
 
     // test if bitpos in bloom is active
-    var code = codePointToInt(bloom.charCodeAt(bloom.length - 1 - Math.floor(bitpos / 4)));
-    var offset = 1 << bitpos % 4;
+    const code = codePointToInt(bloom.charCodeAt(bloom.length - 1 - Math.floor(bitpos / 4)));
+    const offset = 1 << bitpos % 4;
 
     if ((code & offset) !== offset) {
       return false;
@@ -75,12 +75,12 @@ function testBytes(bloom, bytes: string) {
  * @param {String} address in hex notation
  * @returns {Boolean} topic is (probably) part of the block
  */
-export var testAddress = function(bloom: string, address: Address) {
+export let testAddress = (bloom: string, address: string) => {
   if (!isBloom(bloom)) {
-    throw 'Invalid bloom given';
+    throw new Error('Invalid bloom given');
   }
-  if (!isAddress(address)) {
-    throw 'Invalid address given: "' + address + '"';
+  if (!Address.isAddress(address)) {
+    throw new Error('Invalid address given: "' + address + '"');
   }
 
   return testBytes(bloom, address);
@@ -95,9 +95,13 @@ export var testAddress = function(bloom: string, address: Address) {
  * @param {String} address in hex notation
  * @returns {Boolean} topic is (probably) part of the block
  */
-export var testTopic = function(bloom: string, topic: string) {
-  if (!isBloom(bloom)) throw 'invalid bloom';
-  if (!isTopic(topic)) throw 'invalid topic';
+export let testTopic = (bloom: string, topic: string) => {
+  if (!isBloom(bloom)) {
+    throw new Error('invalid bloom');
+  }
+  if (!isTopic(topic)) {
+    throw new Error('invalid topic');
+  }
 
   return testBytes(bloom, topic);
 };
@@ -111,7 +115,7 @@ export var testTopic = function(bloom: string, topic: string) {
  * @param {String} hex encoded bloom filter
  * @return {Boolean}
  */
-export var isBloom = function(bloom: string) {
+export let isBloom = (bloom: string) => {
   if (!/^(0x)?[0-9a-f]{512}$/i.test(bloom)) {
     return false;
   } else if (/^(0x)?[0-9a-f]{512}$/.test(bloom) || /^(0x)?[0-9A-F]{512}$/.test(bloom)) {

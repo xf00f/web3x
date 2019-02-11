@@ -1,17 +1,18 @@
 import BN from "bn.js";
+import { Address } from "../../address";
 import { EventLog, TransactionReceipt } from "../../formatters";
-import { Contract, ContractOptions, ContractAbi, TxCall, TxSend, EventSubscriptionFactory } from "../../contract";
+import { Contract, ContractOptions, TxCall, TxSend, TxDeploy, EventSubscriptionFactory } from "../../contract";
 import { Eth } from "../../eth";
 import abi from "./TestContractAbi";
 export type ChangedEvent = {
-    from: string;
+    from: Address;
     amount: string;
     t1: string;
     t2: string;
 };
 export type UnchangedEvent = {
     value: string;
-    addressFrom: string;
+    addressFrom: Address;
     t1: string;
 };
 export interface ChangedEventLog extends EventLog<ChangedEvent, "Changed"> {
@@ -36,15 +37,15 @@ interface TestContractMethods {
     addStruct(nestedStruct: {
         status: boolean;
     }): TxSend<TestContractTransactionReceipt>;
-    listOfNestedStructs(a0: string): TxCall<{
+    listOfNestedStructs(a0: Address): TxCall<{
         status: boolean;
     }>;
-    balance(who: string): TxCall<string>;
-    hasALotOfParams(_var1: string, _var2: string, _var3: string[]): TxCall<string>;
+    balance(who: Address): TxCall<string>;
+    hasALotOfParams(_var1: string, _var2: string, _var3: string[]): TxCall<Address>;
     getStr(): TxCall<string>;
-    owner(): TxCall<string>;
-    mySend(to: string, value: number | string | BN): TxSend<TestContractTransactionReceipt>;
-    myDisallowedSend(to: string, value: number | string | BN): TxSend<TestContractTransactionReceipt>;
+    owner(): TxCall<Address>;
+    mySend(to: Address, value: number | string | BN): TxSend<TestContractTransactionReceipt>;
+    myDisallowedSend(to: Address, value: number | string | BN): TxSend<TestContractTransactionReceipt>;
     testArr(value: (number | string | BN)[]): TxCall<string>;
     overloadedFunction(a: number | string | BN): TxCall<string>;
     overloadedFunction(): TxCall<string>;
@@ -55,8 +56,8 @@ export interface TestContractDefinition {
     eventLogs: TestContractEventLogs;
 }
 export class TestContract extends Contract<TestContractDefinition> {
-    constructor(eth: Eth, address?: string, options?: ContractOptions) {
-        super(eth, (abi as ContractAbi), address, options);
+    constructor(eth: Eth, address?: Address, options?: ContractOptions) {
+        super(eth, abi, address, options);
     }
 }
-export var TestContractAbi = (abi as ContractAbi);
+export var TestContractAbi = abi;

@@ -15,8 +15,8 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { isArray } from 'util';
 import { EventEmitter } from 'events';
+import { isArray } from 'util';
 import { EthereumProvider } from '../providers/ethereum-provider';
 
 interface SubscriptionParams {
@@ -24,7 +24,7 @@ interface SubscriptionParams {
   result: any;
 }
 
-export class Subscription<Result = any> extends EventEmitter {
+export class Subscription<Result = any, RawResult = Result> extends EventEmitter {
   private id?: string;
   private listener?: (result: any) => void;
 
@@ -33,19 +33,17 @@ export class Subscription<Result = any> extends EventEmitter {
     readonly subscription: string,
     readonly params: any[],
     private provider: EthereumProvider,
+    private callback: (result: RawResult, sub: Subscription<Result, RawResult>) => void,
+    subscribeImmediately: boolean = true,
   ) {
     super();
+
+    if (subscribeImmediately) {
+      this.subscribe();
+    }
   }
 
-  on(event: 'rawdata' | 'data' | 'changed' | 'error', listener: (result: Result) => void): this {
-    return super.on(event, listener);
-  }
-
-  once(event: 'rawdata' | 'data' | 'changed' | 'error', listener: (result: Result) => void): this {
-    return super.once(event, listener);
-  }
-
-  async subscribe() {
+  public async subscribe() {
     if (this.id) {
       this.unsubscribe();
     }
@@ -57,11 +55,10 @@ export class Subscription<Result = any> extends EventEmitter {
       this.id = await this.provider.send(`${this.type}_subscribe`, [this.subscription, ...this.params]);
 
       if (!this.id) {
-        throw new Error('No result');
+        throw new Error(`Failed to subscribe to ${this.subscription}.`);
       }
     } catch (err) {
-      this.unsubscribe();
-      this.emit('error', err);
+      this.emit('error', err, this);
     }
 
     return this;
@@ -75,22 +72,25 @@ export class Subscription<Result = any> extends EventEmitter {
     }
 
     if (result instanceof Error) {
-      this.emit('error', result);
+      this.unsubscribe();
+      this.emit('error', result, this);
       return;
     }
 
     const resultArr = isArray(result) ? result : [result];
 
     resultArr.forEach(resultItem => {
-      this.emit('rawdata', resultItem);
+      this.callback(resultItem, this);
     });
   }
 
-  unsubscribe() {
+  public unsubscribe() {
     if (this.listener) {
       this.provider.removeListener('notification', this.listener);
     }
-    this.removeAllListeners();
+    if (this.id) {
+      this.provider.send(`${this.type}_unsubscribe`, [this.id]);
+    }
     this.id = undefined;
     this.listener = undefined;
   }

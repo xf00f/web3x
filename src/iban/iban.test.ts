@@ -15,14 +15,15 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import { Address } from '../address';
 import { Iban } from './iban';
 
-describe('iban', function() {
-  describe('createIndirect', function() {
+describe('iban', () => {
+  describe('createIndirect', () => {
     const tests = [{ institution: 'XREG', identifier: 'GAVOFYORK', expected: 'XE81ETHXREGGAVOFYORK' }];
 
-    tests.forEach(function(test) {
-      it('shoud create indirect iban: ' + test.expected, function() {
+    tests.forEach(test => {
+      it('shoud create indirect iban: ' + test.expected, () => {
         expect(
           Iban.createIndirect({
             institution: test.institution,
@@ -33,7 +34,7 @@ describe('iban', function() {
     });
   });
 
-  describe('toAddress / instance address', function() {
+  describe('toAddress / instance address', () => {
     const tests = [
       { direct: 'XE7338O073KYGTWWZN0F2WZ0R8PX5ZPPZS', address: '0x00c5496aEe77C1bA1f0854206A26DdA82a81D6D8' },
       { direct: 'XE7338O073KYGTWWZN0F2WZ0R8PX5ZPPZS', address: '0x00c5496aEe77C1bA1f0854206A26DdA82a81D6D8' },
@@ -41,29 +42,29 @@ describe('iban', function() {
       { direct: 'XE75JRZCTTLBSYEQBGAS7GID8DKR7QY0QA3', address: '0xa94f5374Fce5edBC8E2a8697C15331677e6EbF0B' },
     ];
 
-    describe('toAddress', function() {
-      tests.forEach(function(test) {
-        it('should transform iban to address: ' + test.address, function() {
-          expect(Iban.toAddress(test.direct)).toBe(test.address);
+    describe('toAddress', () => {
+      tests.forEach(test => {
+        it('should transform iban to address: ' + test.address, () => {
+          expect(Iban.toAddress(test.direct).toString()).toBe(test.address);
         });
       });
 
-      it('should error', function() {
+      it('should error', () => {
         expect(() => Iban.toAddress('XE81ETHXREGGAVOFYORK')).toThrow();
       });
     });
 
-    describe('instance address', function() {
-      tests.forEach(function(test) {
-        it('shoud transform iban to address: ' + test.address, function() {
+    describe('instance address', () => {
+      tests.forEach(test => {
+        it('should transform iban to address: ' + test.address, () => {
           const iban = new Iban(test.direct);
-          expect(iban.toAddress()).toBe(test.address);
+          expect(iban.toAddress().toString()).toBe(test.address);
         });
       });
     });
   });
 
-  describe('fromAddress', function() {
+  describe('fromAddress', () => {
     const tests = [
       { address: '00c5496aee77c1ba1f0854206a26dda82a81d6d8', expected: 'XE7338O073KYGTWWZN0F2WZ0R8PX5ZPPZS' },
       { address: '0x00c5496aee77c1ba1f0854206a26dda82a81d6d8', expected: 'XE7338O073KYGTWWZN0F2WZ0R8PX5ZPPZS' },
@@ -72,14 +73,14 @@ describe('iban', function() {
       { address: '0x0000a5327eab78357cbf2ae8f3d49fd9d90c7d22', expected: 'XE0600DQK33XDTYUCRI0KYM5ELAKXDWWF6' },
     ];
 
-    tests.forEach(function(test) {
-      it('shoud create indirect iban: ' + test.expected, function() {
-        expect(Iban.fromAddress(test.address)).toEqual(new Iban(test.expected));
+    tests.forEach(test => {
+      it('shoud create indirect iban: ' + test.expected, () => {
+        expect(Iban.fromString(test.address)).toEqual(new Iban(test.expected));
       });
     });
   });
 
-  describe('toIban', function() {
+  describe('toIban', () => {
     const tests = [
       { address: '00c5496aee77c1ba1f0854206a26dda82a81d6d8', expected: 'XE7338O073KYGTWWZN0F2WZ0R8PX5ZPPZS' },
       { address: '0x00c5496aee77c1ba1f0854206a26dda82a81d6d8', expected: 'XE7338O073KYGTWWZN0F2WZ0R8PX5ZPPZS' },
@@ -88,16 +89,16 @@ describe('iban', function() {
       { address: '0x0000a5327eab78357cbf2ae8f3d49fd9d90c7d22', expected: 'XE0600DQK33XDTYUCRI0KYM5ELAKXDWWF6' },
     ];
 
-    tests.forEach(function(test) {
-      it('should create indirect iban: ' + test.expected, function() {
-        expect(Iban.toIban(test.address)).toBe(test.expected);
+    tests.forEach(test => {
+      it('should create indirect iban: ' + test.expected, () => {
+        expect(Iban.toIban(Address.fromString(test.address))).toBe(test.expected);
       });
     });
   });
 
-  describe('isValid', function() {
+  describe('isValid', () => {
     const tests = [
-      { obj: function() {}, is: false },
+      { obj: () => {}, is: false },
       { obj: new Function(), is: false },
       { obj: 'function', is: false },
       { obj: {}, is: false },
@@ -117,8 +118,8 @@ describe('iban', function() {
       { obj: 'XE1222Q908LN1QBBU6XUQSO1OHWJIOS46OO', is: true },
     ];
 
-    tests.forEach(function(test) {
-      it('shoud test if value ' + test.obj + ' is iban: ' + test.is, function() {
+    tests.forEach(test => {
+      it('shoud test if value ' + test.obj + ' is iban: ' + test.is, () => {
         expect(Iban.isValid(test.obj)).toBe(test.is);
       });
     });

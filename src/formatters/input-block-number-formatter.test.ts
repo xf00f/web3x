@@ -27,9 +27,9 @@ const tests = [
 ];
 
 describe('formatters', () => {
-  describe('inputBlockNumberFormatter', function() {
-    tests.forEach(function(test) {
-      it('should turn ' + test.value + ' to ' + test.expected, function() {
+  describe('inputBlockNumberFormatter', () => {
+    tests.forEach(test => {
+      it('should turn ' + test.value + ' to ' + test.expected, () => {
         expect(inputBlockNumberFormatter(test.value)).toBe(test.expected);
       });
     });

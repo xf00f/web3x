@@ -15,14 +15,25 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { numberToHex } from '../utils';
-import RLP from '../eth-lib/rlp';
-import Bytes from '../eth-lib/bytes';
-import Hash from '../eth-lib/hash';
-import Nat from '../eth-lib/nat';
+import { decode, encode } from 'rlp';
+import { Address } from '../address';
+import { Eth } from '../eth';
 import Account from '../eth-lib/account';
-import { Eth, Tx } from '../eth';
-import { inputCallFormatter } from '../formatters';
+import Bytes from '../eth-lib/bytes';
+import Nat from '../eth-lib/nat';
+import RLP from '../eth-lib/rlp';
+import { inputAddressFormatter } from '../formatters';
+import { bufferToHex, makeHexEven, numberToHex, sha3, trimHexLeadingZero } from '../utils';
+
+export interface SignTransactionRequest {
+  chainId?: number | string;
+  to?: Address;
+  gas?: string | number;
+  gasPrice?: string | number;
+  value?: string | number;
+  data?: Buffer;
+  nonce?: string | number;
+}
 
 export interface SignedTx {
   messageHash: string;
@@ -35,7 +46,7 @@ export interface SignedTx {
   nonce?: number;
 }
 
-export async function signTransaction(tx: Tx, privateKey: Buffer, eth: Eth): Promise<SignedTx> {
+export async function signTransaction(tx: SignTransactionRequest, privateKey: Buffer, eth: Eth): Promise<SignedTx> {
   if (!tx.gas) {
     throw new Error('gas is missing or 0');
   }
@@ -49,7 +60,9 @@ export async function signTransaction(tx: Tx, privateKey: Buffer, eth: Eth): Pro
   const promises = [
     isNot(tx.chainId) ? eth.getId() : Promise.resolve(tx.chainId),
     isNot(tx.gasPrice) ? eth.getGasPrice() : Promise.resolve(tx.gasPrice),
-    isNot(tx.nonce) ? eth.getTransactionCount(Account.fromPrivate(privateKey).address) : Promise.resolve(tx.nonce),
+    isNot(tx.nonce)
+      ? eth.getTransactionCount(Address.fromString(Account.fromPrivate(privateKey).address))
+      : Promise.resolve(tx.nonce),
   ];
 
   const [chainId, gasPrice, nonce] = await Promise.all(promises);
@@ -62,82 +75,59 @@ export async function signTransaction(tx: Tx, privateKey: Buffer, eth: Eth): Pro
 }
 
 export function recoverTransaction(rawTx: string): string {
-  var values = RLP.decode(rawTx);
-  var signature = Account.encodeSignature(values.slice(6, 9));
-  var recovery = Bytes.toNumber(values[6]);
-  var extraData = recovery < 35 ? [] : [Bytes.fromNumber((recovery - 35) >> 1), '0x', '0x'];
-  var signingData = values.slice(0, 6).concat(extraData);
-  var signingDataHex = RLP.encode(signingData);
-  return Account.recover(Hash.keccak256(signingDataHex), signature);
+  const values = RLP.decode(rawTx);
+  const signature = Account.encodeSignature(values.slice(6, 9));
+  const recovery = Bytes.toNumber(values[6]);
+  const extraData = recovery < 35 ? [] : [Bytes.fromNumber((recovery - 35) >> 1), '0x', '0x'];
+  const signingData = values.slice(0, 6).concat(extraData);
+  const signingDataHex = RLP.encode(signingData);
+  return Account.recover(sha3(signingDataHex), signature);
 }
 
-function sign(tx: Tx, privateKey: Buffer): SignedTx {
-  if (tx.nonce! < 0 || tx.gas < 0 || tx.gasPrice! < 0 || tx.chainId! < 0) {
+export function sign(tx: SignTransactionRequest, privateKey: Buffer): SignedTx {
+  if (tx.nonce! < 0 || tx.gas! < 0 || tx.gasPrice! < 0 || tx.chainId! < 0) {
     throw new Error('gas, gasPrice, nonce or chainId is lower than 0');
   }
 
-  tx = inputCallFormatter(tx);
+  const chainId = numberToHex(tx.chainId!);
 
-  const transaction = tx;
-  transaction.to = tx.to || '0x';
-  transaction.data = tx.data || '0x';
-  transaction.value = tx.value || '0x';
-  transaction.chainId = numberToHex(tx.chainId);
-
-  const rlpEncoded = RLP.encode([
-    Bytes.fromNat(transaction.nonce),
-    Bytes.fromNat(transaction.gasPrice),
-    Bytes.fromNat(transaction.gas),
-    transaction.to.toLowerCase(),
-    Bytes.fromNat(transaction.value),
-    transaction.data,
-    Bytes.fromNat(transaction.chainId || '0x1'),
+  const toEncode = [
+    Bytes.fromNat(numberToHex(tx.nonce!)),
+    Bytes.fromNat(numberToHex(tx.gasPrice!)),
+    Bytes.fromNat(numberToHex(tx.gas!)),
+    tx.to ? inputAddressFormatter(tx.to) : '0x',
+    Bytes.fromNat(tx.value ? numberToHex(tx.value) : '0x'),
+    tx.data ? bufferToHex(tx.data) : '0x',
+    Bytes.fromNat(chainId || '0x1'),
     '0x',
     '0x',
-  ]);
+  ];
 
-  const messageHash = Hash.keccak256(rlpEncoded);
+  const rlpEncoded = encode(toEncode);
 
-  const signature = Account.makeSigner(Nat.toNumber(transaction.chainId || '0x1') * 2 + 35)(
-    Hash.keccak256(rlpEncoded),
-    privateKey,
-  );
+  const messageHash = sha3(rlpEncoded);
 
-  const rawTx = RLP.decode(rlpEncoded)
-    .slice(0, 6)
-    .concat(Account.decodeSignature(signature));
+  const signature = Account.makeSigner(Nat.toNumber(chainId || '0x1') * 2 + 35)(messageHash, privateKey);
 
-  rawTx[6] = makeEven(trimLeadingZero(rawTx[6]));
-  rawTx[7] = makeEven(trimLeadingZero(rawTx[7]));
-  rawTx[8] = makeEven(trimLeadingZero(rawTx[8]));
+  const rawTx: any[] = [...decode(rlpEncoded).slice(0, 6), ...Account.decodeSignature(signature)];
 
-  const rawTransaction = RLP.encode(rawTx);
+  rawTx[6] = makeHexEven(trimHexLeadingZero(rawTx[6]));
+  rawTx[7] = makeHexEven(trimHexLeadingZero(rawTx[7]));
+  rawTx[8] = makeHexEven(trimHexLeadingZero(rawTx[8]));
 
-  const values = RLP.decode(rawTransaction);
+  const rawTransaction = encode(rawTx);
+
+  const values = decode(rawTransaction) as any;
 
   return {
     messageHash,
-    v: trimLeadingZero(values[6]),
-    r: trimLeadingZero(values[7]),
-    s: trimLeadingZero(values[8]),
-    rawTransaction,
+    v: trimHexLeadingZero(bufferToHex(values[6])),
+    r: trimHexLeadingZero(bufferToHex(values[7])),
+    s: trimHexLeadingZero(bufferToHex(values[8])),
+    rawTransaction: bufferToHex(rawTransaction),
   };
 }
 
 function isNot(value) {
   return value === undefined || value === null;
-}
-
-function trimLeadingZero(hex) {
-  while (hex && hex.startsWith('0x0')) {
-    hex = '0x' + hex.slice(3);
-  }
-  return hex;
-}
-
-function makeEven(hex) {
-  if (hex.length % 2 === 1) {
-    hex = hex.replace('0x', '0x0');
-  }
-  return hex;
 }

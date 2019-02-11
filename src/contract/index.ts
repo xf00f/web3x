@@ -15,6 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export * from './contract-abi';
 export * from './contract';
 export * from './tx';
+export * from './tx-deploy';
+export * from './abi';

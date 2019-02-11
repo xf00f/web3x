@@ -29,3 +29,7 @@ import Hash from '../eth-lib/hash';
 export function sha3(value: string | Buffer): string {
   return Hash.keccak256(value);
 }
+
+export function sha3Buffer(value: string | Buffer): Buffer {
+  return Buffer.from(Hash.keccak256(value).slice(2), 'hex');
+}

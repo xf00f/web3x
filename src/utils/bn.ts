@@ -33,14 +33,14 @@ export function isBN(object) {
  * Takes an input and transforms it into an BN
  *
  * @method toBN
- * @param {Number|String|BN} number, string, HEX string or BN
+ * @param {Number|String|BN} num, string, HEX string or BN
  * @return {BN} BN
  */
-export function toBN(number: number | string | BN) {
+export function toBN(num: number | string | BN) {
   try {
-    return numberToBN(number);
+    return numberToBN(num);
   } catch (e) {
-    throw new Error(e + ' Given value: "' + number + '"');
+    throw new Error(e + ' Given value: "' + num + '"');
   }
 }
 
@@ -48,13 +48,13 @@ export function toBN(number: number | string | BN) {
  * Takes and input transforms it into BN and if it is negative value, into two's complement
  *
  * @method toTwosComplement
- * @param {Number|String|BN} number
+ * @param {Number|String|BN} num
  * @return {String}
  */
-export function toTwosComplement(number: number | string | BN) {
+export function toTwosComplement(num: number | string | BN) {
   return (
     '0x' +
-    toBN(number)
+    toBN(num)
       .toTwos(256)
       .toString(16, 64)
   );

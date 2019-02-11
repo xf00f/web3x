@@ -15,122 +15,122 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { isString } from 'util';
+import { isNumber } from 'util';
 import { Account } from '../account';
-import { KeyStore, decrypt } from '../utils/encryption';
+import { Address } from '../address';
+import { decrypt, KeyStore } from '../utils/encryption';
+
+const DEFAULT_KEY_NAME = 'web3js_wallet';
 
 export class Wallet {
-  public static defaultKeyName = 'web3js_wallet';
   public length: number = 0;
   public accounts: Account[] = [];
 
-  constructor() {}
+  constructor(numberOfAccounts: number = 0) {
+    this.create(numberOfAccounts);
+  }
 
-  static async fromKeystores(encryptedWallet: KeyStore[], password: string) {
+  public static fromMnemonic(mnemonic: string, numberOfAccounts: number) {
+    const wallet = new Wallet();
+    for (let i = 0; i < numberOfAccounts; ++i) {
+      const path = `m/44'/60'/0'/0/${i}`;
+      wallet.add(Account.createFromMnemonicAndPath(mnemonic, path));
+    }
+    return wallet;
+  }
+
+  public static fromSeed(seed: Buffer, numberOfAccounts: number) {
+    const wallet = new Wallet();
+    for (let i = 0; i < numberOfAccounts; ++i) {
+      const path = `m/44'/60'/0'/0/${i}`;
+      wallet.add(Account.createFromSeedAndPath(seed, path));
+    }
+    return wallet;
+  }
+
+  public static async fromKeystores(encryptedWallet: KeyStore[], password: string) {
     const wallet = new Wallet();
     await wallet.decrypt(encryptedWallet, password);
     return wallet;
   }
 
-  static async fromLocalStorage(password: string, keyName: string = this.defaultKeyName) {
+  public static async fromLocalStorage(password: string, keyName: string = DEFAULT_KEY_NAME) {
     if (!localStorage) {
-      return new Wallet();
+      return;
     }
 
     const keystoreStr = localStorage.getItem(keyName);
 
     if (!keystoreStr) {
-      return new Wallet();
+      return;
     }
 
     try {
       return Wallet.fromKeystores(JSON.parse(keystoreStr), password);
     } catch (e) {
-      return new Wallet();
+      return;
     }
   }
 
-  private findSafeIndex(pointer: number = 0) {
-    while (this.accounts[pointer]) {
-      ++pointer;
-    }
-    return pointer;
-  }
-
-  private currentIndexes() {
-    const keys = Object.keys(this.accounts);
-    return keys.map(key => +key);
-  }
-
-  create(numberOfAccounts: number, entropy?: Buffer): Account[] {
-    for (var i = 0; i < numberOfAccounts; ++i) {
+  public create(numberOfAccounts: number, entropy?: Buffer): Account[] {
+    for (let i = 0; i < numberOfAccounts; ++i) {
       this.add(Account.create(entropy).privateKey);
     }
     return this.accounts;
   }
 
-  get(addressOrIndex: string | number) {
-    if (isString(addressOrIndex)) {
-      return this.accounts.find(a => a && a.address.toLowerCase() === addressOrIndex.toLowerCase());
+  public get(addressOrIndex: string | number | Address) {
+    if (isNumber(addressOrIndex)) {
+      return this.accounts[addressOrIndex];
     }
-    return this.accounts[addressOrIndex];
+    return this.accounts.find(a => a && a.address.toString().toLowerCase() === addressOrIndex.toString().toLowerCase());
   }
 
-  indexOf(addressOrIndex: string | number) {
-    if (isString(addressOrIndex)) {
-      return this.accounts.findIndex(a => a.address.toLowerCase() === addressOrIndex.toLowerCase());
+  public indexOf(addressOrIndex: string | number | Address) {
+    if (isNumber(addressOrIndex)) {
+      return addressOrIndex;
     }
-    return addressOrIndex;
+    return this.accounts.findIndex(a => a.address.toString().toLowerCase() === addressOrIndex.toString().toLowerCase());
   }
 
-  add(privateKey: Buffer): Account;
-  add(account: Account): Account;
-  add(accountOrKey: Buffer | Account): Account {
-    if (Buffer.isBuffer(accountOrKey)) {
-      accountOrKey = Account.fromPrivate(accountOrKey);
-    } else {
-      accountOrKey = Account.fromPrivate(accountOrKey.privateKey);
-    }
+  public add(accountOrKey: Buffer | Account): Account {
+    const account = Buffer.isBuffer(accountOrKey) ? Account.fromPrivate(accountOrKey) : accountOrKey;
 
-    const existing = this.get(accountOrKey.address);
+    const existing = this.get(account.address);
     if (existing) {
       return existing;
     }
 
     const index = this.findSafeIndex();
-    this.accounts[index] = accountOrKey;
+    this.accounts[index] = account;
     this.length++;
 
-    return accountOrKey;
+    return account;
   }
 
-  remove(addressOrIndex: string | number) {
+  public remove(addressOrIndex: string | number | Address) {
     const index = this.indexOf(addressOrIndex);
 
-    if (index == -1) {
+    if (index === -1) {
       return false;
     }
 
-    this.accounts[index].privateKey = Buffer.of();
     delete this.accounts[index];
     this.length--;
 
     return true;
   }
 
-  clear() {
-    var indexes = this.currentIndexes();
-
-    indexes.forEach(index => {
-      this.remove(index);
-    });
+  public clear() {
+    this.accounts = [];
+    this.length = 0;
   }
 
-  encrypt(password: string, options?) {
+  public encrypt(password: string, options?) {
     return Promise.all(this.currentIndexes().map(index => this.accounts[index].encrypt(password, options)));
   }
 
-  async decrypt(encryptedWallet: KeyStore[], password: string) {
+  public async decrypt(encryptedWallet: KeyStore[], password: string) {
     const decrypted = await Promise.all(encryptedWallet.map(keystore => decrypt(keystore, password)));
     decrypted.forEach(account => {
       if (!account) {
@@ -143,7 +143,7 @@ export class Wallet {
     return this.accounts;
   }
 
-  async save(password: string, keyName: string = Wallet.defaultKeyName) {
+  public async saveToLocalStorage(password: string, keyName: string = DEFAULT_KEY_NAME) {
     if (!localStorage) {
       return false;
     }
@@ -151,5 +151,20 @@ export class Wallet {
     localStorage.setItem(keyName, JSON.stringify(await this.encrypt(password)));
 
     return true;
+  }
+
+  private findSafeIndex(pointer: number = 0) {
+    while (this.accounts[pointer]) {
+      ++pointer;
+    }
+    return pointer;
+  }
+
+  public currentIndexes() {
+    return Object.keys(this.accounts).map(key => +key);
+  }
+
+  public currentAddresses() {
+    return Object.entries(this.accounts).map(([, account]) => account.address);
   }
 }

@@ -1,13 +1,13 @@
-import { sign, recover, fromWei } from 'web3x/utils';
 import { Account } from 'web3x/account';
-import { Wallet } from 'web3x/wallet';
-import { WebsocketProvider } from 'web3x/providers';
-import { Net } from 'web3x/net';
+import { Address } from 'web3x/address';
 import { Eth } from 'web3x/eth';
+import { Net } from 'web3x/net';
+import { WebsocketProvider } from 'web3x/providers';
+import { fromWei, recover, sign } from 'web3x/utils';
+import { Wallet } from 'web3x/wallet';
 import { DaiContract } from './contracts/DaiContract';
 
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-const DAI_CONTRACT_ADDRESS = '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359';
+const DAI_CONTRACT_ADDRESS = Address.fromString('0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359');
 
 async function main() {
   // Construct necessary components.
@@ -21,12 +21,12 @@ async function main() {
     console.log(`Node info: ${await eth.getNodeInfo()}`);
 
     // Simple balance query.
-    const balance = await eth.getBalance(ZERO_ADDRESS);
+    const balance = await eth.getBalance(Address.ZERO);
     console.log(`Balance of 0 address ETH: ${fromWei(balance, 'ether')}`);
 
     // Use our type safe auto generated dai contract.
     const contract = new DaiContract(eth, DAI_CONTRACT_ADDRESS);
-    const daiBalance = await contract.methods.balanceOf(ZERO_ADDRESS).call();
+    const daiBalance = await contract.methods.balanceOf(Address.ZERO).call();
     console.log(`Balance of 0 address DAI: ${fromWei(daiBalance, 'ether')}`);
 
     // Create an account, encrypt and decrypt.
@@ -41,10 +41,10 @@ async function main() {
     wallet.create(2);
 
     // If you want eth to use your accounts for signing transaction, set the wallet.
-    eth.setWallet(wallet);
+    eth.wallet = wallet;
 
     // Optionally you can specify a default 'from' address.
-    eth.setDefaultFromAddress(account.address);
+    eth.defaultFromAddress = account.address;
 
     const encryptedWallet = await wallet.encrypt(password);
     const decryptedWallet = await Wallet.fromKeystores(encryptedWallet, password);
@@ -59,10 +59,10 @@ async function main() {
 
     // Verify message was signed by account.
     const address = recover(msg, sig.signature);
-    if (address === signingAccount.address) {
+    if (address.equals(signingAccount.address)) {
       console.log(`Message was signed by: ${address}`);
     } else {
-      console.error('Incorrect signature for message.');
+      console.error(`Incorrect signature for message ${address}.`);
     }
   } finally {
     provider.disconnect();

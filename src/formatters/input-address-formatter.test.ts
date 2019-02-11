@@ -30,30 +30,28 @@ const tests = [
   { input: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe', result: '0x11f4d0a3c12e86b4b5f39b213f7e19d048276dae' },
 ];
 
-var errorTests = [
+const errorTests = [
   '0x0c5496aee77c1ba1f0854206a26dda82a81d6d8',
   '0x0c5496aee77c1ba1f0854206a26dda82a81d6d8',
   '00c5496aee77c1ba1f0854206a26dda82a81d6d',
   'XE7338O073KYGTWWZN0F2WZ0R8PX5ZPPZE',
   '0x',
   '0x11f4d0a3c12e86B4b5F39b213f7E19D048276DAe',
-  {},
-  [],
   '',
 ];
 
-describe('formatters', function() {
-  describe('inputAddressFormatter correct addresses', function() {
-    tests.forEach(function(test) {
-      it('should return the correct value', function() {
+describe('formatters', () => {
+  describe('inputAddressFormatter correct addresses', () => {
+    tests.forEach(test => {
+      it('should return the correct value', () => {
         expect(inputAddressFormatter(test.input)).toBe(test.result);
       });
     });
   });
 
-  describe('inputAddressFormatter wrong addresses', function() {
-    errorTests.forEach(function(test) {
-      it('should throw an exception', function() {
+  describe('inputAddressFormatter wrong addresses', () => {
+    errorTests.forEach(test => {
+      it('should throw an exception', () => {
         expect(() => inputAddressFormatter(test)).toThrow();
       });
     });
