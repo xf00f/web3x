@@ -366,6 +366,7 @@ function makeContract(name: string, initData: string | undefined, abi: ContractA
 
   if (initData) {
     const ctorDef = abi.find(def => def.type === 'constructor')!;
+    const inputs = ctorDef && ctorDef.inputs ? ctorDef.inputs : [];
     const deployMethod = ts.createMethod(
       undefined,
       undefined,
@@ -373,7 +374,7 @@ function makeContract(name: string, initData: string | undefined, abi: ContractA
       'deploy',
       undefined,
       undefined,
-      ctorDef.inputs!.map(makeParameter),
+      inputs.map(makeParameter),
       undefined,
       ts.createBlock(
         [
@@ -381,7 +382,7 @@ function makeContract(name: string, initData: string | undefined, abi: ContractA
             ts.createAsExpression(
               ts.createCall(ts.createPropertyAccess(ts.createSuper(), 'deployBytecode'), undefined, [
                 ts.createStringLiteral(initData),
-                ...ctorDef.inputs!.map(input => ts.createIdentifier(input.name)),
+                ...inputs.map(input => ts.createIdentifier(input.name)),
               ]),
               ts.createTypeReferenceNode('TxSend', [
                 ts.createTypeReferenceNode(`${name}TransactionReceipt`, undefined),
