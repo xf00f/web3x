@@ -20,6 +20,7 @@ import { Eth } from '../eth';
 import { TransactionReceipt } from '../formatters';
 import { TransactionHash } from '../types';
 import { ContractAbi } from './abi';
+import { Contract } from './contract';
 import { SentContractTx } from './sent-contract-tx';
 
 export class SentDeployContractTx extends SentContractTx {
@@ -47,5 +48,10 @@ export class SentDeployContractTx extends SentContractTx {
     this.onDeployed(receipt.contractAddress);
 
     return receipt;
+  }
+
+  public async getContract() {
+    const receipt = await this.getReceipt();
+    return new Contract(this.eth, this.contractAbi, receipt.contractAddress);
   }
 }

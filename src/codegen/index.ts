@@ -375,7 +375,7 @@ function makeContract(name: string, initData: string | undefined, abi: ContractA
       undefined,
       undefined,
       inputs.map(makeParameter),
-      undefined,
+      ts.createTypeReferenceNode('TxSend', [ts.createTypeReferenceNode(`${name}TransactionReceipt`, undefined)]),
       ts.createBlock(
         [
           ts.createReturn(
@@ -384,9 +384,7 @@ function makeContract(name: string, initData: string | undefined, abi: ContractA
                 ts.createStringLiteral(initData),
                 ...inputs.map(input => ts.createIdentifier(input.name)),
               ]),
-              ts.createTypeReferenceNode('TxSend', [
-                ts.createTypeReferenceNode(`${name}TransactionReceipt`, undefined),
-              ]),
+              ts.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword),
             ),
           ),
         ],

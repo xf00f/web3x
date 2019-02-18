@@ -59,5 +59,8 @@ export class TestContract extends Contract<TestContractDefinition> {
     constructor(eth: Eth, address?: Address, options?: ContractOptions) {
         super(eth, abi, address, options);
     }
+    deploy(who: Address, myValue: number | string | BN): TxSend<TestContractTransactionReceipt> {
+        return super.deployBytecode("0x608060__LinkMe_______________________63b54040", who, myValue) as any;
+    }
 }
 export var TestContractAbi = abi;

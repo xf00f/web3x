@@ -4,7 +4,8 @@
   "contracts": {
     "TestContract": {
       "source": "files",
-      "abiFile": "./abi.json"
+      "abiFile": "./abi.json",
+      "initDataFile": "./bytecode"
     }
   }
 }

@@ -22,7 +22,7 @@ import { TransactionHash } from '../types';
 import { ContractAbi } from './abi';
 
 export class SentContractTx extends SentTransaction {
-  constructor(eth: Eth, private contractAbi: ContractAbi, promise: Promise<TransactionHash>) {
+  constructor(eth: Eth, protected contractAbi: ContractAbi, promise: Promise<TransactionHash>) {
     super(eth, promise);
   }
 

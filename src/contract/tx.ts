@@ -37,14 +37,14 @@ export interface SendOptions {
   value?: number | string;
 }
 
-interface EstimateOptions {
+export interface EstimateOptions {
   from?: Address;
   gas?: string | number;
   gasPrice?: string | number;
   value?: number | string;
 }
 
-type DefaultOptions = {
+export type DefaultOptions = {
   from?: Address;
   gasPrice?: string | number;
   gas?: number;
@@ -66,12 +66,12 @@ export interface TxSend<TxReceipt = TransactionReceipt> {
 
 export class Tx implements TxCall, TxSend {
   constructor(
-    private eth: Eth,
-    private contractEntry: ContractFunctionEntry,
-    private contractAbi: ContractAbi,
-    private contractAddress: Address,
-    private args: any[] = [],
-    private defaultOptions: DefaultOptions = {},
+    protected eth: Eth,
+    protected contractEntry: ContractFunctionEntry,
+    protected contractAbi: ContractAbi,
+    protected contractAddress?: Address,
+    protected args: any[] = [],
+    protected defaultOptions: DefaultOptions = {},
   ) {}
 
   public async estimateGas(options: EstimateOptions = {}) {
