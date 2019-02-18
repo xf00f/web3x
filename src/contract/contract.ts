@@ -67,23 +67,15 @@ type GetContractEvents<T> = T extends ContractDefinition
 export class Contract<T extends ContractDefinition | void = void> {
   public readonly methods: GetContractMethods<T>;
   public readonly events: GetContractEvents<T>;
-  private options: ContractOptions;
 
   constructor(
     private eth: Eth,
     private contractAbi: ContractAbi,
     public address?: Address,
-    defaultOptions: ContractOptions = {},
+    private defaultOptions: ContractOptions = {},
   ) {
     this.methods = this.buildMethods();
     this.events = this.buildEvents();
-
-    const { gasPrice, from, gas } = defaultOptions;
-    this.options = {
-      gas,
-      gasPrice,
-      from,
-    };
   }
 
   public deployBytecode(data: Data, ...args: any[]) {
@@ -93,7 +85,7 @@ export class Contract<T extends ContractDefinition | void = void> {
       this.contractAbi,
       data,
       args,
-      this.options,
+      this.defaultOptions,
       addr => (this.address = addr),
     );
   }
@@ -183,7 +175,7 @@ export class Contract<T extends ContractDefinition | void = void> {
         throw new Error(`No matching method with ${args.length} arguments for ${functions[0].name}.`);
       }
 
-      return new Tx(this.eth, firstMatchingOverload, this.contractAbi, this.address, args, this.options);
+      return new Tx(this.eth, firstMatchingOverload, this.contractAbi, this.address, args, this.defaultOptions);
     };
   }
 

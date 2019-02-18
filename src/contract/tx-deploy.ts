@@ -20,66 +20,24 @@ import { Eth, SendTx } from '../eth';
 import { hexToBuffer } from '../utils';
 import { ContractAbi, ContractFunctionEntry } from './abi';
 import { SentDeployContractTx } from './sent-deploy-contract-tx';
-import { TxSend } from './tx';
+import { DefaultOptions, SendOptions, Tx } from './tx';
 
-interface SendOptions {
-  from?: Address;
-  gasPrice?: string | number;
-  gas?: number;
-  value?: number | string;
-}
-
-interface EstimateOptions {
-  from?: Address;
-  gasPrice?: string;
-  value?: number | string;
-}
-
-type DefaultOptions = {
-  from?: Address;
-  gasPrice?: string;
-  gas?: number;
-};
-
-export class TxDeploy implements TxSend {
+export class TxDeploy extends Tx {
   constructor(
-    private eth: Eth,
-    private contractEntry: ContractFunctionEntry,
-    private contractAbi: ContractAbi,
+    eth: Eth,
+    contractEntry: ContractFunctionEntry,
+    contractAbi: ContractAbi,
     private deployData: string,
-    private args: any[] = [],
-    private defaultOptions: DefaultOptions = {},
-    private onDeployed: (address: Address) => void,
-  ) {}
-
-  public async estimateGas(options: EstimateOptions = {}) {
-    return await this.eth.estimateGas(this.getTx(options));
+    args: any[] = [],
+    defaultOptions: DefaultOptions = {},
+    private onDeployed: (address: Address) => void = x => x,
+  ) {
+    super(eth, contractEntry, contractAbi, undefined, args, defaultOptions);
   }
 
   public send(options: SendOptions): SendTx {
-    const tx = this.getTx(options);
-
-    if (!this.contractEntry.payable && tx.value > 0) {
-      throw new Error('Can not send value to non-payable constructor.');
-    }
-
-    const promise = this.eth.sendTransaction(tx).getTxHash();
-
-    return new SentDeployContractTx(this.eth, this.contractAbi, promise, this.onDeployed);
-  }
-
-  public getSendRequestPayload(options: SendOptions) {
-    return this.eth.request.sendTransaction(this.getTx(options));
-  }
-
-  private getTx(options) {
-    return {
-      from: options.from || this.defaultOptions.from,
-      gasPrice: options.gasPrice || this.defaultOptions.gasPrice,
-      gas: options.gas || this.defaultOptions.gas,
-      value: options.value,
-      data: this.encodeABI(),
-    };
+    const sentTx = super.send(options);
+    return new SentDeployContractTx(this.eth, this.contractAbi, sentTx.getTxHash(), this.onDeployed);
   }
 
   public encodeABI() {
