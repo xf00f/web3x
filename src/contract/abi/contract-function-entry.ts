@@ -24,8 +24,12 @@ export class ContractFunctionEntry extends ContractEntry {
   public readonly signature: string;
 
   constructor(entry: ContractEntryDefinition) {
+    entry.inputs = entry.inputs || [];
     super(entry);
-    this.signature = abiCoder.encodeFunctionSignature(abiCoder.abiMethodToString(entry));
+    this.signature =
+      entry.type === 'constructor'
+        ? 'constructor'
+        : abiCoder.encodeFunctionSignature(abiCoder.abiMethodToString(entry));
   }
 
   public get constant() {
@@ -60,6 +64,6 @@ export class ContractFunctionEntry extends ContractEntry {
   }
 
   public encodeParameters(args: any[]) {
-    return abiCoder.encodeParameters(this.entry.inputs || [], args);
+    return abiCoder.encodeParameters(this.entry.inputs, args);
   }
 }

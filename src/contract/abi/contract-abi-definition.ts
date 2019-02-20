@@ -28,6 +28,7 @@ export interface ContractEntryDefinition {
   outputs?: AbiOutput[];
   type: 'function' | 'constructor' | 'event' | 'fallback';
   stateMutability?: 'pure' | 'view' | 'payable' | 'nonpayable';
+  signature?: string;
 }
 
 export type ContractAbiDefinition = ContractEntryDefinition[];

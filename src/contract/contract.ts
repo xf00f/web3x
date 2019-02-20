@@ -81,7 +81,7 @@ export class Contract<T extends ContractDefinition | void = void> {
   public deployBytecode(data: Data, ...args: any[]) {
     return new TxDeploy(
       this.eth,
-      this.contractAbi.ctor!,
+      this.contractAbi.ctor,
       this.contractAbi,
       data,
       args,

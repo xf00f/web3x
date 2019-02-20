@@ -175,32 +175,33 @@ export class Eth {
   }
 
   public sendSignedTransaction(data: Data): SendTx {
-    const promise = new Promise<TransactionHash>(async resolve => {
-      const { method, params, format } = this.request.sendSignedTransaction(data);
-      const txHash = format(await this.provider.send(method, params));
-      resolve(txHash);
-    });
-    return new SentTransaction(this, promise);
+    const { method, params } = this.request.sendSignedTransaction(data);
+    const txHashPromise = this.provider.send(method, params);
+    return new SentTransaction(this, txHashPromise);
   }
 
   public sendTransaction(tx: PartialTransactionRequest): SendTx {
-    const promise = new Promise<TransactionHash>(async resolve => {
-      if (!tx.gasPrice) {
-        tx.gasPrice = await this.getGasPrice();
-      }
+    const promise = new Promise<TransactionHash>(async (resolve, reject) => {
+      try {
+        if (!tx.gasPrice) {
+          tx.gasPrice = await this.getGasPrice();
+        }
 
-      const account = this.getAccount(tx.from);
+        const account = this.getAccount(tx.from);
 
-      if (!account) {
-        const { method, params, format } = this.request.sendTransaction(tx);
-        const txHash = format(await this.provider.send(method, params));
-        resolve(txHash);
-      } else {
-        const { from, ...fromlessTx } = tx;
-        const signedTx = await account.signTransaction(fromlessTx, this);
-        const { method, params, format } = this.request.sendSignedTransaction(signedTx.rawTransaction);
-        const txHash = format(await this.provider.send(method, params));
-        resolve(txHash);
+        if (!account) {
+          const { method, params, format } = this.request.sendTransaction(tx);
+          const txHash = format(await this.provider.send(method, params));
+          resolve(txHash);
+        } else {
+          const { from, ...fromlessTx } = tx;
+          const signedTx = await account.signTransaction(fromlessTx, this);
+          const { method, params, format } = this.request.sendSignedTransaction(signedTx.rawTransaction);
+          const txHash = format(await this.provider.send(method, params));
+          resolve(txHash);
+        }
+      } catch (err) {
+        reject(err);
       }
     });
 

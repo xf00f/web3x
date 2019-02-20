@@ -21,7 +21,7 @@ import { LogResponse } from '../../formatters';
 export class ContractAbi {
   public functions: ContractFunctionEntry[];
   public events: ContractEventEntry[];
-  public ctor?: ContractFunctionEntry;
+  public ctor: ContractFunctionEntry;
   public fallback?: ContractFunctionEntry;
 
   private static anonymousEvent = new ContractEventEntry({
@@ -34,9 +34,7 @@ export class ContractAbi {
     this.functions = definintion.filter(e => e.type === 'function').map(entry => new ContractFunctionEntry(entry));
     this.events = definintion.filter(e => e.type === 'event').map(entry => new ContractEventEntry(entry));
     const ctor = definintion.find(e => e.type === 'constructor');
-    if (ctor) {
-      this.ctor = new ContractFunctionEntry(ctor);
-    }
+    this.ctor = new ContractFunctionEntry(ctor || { type: 'constructor' });
     const fallback = definintion.find(e => e.type === 'fallback');
     if (fallback) {
       this.fallback = new ContractFunctionEntry(fallback);
