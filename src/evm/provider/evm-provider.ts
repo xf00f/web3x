@@ -63,11 +63,22 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
     });
   }
 
+  public async loadWallet(wallet: Wallet, amount: bigint = BigInt(10) * BigInt(10) ** BigInt(18)) {
+    this.worldState.checkpoint();
+    for (const address of wallet.currentAddresses()) {
+      await this.worldState.createAccount(address, amount);
+    }
+    await this.worldState.commit();
+    this.wallet = wallet;
+  }
+
   public async send(method: string, params?: any[] | undefined): Promise<any> {
     // console.log(method);
     // console.log(params);
 
     switch (method) {
+      case 'eth_accounts':
+        return this.wallet ? this.wallet.currentAddresses() : [];
       case 'eth_gasPrice':
         return numberToHex(50000);
     }

@@ -85,6 +85,33 @@ const tests = [
     ],
     result: '0xa7a0d537',
   },
+  {
+    params: [
+      {
+        name: 'create',
+        type: 'function',
+        inputs: [
+          {
+            name: 'tokenId',
+            type: 'uint256',
+          },
+          {
+            name: 'itemOwner',
+            type: 'address',
+          },
+          {
+            name: 'keys',
+            type: 'bytes32[]',
+          },
+          {
+            name: 'values',
+            type: 'bytes32[]',
+          },
+        ],
+      },
+    ],
+    result: '0x04d36f08',
+  },
 ];
 
 describe('encodeFunctionSignature', () => {

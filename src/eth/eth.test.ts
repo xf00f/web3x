@@ -26,7 +26,7 @@ describe('eth', () => {
   const basicTx = {
     from,
     to: Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe'),
-    data: hexToBuffer('0xa123456'),
+    data: hexToBuffer('0x0a123456'),
     gasPrice: 100,
     gas: 100,
   };
@@ -102,7 +102,7 @@ describe('eth', () => {
         {
           from: '0x11f4d0a3c12e86b4b5f39b213f7e19d048276dae',
           to: '0x11f4d0a3c12e86b4b5f39b213f7e19d048276dae',
-          data: '0xa123456',
+          data: '0x0a123456',
           gas: '0x64',
           gasPrice: '0xffffdddd',
         },

@@ -21,6 +21,7 @@ import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
 import { bufferToHex, sha3 } from '../utils';
 import { Contract } from './contract';
 import { TestContract, TestContractAbi } from './fixtures/TestContract';
+import { TestNoCtorContract } from './fixtures/TestNoCtorContract';
 
 describe('contract', () => {
   const address = Address.fromString('0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe');
@@ -58,7 +59,12 @@ describe('contract', () => {
   });
 
   describe('instantiation', () => {
-    it('should transform address from checksum addressess', () => {
+    it('should construct without address', () => {
+      const contract = new TestContract(eth);
+      expect(contract.address).toBeUndefined();
+    });
+
+    it('should transform address from checksum addresses', () => {
       const contract = new TestContract(eth, address);
       expect(contract.address).toBe(address);
     });
@@ -1559,7 +1565,7 @@ describe('contract', () => {
         expect(params).toEqual([
           {
             data:
-              '0x1234567000000000000000000000000' +
+              '0x01234567000000000000000000000000' +
               addressUnprefixedLowercase +
               '00000000000000000000000000000000000000000000000000000000000000c8',
             from: addressLowercase,
@@ -1614,7 +1620,7 @@ describe('contract', () => {
 
       const contract = new TestContract(eth);
 
-      const sendTx = contract.deployBytecode('0x1234567', address, 200).send({
+      const sendTx = contract.deployBytecode('0x01234567', address, 200).send({
         from: address,
         gas: 50000,
         gasPrice: 3000,
@@ -1648,7 +1654,7 @@ describe('contract', () => {
 
       const contract = new TestContract(eth);
 
-      const sendTx = contract.deployBytecode('0x1234567', address, 200).send({
+      const sendTx = contract.deployBytecode('0x01234567', address, 200).send({
         from: address,
         gas: 50000,
         gasPrice: 3000,
@@ -1674,13 +1680,58 @@ describe('contract', () => {
 
       const contract = new TestContract(eth);
 
-      const sendTx = contract.deployBytecode('0x1234567', address, 200).send({
+      const sendTx = contract.deployBytecode('0x01234567', address, 200).send({
         from: address,
         gas: 50000,
         gasPrice: 3000,
       });
 
       await expect(sendTx.getReceipt()).rejects.toThrowError('contract address');
+    });
+
+    it('should deploy a contract with no ctor', async () => {
+      mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
+        expect(method).toBe('eth_sendTransaction');
+        expect(params).toEqual([
+          {
+            data: '0x01234567',
+            from: addressLowercase,
+            gas: '0xc350',
+            gasPrice: '0xbb8',
+          },
+        ]);
+        return '0x5550000000000000000000000000000000000000000000000000000000000032';
+      });
+
+      mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
+        expect(method).toBe('eth_getTransactionReceipt');
+        expect(params).toEqual(['0x5550000000000000000000000000000000000000000000000000000000000032']);
+        return {
+          from: addressLowercase,
+          contractAddress: address2Lowercase,
+          blockHash: '0xffdd',
+        };
+      });
+
+      mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
+        expect(method).toBe('eth_getCode');
+        expect(params).toEqual([address2Lowercase, 'latest']);
+        return '0x321';
+      });
+
+      const contract = new TestNoCtorContract(eth);
+
+      const sendTx = contract.deploy().send({
+        from: address,
+        gas: 50000,
+        gasPrice: 3000,
+      });
+
+      const txHash = await sendTx.getTxHash();
+      const receipt = await sendTx.getReceipt();
+
+      expect(txHash).toBe('0x5550000000000000000000000000000000000000000000000000000000000032');
+      expect(receipt.contractAddress).toEqual(address2);
     });
   });
 });

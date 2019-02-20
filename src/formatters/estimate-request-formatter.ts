@@ -16,7 +16,7 @@
 */
 
 import { Address } from '../address';
-import { bufferToMinimalHex, hexToBuffer, hexToNumberString, numberToHex } from '../utils';
+import { bufferToHex, hexToBuffer, hexToNumberString, numberToHex } from '../utils';
 
 export interface EstimateRequest {
   from?: Address;
@@ -41,7 +41,7 @@ export function toRawEstimateRequest(tx: EstimateRequest): RawEstimateRequest {
   return {
     from: from ? from.toString().toLowerCase() : undefined,
     to: to ? to.toString().toLowerCase() : undefined,
-    data: data ? bufferToMinimalHex(data) : undefined,
+    data: data ? bufferToHex(data) : undefined,
     value: value ? numberToHex(value) : undefined,
     gas: gas ? numberToHex(gas) : undefined,
     gasPrice: gasPrice ? numberToHex(gasPrice) : undefined,

@@ -16,7 +16,7 @@
 */
 
 import { Address } from '../address';
-import { bufferToMinimalHex, hexToBuffer, hexToNumberString, numberToHex } from '../utils';
+import { bufferToHex, hexToBuffer, hexToNumberString, numberToHex } from '../utils';
 
 export interface PartialTransactionRequest {
   from?: Address;
@@ -56,7 +56,7 @@ export function toRawTransactionRequest(tx: TransactionRequest): RawTransactionR
     gas: gas ? numberToHex(gas) : undefined,
     gasPrice: gasPrice ? numberToHex(gasPrice) : undefined,
     value: value ? numberToHex(value) : undefined,
-    data: data ? bufferToMinimalHex(data) : undefined,
+    data: data ? bufferToHex(data) : undefined,
     nonce: nonce ? numberToHex(nonce) : undefined,
   };
 }

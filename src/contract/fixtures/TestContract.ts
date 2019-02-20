@@ -60,7 +60,7 @@ export class TestContract extends Contract<TestContractDefinition> {
         super(eth, abi, address, options);
     }
     deploy(who: Address, myValue: number | string | BN): TxSend<TestContractTransactionReceipt> {
-        return super.deployBytecode("0x608060__LinkMe_______________________63b54040", who, myValue) as any;
+        return super.deployBytecode("0x01234567", who, myValue) as any;
     }
 }
 export var TestContractAbi = abi;
