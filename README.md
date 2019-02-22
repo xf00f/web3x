@@ -208,6 +208,12 @@ An example of how you might use this to deploy a contract and fund an account fo
 IndexedDB. If you want to use an in-memory implementation you can use `levelup(memdown())` as per the test case [here](src/evm/provider/evm-provider.e2e.test.ts).
 
 ```typescript
+import { EvmProvider } from 'web3x-es/evm/provider';
+import { Eth } from 'web3x-es/eth';
+import { toWei } from 'web3x-es/utils';
+import { Wallet } from 'web3x-es/wallet';
+import { DaiContract } from './contracts/DaiContract';
+
 async function getEvmProvider(fresh: boolean = false) {
   if (fresh) {
     return await getBootstrappedEvmProvider();
@@ -224,8 +230,12 @@ async function getBootstrappedEvmProvider() {
   await EvmProvider.eraseLocalDb('testdb');
 
   const provider = await EvmProvider.fromLocalDb('testdb', { blockDelay: 1000 });
-  const wallet = await createAndAddWallet(provider);
   const eth = new Eth(provider);
+
+  const wallet = new Wallet(10);
+  await wallet.saveToLocalStorage('', 'provider-wallet');
+  await provider.loadWallet(wallet);
+
   const bootstrapAccount = wallet.get(0)!.address;
   const recipientAccount = wallet.get(1)!.address;
   const amount = toWei('1000', 'ether');
@@ -260,18 +270,6 @@ async function getBootstrappedEvmProvider() {
   console.log(`Funded ${recipientAccount} with 1000 DAI`);
 
   return provider;
-}
-
-async function createAndAddWallet(provider: EvmProvider) {
-  const wallet = new Wallet();
-  wallet.create(10);
-  await wallet.saveToLocalStorage('', 'provider-wallet');
-  provider.worldState.checkpoint();
-  for (const address of wallet.currentAddresses()) {
-    await provider.worldState.createAccount(address, BigInt(10) * BigInt(10) ** BigInt(18));
-  }
-  await provider.worldState.commit();
-  return (provider.wallet = wallet);
 }
 ```
 

@@ -597,6 +597,7 @@ describe('contract', () => {
       // eth_getTransactionReceipt
       mockEthereumProvider.send.mockResolvedValueOnce({
         from: address2Lowercase,
+        to: addressLowercase,
         contractAddress: null,
         cumulativeGasUsed: '0xa',
         transactionIndex: '0x3',
@@ -635,6 +636,16 @@ describe('contract', () => {
               '0x0000000000000000000000000000000000000000000000000000000000000001' +
               '0000000000000000000000000000000000000000000000000000000000000008',
           },
+          {
+            address: address2Lowercase,
+            topics: [sha3('IgnoredDueToUnmatchingAddress()')],
+            blockNumber: '0xa',
+            transactionHash: '0x1234',
+            transactionIndex: '0x0',
+            blockHash: '0x1345',
+            logIndex: '0x4',
+            data: '0x',
+          },
         ],
       });
     }
@@ -651,6 +662,7 @@ describe('contract', () => {
 
       expect(receipt).toEqual({
         from: address2,
+        to: address,
         cumulativeGasUsed: 10,
         transactionIndex: 3,
         transactionHash: '0x1234',
@@ -762,6 +774,7 @@ describe('contract', () => {
 
       mockEthereumProvider.send.mockResolvedValueOnce({
         from: address2Lowercase,
+        to: addressLowercase,
         contractAddress: null,
         cumulativeGasUsed: '0xa',
         transactionIndex: '0x3',
@@ -814,6 +827,7 @@ describe('contract', () => {
 
       expect(receipt).toEqual({
         from: address2,
+        to: address,
         cumulativeGasUsed: 10,
         transactionIndex: 3,
         transactionHash: '0x1234',

@@ -33,7 +33,9 @@ export class SentContractTx extends SentTransaction {
       return receipt;
     }
 
-    const decodedEvents = receipt.logs.map(log => this.contractAbi.decodeAnyEvent(log));
+    const decodedEvents = receipt.logs
+      .filter(log => log.address.equals((receipt.to || receipt.contractAddress)!))
+      .map(log => this.contractAbi.decodeAnyEvent(log));
 
     receipt.events = {};
     receipt.unnamedEvents = [];

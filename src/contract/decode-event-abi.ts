@@ -30,6 +30,7 @@ import { abiCoder } from './abi-coder';
 export function decodeEvent(event: ContractEntryDefinition, log: LogResponse): EventLog<any> {
   log.data = log.data || '';
   log.topics = log.topics || [];
+  event.inputs = event.inputs || [];
 
   const argTopics = event.anonymous ? log.topics : log.topics.slice(1);
   const returnValues = abiCoder.decodeLog(event.inputs, log.data, argTopics);
