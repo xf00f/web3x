@@ -597,6 +597,7 @@ describe('contract', () => {
       // eth_getTransactionReceipt
       mockEthereumProvider.send.mockResolvedValueOnce({
         from: address2Lowercase,
+        to: addressLowercase,
         contractAddress: null,
         cumulativeGasUsed: '0xa',
         transactionIndex: '0x3',
@@ -616,7 +617,7 @@ describe('contract', () => {
             transactionHash: '0x1234',
             transactionIndex: '0x0',
             blockHash: '0x1345',
-            logIndex: '0x4',
+            logIndex: '0x0',
             data: '0x0000000000000000000000000000000000000000000000000000000000000005',
           },
           {
@@ -630,16 +631,26 @@ describe('contract', () => {
             transactionHash: '0x1234',
             transactionIndex: '0x0',
             blockHash: '0x1345',
-            logIndex: '0x4',
+            logIndex: '0x1',
             data:
               '0x0000000000000000000000000000000000000000000000000000000000000001' +
               '0000000000000000000000000000000000000000000000000000000000000008',
+          },
+          {
+            address: address2Lowercase,
+            topics: [sha3('IgnoredDueToUnmatchingAddress()')],
+            blockNumber: '0xa',
+            transactionHash: '0x1234',
+            transactionIndex: '0x0',
+            blockHash: '0x1345',
+            logIndex: '0x2',
+            data: '0x',
           },
         ],
       });
     }
 
-    it('should sendTransaction and check for receipts with formatted logs', async () => {
+    it('should create correct receipt', async () => {
       bootstrap();
 
       const contract = new TestContract(eth, address);
@@ -651,80 +662,105 @@ describe('contract', () => {
 
       expect(receipt).toEqual({
         from: address2,
+        to: address,
         cumulativeGasUsed: 10,
         transactionIndex: 3,
         transactionHash: '0x1234',
         blockNumber: 10,
         blockHash: '0x1234',
         gasUsed: 0,
-        unnamedEvents: [],
-        events: {
-          Unchanged: [
-            {
-              address,
-              blockNumber: 10,
-              transactionHash: '0x1234',
-              blockHash: '0x1345',
-              logIndex: 4,
-              id: 'log_9ff24cb4',
-              transactionIndex: 0,
-              returnValues: {
-                0: '2',
-                1: address,
-                2: '5',
-                value: '2',
-                addressFrom: address,
-                t1: '5',
-              },
-              event: 'Unchanged',
-              signature: '0xf359668f205d0b5cfdc20d11353e05f633f83322e96f15486cbb007d210d66e5',
-              raw: {
-                topics: [
-                  '0xf359668f205d0b5cfdc20d11353e05f633f83322e96f15486cbb007d210d66e5',
-                  '0x0000000000000000000000000000000000000000000000000000000000000002',
-                  '0x000000000000000000000000' + addressUnprefixedLowercase,
-                ],
-                data: '0x0000000000000000000000000000000000000000000000000000000000000005',
-              },
-            },
-          ],
-          Changed: [
-            {
-              address,
-              blockNumber: 10,
-              transactionHash: '0x1234',
-              blockHash: '0x1345',
-              logIndex: 4,
-              id: 'log_9ff24cb4',
-              transactionIndex: 0,
-              returnValues: {
-                0: address,
-                1: '1',
-                2: '1',
-                3: '8',
-                from: address,
-                amount: '1',
-                t1: '1',
-                t2: '8',
-              },
-              event: 'Changed',
-              signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
-              raw: {
-                topics: [
-                  '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
-                  '0x000000000000000000000000' + addressUnprefixedLowercase,
-                  '0x0000000000000000000000000000000000000000000000000000000000000001',
-                ],
-                data:
-                  '0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000008',
-              },
-            },
-          ],
-        },
+        contractAddress: undefined,
+        status: undefined,
+        anonymousLogs: expect.any(Array),
+        events: expect.any(Object),
       });
     });
 
-    it('should sendTransaction and check returnValues on resolved receipt', async () => {
+    it('should correctly filter receipts anonymous logs', async () => {
+      bootstrap();
+
+      const contract = new TestContract(eth, address);
+
+      const receipt = await contract.methods
+        .mySend(address, 10)
+        .send({ from: address2, gasPrice: '21345678654321' })
+        .getReceipt();
+
+      expect(receipt.anonymousLogs).toEqual([
+        {
+          id: 'log_0c7b7b69',
+          address: address2,
+          topics: [sha3('IgnoredDueToUnmatchingAddress()')],
+          blockNumber: 10,
+          transactionHash: '0x1234',
+          transactionIndex: 0,
+          blockHash: '0x1345',
+          logIndex: 2,
+          data: '0x',
+        },
+      ]);
+    });
+
+    it('should correctly extract receipts events', async () => {
+      bootstrap();
+
+      const contract = new TestContract(eth, address);
+
+      const receipt = await contract.methods
+        .mySend(address, 10)
+        .send({ from: address2, gasPrice: '21345678654321' })
+        .getReceipt();
+
+      expect(receipt.events).toEqual({
+        Unchanged: [
+          {
+            address,
+            blockNumber: 10,
+            transactionHash: '0x1234',
+            blockHash: '0x1345',
+            logIndex: 0,
+            id: 'log_eb38a24f',
+            transactionIndex: 0,
+            returnValues: expect.any(Object),
+            event: 'Unchanged',
+            signature: '0xf359668f205d0b5cfdc20d11353e05f633f83322e96f15486cbb007d210d66e5',
+            raw: {
+              topics: [
+                '0xf359668f205d0b5cfdc20d11353e05f633f83322e96f15486cbb007d210d66e5',
+                '0x0000000000000000000000000000000000000000000000000000000000000002',
+                '0x000000000000000000000000' + addressUnprefixedLowercase,
+              ],
+              data: '0x0000000000000000000000000000000000000000000000000000000000000005',
+            },
+          },
+        ],
+        Changed: [
+          {
+            address,
+            blockNumber: 10,
+            transactionHash: '0x1234',
+            blockHash: '0x1345',
+            logIndex: 1,
+            id: 'log_e6d0b97d',
+            transactionIndex: 0,
+            returnValues: expect.any(Object),
+            event: 'Changed',
+            signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
+            raw: {
+              topics: [
+                '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
+                '0x000000000000000000000000' + addressUnprefixedLowercase,
+                '0x0000000000000000000000000000000000000000000000000000000000000001',
+              ],
+              data:
+                '0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000008',
+            },
+          },
+        ],
+      });
+    });
+
+    it('should correctly decode receipts event logs', async () => {
       bootstrap();
 
       const contract = new TestContract(eth, address);
@@ -755,13 +791,14 @@ describe('contract', () => {
       });
     });
 
-    it('should sendTransaction and check for receipts with formatted logs when multiple of same event', async () => {
+    it('should correctly decode multiple of the same event log', async () => {
       mockEthereumProvider.send.mockResolvedValueOnce(
         '0x1234000000000000000000000000000000000000000000000000000000056789',
       );
 
       mockEthereumProvider.send.mockResolvedValueOnce({
         from: address2Lowercase,
+        to: addressLowercase,
         contractAddress: null,
         cumulativeGasUsed: '0xa',
         transactionIndex: '0x3',
@@ -812,79 +849,69 @@ describe('contract', () => {
         .send({ from: address2, gasPrice: '21345678654321' })
         .getReceipt();
 
-      expect(receipt).toEqual({
-        from: address2,
-        cumulativeGasUsed: 10,
-        transactionIndex: 3,
-        transactionHash: '0x1234',
-        blockNumber: 10,
-        blockHash: '0x1234',
-        gasUsed: 0,
-        unnamedEvents: [],
-        events: {
-          Changed: [
-            {
-              address,
-              blockNumber: 10,
-              transactionHash: '0x1234',
-              blockHash: '0x1345',
-              logIndex: 4,
-              id: 'log_9ff24cb4',
-              transactionIndex: 0,
-              returnValues: {
-                0: address,
-                1: '1',
-                2: '1',
-                3: '8',
-                from: address,
-                amount: '1',
-                t1: '1',
-                t2: '8',
-              },
-              event: 'Changed',
-              signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
-              raw: {
-                topics: [
-                  '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
-                  '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
-                  '0x0000000000000000000000000000000000000000000000000000000000000001',
-                ],
-                data:
-                  '0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000008',
-              },
+      expect(receipt.events).toEqual({
+        Changed: [
+          {
+            address,
+            blockNumber: 10,
+            transactionHash: '0x1234',
+            blockHash: '0x1345',
+            logIndex: 4,
+            id: 'log_9ff24cb4',
+            transactionIndex: 0,
+            returnValues: {
+              0: address,
+              1: '1',
+              2: '1',
+              3: '8',
+              from: address,
+              amount: '1',
+              t1: '1',
+              t2: '8',
             },
-            {
-              address,
-              blockNumber: 10,
-              transactionHash: '0x1234',
-              blockHash: '0x1345',
-              logIndex: 5,
-              id: 'log_8b8a2b7f',
-              transactionIndex: 0,
-              returnValues: {
-                0: address,
-                1: '2',
-                2: '1',
-                3: '8',
-                from: address,
-                amount: '2',
-                t1: '1',
-                t2: '8',
-              },
-              event: 'Changed',
-              signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
-              raw: {
-                topics: [
-                  '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
-                  '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
-                  '0x0000000000000000000000000000000000000000000000000000000000000002',
-                ],
-                data:
-                  '0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000008',
-              },
+            event: 'Changed',
+            signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
+            raw: {
+              topics: [
+                '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
+                '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
+                '0x0000000000000000000000000000000000000000000000000000000000000001',
+              ],
+              data:
+                '0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000008',
             },
-          ],
-        },
+          },
+          {
+            address,
+            blockNumber: 10,
+            transactionHash: '0x1234',
+            blockHash: '0x1345',
+            logIndex: 5,
+            id: 'log_8b8a2b7f',
+            transactionIndex: 0,
+            returnValues: {
+              0: address,
+              1: '2',
+              2: '1',
+              3: '8',
+              from: address,
+              amount: '2',
+              t1: '1',
+              t2: '8',
+            },
+            event: 'Changed',
+            signature: '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
+            raw: {
+              topics: [
+                '0x792991ed5ba9322deaef76cff5051ce4bedaaa4d097585970f9ad8f09f54e651',
+                '0x000000000000000000000000' + addressLowercase.replace('0x', ''),
+                '0x0000000000000000000000000000000000000000000000000000000000000002',
+              ],
+              data:
+                '0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000008',
+            },
+          },
+        ],
       });
     });
 
@@ -946,7 +973,7 @@ describe('contract', () => {
               blockNumber: 10,
               blockHash: '0x1234',
               gasUsed: 0,
-              unnamedEvents: [],
+              anonymousLogs: [],
               events: {},
             });
 
@@ -961,7 +988,7 @@ describe('contract', () => {
               blockNumber: 10,
               blockHash: '0x1234',
               gasUsed: 0,
-              unnamedEvents: [],
+              anonymousLogs: [],
               events: {},
             });
 

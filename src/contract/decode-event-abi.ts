@@ -28,20 +28,19 @@ import { abiCoder } from './abi-coder';
  * @returns The decoded event log.
  */
 export function decodeEvent(event: ContractEntryDefinition, log: LogResponse): EventLog<any> {
-  log.data = log.data || '';
-  log.topics = log.topics || [];
+  const { data = '', topics = [], ...formattedLog } = log;
+  const { anonymous, inputs = [], name = '' } = event;
 
-  const argTopics = event.anonymous ? log.topics : log.topics.slice(1);
-  const returnValues = abiCoder.decodeLog(event.inputs, log.data, argTopics);
+  const argTopics = anonymous ? topics : topics.slice(1);
+  const returnValues = abiCoder.decodeLog(inputs, data, argTopics);
   delete returnValues.__length__;
 
-  const { data, topics, ...formattedLog } = log;
 
   return {
     ...formattedLog,
-    event: event.name,
+    event: name,
     returnValues,
-    signature: event.anonymous || !log.topics[0] ? null : log.topics[0],
+    signature: anonymous || !topics[0] ? null : topics[0],
     raw: {
       data,
       topics,

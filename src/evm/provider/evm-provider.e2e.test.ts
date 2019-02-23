@@ -17,13 +17,7 @@ describe('evm provider e2e tests', () => {
 
   beforeEach(async () => {
     provider = await EvmProvider.fromDb(levelup(memdown()));
-    provider.wallet = wallet;
-
-    provider.worldState.checkpoint();
-    for (const addr of wallet.currentAddresses()) {
-      await provider.worldState.createAccount(addr, BigInt(10) * BigInt(10) ** BigInt(18));
-    }
-    await provider.worldState.commit();
+    await provider.loadWallet(wallet);
 
     eth = new Eth(provider);
     daiContract = new DaiContract(eth);

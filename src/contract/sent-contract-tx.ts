@@ -28,25 +28,28 @@ export class SentContractTx extends SentTransaction {
 
   protected async handleReceipt(receipt: TransactionReceipt) {
     receipt = await super.handleReceipt(receipt);
+    const { logs, to, contractAddress = to! } = receipt;
 
-    if (!isArray(receipt.logs)) {
+    if (!isArray(logs)) {
       return receipt;
     }
 
-    const decodedEvents = receipt.logs.map(log => this.contractAbi.decodeAnyEvent(log));
+    const isAnonymous = log => !log.address.equals(contractAddress) || !this.contractAbi.findEntryForLog(log);
 
-    receipt.events = {};
-    receipt.unnamedEvents = [];
-    for (const ev of decodedEvents) {
-      if (ev.event) {
-        const events = receipt.events[ev.event] || [];
-        receipt.events[ev.event] = [...events, ev];
-      } else {
-        receipt.unnamedEvents = [...receipt.unnamedEvents, ev];
+    const anonymousLogs = logs.filter(isAnonymous);
+
+    const events = logs.reduce((a, log) => {
+      if (isAnonymous(log)) {
+        return a;
       }
-    }
+      const ev = this.contractAbi.decodeAnyEvent(log);
+      a[ev.event] = a[ev.event] || [];
+      a[ev.event].push(ev);
+      return a;
+    }, {});
+
     delete receipt.logs;
 
-    return receipt;
+    return { ...receipt, anonymousLogs, events };
   }
 }

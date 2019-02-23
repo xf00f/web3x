@@ -25,6 +25,10 @@ export class ContractEntry {
     return this.entry.name;
   }
 
+  public get anonymous() {
+    return this.entry.anonymous || false;
+  }
+
   public asString() {
     return abiCoder.abiMethodToString(this.entry);
   }

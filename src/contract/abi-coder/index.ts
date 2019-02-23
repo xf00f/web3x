@@ -18,6 +18,7 @@
 import { isArray, isObject } from 'util';
 import { AbiCoder as EthersAbi } from '../../ethers/abi-coder';
 import { sha3 } from '../../utils';
+import { AbiInput } from '../abi/contract-abi-definition';
 
 /**
  * ABICoder prototype should be used to encode/decode solidity params of any type
@@ -157,7 +158,7 @@ export class ABICoder {
    * @param {Array} topics
    * @return {Array} array of plain params
    */
-  public decodeLog(inputs, data, topics) {
+  public decodeLog(inputs: AbiInput[], data, topics) {
     topics = isArray(topics) ? topics : [topics];
 
     data = data || '';
@@ -170,9 +171,7 @@ export class ABICoder {
 
     inputs.forEach((input, i) => {
       if (input.indexed) {
-        indexedParams[i] = ['bool', 'int', 'uint', 'address', 'fixed', 'ufixed'].find(
-          staticType => input.type.indexOf(staticType) !== -1,
-        )
+        indexedParams[i] = ['bool', 'int', 'uint', 'address', 'fixed', 'ufixed'].some(t => input.type.includes(t))
           ? this.decodeParameter(input.type, topics[topicCount])
           : topics[topicCount];
         topicCount++;
