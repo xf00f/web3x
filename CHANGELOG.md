@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.3] - 2019-02-23
+
+### Fixed
+
+- Logs for contracts other than that being sent to, are now put in the `anonymousLogs` field. This fixes a situation where event signatures match between different contracts called in the same transaction and the event gets parsed incorrectly.
+
 ## [3.0.2] - 2019-02-20
 
 ### Fixed
@@ -157,6 +163,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release of Typescript port from web3.js.
 
+[3.0.3]: https://github.com/xf00f/web3x/compare/v3.0.2...v3.0.3
 [3.0.2]: https://github.com/xf00f/web3x/compare/v3.0.1...v3.0.2
 [3.0.1]: https://github.com/xf00f/web3x/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/xf00f/web3x/compare/v2.0.4...v3.0.0
