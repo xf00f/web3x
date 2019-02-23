@@ -37,7 +37,7 @@ export interface RawTransactionReceipt {
 export interface EventLog<ReturnValues, Name = string> {
   id: string | null;
   removed?: boolean;
-  event?: Name;
+  event: Name;
   address: Address;
   returnValues: ReturnValues;
   logIndex: number | null;
@@ -60,8 +60,8 @@ export interface TransactionReceipt<Events = void> {
   gasUsed: number;
   contractAddress?: Address;
   logs?: LogResponse[];
+  anonymousLogs?: LogResponse[];
   events?: Events extends void ? { [eventName: string]: EventLog<any>[] } : Events;
-  unnamedEvents?: EventLog<any>[];
   status?: boolean;
 }
 

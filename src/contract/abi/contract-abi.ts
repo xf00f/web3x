@@ -24,12 +24,6 @@ export class ContractAbi {
   public ctor: ContractFunctionEntry;
   public fallback?: ContractFunctionEntry;
 
-  private static anonymousEvent = new ContractEventEntry({
-    type: 'event',
-    anonymous: true,
-    inputs: [],
-  });
-
   constructor(definintion: ContractAbiDefinition) {
     this.functions = definintion.filter(e => e.type === 'function').map(entry => new ContractFunctionEntry(entry));
     this.events = definintion.filter(e => e.type === 'event').map(entry => new ContractEventEntry(entry));
@@ -41,8 +35,15 @@ export class ContractAbi {
     }
   }
 
+  public findEntryForLog(log: LogResponse) {
+    return this.events.find(abiDef => abiDef.signature === log.topics[0]);
+  }
+
   public decodeAnyEvent(log: LogResponse) {
-    const event = this.events.find(abiDef => abiDef.signature === log.topics[0]) || ContractAbi.anonymousEvent;
+    const event = this.findEntryForLog(log);
+    if (!event) {
+      throw new Error(`Unable to find matching event signature for log: ${log.id}`);
+    }
     return event.decodeEvent(log);
   }
 }
