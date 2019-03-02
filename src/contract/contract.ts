@@ -26,7 +26,7 @@ import { TxDeploy } from './tx-deploy';
 
 export interface ContractOptions {
   from?: Address;
-  gasPrice?: string;
+  gasPrice?: string | number;
   gas?: number;
 }
 

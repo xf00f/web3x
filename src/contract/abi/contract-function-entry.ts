@@ -66,4 +66,8 @@ export class ContractFunctionEntry extends ContractEntry {
   public encodeParameters(args: any[]) {
     return abiCoder.encodeParameters(this.entry.inputs, args);
   }
+
+  public decodeParameters(bytes: string) {
+    return abiCoder.decodeParameters(this.entry.inputs, bytes);
+  }
 }

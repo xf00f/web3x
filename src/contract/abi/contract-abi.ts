@@ -24,12 +24,12 @@ export class ContractAbi {
   public ctor: ContractFunctionEntry;
   public fallback?: ContractFunctionEntry;
 
-  constructor(definintion: ContractAbiDefinition) {
-    this.functions = definintion.filter(e => e.type === 'function').map(entry => new ContractFunctionEntry(entry));
-    this.events = definintion.filter(e => e.type === 'event').map(entry => new ContractEventEntry(entry));
-    const ctor = definintion.find(e => e.type === 'constructor');
+  constructor(definition: ContractAbiDefinition) {
+    this.functions = definition.filter(e => e.type === 'function').map(entry => new ContractFunctionEntry(entry));
+    this.events = definition.filter(e => e.type === 'event').map(entry => new ContractEventEntry(entry));
+    const ctor = definition.find(e => e.type === 'constructor');
     this.ctor = new ContractFunctionEntry(ctor || { type: 'constructor' });
-    const fallback = definintion.find(e => e.type === 'fallback');
+    const fallback = definition.find(e => e.type === 'fallback');
     if (fallback) {
       this.fallback = new ContractFunctionEntry(fallback);
     }

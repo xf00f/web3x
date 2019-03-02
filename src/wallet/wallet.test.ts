@@ -20,194 +20,176 @@ import { Address } from '../address';
 import { hexToBuffer } from '../utils';
 import { Wallet } from './wallet';
 
-const tests = [
-  {
-    address: Address.fromString('0xEB014f8c8B418Db6b45774c326A0E64C78914dC0'),
-    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
-    data: 'Some data',
-    // signature done with personal_sign
-    signature:
-      '0xa8037a6116c176a25e6fc224947fde9e79a2deaa0dd8b67b366fbdfdbffc01f953e41351267b20d4a89ebfe9c8f03c04de9b345add4a52f15bd026b63c8fb1501b',
-  },
-  {
-    address: Address.fromString('0xEB014f8c8B418Db6b45774c326A0E64C78914dC0'),
-    privateKey: hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728'),
-    data: 'Some data!%$$%&@*',
-    // signature done with personal_sign
-    signature:
-      '0x05252412b097c5d080c994d1ea12abcee6f1cae23feb225517a0b691a66e12866b3f54292f9cfef98f390670b4d010fc4af7fcd46e41d72870602c117b14921c1c',
-  },
-];
-
 describe('wallet', () => {
-  tests.forEach((test, i) => {
-    it('creates the right number of wallets', () => {
-      const wallet = new Wallet();
-      expect(wallet.length).toBe(0);
+  const address = Address.fromString('0xEB014f8c8B418Db6b45774c326A0E64C78914dC0');
+  const privateKey = hexToBuffer('0xbe6383dad004f233317e46ddb46ad31b16064d14447a95cc1d8c8d4bc61c3728');
 
-      wallet.create(2, Buffer.from('542342f!@#$$'));
-      expect(wallet.length).toBe(2);
+  it('creates the right number of wallets', () => {
+    const wallet = new Wallet();
+    expect(wallet.length).toBe(0);
 
-      wallet.create(3);
-      expect(wallet.length).toBe(5);
+    wallet.create(2, Buffer.from('542342f!@#$$'));
+    expect(wallet.length).toBe(2);
 
-      expect(Address.isAddress(wallet.accounts[1].address.toString())).toBe(true);
-      expect(Address.isAddress(wallet.accounts[2].address.toString())).toBe(true);
-    });
+    wallet.create(3);
+    expect(wallet.length).toBe(5);
 
-    it('add wallet using a privatekey', () => {
-      const wallet = new Wallet();
-
-      const account = wallet.add(test.privateKey);
-
-      expect(account.address).toEqual(test.address);
-      expect(account.privateKey).toEqual(test.privateKey);
-      expect(wallet.indexOf(account.address)).toBe(0);
-
-      expect(wallet.get(test.address)!.address).toEqual(test.address);
-      expect(wallet.get(0)!.address).toEqual(test.address);
-      expect(wallet.length).toBe(1);
-    });
-
-    it('add wallet using an account', () => {
-      const wallet = new Wallet();
-
-      const account = Account.fromPrivate(test.privateKey);
-      wallet.add(account);
-
-      expect(account.address).toEqual(test.address);
-      expect(account.privateKey).toEqual(test.privateKey);
-      expect(wallet.indexOf(account.address)).toBe(0);
-
-      expect(wallet.get(test.address)!.address).toEqual(test.address);
-      expect(wallet.get(0)!.address).toEqual(test.address);
-      expect(wallet.length).toBe(1);
-    });
-
-    it('should not add wallet twice work', () => {
-      const wallet = new Wallet();
-
-      const account = Account.fromPrivate(test.privateKey);
-      wallet.add(account);
-      wallet.add(account);
-
-      expect(account.address).toEqual(test.address);
-      expect(account.privateKey).toEqual(test.privateKey);
-      expect(wallet.indexOf(account.address)).toBe(0);
-
-      expect(wallet.get(test.address)!.address).toEqual(test.address);
-      expect(wallet.get(0)!.address).toEqual(test.address);
-      expect(wallet.length).toBe(1);
-    });
-
-    it('remove wallet using an index', () => {
-      const wallet = new Wallet();
-
-      wallet.add(test.privateKey);
-      expect(wallet.length).toBe(1);
-
-      wallet.remove(0);
-      expect(wallet.get(test.address)).toBeUndefined();
-      expect(wallet.get(0)).toBeUndefined();
-      expect(wallet.length).toBe(0);
-    });
-
-    it('remove wallet using an address', () => {
-      const wallet = new Wallet();
-
-      wallet.add(test.privateKey);
-      expect(wallet.length).toBe(1);
-
-      wallet.remove(test.address);
-      expect(wallet.length).toBe(0);
-    });
-
-    it('remove wallet using an lowercase address', () => {
-      const wallet = new Wallet();
-
-      wallet.add(test.privateKey);
-      expect(wallet.length).toBe(1);
-
-      wallet.remove(test.address.toString().toLowerCase());
-      expect(wallet.length).toBe(0);
-    });
-
-    it('create 5 wallets, remove two, create two more and check for overwrites', () => {
-      const count = 5;
-      const wallet = new Wallet();
-      expect(wallet.length).toBe(0);
-
-      wallet.create(count);
-      const initialAddresses = [0, 1, 2, 3, 4].map(n => wallet.get(n)!.address);
-      expect(wallet.length).toBe(count);
-
-      const remainingAddresses = [0, 1, 3];
-      const beforeRemoval = remainingAddresses.map(n => wallet.get(n)!.address);
-
-      wallet.remove(2);
-      wallet.remove(4);
-
-      expect(wallet.get(2)).toBeUndefined();
-      expect(wallet.get(4)).toBeUndefined();
-
-      const afterRemoval = remainingAddresses.map(n => wallet.get(n)!.address);
-
-      expect(wallet.length).toBe(3);
-
-      wallet.create(2);
-      expect(Address.isAddress(wallet.accounts[2].address.toString())).toBe(true);
-      expect(Address.isAddress(wallet.accounts[4].address.toString())).toBe(true);
-      expect(wallet.get(5)).toBeUndefined();
-
-      const afterMoreCreation = remainingAddresses.map(n => wallet.get(n)!.address);
-      const newAddresses = [0, 1, 2, 3, 4].map(n => wallet.get(n)!.address);
-
-      // Checks for account overwrites
-      expect(wallet.length).toBe(count);
-      expect(beforeRemoval).toEqual(afterMoreCreation);
-      expect(afterRemoval).toEqual(afterMoreCreation);
-      expect(initialAddresses).not.toEqual(newAddresses);
-    });
-
-    it('clear wallet', () => {
-      const count = 10;
-      const wallet = new Wallet();
-
-      wallet.create(count);
-      expect(wallet.length).toBe(10);
-
-      wallet.clear();
-
-      for (let i = 0; i < count; i++) {
-        expect(wallet.get(i)).toBeUndefined();
-      }
-      expect(wallet.length).toBe(0);
-    });
-
-    it('encrypt then decrypt wallet', async () => {
-      const wallet = new Wallet();
-      const password = 'qwerty';
-
-      wallet.create(5);
-      const addressFromWallet = wallet.accounts[0].address;
-      expect(wallet.length).toBe(5);
-
-      wallet.remove(2);
-      expect(wallet.length).toBe(4);
-
-      const keystore = await wallet.encrypt(password);
-      expect(wallet.length).toBe(4);
-
-      wallet.clear();
-      expect(wallet.length).toBe(0);
-
-      await wallet.decrypt(keystore, password);
-      expect(wallet.length).toBe(4);
-
-      const addressFromKeystore = wallet.accounts[0].address;
-      expect(addressFromKeystore).toEqual(addressFromWallet);
-    });
+    expect(Address.isAddress(wallet.accounts[1].address.toString())).toBe(true);
+    expect(Address.isAddress(wallet.accounts[2].address.toString())).toBe(true);
   });
+
+  it('add wallet using a privatekey', () => {
+    const wallet = new Wallet();
+
+    const account = wallet.add(privateKey);
+
+    expect(account.address).toEqual(address);
+    expect(account.privateKey).toEqual(privateKey);
+    expect(wallet.indexOf(account.address)).toBe(0);
+
+    expect(wallet.get(address)!.address).toEqual(address);
+    expect(wallet.get(0)!.address).toEqual(address);
+    expect(wallet.length).toBe(1);
+  });
+
+  it('add wallet using an account', () => {
+    const wallet = new Wallet();
+
+    const account = Account.fromPrivate(privateKey);
+    wallet.add(account);
+
+    expect(account.address).toEqual(address);
+    expect(account.privateKey).toEqual(privateKey);
+    expect(wallet.indexOf(account.address)).toBe(0);
+
+    expect(wallet.get(address)!.address).toEqual(address);
+    expect(wallet.get(0)!.address).toEqual(address);
+    expect(wallet.length).toBe(1);
+  });
+
+  it('should not add wallet twice work', () => {
+    const wallet = new Wallet();
+
+    const account = Account.fromPrivate(privateKey);
+    wallet.add(account);
+    wallet.add(account);
+
+    expect(account.address).toEqual(address);
+    expect(account.privateKey).toEqual(privateKey);
+    expect(wallet.indexOf(account.address)).toBe(0);
+
+    expect(wallet.get(address)!.address).toEqual(address);
+    expect(wallet.get(0)!.address).toEqual(address);
+    expect(wallet.length).toBe(1);
+  });
+
+  it('remove wallet using an index', () => {
+    const wallet = new Wallet();
+
+    wallet.add(privateKey);
+    expect(wallet.length).toBe(1);
+
+    wallet.remove(0);
+    expect(wallet.get(address)).toBeUndefined();
+    expect(wallet.get(0)).toBeUndefined();
+    expect(wallet.length).toBe(0);
+  });
+
+  it('remove wallet using an address', () => {
+    const wallet = new Wallet();
+
+    wallet.add(privateKey);
+    expect(wallet.length).toBe(1);
+
+    wallet.remove(address);
+    expect(wallet.length).toBe(0);
+  });
+
+  it('remove wallet using an lowercase address', () => {
+    const wallet = new Wallet();
+
+    wallet.add(privateKey);
+    expect(wallet.length).toBe(1);
+
+    wallet.remove(address.toString().toLowerCase());
+    expect(wallet.length).toBe(0);
+  });
+
+  it('create 5 wallets, remove two, create two more and check for overwrites', () => {
+    const count = 5;
+    const wallet = new Wallet();
+    expect(wallet.length).toBe(0);
+
+    wallet.create(count);
+    const initialAddresses = [0, 1, 2, 3, 4].map(n => wallet.get(n)!.address);
+    expect(wallet.length).toBe(count);
+
+    const remainingAddresses = [0, 1, 3];
+    const beforeRemoval = remainingAddresses.map(n => wallet.get(n)!.address);
+
+    wallet.remove(2);
+    wallet.remove(4);
+
+    expect(wallet.get(2)).toBeUndefined();
+    expect(wallet.get(4)).toBeUndefined();
+
+    const afterRemoval = remainingAddresses.map(n => wallet.get(n)!.address);
+
+    expect(wallet.length).toBe(3);
+
+    wallet.create(2);
+    expect(Address.isAddress(wallet.accounts[2].address.toString())).toBe(true);
+    expect(Address.isAddress(wallet.accounts[4].address.toString())).toBe(true);
+    expect(wallet.get(5)).toBeUndefined();
+
+    const afterMoreCreation = remainingAddresses.map(n => wallet.get(n)!.address);
+    const newAddresses = [0, 1, 2, 3, 4].map(n => wallet.get(n)!.address);
+
+    // Checks for account overwrites
+    expect(wallet.length).toBe(count);
+    expect(beforeRemoval).toEqual(afterMoreCreation);
+    expect(afterRemoval).toEqual(afterMoreCreation);
+    expect(initialAddresses).not.toEqual(newAddresses);
+  });
+
+  it('clear wallet', () => {
+    const count = 10;
+    const wallet = new Wallet();
+
+    wallet.create(count);
+    expect(wallet.length).toBe(10);
+
+    wallet.clear();
+
+    for (let i = 0; i < count; i++) {
+      expect(wallet.get(i)).toBeUndefined();
+    }
+    expect(wallet.length).toBe(0);
+  });
+
+  it('encrypt then decrypt wallet', async () => {
+    const wallet = new Wallet();
+    const password = 'qwerty';
+
+    wallet.create(5);
+    const addressFromWallet = wallet.accounts[0].address;
+    expect(wallet.length).toBe(5);
+
+    wallet.remove(2);
+    expect(wallet.length).toBe(4);
+
+    const keystore = await wallet.encrypt(password);
+    expect(wallet.length).toBe(4);
+
+    wallet.clear();
+    expect(wallet.length).toBe(0);
+
+    await wallet.decrypt(keystore, password);
+    expect(wallet.length).toBe(4);
+
+    const addressFromKeystore = wallet.accounts[0].address;
+    expect(addressFromKeystore).toEqual(addressFromWallet);
+  }, 10000);
 
   it('should create correct accounts from mnemonic', () => {
     const mnemonic = 'profit gather crucial census birth effort clinic roast harvest rebuild hidden bamboo';
