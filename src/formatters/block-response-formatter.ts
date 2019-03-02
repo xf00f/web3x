@@ -68,10 +68,10 @@ export interface BlockHeaderResponse {
   nonce: Buffer | null;
 }
 
-export interface BlockResponse extends BlockHeaderResponse {
+export interface BlockResponse<T = TransactionResponse | Buffer> extends BlockHeaderResponse {
   totalDifficulty: string;
   size: number;
-  transactions: (TransactionResponse | Buffer)[];
+  transactions: T[];
   uncles: string[];
 }
 

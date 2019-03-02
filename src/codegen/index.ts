@@ -254,7 +254,7 @@ function getTupleType(components: AbiInput[], returnValue: boolean): ts.TypeLite
 
 function getTsTypeFromSolidityType(input: AbiInput, returnValue: boolean) {
   const { type } = input;
-  const isArray = /\[\]$/.test(type);
+  const isArray = /\[\d*\]$/.test(type);
   const baseSolType = isArray ? type.substr(0, type.length - 2) : type;
   const isTuple = baseSolType === 'tuple';
   const baseTsType = isTuple ? getTupleType(input.components, returnValue) : getBaseType(input.type, returnValue);

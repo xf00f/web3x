@@ -20,7 +20,7 @@ describe('evm provider e2e tests', () => {
     await provider.loadWallet(wallet);
 
     eth = new Eth(provider);
-    daiContract = new DaiContract(eth);
+    daiContract = new DaiContract(eth, undefined, { gasPrice });
 
     eth.defaultFromAddress = account1;
   });
@@ -36,7 +36,7 @@ describe('evm provider e2e tests', () => {
     // Mint some DAI into account1.
     await daiContract.methods
       .mint(toWei('1000', 'ether'))
-      .send({ gasPrice })
+      .send()
       .getReceipt();
 
     expect(await daiContract.methods.balanceOf(account1).call()).toBe(toWei('1000', 'ether'));
@@ -45,7 +45,7 @@ describe('evm provider e2e tests', () => {
     // Approve account2 to transfer the minted funds to itself.
     await daiContract.methods
       .approve(account2, toWei('1000', 'ether'))
-      .send({ gasPrice })
+      .send()
       .getReceipt();
 
     expect(await daiContract.methods.allowance(account1, account2).call()).toBe(toWei('1000', 'ether'));
@@ -53,7 +53,7 @@ describe('evm provider e2e tests', () => {
     // Transfer 600 to account2.
     await daiContract.methods
       .transferFrom(account1, account2, toWei('600', 'ether'))
-      .send({ from: account2, gasPrice })
+      .send({ from: account2 })
       .getReceipt();
 
     expect(await daiContract.methods.allowance(account1, account2).call()).toBe(toWei('400', 'ether'));
@@ -63,7 +63,7 @@ describe('evm provider e2e tests', () => {
     // Transfer 400 to account2.
     const transferReceipt = await daiContract.methods
       .transferFrom(account1, account2, toWei('400', 'ether'))
-      .send({ from: account2, gasPrice })
+      .send({ from: account2 })
       .getReceipt();
 
     const transferEvent = transferReceipt.events!.Transfer[0].returnValues;
@@ -89,12 +89,12 @@ describe('evm provider e2e tests', () => {
   it('should receive Transfer event', async done => {
     await daiContract
       .deploy(utf8ToHex('xf00f'))
-      .send({ gasPrice })
+      .send()
       .getReceipt();
 
     await daiContract.methods
       .mint(toWei('1000', 'ether'))
-      .send({ gasPrice })
+      .send()
       .getReceipt();
 
     const sub = daiContract.events.Transfer({}, (err, log) => {
@@ -110,7 +110,7 @@ describe('evm provider e2e tests', () => {
 
     await daiContract.methods
       .transfer(account2, toWei('600', 'ether'))
-      .send({ gasPrice })
+      .send()
       .getReceipt();
   });
 });

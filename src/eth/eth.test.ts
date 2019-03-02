@@ -16,6 +16,7 @@
 */
 
 import { Address } from '../address';
+import { RawBlockHeaderResponse, RawBlockResponse, RawTransactionResponse } from '../formatters';
 import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
 import { hexToBuffer, numberToHex } from '../utils';
 import { Eth } from './eth';
@@ -30,7 +31,7 @@ describe('eth', () => {
     gasPrice: 100,
     gas: 100,
   };
-  const blockHeader = {
+  const blockHeader: RawBlockHeaderResponse = {
     hash: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
     parentHash: '0x83ffb245cfced97ccc5c75253d6960376d6c6dea93647397a543a72fdaea5265',
     miner: '0xdcc6960376d6c6dea93647383ffb245cfced97cf',
@@ -40,13 +41,32 @@ describe('eth', () => {
     sha3Uncles: '0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347',
     logsBloom: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
     difficulty: '0x3e8',
-    totalDifficulty: '0x3e8',
     number: '0x11',
     gasLimit: '0x3e8',
     gasUsed: '0x3e8',
     timestamp: '0x3e8',
     extraData: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
     nonce: '0xd6960376d6c6dea93647383ffb245cfced97ccc5c7525397a543a72fdaea5265',
+  };
+  const tx: RawTransactionResponse = {
+    input: '0x3454645634534',
+    from: '0x11f4d0A3c12e86B4b5F39B213F7E19D048276DAe',
+    to: '0x11f4d0a3c12e86b4b5f39b213f7e19d048276dae',
+    value: '0x3e8',
+    gas: '0x3e8',
+    gasPrice: '0x3e8',
+    nonce: '0xb',
+    transactionIndex: '0x1',
+    blockNumber: '0x10',
+    blockHash: '0xc9b9cdc2092a9d6589d96662b1fd6949611163fb3910cf8a173cd060f17702f9',
+    hash: '0xd9b9cdc2092a9d6589d96662b1fd6949611163fb3910cf8a173cd060f17702f9',
+    v: 'v',
+    r: 'r',
+    s: 's',
+  };
+  const block: RawBlockResponse = {
+    ...blockHeader,
+    totalDifficulty: '0x3e8',
     size: '0x3e8',
     transactions: [],
     uncles: [],
@@ -57,7 +77,7 @@ describe('eth', () => {
     mockEthereumProvider = new MockEthereumProvider();
   });
 
-  it('should return a promise and resolve it', async () => {
+  it('should successfully make call and return response', async () => {
     const eth = new Eth(mockEthereumProvider);
 
     mockEthereumProvider.send.mockResolvedValue('0x1234567453543456321456321');
@@ -67,7 +87,7 @@ describe('eth', () => {
     expect(result).toEqual('0x1234567453543456321456321');
   });
 
-  it('should return a promise and fail it', async () => {
+  it('should fail call due to provider returning error', async () => {
     const eth = new Eth(mockEthereumProvider);
 
     mockEthereumProvider.send.mockRejectedValue({
@@ -81,7 +101,7 @@ describe('eth', () => {
     });
   });
 
-  it('should fill in gasPrice if not given', async () => {
+  it('should send transaction and fill in gasPrice if not given', async () => {
     const eth = new Eth(mockEthereumProvider);
 
     // eth_gasPrice
@@ -110,7 +130,7 @@ describe('eth', () => {
     ]);
   });
 
-  it('should get receipt', async () => {
+  it('should send transaction, subscribe, wait for block and get receipt', async () => {
     mockEthereumProvider.send.mockImplementationOnce(async method => {
       expect(method).toBe('eth_sendTransaction');
       return '0x1234567453543456321456321';
@@ -162,7 +182,7 @@ describe('eth', () => {
     });
   });
 
-  it('should fail after no receipt after 50 blocks', async () => {
+  it('should send transaction and fail after no receipt after 50 blocks', async () => {
     mockEthereumProvider.send.mockImplementationOnce(async method => {
       expect(method).toBe('eth_sendTransaction');
       return '0x1234567453543456321456321';
@@ -194,7 +214,7 @@ describe('eth', () => {
     await expect(eth.sendTransaction(basicTx).getReceipt()).rejects.toBeInstanceOf(Error);
   });
 
-  it('should receive emitted confirmation receipts', async () => {
+  it('should send transaction, subscribe, and receive emitted confirmation receipts', async () => {
     mockEthereumProvider.send.mockImplementationOnce(async method => {
       expect(method).toBe('eth_sendTransaction');
       return '0x1234567453543456321456321';
@@ -259,5 +279,41 @@ describe('eth', () => {
     });
 
     expect(confCount).toBe(10);
+  });
+
+  it('should get block with transaction hash in response', async () => {
+    const testBlock = {
+      ...block,
+      transactions: ['0xd9b9cdc2092a9d6589d96662b1fd6949611163fb3910cf8a173cd060f17702f9'],
+    };
+
+    mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
+      expect(method).toBe('eth_getBlockByNumber');
+      expect(params).toEqual(['0x0', false]);
+      return testBlock;
+    });
+
+    const eth = new Eth(mockEthereumProvider);
+    const resultBlock = await eth.getBlock(0);
+
+    expect(resultBlock.transactions[0]).toEqual(hexToBuffer(testBlock.transactions[0]));
+  });
+
+  it('should get block with transaction response in response', async () => {
+    const testBlock = {
+      ...block,
+      transactions: [tx],
+    };
+
+    mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
+      expect(method).toBe('eth_getBlockByNumber');
+      expect(params).toEqual(['0x0', true]);
+      return testBlock;
+    });
+
+    const eth = new Eth(mockEthereumProvider);
+    const resultBlock = await eth.getBlock(0, true);
+
+    expect(resultBlock.transactions[0].blockNumber).toBe(16);
   });
 });

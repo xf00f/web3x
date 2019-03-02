@@ -131,19 +131,24 @@ export class Eth {
     return await this.send(this.request.getCode(address, block));
   }
 
-  public async getBlock(
-    block: BlockType | BlockHash,
-    returnTransactionObjects: boolean = false,
-  ): Promise<BlockResponse> {
-    return await this.send(this.request.getBlock(block, returnTransactionObjects));
+  public async getBlock(block: BlockType | BlockHash, returnTxs?: false): Promise<BlockResponse<Buffer>>;
+  public async getBlock(block: BlockType | BlockHash, returnTxs?: true): Promise<BlockResponse<TransactionResponse>>;
+  public async getBlock(block: BlockType | BlockHash, returnTxs?: boolean): Promise<BlockResponse> {
+    return await this.send(this.request.getBlock(block, returnTxs));
   }
 
   public async getUncle(
     block: BlockType | BlockHash,
     uncleIndex: number,
-    returnTransactionObjects: boolean = false,
-  ): Promise<BlockResponse> {
-    return await this.send(this.request.getUncle(block, uncleIndex, returnTransactionObjects));
+    returnTxs?: false,
+  ): Promise<BlockResponse<Buffer>>;
+  public async getUncle(
+    block: BlockType | BlockHash,
+    uncleIndex: number,
+    returnTxs?: true,
+  ): Promise<BlockResponse<TransactionResponse>>;
+  public async getUncle(block: BlockType | BlockHash, uncleIndex: number, returnTxs?: boolean): Promise<BlockResponse> {
+    return await this.send(this.request.getUncle(block, uncleIndex, returnTxs));
   }
 
   public async getBlockTransactionCount(block: BlockType | BlockHash): Promise<number> {
