@@ -18,7 +18,8 @@ export async function handleGetTransactionReceipt(
     return null;
   }
 
-  const tx = await blockchain.getMinedTransaction(txHash);
+  // If there is a receipt, we can assume tx exists.
+  const { blockHash, blockHeader, tx, txIndex } = (await blockchain.getMinedTransaction(txHash))!;
   const { to, nonce } = tx;
   // TODO: Store from in tx so no need to recover? This is slow.
   const from = recoverTransaction(tx);
@@ -29,10 +30,10 @@ export async function handleGetTransactionReceipt(
     id: null,
     removed: false,
     logIndex,
-    blockNumber: 0,
-    blockHash: '0',
+    blockNumber: blockHeader.number,
+    blockHash: bufferToHex(blockHash),
     transactionHash,
-    transactionIndex: 0,
+    transactionIndex: txIndex,
     address: log.address,
     data: bufferToHex(log.data),
     topics: log.topics.map(bufferToHex),
@@ -40,9 +41,9 @@ export async function handleGetTransactionReceipt(
 
   const txReceipt = {
     transactionHash,
-    transactionIndex: 0,
-    blockHash: '0',
-    blockNumber: 0,
+    transactionIndex: txIndex,
+    blockHash: bufferToHex(blockHash),
+    blockNumber: blockHeader.number,
     from,
     to,
     cumulativeGasUsed: Number(cumulativeGasUsed),

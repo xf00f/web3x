@@ -67,6 +67,7 @@ type GetContractEvents<T> = T extends ContractDefinition
 export class Contract<T extends ContractDefinition | void = void> {
   public readonly methods: GetContractMethods<T>;
   public readonly events: GetContractEvents<T>;
+  private linkTable: { [name: string]: Address } = {};
 
   constructor(
     private eth: Eth,
@@ -78,12 +79,32 @@ export class Contract<T extends ContractDefinition | void = void> {
     this.events = this.buildEvents();
   }
 
+  public link(name: string, address: Address) {
+    this.linkTable[name] = address;
+  }
+
   public deployBytecode(data: Data, ...args: any[]) {
+    const linkedData = Object.entries(this.linkTable).reduce(
+      (data, [name, address]) =>
+        data.replace(
+          new RegExp(`_+${name}_+`, 'i'),
+          address
+            .toString()
+            .slice(2)
+            .toLowerCase(),
+        ),
+      data,
+    );
+
+    if (linkedData.includes('_')) {
+      throw new Error('Bytecode has not been fully linked.');
+    }
+
     return new TxDeploy(
       this.eth,
       this.contractAbi.ctor,
       this.contractAbi,
-      data,
+      linkedData,
       args,
       this.defaultOptions,
       addr => (this.address = addr),

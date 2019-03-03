@@ -1,7 +1,7 @@
 import { sign } from '../../account/sign-transaction';
 import { TransactionRequest } from '../../formatters';
 import { TransactionHash } from '../../types';
-import { bufferToHex, sha3 } from '../../utils';
+import { sha3 } from '../../utils';
 import { Wallet } from '../../wallet';
 import { Blockchain } from '../blockchain';
 import { serializeTx, Tx, TxReceipt } from '../tx';
@@ -50,7 +50,7 @@ export async function handleSendTransaction(
 
   const txHash = sha3(serializeTx(tx));
 
-  setTimeout(async () => {
+  const mine = async () => {
     const result = await executeTransaction(worldState, tx, from);
 
     const receipt: TxReceipt = {
@@ -60,8 +60,14 @@ export async function handleSendTransaction(
       status: result.status,
     };
 
-    await blockchain.mineTransactions(await worldState.getStateRoot(), [tx], [receipt]);
-  }, blockDelay);
+    await blockchain.mineTransactions(await worldState.getStateRoot(), [tx], [receipt], [from]);
+  };
+
+  if (blockDelay) {
+    setTimeout(mine, blockDelay);
+  } else {
+    await mine();
+  }
 
   return txHash;
 }

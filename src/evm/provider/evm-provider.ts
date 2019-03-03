@@ -16,9 +16,11 @@ import { bufferToHex, numberToHex } from '../../utils';
 import { Wallet } from '../../wallet';
 import { Blockchain, BlockHeader } from '../blockchain';
 import { getAccountCode } from '../vm';
+import { getAccountTransactions } from '../vm/get-account-transactions';
 import { WorldState } from '../world';
 import { handleCall } from './handle-call';
 import { getLogs } from './handle-get-logs';
+import { handleGetTransactionByHash } from './handle-get-transaction';
 import { handleGetTransactionReceipt } from './handle-get-transaction-receipt';
 import { handleSendTransaction } from './handle-send-transaction';
 
@@ -81,6 +83,8 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
         return this.wallet ? this.wallet.currentAddresses() : [];
       case 'eth_gasPrice':
         return numberToHex(50000);
+      case 'net_version':
+        return numberToHex(666);
     }
 
     if (!params || !params[0]) {
@@ -101,8 +105,12 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
         );
       case 'eth_call':
         return bufferToHex(await handleCall(this.worldState, fromRawCallRequest(params[0])));
+      case 'eth_getTransactionCount':
+        return numberToHex(await getAccountTransactions(this.worldState, Address.fromString(params![0])));
       case 'eth_getTransactionReceipt':
         return await handleGetTransactionReceipt(this.blockchain, params[0]);
+      case 'eth_getTransactionByHash':
+        return await handleGetTransactionByHash(this.blockchain, params[0]);
       case 'eth_getCode':
         return bufferToHex(await getAccountCode(this.worldState, Address.fromString(params![0])));
       case 'eth_getLogs':
@@ -111,6 +119,8 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
         return numberToHex(this.subscribe(params[0], params[1]));
       case 'eth_unsubscribe':
         return this.unsubscribe(params[0]);
+      default:
+        throw new Error(`Unsupported method ${method}`);
     }
   }
 

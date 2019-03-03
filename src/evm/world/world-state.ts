@@ -4,7 +4,8 @@ import { Address } from '../../address';
 import { sha3Buffer } from '../../utils';
 import { Trie } from '../trie';
 import { AccountState } from './account-state';
-import { EvmAccount, EvmAccountFactory, EvmEcdsaRecoveryAccount } from './evm-account';
+import { EvmAccount } from './evm-account';
+import { createPrecompilesFromDb, EvmAccountFactory } from './evm-account-factory';
 
 type Immutable<T> = { readonly [P in keyof T]: T[P] };
 
@@ -33,8 +34,9 @@ export class WorldState {
   }
 
   private async installPrecompiledContracts() {
-    const ecdsaRecovery = EvmEcdsaRecoveryAccount.fromDb(this.accounts.db);
-    await this.storeAccount(ecdsaRecovery);
+    for (const account of createPrecompilesFromDb(this.accounts.db)) {
+      await this.storeAccount(account);
+    }
     await this.saveStateRoot();
   }
 
@@ -76,7 +78,7 @@ export class WorldState {
 
   public async loadImmutableAccount(address: Address) {
     const account: Immutable<EvmAccount> | undefined =
-      (await this.loadCheckpointAccount(address)) || (await this.loadPersistedAccount(address));
+      this.loadCheckpointAccount(address) || (await this.loadPersistedAccount(address));
     return account;
   }
 
@@ -87,7 +89,7 @@ export class WorldState {
 
     address = address instanceof Address ? address : new Address(toBufferBE(address, 20));
 
-    const account = (await this.loadCheckpointAccount(address)) || (await this.loadPersistedAccount(address));
+    const account = this.loadCheckpointAccount(address) || (await this.loadPersistedAccount(address));
     if (!account) {
       return;
     }
@@ -108,7 +110,7 @@ export class WorldState {
     }
     if (index > 0) {
       const { nonce, balance, storage, code } = this.checkpoints[index][addrStr];
-      return new EvmAccount(address, nonce, balance, storage, code);
+      return EvmAccountFactory(address, nonce, balance, storage, code);
     }
     return this.checkpoints[0][addrStr];
   }
