@@ -35,6 +35,7 @@ export interface SendOptions {
   gasPrice?: string | number;
   gas?: number;
   value?: number | string;
+  nonce?: number | string;
 }
 
 export interface EstimateOptions {
@@ -119,6 +120,7 @@ export class Tx implements TxCall, TxSend {
       gas: options.gas || this.defaultOptions.gas,
       value: options.value,
       data: this.encodeABI(),
+      nonce: options.nonce,
     };
   }
 }
