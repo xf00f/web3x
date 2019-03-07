@@ -26,6 +26,7 @@ import { handleSendTransaction } from './handle-send-transaction';
 
 export interface EvmProviderOptions {
   blockDelay?: number;
+  wallet?: Wallet;
 }
 
 export class EvmProvider extends EventEmitter implements EthereumProvider {
@@ -39,6 +40,7 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
     private options: EvmProviderOptions = {},
   ) {
     super();
+    this.wallet = options.wallet;
   }
 
   public static fromEvmProvider(provider: EvmProvider, options?: EvmProviderOptions) {
