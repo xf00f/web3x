@@ -18,7 +18,6 @@
 import { isArray } from 'util';
 import { EventLog, LogResponse } from '../../formatters';
 import { abiCoder } from '../abi-coder';
-import { decodeEvent } from '../decode-event-abi';
 import { ContractEntryDefinition } from './contract-abi-definition';
 import { ContractEntry } from './contract-entry';
 
@@ -59,6 +58,22 @@ export class ContractEventEntry extends ContractEntry {
   }
 
   public decodeEvent(log: LogResponse): EventLog<any> {
-    return decodeEvent(this.entry, log);
+    const { data = '', topics = [], ...formattedLog } = log;
+    const { anonymous, inputs = [], name = '' } = this.entry;
+
+    const argTopics = anonymous ? topics : topics.slice(1);
+    const returnValues = abiCoder.decodeLog(inputs, data, argTopics);
+    delete returnValues.__length__;
+
+    return {
+      ...formattedLog,
+      event: name,
+      returnValues,
+      signature: anonymous || !topics[0] ? null : topics[0],
+      raw: {
+        data,
+        topics,
+      },
+    };
   }
 }

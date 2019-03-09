@@ -17,7 +17,6 @@
 
 import { Address } from '../address';
 import { Eth, SendTx } from '../eth';
-import { hexToBuffer } from '../utils';
 import { ContractAbi, ContractFunctionEntry } from './abi';
 import { SentDeployContractTx } from './sent-deploy-contract-tx';
 import { DefaultOptions, SendOptions, Tx } from './tx';
@@ -27,7 +26,7 @@ export class TxDeploy extends Tx {
     eth: Eth,
     contractEntry: ContractFunctionEntry,
     contractAbi: ContractAbi,
-    private deployData: string,
+    private deployData: Buffer,
     args: any[] = [],
     defaultOptions: DefaultOptions = {},
     private onDeployed: (address: Address) => void = x => x,
@@ -41,6 +40,6 @@ export class TxDeploy extends Tx {
   }
 
   public encodeABI() {
-    return hexToBuffer(this.deployData + this.contractEntry.encodeParameters(this.args).replace('0x', ''));
+    return Buffer.concat([this.deployData, this.contractEntry.encodeParameters(this.args)]);
   }
 }

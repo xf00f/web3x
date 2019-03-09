@@ -35,7 +35,7 @@ web3x solves the above issues and more.
 
 - It's pure TypeScript and generates contract types from ABIs.
 - It's small, with a minimum sized contract interaction weighing in at ~150k uncompressed.
-- It's expanding with additional features. For example the `EvmProvider` which provides a full inplace EVM implementation for exeuting contract code in your DAPP for simplified development workflows.
+- It's expanding with additional features. For example the `EvmProvider` which provides a full inplace EVM implementation for executing contract code in your DAPP for simplified development workflows.
 
 web3x also adopts a lean, functional design, and resolves many out the outstanding issues in the web3.js repository.
 It is under active development, view the [CHANGELOG](CHANGELOG.md) to see updates and planned roadmap.

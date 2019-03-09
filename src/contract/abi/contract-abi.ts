@@ -17,6 +17,7 @@
 
 import { ContractAbiDefinition, ContractEventEntry, ContractFunctionEntry } from '.';
 import { LogResponse } from '../../formatters';
+import { bufferToHex } from '../../utils';
 
 export class ContractAbi {
   public functions: ContractFunctionEntry[];
@@ -39,11 +40,17 @@ export class ContractAbi {
     return this.events.find(abiDef => abiDef.signature === log.topics[0]);
   }
 
-  public decodeAnyEvent(log: LogResponse) {
+  public decodeEvent(log: LogResponse) {
     const event = this.findEntryForLog(log);
     if (!event) {
       throw new Error(`Unable to find matching event signature for log: ${log.id}`);
     }
     return event.decodeEvent(log);
+  }
+
+  public decodeFunctionData(data: Buffer) {
+    const funcSig = bufferToHex(data.slice(0, 4));
+    const func = this.functions.find(f => f.signature === funcSig);
+    return func ? func.decodeParameters(data.slice(4)) : undefined;
   }
 }

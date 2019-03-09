@@ -42,7 +42,7 @@ export class SentContractTx extends SentTransaction {
       if (isAnonymous(log)) {
         return a;
       }
-      const ev = this.contractAbi.decodeAnyEvent(log);
+      const ev = this.contractAbi.decodeEvent(log);
       a[ev.event] = a[ev.event] || [];
       a[ev.event].push(ev);
       return a;
