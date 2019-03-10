@@ -28,7 +28,7 @@ describe('evm provider e2e tests', () => {
   it('should execute contract code', async () => {
     const deployReceipt = await daiContract
       .deploy(utf8ToHex('xf00f'))
-      .send({ gasPrice })
+      .send()
       .getReceipt();
 
     expect(deployReceipt.events!.LogSetOwner[0].returnValues.owner).toEqual(account1);

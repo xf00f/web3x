@@ -14,7 +14,7 @@ class GasOp implements OpCode {
   }
 
   public handle(context: EvmContext) {
-    context.stack.push(context.gas);
+    context.stack.push(context.availableGas);
     context.ip += this.bytes;
   }
 }

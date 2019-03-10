@@ -9,8 +9,10 @@ export async function messageCall(
   origin: Address,
   recipient: Address,
   codeFrom: Address,
-  value: bigint,
-  gas: bigint,
+  availableGas: bigint,
+  gasPrice: bigint,
+  transferValue: bigint,
+  executionValue: bigint,
   data: Buffer,
   callDepth: number,
   modify: boolean,
@@ -22,8 +24,8 @@ export async function messageCall(
   const codeAccount = (await worldState.loadAccount(codeFrom))!;
   const txSubstrate = new TxSubstrate();
 
-  recipientAccount.balance += value;
-  senderAccount.balance -= value;
+  recipientAccount.balance += transferValue;
+  senderAccount.balance -= transferValue;
 
   const callContext = new EvmContext(
     worldState,
@@ -32,8 +34,10 @@ export async function messageCall(
     origin,
     sender,
     recipient,
-    value,
-    gas,
+    transferValue,
+    executionValue,
+    availableGas,
+    gasPrice,
     recipientAccount.storage,
     callDepth,
     modify,
@@ -74,6 +78,8 @@ export async function staticMessageCall(
     origin,
     sender,
     recipient,
+    BigInt(0),
+    BigInt(0),
     BigInt(0),
     BigInt(0),
     recipientAccount.storage,

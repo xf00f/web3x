@@ -4,10 +4,10 @@ import { Address } from '../../address';
 import { EvmContext } from '../vm/evm-context';
 import { messageCall } from '../vm/message-call';
 
-class CallOp implements OpCode {
-  public readonly code = 0xf1;
-  public readonly mnemonic = 'CALL';
-  public readonly description = 'Message-call into an account';
+class StaticCallOp implements OpCode {
+  public readonly code = 0xfa;
+  public readonly mnemonic = 'STATICCALL';
+  public readonly description = 'Static message-call into an account';
   public readonly gas = 0;
   public readonly bytes = 1;
 
@@ -16,11 +16,10 @@ class CallOp implements OpCode {
   }
 
   public async handle(context: EvmContext) {
-    const { stack, worldState, memory, origin, executor, gasPrice, callDepth, modify } = context;
+    const { stack, worldState, memory, origin, executor, gasPrice, callDepth } = context;
 
     const gas = stack.pop();
     const addr = stack.pop();
-    const value = stack.pop();
     const inOffset = stack.pop();
     const inSize = stack.pop();
     const retOffset = stack.pop();
@@ -37,11 +36,11 @@ class CallOp implements OpCode {
       recipient,
       gas,
       gasPrice,
-      value,
-      value,
+      BigInt(0),
+      BigInt(0),
       calldata,
       callDepth + 1,
-      modify,
+      false,
     );
 
     if (!status) {
@@ -59,4 +58,4 @@ class CallOp implements OpCode {
   }
 }
 
-export const Call = new CallOp();
+export const StaticCall = new StaticCallOp();

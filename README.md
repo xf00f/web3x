@@ -35,7 +35,7 @@ web3x solves the above issues and more.
 
 - It's pure TypeScript and generates contract types from ABIs.
 - It's small, with a minimum sized contract interaction weighing in at ~150k uncompressed.
-- It's expanding with additional features. For example the `EvmProvider` which provides a full inplace EVM implementation for exeuting contract code in your DAPP for simplified development workflows.
+- It's expanding with additional features. For example the `EvmProvider` which provides a full inplace EVM implementation for executing contract code in your DAPP for simplified development workflows.
 
 web3x also adopts a lean, functional design, and resolves many out the outstanding issues in the web3.js repository.
 It is under active development, view the [CHANGELOG](CHANGELOG.md) to see updates and planned roadmap.
@@ -214,63 +214,74 @@ import { toWei } from 'web3x-es/utils';
 import { Wallet } from 'web3x-es/wallet';
 import { DaiContract } from './contracts/DaiContract';
 
-async function getEvmProvider(fresh: boolean = false) {
-  if (fresh) {
-    return await getBootstrappedEvmProvider();
-  }
+async function getComponents(fresh: boolean = false) {
+  const daiContractAddrStr = window.localStorage.getItem('DaiContractAddress');
+  const daiContractAddr = !fresh && daiContractAddrStr ? Address.fromString(daiContractAddrStr) : await bootstrap();
 
-  // Blocks will be mined with a 1000ms delay. Leave this option out for instant mining.
-  const provider = await EvmProvider.fromLocalDb('testdb', { blockDelay: 1000 });
-  provider.wallet = await Wallet.fromLocalStorage('', 'provider-wallet');
-  return provider;
+  // Load the wallet this provider was initialised with.
+  const wallet = await Wallet.fromLocalStorage('', 'provider-wallet');
+
+  // Blocks will be mined with a 1000ms delay.
+  const provider = await EvmProvider.fromLocalDb('testdb', { blockDelay: 1000, wallet });
+  const eth = new Eth(provider);
+  const daiContract = new DaiContract(eth, daiContractAddr, { gasPrice: 50000 });
+
+  return { provider, eth, daiContract };
 }
 
-async function getBootstrappedEvmProvider() {
+async function bootstrap() {
   console.log('Erasing existing database.');
   await EvmProvider.eraseLocalDb('testdb');
 
-  const provider = await EvmProvider.fromLocalDb('testdb', { blockDelay: 1000 });
+  const provider = await EvmProvider.fromLocalDb('testdb');
   const eth = new Eth(provider);
 
   const wallet = new Wallet(10);
   await wallet.saveToLocalStorage('', 'provider-wallet');
+
+  // Create all wallet accounts on the simulated chain. Will preload ETH into each account.
   await provider.loadWallet(wallet);
 
   const bootstrapAccount = wallet.get(0)!.address;
   const recipientAccount = wallet.get(1)!.address;
-  const amount = toWei('1000', 'ether');
 
   eth.defaultFromAddress = bootstrapAccount;
   console.log(`Bootstrap account: ${bootstrapAccount}`);
 
-  const daiContract = new DaiContract(eth);
-  const gasPrice = 50000;
+  const daiContract = new DaiContract(eth, undefined, { gasPrice: 50000 });
 
   // Deploy the contract.
   await daiContract
-    .deploy(utf8ToHex('xf00f'))
-    .send({ gasPrice })
+    .deploy(utf8ToHex('xf00f token'))
+    .send()
     .getReceipt();
   console.log(`Deployed DAI contract at ${daiContract.address!}`);
 
   // Mint some DAI into the bootstrap account.
   await daiContract.methods
-    .mint(bootstrapAccount, amount)
-    .send({ gasPrice })
+    .mint(bootstrapAccount, toWei('1000', 'ether'))
+    .send()
     .getReceipt();
 
   console.log(`Minted 1000 DAI into ${bootstrapAccount}`);
 
-  // Transfer funds to receipient address.
+  window.localStorage.setItem('DaiContractAddress', daiContract.address!.toString());
+  return daiContract.address!;
+}
+
+async function main() {
+  const { provider, eth, daiContract } = getComponents();
+
+  // Transfer funds to recipient address.
   await daiContract.methods
-    .transfer(recipientAccount, amount)
-    .send({ gasPrice })
+    .transfer(recipientAccount, toWei('1000', 'ether'))
+    .send()
     .getReceipt();
 
-  console.log(`Funded ${recipientAccount} with 1000 DAI`);
-
-  return provider;
+  console.log(`Transferred 1000 DAI to ${recipientAccount}`);
 }
+
+main().catch(console.error);
 ```
 
 ## Differences

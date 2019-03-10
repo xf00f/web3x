@@ -82,6 +82,7 @@
     "node-http-xhr": "^1.3.4",
     "pbkdf2": "^3.0.17",
     "randombytes": "^2.0.6",
+    "rustbn.js": "^0.2.0",
     "swarm-js": "^0.1.39",
     "tslib": "^1.9.3",
     "utf8": "^3.0.0",

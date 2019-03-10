@@ -13,7 +13,7 @@ class CallValueOp implements OpCode {
   }
 
   public handle(context: EvmContext) {
-    context.stack.push(context.value);
+    context.stack.push(context.executionValue);
     context.ip += this.bytes;
   }
 }

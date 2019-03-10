@@ -20,6 +20,7 @@ import { Eth } from '../eth';
 import { EventLog, fromRawLogResponse, LogRequest, LogResponse, RawLogResponse, toRawLogRequest } from '../formatters';
 import { Subscription } from '../subscriptions';
 import { Data } from '../types';
+import { hexToBuffer } from '../utils';
 import { ContractAbi, ContractFunctionEntry } from './abi';
 import { Tx, TxFactory } from './tx';
 import { TxDeploy } from './tx-deploy';
@@ -67,6 +68,7 @@ type GetContractEvents<T> = T extends ContractDefinition
 export class Contract<T extends ContractDefinition | void = void> {
   public readonly methods: GetContractMethods<T>;
   public readonly events: GetContractEvents<T>;
+  private linkTable: { [name: string]: Address } = {};
 
   constructor(
     private eth: Eth,
@@ -78,12 +80,32 @@ export class Contract<T extends ContractDefinition | void = void> {
     this.events = this.buildEvents();
   }
 
+  public link(name: string, address: Address) {
+    this.linkTable[name] = address;
+  }
+
   public deployBytecode(data: Data, ...args: any[]) {
+    const linkedData = Object.entries(this.linkTable).reduce(
+      (data, [name, address]) =>
+        data.replace(
+          new RegExp(`_+${name}_+`, 'i'),
+          address
+            .toString()
+            .slice(2)
+            .toLowerCase(),
+        ),
+      data,
+    );
+
+    if (linkedData.includes('_')) {
+      throw new Error('Bytecode has not been fully linked.');
+    }
+
     return new TxDeploy(
       this.eth,
       this.contractAbi.ctor,
       this.contractAbi,
-      data,
+      hexToBuffer(linkedData),
       args,
       this.defaultOptions,
       addr => (this.address = addr),
@@ -113,7 +135,7 @@ export class Contract<T extends ContractDefinition | void = void> {
   public async getPastEvents(event: Events<T> & 'allevents', options: LogRequest = {}): Promise<EventLog<any>[]> {
     const logOptions = this.getLogOptions(event, options);
     const result = await this.eth.getPastLogs(logOptions);
-    return result.map(log => this.contractAbi.decodeAnyEvent(log));
+    return result.map(log => this.contractAbi.decodeEvent(log));
   }
 
   private on(event: string, options: LogRequest = {}, callback?: (err, res, sub) => void) {
@@ -128,7 +150,7 @@ export class Contract<T extends ContractDefinition | void = void> {
       this.eth.provider,
       (result, sub) => {
         const output = fromRawLogResponse(result);
-        const eventLog = this.contractAbi.decodeAnyEvent(output);
+        const eventLog = this.contractAbi.decodeEvent(output);
         sub.emit(output.removed ? 'changed' : 'data', eventLog);
         if (callback) {
           callback(undefined, eventLog, sub);
@@ -148,7 +170,7 @@ export class Contract<T extends ContractDefinition | void = void> {
         .getPastLogs(logOptions)
         .then(logs => {
           logs.forEach(result => {
-            const output = this.contractAbi.decodeAnyEvent(result);
+            const output = this.contractAbi.decodeEvent(result);
             subscription.emit('data', output);
           });
           subscription.subscribe();

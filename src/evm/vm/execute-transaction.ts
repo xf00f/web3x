@@ -26,7 +26,7 @@ export async function executeTransaction(worldState: WorldState, tx: Tx, sender?
   await worldState.commit();
 
   const result = to
-    ? await messageCall(worldState, sender, sender, to, to, value, gasLimit, dataOrInit, 0, true)
+    ? await messageCall(worldState, sender, sender, to, to, gasLimit, gasPrice, value, value, dataOrInit, 0, true)
     : await contractCreation(worldState, sender, sender, gasLimit, gasPrice, value, dataOrInit, 0, true);
 
   return result;

@@ -11,6 +11,7 @@ import { CallDataSize } from './calldatasize';
 import { Caller } from './caller';
 import { CallValue } from './callvalue';
 import { CopyCode } from './copycode';
+import { DelegateCall } from './delegatecall';
 import { Div } from './div';
 import { DupOps } from './dup';
 import { Eq } from './eq';
@@ -29,6 +30,7 @@ import { Mload } from './mload';
 import { Mod } from './mod';
 import { Mstore } from './mstore';
 import { Mul } from './mul';
+import { MulMod } from './mulmod';
 import { Not } from './not';
 import { Or } from './or';
 import { Pop } from './pop';
@@ -42,6 +44,7 @@ import { Sha3 } from './sha3';
 import { Sload } from './sload';
 import { Slt } from './slt';
 import { Sstore } from './sstore';
+import { StaticCall } from './staticcall';
 import { Stop } from './stop';
 import { Sub } from './sub';
 import { SwapOps } from './swap';
@@ -76,6 +79,7 @@ const opCodes: OpCode[] = [
   CallDataSize,
   CallValue,
   CopyCode,
+  DelegateCall,
   Div,
   Eq,
   Exp,
@@ -89,11 +93,13 @@ const opCodes: OpCode[] = [
   Jumpi,
   Lt,
   Mul,
+  MulMod,
   Mod,
   Or,
   Pop,
   Sgt,
   Slt,
+  StaticCall,
   Timestamp,
   Mload,
   Mstore,

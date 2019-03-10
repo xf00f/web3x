@@ -252,13 +252,16 @@ function getTupleType(components: AbiInput[], returnValue: boolean): ts.TypeLite
   );
 }
 
-function getTsTypeFromSolidityType(input: AbiInput, returnValue: boolean) {
-  const { type } = input;
-  const isArray = /\[\d*\]$/.test(type);
-  const baseSolType = isArray ? type.substr(0, type.length - 2) : type;
-  const isTuple = baseSolType === 'tuple';
-  const baseTsType = isTuple ? getTupleType(input.components, returnValue) : getBaseType(input.type, returnValue);
-  return isArray ? ts.createArrayTypeNode(baseTsType) : baseTsType;
+function getTsTypeFromSolidityType(input: AbiInput, returnValue: boolean, type?: string) {
+  type = type || input.type;
+  const arrayMatched = type.match(/(.+)\[\d*\]$/);
+  if (arrayMatched) {
+    const tsType = getTsTypeFromSolidityType(input, returnValue, arrayMatched[1]);
+    return ts.createArrayTypeNode(tsType);
+  } else {
+    const isTuple = type === 'tuple';
+    return isTuple ? getTupleType(input.components, returnValue) : getBaseType(type, returnValue);
+  }
 }
 
 function makeParameter(input: AbiInput, index: number) {
