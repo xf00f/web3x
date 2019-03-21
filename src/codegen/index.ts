@@ -66,7 +66,6 @@ function makeImports(name: string, web3xPath: string) {
           ts.createImportSpecifier(undefined, ts.createIdentifier('ContractOptions')),
           ts.createImportSpecifier(undefined, ts.createIdentifier('TxCall')),
           ts.createImportSpecifier(undefined, ts.createIdentifier('TxSend')),
-          ts.createImportSpecifier(undefined, ts.createIdentifier('TxDeploy')),
           ts.createImportSpecifier(undefined, ts.createIdentifier('EventSubscriptionFactory')),
         ]),
       ),
