@@ -226,7 +226,7 @@ async function getComponents(fresh: boolean = false) {
   const eth = new Eth(provider);
   const daiContract = new DaiContract(eth, daiContractAddr, { gasPrice: 50000 });
 
-  return { provider, eth, daiContract };
+  return { provider, eth, daiContract, wallet };
 }
 
 async function bootstrap() {
@@ -243,10 +243,7 @@ async function bootstrap() {
   await provider.loadWallet(wallet);
 
   const bootstrapAccount = wallet.get(0)!.address;
-  const recipientAccount = wallet.get(1)!.address;
-
   eth.defaultFromAddress = bootstrapAccount;
-  console.log(`Bootstrap account: ${bootstrapAccount}`);
 
   const daiContract = new DaiContract(eth, undefined, { gasPrice: 50000 });
 
@@ -270,15 +267,18 @@ async function bootstrap() {
 }
 
 async function main() {
-  const { provider, eth, daiContract } = getComponents();
+  const { provider, eth, daiContract, wallet } = getComponents();
+
+  const from = wallet.get(0)!.address;
+  const to = wallet.get(1)!.address;
 
   // Transfer funds to recipient address.
   await daiContract.methods
-    .transfer(recipientAccount, toWei('1000', 'ether'))
-    .send()
+    .transfer(to, toWei('1000', 'ether'))
+    .send({ from })
     .getReceipt();
 
-  console.log(`Transferred 1000 DAI to ${recipientAccount}`);
+  console.log(`Transferred 1000 DAI to ${to}`);
 }
 
 main().catch(console.error);
