@@ -1,7 +1,7 @@
 import BN from "bn.js";
 import { Address } from "../../address";
 import { EventLog, TransactionReceipt } from "../../formatters";
-import { Contract, ContractOptions, TxCall, TxSend, TxDeploy, EventSubscriptionFactory } from "../../contract";
+import { Contract, ContractOptions, TxCall, TxSend, EventSubscriptionFactory } from "../../contract";
 import { Eth } from "../../eth";
 import abi from "./TestNoCtorContractAbi";
 interface TestNoCtorContractEvents {

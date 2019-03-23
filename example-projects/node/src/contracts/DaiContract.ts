@@ -1,7 +1,7 @@
 import BN from "bn.js";
 import { Address } from "web3x/address";
 import { EventLog, TransactionReceipt } from "web3x/formatters";
-import { Contract, ContractOptions, TxCall, TxSend, TxDeploy, EventSubscriptionFactory } from "web3x/contract";
+import { Contract, ContractOptions, TxCall, TxSend, EventSubscriptionFactory } from "web3x/contract";
 import { Eth } from "web3x/eth";
 import abi from "./DaiContractAbi";
 export type MintEvent = {
