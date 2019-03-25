@@ -44,7 +44,7 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
   }
 
   public static fromEvmProvider(provider: EvmProvider, options?: EvmProviderOptions) {
-    return new EvmProvider(provider.worldState, provider.blockchain, options);
+    return new EvmProvider(provider.worldState, provider.blockchain, { wallet: provider.wallet, ...options });
   }
 
   public static async fromDb(db: LevelUp, options?: EvmProviderOptions) {
