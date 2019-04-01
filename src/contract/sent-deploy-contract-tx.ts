@@ -42,7 +42,7 @@ export class SentDeployContractTx extends SentContractTx {
 
     const code = await this.eth.getCode(receipt.contractAddress);
     if (code.length <= 2) {
-      throw new Error('Contract code could not be stored.');
+      throw new Error(`Contract code could not be stored at ${receipt.contractAddress}.`);
     }
 
     this.onDeployed(receipt.contractAddress);

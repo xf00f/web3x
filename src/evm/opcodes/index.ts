@@ -10,6 +10,7 @@ import { CallDataLoad } from './calldataload';
 import { CallDataSize } from './calldatasize';
 import { Caller } from './caller';
 import { CallValue } from './callvalue';
+import { CodeSize } from './codesize';
 import { CopyCode } from './copycode';
 import { DelegateCall } from './delegatecall';
 import { Div } from './div';
@@ -39,8 +40,12 @@ import { Return } from './return';
 import { ReturnDataCopy } from './returndatacopy';
 import { ReturnDataSize } from './returndatasize';
 import { Revert } from './revert';
+import { Rol } from './rol';
+import { Ror } from './ror';
 import { Sgt } from './sgt';
 import { Sha3 } from './sha3';
+import { Shl } from './shl';
+import { Shr } from './shr';
 import { Sload } from './sload';
 import { Slt } from './slt';
 import { Sstore } from './sstore';
@@ -78,6 +83,7 @@ const opCodes: OpCode[] = [
   CallDataLoad,
   CallDataSize,
   CallValue,
+  CodeSize,
   CopyCode,
   DelegateCall,
   Div,
@@ -97,7 +103,11 @@ const opCodes: OpCode[] = [
   Mod,
   Or,
   Pop,
+  Rol,
+  Ror,
   Sgt,
+  Shl,
+  Shr,
   Slt,
   StaticCall,
   Timestamp,

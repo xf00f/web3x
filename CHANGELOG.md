@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.7] - 2019-04-01
+
+- Added opcodes `SHR`, `SHL`, `ROR`, `ROL`, and `CODESIZE`.
+- Fixed edge case bug involving code deployment.
+
 ## [3.0.6] - 2019-03-25
 
 - `wallet` can be passed as option in `EvmProvider`.
@@ -119,6 +124,7 @@ All notable changes to this project will be documented in this file.
 
 - Initial release of Typescript port from web3.js.
 
+[3.0.7]: https://github.com/xf00f/web3x/compare/v3.0.6...v3.0.7
 [3.0.6]: https://github.com/xf00f/web3x/compare/v3.0.5...v3.0.6
 [3.0.5]: https://github.com/xf00f/web3x/compare/v3.0.4...v3.0.5
 [3.0.4]: https://github.com/xf00f/web3x/compare/v3.0.3...v3.0.4

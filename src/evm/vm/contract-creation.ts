@@ -46,7 +46,8 @@ export async function contractCreation(
   if (callContext.reverted) {
     await worldState.revert();
   } else {
-    contractAccount.code = callContext.returned;
+    const contractAccount = await worldState.loadAccount(contractAddress);
+    contractAccount!.code = callContext.returned;
     await worldState.commit();
   }
 
