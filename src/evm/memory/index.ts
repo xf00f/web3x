@@ -1,6 +1,7 @@
 import { toBigIntBE, toBufferBE } from 'bigint-buffer';
 
 export class EvmMemory {
+  private activeWords: bigint = BigInt(0);
   private memory: { [address: string]: number } = {};
 
   public loadByte(address: bigint) {
@@ -21,12 +22,19 @@ export class EvmMemory {
 
   public storeN(address: bigint, buffer: Buffer) {
     for (let i = 0; i < buffer.length; ++i) {
-      this.memory[(address + BigInt(i)).toString(16)] = buffer[i];
+      const byteAddr = address + BigInt(i);
+      this.memory[byteAddr.toString(16)] = buffer[i];
     }
+    const wordNumber = ((address + (address % BigInt(32))) >> BigInt(5)) + BigInt(1);
+    this.activeWords = wordNumber > this.activeWords ? wordNumber : this.activeWords;
   }
 
   public storeWord(address: bigint, word: bigint) {
     const wordBuf = toBufferBE(word, 32);
     this.storeN(address, wordBuf);
+  }
+
+  public activeMemoryWords() {
+    return this.activeWords;
   }
 }

@@ -1,23 +1,33 @@
 import { OpCodes } from '../opcodes';
-import { EvmContext } from './evm-context';
+import { EvmContext, ExecutionError } from './evm-context';
 
 export async function run(context: EvmContext, printOpcodes: boolean = false) {
-  while (!context.halt) {
-    const { code, ip } = context;
-    const byte = code[context.ip];
-    const opCode = OpCodes[byte];
+  try {
+    while (!context.halt) {
+      const { code, ip } = context;
 
-    if (!opCode) {
-      throw new Error(`Unknown opcode 0x${byte.toString(16)}`);
+      if (ip >= code.length) {
+        break;
+      }
+
+      const byte = code[ip];
+      const opCode = OpCodes[byte];
+
+      if (!opCode) {
+        throw new Error(`Unknown opcode 0x${byte.toString(16)}`);
+      }
+
+      if (printOpcodes) {
+        const opCodeParams = code.slice(ip + 1, ip + opCode.bytes);
+        // tslint:disable-next-line:no-console
+        console.log(opCode.toString(opCodeParams));
+      }
+
+      await opCode.handle(context);
     }
-
-    if (printOpcodes) {
-      const opCodeParams = code.slice(ip + 1, ip + opCode.bytes);
-      // tslint:disable-next-line:no-console
-      console.log(opCode.toString(opCodeParams));
-    }
-
-    await opCode.handle(context);
+  } catch (err) {
+    context.error = err;
+    context.reverted = true;
   }
 
   if (context.reverted) {
@@ -26,14 +36,10 @@ export async function run(context: EvmContext, printOpcodes: boolean = false) {
       const { code } = context;
       const byte = code[bytes];
       const opCode = OpCodes[byte];
-      if (!opCode) {
-        throw new Error(`Unknown opcode 0x${byte.toString(16)}`);
-      }
-      bytes += opCode.bytes;
+      bytes += opCode ? opCode.bytes : 1;
     }
     context.revertInstruction = instruction;
-    // tslint:disable-next-line:no-console
-    console.error(`Execution reverted at instruction ${instruction}.`);
+    context.error = new ExecutionError(context.error ? context.error.message : 'Reverted', instruction);
   }
 
   return context;

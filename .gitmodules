@@ -1,0 +1,3 @@
+[submodule "src/evm/test/test-data"]
+	path = src/evm/test/test-data
+	url = git@github.com:ethereum/tests

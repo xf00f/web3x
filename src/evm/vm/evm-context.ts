@@ -5,6 +5,12 @@ import { Trie } from '../trie';
 import { TxSubstrate } from '../tx/tx-substrate';
 import { WorldState } from '../world/world-state';
 
+export class ExecutionError extends Error {
+  constructor(message: string, public instructionNumber?: number) {
+    super(`${message} (instruction ${instructionNumber})`);
+  }
+}
+
 export class EvmContext {
   public stack = new Stack<bigint>();
   public memory = new EvmMemory();
@@ -14,6 +20,7 @@ export class EvmContext {
   public revertInstruction = 0;
   public returned = Buffer.of();
   public lastReturned = Buffer.of();
+  public error?: Error;
 
   constructor(
     public worldState: WorldState,
