@@ -13,15 +13,15 @@ class JumpiOp implements OpCode {
   }
 
   public handle(context: EvmContext) {
-    const ip = context.stack.pop()!;
-    const condition = context.stack.pop()!;
+    const [ip, condition] = context.stack.popN(2);
     if (condition === BigInt(0)) {
       context.ip += 1;
     } else {
-      context.ip = +ip.toString();
-      if (OpCodes[context.code[context.ip]].mnemonic !== 'JUMPDEST') {
+      const nip = Number(ip);
+      if (OpCodes[context.code[nip]].mnemonic !== 'JUMPDEST') {
         throw new Error('Invalid jump destination.');
       }
+      context.ip = nip;
     }
   }
 }

@@ -19,6 +19,9 @@ class SwapOp implements OpCode {
 
   public handle(context: EvmContext) {
     const { stack } = context;
+    if (stack.length < this.position + 1) {
+      throw new Error('Not enough stack items for swap.');
+    }
     const v1 = stack[stack.length - 1];
     const v2 = stack[stack.length - (this.position + 1)];
     stack[stack.length - 1] = v2;

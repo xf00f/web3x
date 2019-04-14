@@ -1,6 +1,8 @@
 import { OpCode } from '.';
 import { EvmContext } from '../vm/evm-context';
 
+const MAX_INT = BigInt(2) ** BigInt(256) - BigInt(1);
+
 class NotOp implements OpCode {
   public readonly code = 0x19;
   public readonly mnemonic = 'NOT';
@@ -14,7 +16,7 @@ class NotOp implements OpCode {
 
   public handle(context: EvmContext) {
     const v1 = context.stack.pop()!;
-    context.stack.push(~v1);
+    context.stack.push(v1 ^ MAX_INT);
     context.ip += this.bytes;
   }
 }

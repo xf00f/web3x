@@ -29,11 +29,15 @@ import { LogOps } from './log';
 import { Lt } from './lt';
 import { Mload } from './mload';
 import { Mod } from './mod';
+import { Msize } from './msize';
 import { Mstore } from './mstore';
+import { Mstore8 } from './mstore8';
 import { Mul } from './mul';
 import { MulMod } from './mulmod';
 import { Not } from './not';
+import { BlockNumber } from './number';
 import { Or } from './or';
+import { Pc } from './pc';
 import { Pop } from './pop';
 import { PushOps } from './push';
 import { Return } from './return';
@@ -42,12 +46,15 @@ import { ReturnDataSize } from './returndatasize';
 import { Revert } from './revert';
 import { Rol } from './rol';
 import { Ror } from './ror';
+import { Sdiv } from './sdiv';
 import { Sgt } from './sgt';
 import { Sha3 } from './sha3';
 import { Shl } from './shl';
 import { Shr } from './shr';
+import { SignExtend } from './signextend';
 import { Sload } from './sload';
 import { Slt } from './slt';
+import { Smod } from './smod';
 import { Sstore } from './sstore';
 import { StaticCall } from './staticcall';
 import { Stop } from './stop';
@@ -101,14 +108,21 @@ const opCodes: OpCode[] = [
   Mul,
   MulMod,
   Mod,
+  Msize,
+  Mstore8,
+  BlockNumber,
   Or,
+  Pc,
   Pop,
   Rol,
   Ror,
+  Sdiv,
   Sgt,
   Shl,
   Shr,
+  SignExtend,
   Slt,
+  Smod,
   StaticCall,
   Timestamp,
   Mload,
