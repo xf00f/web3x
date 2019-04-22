@@ -1,22 +1,32 @@
 import { Address } from '../../address';
-import { recoverTransaction, Tx } from '../tx/tx';
+import { recoverTransactionSender, Tx } from '../tx/tx';
 import { TxSubstrate } from '../tx/tx-substrate';
 import { WorldState } from '../world';
 import { contractCreation } from './contract-creation';
 import { Gas } from './gas';
 import { messageCall } from './message-call';
 
-interface ExTxResult {
+export interface ExTxContext {
+  worldState: WorldState;
+  coinbase: Address;
+  timestamp: number;
+  difficulty: bigint;
+  blockGasLimit: bigint;
+  sender?: Address;
+}
+
+export interface ExTxResult {
   contractAddress?: Address;
   returned?: Buffer;
   remainingGas: bigint;
-  txSubstrate: TxSubstrate;
-  status: boolean;
+  txSubstrate?: TxSubstrate;
+  reverted: boolean;
 }
 
-export async function executeTransaction(worldState: WorldState, tx: Tx, sender?: Address): Promise<ExTxResult> {
+export async function executeTransaction(context: ExTxContext, tx: Tx): Promise<ExTxResult> {
   const { to, dataOrInit, value, gasPrice, gasLimit } = tx;
-  sender = sender || recoverTransaction(tx);
+  const { worldState } = context;
+  const sender = context.sender || recoverTransactionSender(tx);
 
   await validateTx(worldState, sender, tx);
 

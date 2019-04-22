@@ -39,7 +39,7 @@ class DelegateCallOp implements OpCode {
     const recipient = new Address(toBufferBE(addr, 20));
     const calldata = memory.loadN(inOffset, Number(inSize));
 
-    const { txSubstrate, status, returned } = await messageCall(
+    const { txSubstrate, reverted, returned } = await messageCall(
       worldState,
       caller,
       origin,
@@ -54,16 +54,14 @@ class DelegateCallOp implements OpCode {
       modify,
     );
 
-    if (!status) {
-      context.stack.push(BigInt(0));
-    } else {
-      context.stack.push(BigInt(1));
+    context.stack.push(BigInt(reverted ? 0 : 1));
 
+    if (txSubstrate) {
       context.txSubstrate.logs.push(...txSubstrate.logs);
-
-      context.memory.storeN(retOffset, returned.slice(0, Number(retSize)));
-      context.lastReturned = returned;
     }
+
+    context.memory.storeN(retOffset, returned.slice(0, Number(retSize)));
+    context.lastReturned = returned;
 
     context.ip += this.bytes;
   }

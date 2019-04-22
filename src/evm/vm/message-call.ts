@@ -45,17 +45,24 @@ export async function messageCall(
   );
   await recipientAccount.run(callContext);
 
-  if (callContext.reverted) {
+  const { reverted, returned } = callContext;
+
+  if (reverted) {
     await worldState.revert();
-  } else {
-    await worldState.commit();
+    return {
+      remainingGas: BigInt(0),
+      reverted,
+      returned,
+    };
   }
+
+  await worldState.commit();
 
   return {
     remainingGas: BigInt(0),
     txSubstrate,
-    status: !callContext.reverted,
-    returned: callContext.returned,
+    reverted,
+    returned,
   };
 }
 

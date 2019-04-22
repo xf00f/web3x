@@ -1,11 +1,12 @@
 import { sign } from '../../account/sign-transaction';
+import { abiCoder } from '../../contract/abi-coder';
 import { TransactionRequest } from '../../formatters';
 import { TransactionHash } from '../../types';
 import { sha3 } from '../../utils';
 import { Wallet } from '../../wallet';
 import { Blockchain } from '../blockchain';
-import { serializeTx, Tx, TxReceipt } from '../tx';
-import { executeTransaction } from '../vm';
+import { mineTxs } from '../blockchain/mine-txs';
+import { serializeTx, Tx } from '../tx';
 import { WorldState } from '../world';
 
 export async function handleSendTransaction(
@@ -15,12 +16,12 @@ export async function handleSendTransaction(
   wallet: Wallet,
   blockDelay: number = 0,
 ): Promise<TransactionHash> {
-  const { from, to, gas = 200000, gasPrice, value = 0, data } = txRequest;
-  const nonce = txRequest.nonce ? BigInt(txRequest.nonce) : await worldState.getTransactionCount(from);
+  const { from: sender, to, gas = 200000, gasPrice, value = 0, data } = txRequest;
+  const nonce = txRequest.nonce ? BigInt(txRequest.nonce) : await worldState.getTransactionCount(sender);
 
-  const fromAccount = wallet.get(from);
+  const fromAccount = wallet.get(sender);
   if (!fromAccount) {
-    throw new Error(`Unknown address: ${from}`);
+    throw new Error(`Unknown address: ${sender}`);
   }
 
   const signTxRequest = {
@@ -50,23 +51,16 @@ export async function handleSendTransaction(
 
   const txHash = sha3(serializeTx(tx));
 
-  const mine = async () => {
-    const result = await executeTransaction(worldState, tx, from);
-
-    const receipt: TxReceipt = {
-      cumulativeGasUsed: BigInt(gas) - result.remainingGas,
-      logs: result.txSubstrate.logs,
-      logsBloomFilter: Buffer.of(),
-      status: result.status,
-    };
-
-    await blockchain.mineTransactions(await worldState.getStateRoot(), [tx], [receipt], [from]);
-  };
+  const mine = () => mineTxs(worldState, blockchain, +gas, [tx], sender);
 
   if (blockDelay) {
     setTimeout(mine, blockDelay);
   } else {
-    await mine();
+    const { result } = (await mine())[0];
+    if (result.reverted && result.returned!.slice(0, 4).equals(Buffer.from('08c379a0', 'hex'))) {
+      const errorMessage = abiCoder.decodeParameter('string', result.returned!.slice(4).toString('hex'));
+      throw new Error(`Transaction failed: ${errorMessage}`);
+    }
   }
 
   return txHash;

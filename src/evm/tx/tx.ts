@@ -49,7 +49,7 @@ export function deserializeTx(data: Buffer): Tx {
 
 const bigIntToHex = n => '0x' + n.toString(16);
 
-export function recoverTransaction(tx: Tx): Address {
+export function recoverTransactionSender(tx: Tx): Address {
   const { to, nonce, gasPrice, gasLimit, value, dataOrInit, v, r, s } = tx;
 
   const signature = Bytes.flatten([Bytes.pad(32, r), Bytes.pad(32, s), v]);

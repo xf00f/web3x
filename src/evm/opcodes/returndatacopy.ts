@@ -5,8 +5,8 @@ class ReturnDataCopyOp implements OpCode {
   public readonly code = 0x3e;
   public readonly mnemonic = 'RETURNDATACOPY';
   public readonly description = 'Copy output data from the previous call to memory.';
-  public readonly gas = 0;
-  public readonly bytes = 3;
+  public readonly gas = 3;
+  public readonly bytes = 1;
 
   public toString(params: Buffer): string {
     return `${this.mnemonic}`;

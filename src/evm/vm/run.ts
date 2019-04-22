@@ -1,5 +1,5 @@
 import { OpCodes } from '../opcodes';
-import { EvmContext, ExecutionError } from './evm-context';
+import { EvmContext } from './evm-context';
 
 export async function run(context: EvmContext, printOpcodes: boolean = false) {
   try {
@@ -27,6 +27,7 @@ export async function run(context: EvmContext, printOpcodes: boolean = false) {
     }
   } catch (err) {
     context.error = err;
+    context.halt = true;
     context.reverted = true;
   }
 
@@ -39,7 +40,11 @@ export async function run(context: EvmContext, printOpcodes: boolean = false) {
       bytes += opCode ? opCode.bytes : 1;
     }
     context.revertInstruction = instruction;
-    context.error = new ExecutionError(context.error ? context.error.message : 'Reverted', instruction);
+    if (context.error) {
+      context.error.message += ` (instruction ${instruction})`;
+    } else {
+      context.error = new Error(`Reverted at instruction ${instruction}`);
+    }
   }
 
   return context;

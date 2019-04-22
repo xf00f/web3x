@@ -5,12 +5,6 @@ import { Trie } from '../trie';
 import { TxSubstrate } from '../tx/tx-substrate';
 import { WorldState } from '../world/world-state';
 
-export class ExecutionError extends Error {
-  constructor(message: string, public instructionNumber?: number) {
-    super(`${message} (instruction ${instructionNumber})`);
-  }
-}
-
 export class EvmContext {
   public stack = new Stack<bigint>();
   public memory = new EvmMemory();

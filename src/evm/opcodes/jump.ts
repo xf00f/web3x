@@ -14,7 +14,8 @@ class JumpOp implements OpCode {
 
   public handle(context: EvmContext) {
     const nip = Number(context.stack.pop());
-    if (OpCodes[context.code[nip]].mnemonic !== 'JUMPDEST') {
+    const opcode = OpCodes[context.code[nip]];
+    if (!opcode || opcode.mnemonic !== 'JUMPDEST') {
       throw new Error('Invalid jump destination.');
     }
     context.ip = nip;
