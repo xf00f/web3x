@@ -1,4 +1,5 @@
 import { Address } from '../../address';
+import { BlockchainContext } from '../blockchain';
 import { recoverTransactionSender, Tx } from '../tx/tx';
 import { TxSubstrate } from '../tx/tx-substrate';
 import { WorldState } from '../world';
@@ -8,10 +9,7 @@ import { messageCall } from './message-call';
 
 export interface ExTxContext {
   worldState: WorldState;
-  coinbase: Address;
-  timestamp: number;
-  difficulty: bigint;
-  blockGasLimit: bigint;
+  blockchainContext: BlockchainContext;
   sender?: Address;
 }
 
@@ -25,7 +23,7 @@ export interface ExTxResult {
 
 export async function executeTransaction(context: ExTxContext, tx: Tx): Promise<ExTxResult> {
   const { to, dataOrInit, value, gasPrice, gasLimit } = tx;
-  const { worldState } = context;
+  const { worldState, blockchainContext } = context;
   const sender = context.sender || recoverTransactionSender(tx);
 
   await validateTx(worldState, sender, tx);
@@ -36,8 +34,33 @@ export async function executeTransaction(context: ExTxContext, tx: Tx): Promise<
   await worldState.commit();
 
   const result = to
-    ? await messageCall(worldState, sender, sender, to, to, gasLimit, gasPrice, value, value, dataOrInit, 0, true)
-    : await contractCreation(worldState, sender, sender, gasLimit, gasPrice, value, dataOrInit, 0, true);
+    ? await messageCall(
+        worldState,
+        blockchainContext,
+        sender,
+        sender,
+        to,
+        to,
+        gasLimit,
+        gasPrice,
+        value,
+        value,
+        dataOrInit,
+        0,
+        true,
+      )
+    : await contractCreation(
+        worldState,
+        blockchainContext,
+        sender,
+        sender,
+        gasLimit,
+        gasPrice,
+        value,
+        dataOrInit,
+        0,
+        true,
+      );
 
   return result;
 }

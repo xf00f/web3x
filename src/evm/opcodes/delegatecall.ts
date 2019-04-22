@@ -19,6 +19,7 @@ class DelegateCallOp implements OpCode {
     const {
       stack,
       worldState,
+      blockchainCtx,
       memory,
       caller,
       origin,
@@ -41,6 +42,7 @@ class DelegateCallOp implements OpCode {
 
     const { txSubstrate, reverted, returned } = await messageCall(
       worldState,
+      blockchainCtx,
       caller,
       origin,
       executor,

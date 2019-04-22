@@ -3,7 +3,8 @@ import { readdirSync } from 'fs';
 import levelup from 'levelup';
 import memdown from 'memdown';
 import { Address } from '../../address';
-import { hexToBuffer, leftPad } from '../../utils';
+import { hexToBuffer, hexToNumber, leftPad } from '../../utils';
+import { BlockchainContext } from '../blockchain';
 import { TxSubstrate } from '../tx';
 import { EvmContext } from '../vm';
 import { WorldState } from '../world';
@@ -15,12 +16,7 @@ const suites: { dir: string; include?: RegExp; exclude?: RegExp[] }[] = [
   { dir: 'vmSha3Test' },
   {
     dir: 'vmIOandFlowOperations',
-    exclude: [
-      /foreverOutOfGas/,
-      /^gas/,
-      /DynamicJumpPathologicalTest0/, // Until Number op returns block as specified in test.
-      /^BlockNumber/,
-    ],
+    exclude: [/foreverOutOfGas/, /^gas/],
   },
 ];
 
@@ -39,6 +35,7 @@ interface TestAccount {
 
 interface Test {
   exec: any;
+  env: any;
   pre: {
     [acc: string]: TestAccount;
   };
@@ -67,7 +64,7 @@ for (const { include, exclude, dir } of suites) {
 
 function runTest([testName, testSpec]: [string, Test]) {
   it(testName, async () => {
-    const { pre, post, exec } = testSpec;
+    const { pre, post, exec, env } = testSpec;
     const worldState = await WorldState.fromDb(levelup(memdown()));
 
     worldState.checkpoint();
@@ -84,8 +81,18 @@ function runTest([testName, testSpec]: [string, Test]) {
     }
     await worldState.commit();
 
+    const blockchainCtx: BlockchainContext = {
+      difficulty: hexToBigInt(env.currentDifficulty),
+      coinbase: Address.fromString(env.currentCoinbase),
+      last256BlockHashes: [],
+      blockNumber: hexToNumber(env.currentNumber)!,
+      blockGasLimit: hexToBigInt(env.currentGasLimit),
+      timestamp: hexToNumber(env.currentTimestamp)!,
+    };
+
     const result = await messageCall(
       worldState,
+      blockchainCtx,
       Address.fromString(exec.caller),
       Address.fromString(exec.origin),
       Address.fromString(exec.address),
@@ -125,6 +132,7 @@ function runTest([testName, testSpec]: [string, Test]) {
 
 async function messageCall(
   worldState: WorldState,
+  blockchainCtx: BlockchainContext,
   caller: Address,
   origin: Address,
   executor: Address,
@@ -148,6 +156,7 @@ async function messageCall(
 
   const callContext = new EvmContext(
     worldState,
+    blockchainCtx,
     code,
     data,
     origin,

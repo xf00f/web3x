@@ -16,7 +16,7 @@ class CallOp implements OpCode {
   }
 
   public async handle(context: EvmContext) {
-    const { stack, worldState, memory, origin, executor, gasPrice, callDepth, modify } = context;
+    const { stack, worldState, blockchainCtx, memory, origin, executor, gasPrice, callDepth, modify } = context;
 
     const gas = stack.pop();
     const addr = stack.pop();
@@ -31,6 +31,7 @@ class CallOp implements OpCode {
 
     const { txSubstrate, reverted, returned } = await messageCall(
       worldState,
+      blockchainCtx,
       executor,
       origin,
       recipient,

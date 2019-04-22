@@ -16,7 +16,7 @@ class StaticCallOp implements OpCode {
   }
 
   public async handle(context: EvmContext) {
-    const { stack, worldState, memory, origin, executor, gasPrice, callDepth } = context;
+    const { stack, worldState, blockchainCtx, memory, origin, executor, gasPrice, callDepth } = context;
 
     const gas = stack.pop();
     const addr = stack.pop();
@@ -30,6 +30,7 @@ class StaticCallOp implements OpCode {
 
     const { txSubstrate, reverted, returned } = await messageCall(
       worldState,
+      blockchainCtx,
       executor,
       origin,
       recipient,

@@ -14,10 +14,7 @@ export interface EvaluatedTx {
 }
 
 export async function mineTxs(worldState: WorldState, blockchain: Blockchain, gas: number, txs: Tx[], sender: Address) {
-  const coinbase = Address.ZERO;
-  const gasLimit = BigInt(0);
-  const timestamp = new Date().getTime();
-  const difficulty = BigInt(0);
+  const blockchainContext = blockchain.getContext();
 
   const evaluatedTxs = await Promise.all(
     txs.map(async tx => {
@@ -25,11 +22,8 @@ export async function mineTxs(worldState: WorldState, blockchain: Blockchain, ga
 
       const exTxContext: ExTxContext = {
         worldState,
+        blockchainContext,
         sender,
-        coinbase,
-        blockGasLimit: gasLimit,
-        timestamp,
-        difficulty,
       };
 
       const result = await executeTransaction(exTxContext, tx);
@@ -53,14 +47,7 @@ export async function mineTxs(worldState: WorldState, blockchain: Blockchain, ga
     }),
   );
 
-  await blockchain.mineTransactions(
-    await worldState.getStateRoot(),
-    coinbase,
-    timestamp,
-    difficulty,
-    gasLimit,
-    evaluatedTxs,
-  );
+  await blockchain.mineTransactions(await worldState.getStateRoot(), blockchainContext, evaluatedTxs);
 
   return evaluatedTxs;
 }

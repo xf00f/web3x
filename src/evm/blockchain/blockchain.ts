@@ -11,6 +11,15 @@ import { BlockHeader, deserializeBlockHeader, serializeBlockHeader } from './blo
 import { createBlockState } from './block-state';
 import { EvaluatedTx } from './mine-txs';
 
+export interface BlockchainContext {
+  blockNumber: number;
+  last256BlockHashes: Buffer[];
+  coinbase: Address;
+  timestamp: number;
+  difficulty: bigint;
+  blockGasLimit: bigint;
+}
+
 export type GetLogsResult = {
   block: BlockHeader;
   blockHash: Buffer;
@@ -49,22 +58,23 @@ export class Blockchain extends EventEmitter {
     return new Blockchain(db, blocks, blockHashes);
   }
 
-  public getNextBlockNumber() {
+  private getNextBlockNumber() {
     return this.blockHeaders.length > 0 ? this.blockHeaders[this.blockHeaders.length - 1].number + 1 : 0;
   }
 
-  public getLast256BlockHashes() {
-    return this.blockHashes.slice(-256);
+  public getContext(): BlockchainContext {
+    return {
+      coinbase: Address.ZERO,
+      blockGasLimit: BigInt(0),
+      timestamp: new Date().getTime(),
+      blockNumber: this.getNextBlockNumber(),
+      last256BlockHashes: this.blockHashes.slice(-256),
+      difficulty: BigInt(0),
+    };
   }
 
-  public async mineTransactions(
-    stateRoot: Buffer,
-    coinbase: Address,
-    timestamp: number,
-    difficulty: bigint,
-    gasLimit: bigint,
-    evaluatedTxs: EvaluatedTx[],
-  ) {
+  public async mineTransactions(stateRoot: Buffer, blockchainCtx: BlockchainContext, evaluatedTxs: EvaluatedTx[]) {
+    const { coinbase, timestamp, difficulty, blockGasLimit } = blockchainCtx;
     const blockNumber = this.getNextBlockNumber();
     const parentHash = this.blockHashes.length ? this.blockHashes[this.blockHashes.length - 1] : Buffer.of();
     const blockState = createBlockState(
@@ -74,7 +84,7 @@ export class Blockchain extends EventEmitter {
       coinbase,
       timestamp,
       difficulty,
-      gasLimit,
+      blockGasLimit,
       evaluatedTxs,
       this.db,
     );

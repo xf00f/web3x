@@ -106,7 +106,7 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
           this.options.blockDelay,
         );
       case 'eth_call':
-        return bufferToHex(await handleCall(this.worldState, fromRawCallRequest(params[0])));
+        return bufferToHex(await handleCall(this.worldState, this.blockchain, fromRawCallRequest(params[0])));
       case 'eth_getTransactionCount':
         return numberToHex(await getAccountTransactions(this.worldState, Address.fromString(params![0])));
       case 'eth_getTransactionReceipt':

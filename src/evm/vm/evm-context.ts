@@ -1,4 +1,5 @@
 import { Address } from '../../address';
+import { BlockchainContext } from '../blockchain';
 import { EvmMemory } from '../memory';
 import { Stack } from '../stack';
 import { Trie } from '../trie';
@@ -18,6 +19,7 @@ export class EvmContext {
 
   constructor(
     public worldState: WorldState,
+    public blockchainCtx: BlockchainContext,
     public code: Buffer = Buffer.of(),
     public calldata: Buffer = Buffer.of(),
     public origin: Address = Address.ZERO,

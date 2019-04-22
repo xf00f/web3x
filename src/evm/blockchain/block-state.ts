@@ -19,7 +19,7 @@ export function createBlockState(
   coinbase: Address,
   timestamp: number,
   difficulty: bigint,
-  gasLimit: bigint,
+  blockGasLimit: bigint,
   evaluatedTxs: EvaluatedTx[],
   db?: LevelUp,
 ): BlockState {
@@ -44,7 +44,7 @@ export function createBlockState(
     logsBloom: Buffer.of(),
     difficulty,
     number: blockNumber,
-    gasLimit,
+    gasLimit: blockGasLimit,
     gasUsed: BigInt(0),
     timestamp,
     extraData: Buffer.of(),
