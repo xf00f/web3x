@@ -1,10 +1,10 @@
 import { OpCode } from '.';
 import { EvmContext } from '../vm/evm-context';
 
-class TimestampOp implements OpCode {
-  public readonly code = 0x42;
-  public readonly mnemonic = 'TIMESTAMP';
-  public readonly description = 'Get the blocks timestamp.';
+class GasPriceOp implements OpCode {
+  public readonly code = 0x3a;
+  public readonly mnemonic = 'GASPRICE';
+  public readonly description = 'Get the transaction gas price.';
   public readonly gas = 1;
   public readonly bytes = 1;
 
@@ -13,9 +13,9 @@ class TimestampOp implements OpCode {
   }
 
   public handle(context: EvmContext) {
-    context.stack.push(BigInt(context.blockchainCtx.timestamp));
+    context.stack.push(context.gasPrice);
     context.ip += this.bytes;
   }
 }
 
-export const Timestamp = new TimestampOp();
+export const GasPrice = new GasPriceOp();
