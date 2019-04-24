@@ -1,7 +1,9 @@
 import { toBigIntBE } from 'bigint-buffer';
 import levelup from 'levelup';
 import memdown from 'memdown';
+import { Address } from '../../address';
 import { sha3 } from '../../utils';
+import { BlockchainContext } from '../blockchain';
 import { EvmContext } from '../vm/evm-context';
 import { WorldState } from '../world/world-state';
 import { Sha3 } from './sha3';
@@ -9,7 +11,15 @@ import { Sha3 } from './sha3';
 describe('opcodes', () => {
   it('sha3', async () => {
     const db = levelup(memdown());
-    const context = new EvmContext(await WorldState.fromDb(db));
+    const blockchainCtx: BlockchainContext = {
+      timestamp: 0,
+      difficulty: BigInt(0),
+      blockGasLimit: BigInt(0),
+      blockNumber: 0,
+      last256BlockHashes: [],
+      coinbase: Address.ZERO,
+    };
+    const context = new EvmContext(await WorldState.fromDb(db), blockchainCtx);
 
     const buffer1 = Buffer.from('00112233445566778899aabbccddeeff000102030405060708090a0b0c0d0e0f', 'hex');
     const buffer2 = Buffer.from('deadbeef00000000000000000000000000000000000000000000000000000000', 'hex');
