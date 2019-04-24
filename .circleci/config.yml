@@ -1,0 +1,42 @@
+version: 2
+
+jobs:
+  test:
+    docker:
+      - image: circleci/node:10
+        entrypoint: bash
+    steps:
+      - checkout
+
+      - run:
+          name: Pull Submodules
+          command: |
+            git submodule init
+            git submodule update
+
+      - restore_cache:
+          name: Restore Yarn Package Cache
+          keys:
+            - yarn-packages
+
+      - run:
+          name: Test
+          command: |
+            export NODE_OPTIONS=--max_old_space_size=4096
+            yarn
+            yarn test --maxWorkers=2
+
+      - save_cache:
+          name: Save Yarn Package Cache
+          key: yarn-packages
+          paths:
+            - ~/.cache/yarn
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - test:
+          filters:
+            branches:
+              ignore: master

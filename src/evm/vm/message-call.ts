@@ -1,10 +1,12 @@
 import { Address } from '../../address';
+import { BlockchainContext } from '../blockchain';
 import { TxSubstrate } from '../tx';
 import { WorldState } from '../world/world-state';
 import { EvmContext } from './evm-context';
 
 export async function messageCall(
   worldState: WorldState,
+  blockchainCtx: BlockchainContext,
   sender: Address,
   origin: Address,
   recipient: Address,
@@ -29,6 +31,7 @@ export async function messageCall(
 
   const callContext = new EvmContext(
     worldState,
+    blockchainCtx,
     codeAccount.code,
     data,
     origin,
@@ -45,22 +48,30 @@ export async function messageCall(
   );
   await recipientAccount.run(callContext);
 
-  if (callContext.reverted) {
+  const { reverted, returned } = callContext;
+
+  if (reverted) {
     await worldState.revert();
-  } else {
-    await worldState.commit();
+    return {
+      remainingGas: BigInt(0),
+      reverted,
+      returned,
+    };
   }
+
+  await worldState.commit();
 
   return {
     remainingGas: BigInt(0),
     txSubstrate,
-    status: !callContext.reverted,
-    returned: callContext.returned,
+    reverted,
+    returned,
   };
 }
 
 export async function staticMessageCall(
   worldState: WorldState,
+  blockchainCtx: BlockchainContext,
   sender: Address,
   origin: Address,
   recipient: Address,
@@ -73,6 +84,7 @@ export async function staticMessageCall(
 
   const callContext = new EvmContext(
     worldState,
+    blockchainCtx,
     codeAccount.code,
     data,
     origin,

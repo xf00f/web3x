@@ -189,7 +189,7 @@ describe('wallet', () => {
 
     const addressFromKeystore = wallet.accounts[0].address;
     expect(addressFromKeystore).toEqual(addressFromWallet);
-  }, 10000);
+  }, 30000);
 
   it('should create correct accounts from mnemonic', () => {
     const mnemonic = 'profit gather crucial census birth effort clinic roast harvest rebuild hidden bamboo';

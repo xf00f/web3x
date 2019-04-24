@@ -5,7 +5,7 @@ import { RawTransactionReceipt, toRawTransactionReceipt } from '../../formatters
 import { TransactionHash } from '../../types';
 import { bufferToHex, hexToBuffer, sha3Buffer } from '../../utils';
 import { Blockchain } from '../blockchain';
-import { recoverTransaction } from '../tx';
+import { recoverTransactionSender } from '../tx';
 
 export async function handleGetTransactionReceipt(
   blockchain: Blockchain,
@@ -22,7 +22,7 @@ export async function handleGetTransactionReceipt(
   const { blockHash, blockHeader, tx, txIndex } = (await blockchain.getMinedTransaction(txHash))!;
   const { to, nonce } = tx;
   // TODO: Store from in tx so no need to recover? This is slow.
-  const from = recoverTransaction(tx);
+  const from = recoverTransactionSender(tx);
 
   const { cumulativeGasUsed, logs, status } = receipt;
 

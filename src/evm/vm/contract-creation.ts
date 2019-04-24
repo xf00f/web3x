@@ -1,10 +1,12 @@
 import { Address } from '../../address';
+import { BlockchainContext } from '../blockchain';
 import { TxSubstrate } from '../tx';
 import { WorldState } from '../world';
 import { EvmContext } from './evm-context';
 
 export async function contractCreation(
   worldState: WorldState,
+  blockchainCtx: BlockchainContext,
   sender: Address,
   origin: Address,
   gas: bigint,
@@ -27,6 +29,7 @@ export async function contractCreation(
   const txSubstrate = new TxSubstrate();
   const callContext = new EvmContext(
     worldState,
+    blockchainCtx,
     initCode,
     Buffer.of(),
     origin,
@@ -55,6 +58,6 @@ export async function contractCreation(
     contractAddress,
     remainingGas: BigInt(0),
     txSubstrate,
-    status: !callContext.reverted,
+    reverted: callContext.reverted,
   };
 }

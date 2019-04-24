@@ -1,9 +1,11 @@
-import { toBigIntBE, toBufferBE } from 'bigint-buffer';
+import { toBigIntBE } from 'bigint-buffer';
 import { readdirSync } from 'fs';
 import levelup from 'levelup';
 import memdown from 'memdown';
+import * as rlp from 'rlp';
 import { Address } from '../../address';
-import { hexToBuffer, leftPad } from '../../utils';
+import { hexToBuffer, hexToNumber, leftPad, sha3 } from '../../utils';
+import { BlockchainContext } from '../blockchain';
 import { TxSubstrate } from '../tx';
 import { EvmContext } from '../vm';
 import { WorldState } from '../world';
@@ -11,17 +13,17 @@ import { WorldState } from '../world';
 const suites: { dir: string; include?: RegExp; exclude?: RegExp[] }[] = [
   { dir: 'vmArithmeticTest' },
   { dir: 'vmBitwiseLogicOperation' },
-  { dir: 'vmPushDupSwapTest', exclude: [/Suicide/] },
-  { dir: 'vmSha3Test' },
+  { dir: 'vmBlockInfoTest' },
+  { dir: 'vmEnvironmentalInfo' },
   {
     dir: 'vmIOandFlowOperations',
-    exclude: [
-      /foreverOutOfGas/,
-      /^gas/,
-      /DynamicJumpPathologicalTest0/, // Until Number op returns block as specified in test.
-      /^BlockNumber/,
-    ],
+    exclude: [/foreverOutOfGas/, /^gas/],
   },
+  { dir: 'vmLogTest' },
+  { dir: 'vmPushDupSwapTest', exclude: [/Suicide/] },
+  { dir: 'vmRandomTest' },
+  { dir: 'vmSha3Test' },
+  { dir: 'vmSystemOperations', exclude: [/suicide/] },
 ];
 
 function hexToBigInt(hex: string) {
@@ -39,6 +41,9 @@ interface TestAccount {
 
 interface Test {
   exec: any;
+  env: any;
+  out: any;
+  logs: any;
   pre: {
     [acc: string]: TestAccount;
   };
@@ -53,7 +58,7 @@ interface TestSuite {
 
 for (const { include, exclude, dir } of suites) {
   const testPath = `${__dirname}/test-data/VMTests/${dir}`;
-  describe('test', () => {
+  describe(dir, () => {
     const files = readdirSync(testPath)
       .filter(f => !include || include.test(f))
       .filter(f => !exclude || !exclude.some(re => re.test(f)));
@@ -67,7 +72,7 @@ for (const { include, exclude, dir } of suites) {
 
 function runTest([testName, testSpec]: [string, Test]) {
   it(testName, async () => {
-    const { pre, post, exec } = testSpec;
+    const { pre, post, exec, env, out, logs } = testSpec;
     const worldState = await WorldState.fromDb(levelup(memdown()));
 
     worldState.checkpoint();
@@ -84,8 +89,18 @@ function runTest([testName, testSpec]: [string, Test]) {
     }
     await worldState.commit();
 
-    const result = await messageCall(
+    const blockchainCtx: BlockchainContext = {
+      difficulty: hexToBigInt(env.currentDifficulty),
+      coinbase: Address.fromString(env.currentCoinbase),
+      last256BlockHashes: [],
+      blockNumber: hexToNumber(env.currentNumber)!,
+      blockGasLimit: hexToBigInt(env.currentGasLimit),
+      timestamp: hexToNumber(env.currentTimestamp)!,
+    };
+
+    const { error, status, returned, txSubstrate } = await messageCall(
       worldState,
+      blockchainCtx,
       Address.fromString(exec.caller),
       Address.fromString(exec.origin),
       Address.fromString(exec.address),
@@ -99,16 +114,23 @@ function runTest([testName, testSpec]: [string, Test]) {
       true,
     );
 
+    if (out) {
+      expect(returned).toEqual(hexToBuffer(out));
+    }
+
+    if (logs) {
+      const hash = sha3(rlp.encode(txSubstrate.logs.map(log => [log.address.toBuffer(), log.topics, log.data])));
+      expect(logs).toBe(hash);
+    }
+
     if (!post) {
       return;
     }
 
-    expect(result.error).toBeUndefined();
-    expect(result.status).toBeTruthy();
+    expect(error).toBeUndefined();
+    expect(status).toBeTruthy();
 
-    // TODO check out return value
-
-    for (const [addressStr, { balance, nonce, code, storage }] of Object.entries(post ? post : pre)) {
+    for (const [addressStr, { balance, nonce, code, storage }] of Object.entries(post)) {
       const address = Address.fromString(addressStr);
       const account = await worldState.loadImmutableAccount(address);
       expect(account!.address).toEqual(address);
@@ -125,6 +147,7 @@ function runTest([testName, testSpec]: [string, Test]) {
 
 async function messageCall(
   worldState: WorldState,
+  blockchainCtx: BlockchainContext,
   caller: Address,
   origin: Address,
   executor: Address,
@@ -148,6 +171,7 @@ async function messageCall(
 
   const callContext = new EvmContext(
     worldState,
+    blockchainCtx,
     code,
     data,
     origin,

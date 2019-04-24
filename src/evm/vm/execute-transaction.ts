@@ -1,22 +1,30 @@
 import { Address } from '../../address';
-import { recoverTransaction, Tx } from '../tx/tx';
+import { BlockchainContext } from '../blockchain';
+import { recoverTransactionSender, Tx } from '../tx/tx';
 import { TxSubstrate } from '../tx/tx-substrate';
 import { WorldState } from '../world';
 import { contractCreation } from './contract-creation';
 import { Gas } from './gas';
 import { messageCall } from './message-call';
 
-interface ExTxResult {
+export interface ExTxContext {
+  worldState: WorldState;
+  blockchainContext: BlockchainContext;
+  sender?: Address;
+}
+
+export interface ExTxResult {
   contractAddress?: Address;
   returned?: Buffer;
   remainingGas: bigint;
-  txSubstrate: TxSubstrate;
-  status: boolean;
+  txSubstrate?: TxSubstrate;
+  reverted: boolean;
 }
 
-export async function executeTransaction(worldState: WorldState, tx: Tx, sender?: Address): Promise<ExTxResult> {
+export async function executeTransaction(context: ExTxContext, tx: Tx): Promise<ExTxResult> {
   const { to, dataOrInit, value, gasPrice, gasLimit } = tx;
-  sender = sender || recoverTransaction(tx);
+  const { worldState, blockchainContext } = context;
+  const sender = context.sender || recoverTransactionSender(tx);
 
   await validateTx(worldState, sender, tx);
 
@@ -26,8 +34,33 @@ export async function executeTransaction(worldState: WorldState, tx: Tx, sender?
   await worldState.commit();
 
   const result = to
-    ? await messageCall(worldState, sender, sender, to, to, gasLimit, gasPrice, value, value, dataOrInit, 0, true)
-    : await contractCreation(worldState, sender, sender, gasLimit, gasPrice, value, dataOrInit, 0, true);
+    ? await messageCall(
+        worldState,
+        blockchainContext,
+        sender,
+        sender,
+        to,
+        to,
+        gasLimit,
+        gasPrice,
+        value,
+        value,
+        dataOrInit,
+        0,
+        true,
+      )
+    : await contractCreation(
+        worldState,
+        blockchainContext,
+        sender,
+        sender,
+        gasLimit,
+        gasPrice,
+        value,
+        dataOrInit,
+        0,
+        true,
+      );
 
   return result;
 }

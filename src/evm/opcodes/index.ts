@@ -11,14 +11,18 @@ import { CallDataSize } from './calldatasize';
 import { Caller } from './caller';
 import { CallValue } from './callvalue';
 import { CodeSize } from './codesize';
+import { Coinbase } from './coinbase';
 import { CopyCode } from './copycode';
 import { DelegateCall } from './delegatecall';
+import { Difficulty } from './difficulty';
 import { Div } from './div';
 import { DupOps } from './dup';
 import { Eq } from './eq';
 import { Exp } from './exp';
 import { ExtCodeSize } from './extcodesize';
 import { Gas } from './gas';
+import { GasLimit } from './gaslimit';
+import { GasPrice } from './gasprice';
 import { Gt } from './gt';
 import { Invalid } from './invalid';
 import { IsZero } from './iszero';
@@ -37,6 +41,7 @@ import { MulMod } from './mulmod';
 import { Not } from './not';
 import { BlockNumber } from './number';
 import { Or } from './or';
+import { Origin } from './origin';
 import { Pc } from './pc';
 import { Pop } from './pop';
 import { PushOps } from './push';
@@ -91,13 +96,17 @@ const opCodes: OpCode[] = [
   CallDataSize,
   CallValue,
   CodeSize,
+  Coinbase,
   CopyCode,
   DelegateCall,
+  Difficulty,
   Div,
   Eq,
   Exp,
   ExtCodeSize,
   Gas,
+  GasLimit,
+  GasPrice,
   Gt,
   Invalid,
   IsZero,
@@ -112,6 +121,7 @@ const opCodes: OpCode[] = [
   Mstore8,
   BlockNumber,
   Or,
+  Origin,
   Pc,
   Pop,
   Rol,

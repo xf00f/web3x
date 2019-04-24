@@ -14,6 +14,8 @@ class RevertOp implements OpCode {
   }
 
   public handle(context: EvmContext) {
+    const [offset, length] = context.stack.popN(2);
+    context.returned = context.memory.loadN(offset, Number(length));
     context.halt = true;
     context.reverted = true;
     context.ip += this.bytes;

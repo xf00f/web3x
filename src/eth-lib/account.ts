@@ -39,8 +39,8 @@ export const toChecksum = address => {
 
 export const fromPrivate = (privateKey: Buffer) => {
   const ecKey = secp256k1.keyFromPrivate(privateKey);
-  const publicKey = Buffer.from(ecKey.getPublic(false, 'hex').slice(2), 'hex');
-  const publicHash = keccak256(publicKey);
+  const publicKey = Buffer.from(ecKey.getPublic(false, 'hex'), 'hex');
+  const publicHash = keccak256(publicKey.slice(1));
   const address = toChecksum('0x' + publicHash.slice(-40));
   return {
     address,

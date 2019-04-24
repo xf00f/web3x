@@ -1,7 +1,7 @@
 import { Account } from '../../account';
 import { sign, SignTransactionRequest } from '../../account/sign-transaction';
 import { Address } from '../../address';
-import { recoverTransaction, Tx } from './tx';
+import { recoverTransactionSender, Tx } from './tx';
 
 describe('tx', () => {
   it('should recover correct address', () => {
@@ -39,7 +39,7 @@ describe('tx', () => {
       s,
     };
 
-    const recovered = recoverTransaction(tx);
+    const recovered = recoverTransactionSender(tx);
 
     expect(recovered).toEqual(fromAccount.address);
   });

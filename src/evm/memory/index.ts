@@ -25,7 +25,8 @@ export class EvmMemory {
       const byteAddr = address + BigInt(i);
       this.memory[byteAddr.toString(16)] = buffer[i];
     }
-    const wordNumber = ((address + (address % BigInt(32))) >> BigInt(5)) + BigInt(1);
+    const topAddr = address + BigInt(buffer.length - 1);
+    const wordNumber = ((topAddr - (topAddr % BigInt(32))) >> BigInt(5)) + BigInt(1);
     this.activeWords = wordNumber > this.activeWords ? wordNumber : this.activeWords;
   }
 

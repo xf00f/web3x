@@ -13,7 +13,7 @@ class NumberOp implements OpCode {
   }
 
   public handle(context: EvmContext) {
-    context.stack.push(BigInt(1));
+    context.stack.push(BigInt(context.blockchainCtx.blockNumber));
     context.ip += this.bytes;
   }
 }
