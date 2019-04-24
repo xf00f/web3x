@@ -88,7 +88,7 @@ export class Contract<T extends ContractDefinition | void = void> {
     const linkedData = Object.entries(this.linkTable).reduce(
       (data, [name, address]) =>
         data.replace(
-          new RegExp(`_+${name}_+`, 'i'),
+          new RegExp(`_+${name}_+`, 'gi'),
           address
             .toString()
             .slice(2)
