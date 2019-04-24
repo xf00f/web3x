@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.9] - 2019-04-24
+
+- Fix returndatacopy opcode size bug.
+- Revert propagates error message.
+- BlockNumber tests passing.
+- Opcodes added: coinbase, difficulty, gaslimit, gasprice, origin.
+- Fix contract linkage.
+- Circle CI for pull requests.
+
 ## [3.0.8] - 2019-04-14
 
 - Added several missing opcodes.
@@ -130,6 +139,7 @@ All notable changes to this project will be documented in this file.
 
 - Initial release of Typescript port from web3.js.
 
+[3.0.9]: https://github.com/xf00f/web3x/compare/v3.0.8...v3.0.9
 [3.0.8]: https://github.com/xf00f/web3x/compare/v3.0.7...v3.0.8
 [3.0.7]: https://github.com/xf00f/web3x/compare/v3.0.6...v3.0.7
 [3.0.6]: https://github.com/xf00f/web3x/compare/v3.0.5...v3.0.6
