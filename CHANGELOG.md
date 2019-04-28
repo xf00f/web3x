@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.10] - 2019-04-28
+
+- Fix revert message undefined bug.
+- Ignore existing accounts when loading wallet into EvmProvider.
+- EXP opcode uses Buffer impl in browser.
+
 ## [3.0.9] - 2019-04-24
 
 - Fix returndatacopy opcode size bug.
@@ -139,6 +145,7 @@ All notable changes to this project will be documented in this file.
 
 - Initial release of Typescript port from web3.js.
 
+[3.0.10]: https://github.com/xf00f/web3x/compare/v3.0.9...v3.0.10
 [3.0.9]: https://github.com/xf00f/web3x/compare/v3.0.8...v3.0.9
 [3.0.8]: https://github.com/xf00f/web3x/compare/v3.0.7...v3.0.8
 [3.0.7]: https://github.com/xf00f/web3x/compare/v3.0.6...v3.0.7

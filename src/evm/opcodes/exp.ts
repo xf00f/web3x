@@ -21,9 +21,10 @@ class ExpOp implements OpCode {
 
     const m = BN.red(TWO_POW256);
     const bnBase = new BN(toBufferBE(base, 32)).toRed(m);
-    const r = bnBase.redPow(new BN(toBufferBE(exponent, 32)));
+    const bnExponent = new BN(toBufferBE(exponent, 32));
+    const r = bnBase.redPow(bnExponent);
 
-    context.stack.push(toBigIntBE(r.toBuffer('be', 32)));
+    context.stack.push(toBigIntBE(r.toArrayLike(Buffer, 'be', 32)));
     context.ip += this.bytes;
   }
 }

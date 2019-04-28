@@ -70,7 +70,9 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
   public async loadWallet(wallet: Wallet, amount: bigint = BigInt(10) * BigInt(10) ** BigInt(18)) {
     this.worldState.checkpoint();
     for (const address of wallet.currentAddresses()) {
-      await this.worldState.createAccount(address, amount);
+      if (!(await this.worldState.accountExists(address))) {
+        await this.worldState.createAccount(address, amount);
+      }
     }
     await this.worldState.commit();
     this.wallet = wallet;
