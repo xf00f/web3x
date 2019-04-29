@@ -26,7 +26,7 @@ jobs:
 
       - run:
           name: Test
-          command: yarn test --maxWorkers=2 --coverage --coverageReporters=text-lcov | coveralls
+          command: yarn test --maxWorkers=2 --coverage --coverageReporters=text-lcov | ./node_modules/.bin/coveralls
 
       - save_cache:
           name: Save Yarn Package Cache
