@@ -20,7 +20,9 @@ jobs:
 
       - run:
           name: Build
-          command: yarn build
+          command: |
+            yarn install
+            yarn build
 
       - run:
           name: Test
