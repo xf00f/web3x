@@ -47,7 +47,7 @@ jobs:
       - run:
           name: Publish Packages
           command: |
-            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
+            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/project/.npmrc
             npm publish dest && npm publish dest-es
 
 workflows:
