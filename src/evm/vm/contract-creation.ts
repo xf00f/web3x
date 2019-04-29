@@ -59,5 +59,6 @@ export async function contractCreation(
     remainingGas: BigInt(0),
     txSubstrate,
     reverted: callContext.reverted,
+    error: callContext.error,
   };
 }

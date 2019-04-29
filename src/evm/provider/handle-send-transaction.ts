@@ -57,9 +57,13 @@ export async function handleSendTransaction(
     setTimeout(mine, blockDelay);
   } else {
     const { result } = (await mine())[0];
-    if (result.reverted && result.returned!.slice(0, 4).equals(Buffer.from('08c379a0', 'hex'))) {
-      const errorMessage = abiCoder.decodeParameter('string', result.returned!.slice(4).toString('hex'));
-      throw new Error(`Transaction failed: ${errorMessage}`);
+    if (result.reverted) {
+      if (result.returned && result.returned.slice(0, 4).equals(Buffer.from('08c379a0', 'hex'))) {
+        const errorMessage = abiCoder.decodeParameter('string', result.returned!.slice(4).toString('hex'));
+        throw new Error(`Transaction failed: ${errorMessage}`);
+      } else if (result.error) {
+        throw result.error;
+      }
     }
   }
 

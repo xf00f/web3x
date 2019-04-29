@@ -48,7 +48,7 @@ export async function messageCall(
   );
   await recipientAccount.run(callContext);
 
-  const { reverted, returned } = callContext;
+  const { reverted, returned, error } = callContext;
 
   if (reverted) {
     await worldState.revert();
@@ -66,6 +66,7 @@ export async function messageCall(
     txSubstrate,
     reverted,
     returned,
+    error,
   };
 }
 

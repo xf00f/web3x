@@ -19,6 +19,7 @@ export interface ExTxResult {
   remainingGas: bigint;
   txSubstrate?: TxSubstrate;
   reverted: boolean;
+  error?: Error;
 }
 
 export async function executeTransaction(context: ExTxContext, tx: Tx): Promise<ExTxResult> {

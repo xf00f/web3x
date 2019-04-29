@@ -33,7 +33,7 @@
     "test": "jest",
     "cover": "jest --coverage && cat coverage/lcov.info | node_modules/coveralls/bin/coveralls.js",
     "clean": "rm -rf ./dest ./dest-es",
-    "deploy": "yarn jest --clearCache && yarn build && npm publish dest && npm publish dest-es",
+    "deploy": "yarn jest --clearCache && jest && yarn build && npm publish dest && npm publish dest-es",
     "patch_version": "yarn version --patch"
   },
   "bin": {

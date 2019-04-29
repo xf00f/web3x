@@ -4,7 +4,6 @@ jobs:
   test:
     docker:
       - image: circleci/node:10
-        entrypoint: bash
     steps:
       - checkout
 
@@ -20,17 +19,36 @@ jobs:
             - yarn-packages
 
       - run:
-          name: Test
+          name: Build
           command: |
-            export NODE_OPTIONS=--max_old_space_size=4096
-            yarn
-            yarn test --maxWorkers=2
+            yarn install
+            yarn build
+
+      - run:
+          name: Test
+          command: yarn test --maxWorkers=2 --coverage --coverageReporters=text-lcov | ./node_modules/.bin/coveralls
 
       - save_cache:
           name: Save Yarn Package Cache
           key: yarn-packages
           paths:
             - ~/.cache/yarn
+
+      - persist_to_workspace:
+          root: ~/project
+          paths: dest*
+
+  deploy:
+    docker:
+      - image: circleci/node:10
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Publish Packages
+          command: |
+            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
+            npm publish dest && npm publish dest-es
 
 workflows:
   version: 2
@@ -40,3 +58,13 @@ workflows:
           filters:
             branches:
               ignore: master
+            tags:
+              only: /^v.*/
+      - deploy:
+          requires:
+            - test
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/

@@ -176,4 +176,9 @@ export class WorldState {
     const account = await this.loadImmutableAccount(address);
     return account ? account.nonce : BigInt(0);
   }
+
+  public async accountExists(address: Address) {
+    const account = await this.loadImmutableAccount(address);
+    return account ? true : false;
+  }
 }
