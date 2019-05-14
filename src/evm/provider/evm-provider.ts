@@ -14,7 +14,8 @@ import {
 import { EthereumProvider, EthereumProviderNotifications } from '../../providers';
 import { bufferToHex, numberToHex } from '../../utils';
 import { Wallet } from '../../wallet';
-import { Blockchain, BlockHeader } from '../blockchain';
+import { Blockchain, BlockHeader, deserializeBlockState } from '../blockchain';
+import { validateBlock } from '../blockchain/validate-block';
 import { getAccountCode } from '../vm';
 import { getAccountTransactions } from '../vm/get-account-transactions';
 import { WorldState } from '../world';
@@ -33,6 +34,7 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
   public wallet?: Wallet;
   private subscriptions: { [id: string]: any } = {};
   private nextSubscriptionId = 0;
+  private newBlockChannel = new BroadcastChannel('newBlock');
 
   constructor(
     public readonly worldState: WorldState,
@@ -41,6 +43,7 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
   ) {
     super();
     this.wallet = options.wallet;
+    this.newBlockChannel.onmessage = e => this.handleBlock(new Buffer(e.data));
   }
 
   public static fromEvmProvider(provider: EvmProvider, options?: EvmProviderOptions) {
@@ -105,6 +108,7 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
           this.blockchain,
           fromRawTransactionRequest(params[0]),
           this.wallet,
+          this.newBlockChannel,
           this.options.blockDelay,
         );
       case 'eth_call':
@@ -172,6 +176,11 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
     this.emit('notification', { subscription, result: toRawBlockHeaderResponse(blockResponse) });
   }
 
+  private async handleBlock(serializedBlockState: Buffer) {
+    const blockState = deserializeBlockState(serializedBlockState);
+    await validateBlock(this.worldState, this.blockchain, blockState);
+  }
+
   public on(notification: 'notification', listener: (result: any) => void): this;
   public on(notification: 'connect', listener: () => void): this;
   public on(notification: 'close', listener: (code: number, reason: string) => void): this;
@@ -192,5 +201,9 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
 
   public removeAllListeners(notification: EthereumProviderNotifications): any {
     return super.removeAllListeners(notification);
+  }
+
+  public shutdown() {
+    this.newBlockChannel.close();
   }
 }

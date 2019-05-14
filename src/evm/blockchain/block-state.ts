@@ -1,15 +1,17 @@
-import { LevelUp } from 'levelup';
+import * as rlp from 'rlp';
 import { Address } from '../../address';
 import { sha3Buffer } from '../../utils';
 import { Trie } from '../trie';
-import { serializeTx, serializeTxReceipt, Tx } from '../tx';
-import { BlockHeader } from './block-header';
-import { EvaluatedTx } from './mine-txs';
+import { deserializeTx, serializeTx, Tx } from '../tx';
+import { BlockHeader, deserializeBlockHeader, serializeBlockHeader } from './block-header';
+import { EvaluatedTx } from './evaluate-txs';
 
 export interface BlockState {
   header: BlockHeader;
   uncles: BlockHeader[];
   transactions: Tx[];
+  serializedHeader: Buffer;
+  blockHash: Buffer;
 }
 
 export function createBlockState(
@@ -21,18 +23,14 @@ export function createBlockState(
   difficulty: bigint,
   blockGasLimit: bigint,
   evaluatedTxs: EvaluatedTx[],
-  db?: LevelUp,
 ): BlockState {
   const txs = evaluatedTxs.map(etx => etx.tx);
-  const serializedTxs = txs.map(serializeTx);
 
-  const receiptTrie = new Trie(db);
-  evaluatedTxs
-    .map(etx => etx.receipt)
-    .forEach((receipt, i) => receiptTrie.put(sha3Buffer(i.toString()), serializeTxReceipt(receipt)));
+  const receiptTrie = new Trie();
+  evaluatedTxs.forEach(({ serializedReceipt }, i) => receiptTrie.put(sha3Buffer(i.toString()), serializedReceipt));
 
-  const txTrie = new Trie(db);
-  serializedTxs.forEach((tx, i) => txTrie.put(sha3Buffer(i.toString()), tx));
+  const txTrie = new Trie();
+  evaluatedTxs.forEach(({ serializedTx }, i) => txTrie.put(sha3Buffer(i.toString()), serializedTx));
 
   const blockHeader: BlockHeader = {
     parentHash,
@@ -52,9 +50,31 @@ export function createBlockState(
     nonce: 0,
   };
 
+  const serializedHeader = serializeBlockHeader(blockHeader);
+  const blockHash = sha3Buffer(serializedHeader);
+
   return {
     header: blockHeader,
     transactions: txs,
     uncles: [],
+    serializedHeader,
+    blockHash,
   };
+}
+
+export function serializeBlockState(blockState: BlockState) {
+  return rlp.encode([blockState.serializedHeader, blockState.transactions.map(serializeTx), blockState.blockHash]);
+}
+
+export function deserializeBlockState(data: Buffer) {
+  const bufs: Buffer[] = rlp.decode(data) as any;
+  const txBufs: Buffer[] = bufs[1] as any;
+  const serializedHeader = bufs[0];
+  return {
+    header: deserializeBlockHeader(serializedHeader),
+    transactions: txBufs.map(deserializeTx),
+    uncles: [],
+    serializedHeader,
+    blockHash: bufs[2],
+  } as BlockState;
 }
