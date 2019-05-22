@@ -30,24 +30,20 @@ import {
   outputBigNumberFormatter,
   outputSyncingFormatter,
   PartialTransactionRequest,
+  RawLogResponse,
   toRawCallRequest,
   toRawEstimateRequest,
   toRawLogRequest,
   toRawTransactionRequest,
   TransactionRequest,
 } from '../formatters';
+import { SignedTransaction } from '../personal';
 import { TransactionHash } from '../types';
 import { Data } from '../types';
 import { hexToNumber, isHexStrict, numberToHex } from '../utils';
 import { BlockHash, BlockType } from './block';
 
-const identity = result => result;
-
-export interface EthRequestPayload {
-  method: string;
-  params: any[];
-  format: (result: any) => any;
-}
+const identity = <T>() => (result: T) => result;
 
 export class EthRequestPayloads {
   constructor(public defaultFromAddress?: Address, private defaultBlock: BlockType = 'latest') {}
@@ -70,28 +66,28 @@ export class EthRequestPayloads {
   public getNodeInfo() {
     return {
       method: 'web3_clientVersion',
-      format: identity,
+      format: identity<string>(),
     };
   }
 
   public getProtocolVersion() {
     return {
       method: 'eth_protocolVersion',
-      format: identity,
+      format: identity<string>(),
     };
   }
 
   public getCoinbase() {
     return {
       method: 'eth_coinbase',
-      format: identity,
+      format: Address.fromString,
     };
   }
 
   public isMining() {
     return {
       method: 'eth_mining',
-      format: identity,
+      format: identity<boolean>(),
     };
   }
 
@@ -119,7 +115,7 @@ export class EthRequestPayloads {
   public getAccounts() {
     return {
       method: 'eth_accounts',
-      format: result => result.map(Address.toChecksumAddress),
+      format: (result: string[]) => result.map(Address.fromString),
     };
   }
 
@@ -146,7 +142,7 @@ export class EthRequestPayloads {
         numberToHex(position),
         inputBlockNumberFormatter(this.resolveBlock(block)),
       ],
-      format: identity,
+      format: identity<string>(),
     };
   }
 
@@ -154,7 +150,7 @@ export class EthRequestPayloads {
     return {
       method: 'eth_getCode',
       params: [address.toString().toLowerCase(), inputBlockNumberFormatter(this.resolveBlock(block))],
-      format: identity,
+      format: identity<string>(),
     };
   }
 
@@ -234,7 +230,7 @@ export class EthRequestPayloads {
     return {
       method: 'eth_signTransaction',
       params: [toRawTransactionRequest(tx)],
-      format: identity,
+      format: identity<SignedTransaction>(),
     };
   }
 
@@ -242,7 +238,7 @@ export class EthRequestPayloads {
     return {
       method: 'eth_sendRawTransaction',
       params: [data],
-      format: identity,
+      format: identity<string>(),
     };
   }
 
@@ -254,7 +250,7 @@ export class EthRequestPayloads {
     return {
       method: 'eth_sendTransaction',
       params: [toRawTransactionRequest({ ...tx, from })],
-      format: identity,
+      format: identity<string>(),
     };
   }
 
@@ -262,7 +258,7 @@ export class EthRequestPayloads {
     return {
       method: 'eth_sign',
       params: [address.toString().toLowerCase(), inputSignFormatter(dataToSign)],
-      format: identity,
+      format: identity<string>(),
     };
   }
 
@@ -270,7 +266,7 @@ export class EthRequestPayloads {
     return {
       method: 'eth_signTypedData',
       params: [dataToSign, address.toString().toLowerCase()],
-      format: identity,
+      format: identity<string>(),
     };
   }
 
@@ -279,7 +275,7 @@ export class EthRequestPayloads {
     return {
       method: 'eth_call',
       params: [toRawCallRequest(tx), inputBlockNumberFormatter(this.resolveBlock(block))],
-      format: identity,
+      format: identity<string>(),
     };
   }
 
@@ -296,14 +292,14 @@ export class EthRequestPayloads {
     return {
       method: 'eth_submitWork',
       params: [nonce, powHash, digest],
-      format: identity,
+      format: identity<boolean>(),
     };
   }
 
   public getWork() {
     return {
       method: 'eth_getWork',
-      format: identity,
+      format: identity<string[]>(),
     };
   }
 
@@ -311,7 +307,7 @@ export class EthRequestPayloads {
     return {
       method: 'eth_getLogs',
       params: [toRawLogRequest(options)],
-      format: result => result.map(fromRawLogResponse),
+      format: (result: RawLogResponse[]) => result.map(fromRawLogResponse),
     };
   }
 

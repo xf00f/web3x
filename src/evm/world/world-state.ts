@@ -34,7 +34,7 @@ export class WorldState {
   }
 
   private async installPrecompiledContracts() {
-    for (const account of createPrecompilesFromDb(this.accounts.db)) {
+    for (const account of createPrecompilesFromDb(this.accounts.db!)) {
       await this.storeAccount(account);
     }
     await this.saveStateRoot();
@@ -44,12 +44,8 @@ export class WorldState {
     await this.db.put(Buffer.from('stateRoot'), this.accounts.root);
   }
 
-  public async getStateRoot() {
-    try {
-      return await this.db.get(Buffer.from('stateRoot'));
-    } catch (err) {
-      return null;
-    }
+  public getStateRoot() {
+    return this.accounts.root;
   }
 
   public async createAccount(address: Address, value: bigint, nonce: bigint = BigInt(0), code: Buffer = Buffer.of()) {

@@ -288,6 +288,11 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
+"@types/abstract-leveldown@*":
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/@types/abstract-leveldown/-/abstract-leveldown-5.0.1.tgz#3c7750d0186b954c7f2d2f6acc8c3c7ba0c3412e"
+  integrity sha512-wYxU3kp5zItbxKmeRYCEplS2MW7DzyBnxPGj+GJVHZEUZiK/nn5Ei1sUFgURDh+X051+zsGe28iud3oHjrYWQQ==
+
 "@types/babel__core@^7.1.0":
   version "7.1.0"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.0.tgz#710f2487dda4dcfd010ca6abb2b4dc7394365c51"
@@ -349,6 +354,15 @@
   integrity sha512-2kLuPC5FDnWIDvaJBzsGTBQaBbnDweznicvK7UGYzlIJP4RJR2a4A/ByLUXEyEgag6jz8eHdlWExGDtH3EYUXQ==
   dependencies:
     "@types/jest-diff" "*"
+
+"@types/levelup@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@types/levelup/-/levelup-3.1.0.tgz#e04f6a8eaf707f88d7c6e043a9067dda431f4538"
+  integrity sha512-Y2SC5PskYsE8+dELuWLCMG+UcUrkhhIz5wV55yX73AAVqr3kDXLYlj6k/vuchXUt1L1b/P1Frt4Dcc3WmWcbLA==
+  dependencies:
+    "@types/abstract-leveldown" "*"
+    "@types/events" "*"
+    "@types/node" "*"
 
 "@types/node@*":
   version "11.11.6"

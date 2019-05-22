@@ -17,7 +17,6 @@
 
 import BN from 'bn.js';
 import { toBN } from './bn';
-import { isHexStrict } from './hex';
 
 /**
  * Converts value to it's number representation
@@ -26,10 +25,7 @@ import { isHexStrict } from './hex';
  * @param {String|Number|BN} value
  * @return {String}
  */
-export function hexToNumber(value: string | number): number | null {
-  if (value === undefined || value === null) {
-    return null;
-  }
+export function hexToNumber(value: string | number): number {
   return toBN(value).toNumber();
 }
 

@@ -8,8 +8,8 @@ import { Log } from '../tx';
 import { deserializeTx } from '../tx/tx';
 import { deserializeTxReceipt } from '../tx/tx-receipt';
 import { BlockHeader, deserializeBlockHeader, serializeBlockHeader } from './block-header';
-import { createBlockState } from './block-state';
-import { EvaluatedTx } from './mine-txs';
+import { BlockState } from './block-state';
+import { EvaluatedTx } from './evaluate-txs';
 
 export interface BlockchainContext {
   blockNumber: number;
@@ -28,20 +28,21 @@ export type GetLogsResult = {
   log: Log;
 }[];
 
+const getChainTip = async (db: LevelUp) => {
+  try {
+    return (await db.get(Buffer.from('chainTip'))) as Buffer;
+  } catch (err) {
+    return null;
+  }
+};
+
 export class Blockchain extends EventEmitter {
   constructor(public db: LevelUp, private blockHeaders: BlockHeader[], private blockHashes: Buffer[]) {
     super();
   }
 
   public static async fromDb(db: LevelUp) {
-    const getChainTip = async () => {
-      try {
-        return await db.get(Buffer.from('chainTip'));
-      } catch (err) {
-        return null;
-      }
-    };
-    let blockHash = await getChainTip();
+    let blockHash = await getChainTip(db);
     const blocks: BlockHeader[] = [];
     const blockHashes: Buffer[] = [];
     if (blockHash) {
@@ -73,54 +74,62 @@ export class Blockchain extends EventEmitter {
     };
   }
 
-  public async mineTransactions(stateRoot: Buffer, blockchainCtx: BlockchainContext, evaluatedTxs: EvaluatedTx[]) {
-    const { coinbase, timestamp, difficulty, blockGasLimit } = blockchainCtx;
-    const blockNumber = this.getNextBlockNumber();
-    const parentHash = this.blockHashes.length ? this.blockHashes[this.blockHashes.length - 1] : Buffer.of();
-    const blockState = createBlockState(
-      stateRoot,
-      parentHash,
-      blockNumber,
-      coinbase,
-      timestamp,
-      difficulty,
-      blockGasLimit,
-      evaluatedTxs,
-      this.db,
-    );
-    const blockHeader = blockState.header;
+  public async addBlock(blockState: BlockState, evaluatedTxs: EvaluatedTx[]) {
+    const { header, blockHash } = blockState;
 
-    // Add block to db.
-    const serializedBlockHeader = serializeBlockHeader(blockHeader);
-    const blockHash = sha3Buffer(serializedBlockHeader);
-    await this.db.put(blockHash, serializedBlockHeader);
+    await this.addBlockToDb(blockState, evaluatedTxs);
 
-    this.blockHeaders.push(blockHeader);
+    this.blockHeaders.push(header);
     this.blockHashes.push(blockHash);
 
-    // Record new chaintip.
-    await this.db.put(Buffer.from('chainTip'), blockHash);
-
-    // Add lookup for transactions. txHash => [blockHash, txIndex, from].
-    await Promise.all(
-      evaluatedTxs.map(({ txHash, sender }, i) =>
-        this.db.put(txHash, rlp.encode([blockHash, Buffer.from(i.toString()), sender.toBuffer()])),
-      ),
-    );
-
-    this.emit('newHeads', blockHeader, blockHash);
+    this.emit('newHeads', header, blockHash);
 
     evaluatedTxs.forEach(({ receipt, txHash }, transactionIndex) => {
       const result = {
         blockHash: bufferToHex(blockHash),
-        blockNumber,
+        blockNumber: header.number,
         transactionIndex,
         transactionHash: bufferToHex(txHash),
       };
       receipt.logs.forEach(({ data, address, topics }, logIndex) => {
-        this.emit('logs', { ...result, logIndex, data: bufferToHex(data), address, topics: topics.map(bufferToHex) });
+        const msg = {
+          ...result,
+          logIndex,
+          data: bufferToHex(data),
+          address: address.toString(),
+          topics: topics.map(bufferToHex),
+        };
+        this.emit('logs', msg);
       });
     });
+  }
+
+  private async addBlockToDb(blockState: BlockState, evaluatedTxs: EvaluatedTx[]) {
+    const { blockHash, serializedHeader } = blockState;
+
+    // If we are using the same underlying db, the block will already have been added. Check first.
+    const chainTip = await getChainTip(this.db);
+    if (chainTip && chainTip.equals(blockHash)) {
+      return;
+    }
+
+    await this.db.put(blockHash, serializedHeader);
+
+    // Record new chaintip.
+    await this.db.put(Buffer.from('chainTip'), blockHash);
+
+    const txTrie = new Trie(this.db);
+    const receiptTrie = new Trie(this.db);
+
+    await Promise.all(
+      evaluatedTxs.map(async ({ txHash, sender, serializedTx, serializedReceipt }, i) => {
+        await receiptTrie.put(sha3Buffer(i.toString()), serializedReceipt);
+        await txTrie.put(sha3Buffer(i.toString()), serializedTx);
+
+        // Add lookup for transactions. txHash => [blockHash, txIndex, from].
+        await this.db.put(txHash, rlp.encode([blockHash, Buffer.from(i.toString()), sender.toBuffer()]));
+      }),
+    );
   }
 
   public async getMinedTransaction(txHash: Buffer) {

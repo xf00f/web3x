@@ -64,6 +64,7 @@
   },
   "dependencies": {
     "@types/bn.js": "^4.11.2",
+    "@types/levelup": "^3.1.0",
     "@types/node": "^10.12.18",
     "@types/ws": "^6.0.1",
     "bigint-buffer": "^1.1.2",

@@ -24,8 +24,6 @@ import {
   LogRequest,
   LogResponse,
   PartialTransactionRequest,
-  Sync,
-  TransactionReceipt,
   TransactionRequest,
   TransactionResponse,
 } from '../formatters';
@@ -38,7 +36,6 @@ import { Wallet } from '../wallet';
 import { BlockHash, BlockType } from './block';
 import { EthRequestPayloads } from './eth-request-payloads';
 import { SendTx, SentTransaction } from './send-tx';
-import { SignedTransaction } from './signed-transaction';
 import { subscribeForLogs } from './subscriptions/logs';
 import { subscribeForNewHeads } from './subscriptions/new-heads';
 import { subscribeForNewPendingTransactions } from './subscriptions/new-pending-transactions';
@@ -75,59 +72,59 @@ export class Eth {
     this.request.defaultFromAddress = address;
   }
 
-  private async send({ method, params, format }: { method: string; params?: any[]; format: any }) {
+  private async send<T>({ method, params, format }: { method: string; params?: any[]; format: (x: any) => T }) {
     return format(await this.provider.send(method, params));
   }
 
-  public async getId(): Promise<number> {
+  public async getId() {
     return await this.send(this.request.getId());
   }
 
-  public async getNodeInfo(): Promise<string> {
+  public async getNodeInfo() {
     return await this.send(this.request.getNodeInfo());
   }
 
-  public async getProtocolVersion(): Promise<string> {
+  public async getProtocolVersion() {
     return await this.send(this.request.getProtocolVersion());
   }
 
-  public async getCoinbase(): Promise<Address> {
+  public async getCoinbase() {
     return await this.send(this.request.getCoinbase());
   }
 
-  public async isMining(): Promise<boolean> {
+  public async isMining() {
     return await this.send(this.request.isMining());
   }
 
-  public async getHashrate(): Promise<number> {
+  public async getHashrate() {
     return await this.send(this.request.getHashrate());
   }
 
-  public async isSyncing(): Promise<Sync | boolean> {
+  public async isSyncing() {
     return await this.send(this.request.isSyncing());
   }
 
-  public async getGasPrice(): Promise<Quantity> {
+  public async getGasPrice() {
     return await this.send(this.request.getGasPrice());
   }
 
-  public async getAccounts(): Promise<Address[]> {
+  public async getAccounts() {
     return await this.send(this.request.getAccounts());
   }
 
-  public async getBlockNumber(): Promise<number> {
+  public async getBlockNumber() {
     return await this.send(this.request.getBlockNumber());
   }
 
-  public async getBalance(address: Address, block?: BlockType): Promise<Quantity> {
+  public async getBalance(address: Address, block?: BlockType) {
     return await this.send(this.request.getBalance(address, block));
   }
 
-  public async getStorageAt(address: Address, position: string, block?: BlockType): Promise<Data> {
+  public async getStorageAt(address: Address, position: string, block?: BlockType) {
     return await this.send(this.request.getStorageAt(address, position, block));
   }
 
-  public async getCode(address: Address, block?: BlockType): Promise<Data> {
+  public async getCode(address: Address, block?: BlockType) {
     return await this.send(this.request.getCode(address, block));
   }
 
@@ -147,35 +144,35 @@ export class Eth {
     uncleIndex: number,
     returnTxs?: true,
   ): Promise<BlockResponse<TransactionResponse>>;
-  public async getUncle(block: BlockType | BlockHash, uncleIndex: number, returnTxs?: boolean): Promise<BlockResponse> {
+  public async getUncle(block: BlockType | BlockHash, uncleIndex: number, returnTxs?: boolean) {
     return await this.send(this.request.getUncle(block, uncleIndex, returnTxs));
   }
 
-  public async getBlockTransactionCount(block: BlockType | BlockHash): Promise<number> {
+  public async getBlockTransactionCount(block: BlockType | BlockHash) {
     return await this.send(this.request.getBlockTransactionCount(block));
   }
 
-  public async getBlockUncleCount(block: BlockType | BlockHash): Promise<number> {
+  public async getBlockUncleCount(block: BlockType | BlockHash) {
     return await this.send(this.request.getBlockUncleCount(block));
   }
 
-  public async getTransaction(hash: TransactionHash): Promise<TransactionResponse> {
+  public async getTransaction(hash: TransactionHash) {
     return await this.send(this.request.getTransaction(hash));
   }
 
-  public async getTransactionFromBlock(block: BlockType | BlockHash, index: number): Promise<TransactionResponse> {
+  public async getTransactionFromBlock(block: BlockType | BlockHash, index: number) {
     return await this.send(this.request.getTransactionFromBlock(block, index));
   }
 
-  public async getTransactionReceipt(txHash: TransactionHash): Promise<TransactionReceipt | null> {
+  public async getTransactionReceipt(txHash: TransactionHash) {
     return await this.send(this.request.getTransactionReceipt(txHash));
   }
 
-  public async getTransactionCount(address: Address, block?: BlockType): Promise<number> {
+  public async getTransactionCount(address: Address, block?: BlockType) {
     return await this.send(this.request.getTransactionCount(address, block));
   }
 
-  public async signTransaction(tx: TransactionRequest): Promise<SignedTransaction> {
+  public async signTransaction(tx: TransactionRequest) {
     return await this.send(this.request.signTransaction(tx));
   }
 
@@ -220,7 +217,7 @@ export class Eth {
     }
   }
 
-  public async sign(address: Address, dataToSign: Data): Promise<Data> {
+  public async sign(address: Address, dataToSign: Data) {
     const account = this.getAccount(address);
 
     if (!account) {
@@ -231,27 +228,27 @@ export class Eth {
     }
   }
 
-  public async signTypedData(address: Address, dataToSign: TypedSigningData): Promise<Data> {
+  public async signTypedData(address: Address, dataToSign: TypedSigningData) {
     return await this.send(this.request.signTypedData(address, dataToSign));
   }
 
-  public async call(tx: CallRequest, block?: BlockType): Promise<Data> {
+  public async call(tx: CallRequest, block?: BlockType) {
     return await this.send(this.request.call(tx, block));
   }
 
-  public async estimateGas(tx: EstimateRequest): Promise<number> {
+  public async estimateGas(tx: EstimateRequest) {
     return await this.send(this.request.estimateGas(tx));
   }
 
-  public async submitWork(nonce: string, powHash: string, digest: string): Promise<boolean> {
+  public async submitWork(nonce: string, powHash: string, digest: string) {
     return await this.send(this.request.submitWork(nonce, powHash, digest));
   }
 
-  public async getWork(): Promise<string[]> {
+  public async getWork() {
     return await this.send(this.request.getWork());
   }
 
-  public async getPastLogs(options: LogRequest): Promise<LogResponse[]> {
+  public async getPastLogs(options: LogRequest) {
     return await this.send(this.request.getPastLogs(options));
   }
 

@@ -4,7 +4,7 @@ import { TransactionRequest } from '../../formatters';
 import { TransactionHash } from '../../types';
 import { sha3 } from '../../utils';
 import { Wallet } from '../../wallet';
-import { Blockchain } from '../blockchain';
+import { Blockchain, serializeBlockState } from '../blockchain';
 import { mineTxs } from '../blockchain/mine-txs';
 import { serializeTx, Tx } from '../tx';
 import { WorldState } from '../world';
@@ -14,6 +14,7 @@ export async function handleSendTransaction(
   blockchain: Blockchain,
   txRequest: TransactionRequest,
   wallet: Wallet,
+  broadcastChannel?: BroadcastChannel,
   blockDelay: number = 0,
 ): Promise<TransactionHash> {
   const { from: sender, to, gas = 200000, gasPrice, value = 0, data } = txRequest;
@@ -51,12 +52,19 @@ export async function handleSendTransaction(
 
   const txHash = sha3(serializeTx(tx));
 
-  const mine = () => mineTxs(worldState, blockchain, +gas, [tx], sender);
+  const mine = async () => {
+    const { evaluatedTxs, blockState } = await mineTxs(worldState, blockchain, [tx], sender);
+    if (broadcastChannel) {
+      broadcastChannel.postMessage(serializeBlockState(blockState));
+    }
+    return evaluatedTxs;
+  };
 
   if (blockDelay) {
     setTimeout(mine, blockDelay);
   } else {
-    const { result } = (await mine())[0];
+    const evaluatedTxs = await mine();
+    const { result } = evaluatedTxs[0];
     if (result.reverted) {
       if (result.returned && result.returned.slice(0, 4).equals(Buffer.from('08c379a0', 'hex'))) {
         const errorMessage = abiCoder.decodeParameter('string', result.returned!.slice(4).toString('hex'));

@@ -71,8 +71,8 @@ export function toRawLogRequest(logRequest: LogRequest = {}): RawLogRequest {
 export function fromRawLogRequest(rawLogRequest: RawLogRequest): LogRequest {
   const { toBlock, fromBlock, address, topics } = rawLogRequest;
   return {
-    toBlock: toBlock ? hexToNumber(toBlock)! : undefined,
-    fromBlock: fromBlock ? hexToNumber(fromBlock)! : undefined,
+    toBlock: toBlock ? hexToNumber(toBlock) : undefined,
+    fromBlock: fromBlock ? hexToNumber(fromBlock) : undefined,
     address: address ? (isArray(address) ? address.map(Address.fromString) : Address.fromString(address)) : undefined,
     topics,
   };
