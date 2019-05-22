@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "es6",
+    "module": "commonjs",
     "moduleResolution": "node",
     "lib": ["dom", "esnext", "es2017.object"],
-    "outDir": "dest-es",
+    "outDir": "dest",
     "strict": true,
     "declaration": true,
     "noImplicitAny": false,
@@ -15,6 +15,5 @@
     "inlineSourceMap": true,
     "importHelpers": true
   },
-  "include": ["src"],
-  "exclude": ["src/**/*.test.ts", "src/**/mock-*.ts", "src/**/fixtures/*"]
+  "include": ["src"]
 }
