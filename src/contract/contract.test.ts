@@ -17,6 +17,7 @@
 
 import { Address } from '../address';
 import { Eth } from '../eth/eth';
+import { RawLogResponse, RawTransactionReceipt } from '../formatters';
 import { MockEthereumProvider } from '../providers/mock-ethereum-provider';
 import { bufferToHex, sha3 } from '../utils';
 import { Contract } from './contract';
@@ -90,6 +91,7 @@ describe('contract', () => {
               '0x0000000000000000000000000000000000000000000000000000000000000001',
             ],
             blockNumber: '0x3',
+            transactionIndex: '0x0',
             transactionHash: '0x1234',
             blockHash: '0x1345',
             logIndex: '0x4',
@@ -183,6 +185,7 @@ describe('contract', () => {
             ],
             blockNumber: '0x3',
             transactionHash: '0x1234',
+            transactionIndex: '0x0',
             blockHash: '0x1345',
             logIndex: '0x4',
             data:
@@ -198,13 +201,14 @@ describe('contract', () => {
             ],
             blockNumber: '0x4',
             transactionHash: '0x1235',
+            transactionIndex: '0x1',
             blockHash: '0x1346',
             logIndex: '0x1',
             data:
               '0x0000000000000000000000000000000000000000000000000000000000000004' +
               '0000000000000000000000000000000000000000000000000000000000000005',
           },
-        ];
+        ] as RawLogResponse[];
       });
 
       mockEthSubscribe();
@@ -1327,7 +1331,7 @@ describe('contract', () => {
             data:
               signature +
               '000000000000000000000000' +
-              addressLowercase.replace('0x', '') +
+              addressUnprefixedLowercase +
               '0000000000000000000000000000000000000000000000000000000000000011',
             to: addressLowercase,
             from: addressLowercase,
@@ -1336,6 +1340,8 @@ describe('contract', () => {
             value: '0x2710',
           },
         ]);
+
+        return '0x10';
       });
 
       // eth_getTransactionReceipt
@@ -1345,9 +1351,11 @@ describe('contract', () => {
 
       const contract = new TestContract(eth, address);
 
-      await contract.methods
+      const gasUsed = await contract.methods
         .mySend(address, 17)
         .estimateGas({ from: address, gas: 50000, gasPrice: 3000, value: 10000 });
+
+      expect(gasUsed).toBe(16);
     });
 
     it('getPastEvents should get past events and format them correctly', async () => {
@@ -1586,6 +1594,17 @@ describe('contract', () => {
   });
 
   describe('deploy', () => {
+    const txReceipt: RawTransactionReceipt = {
+      transactionHash: '0x123',
+      from: addressLowercase,
+      contractAddress: address2Lowercase,
+      blockHash: '0xffdd',
+      transactionIndex: '0x0',
+      blockNumber: '0x0',
+      cumulativeGasUsed: '0x1',
+      gasUsed: '0x1',
+    };
+
     it('should deploy a contract and use all promise steps', async () => {
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
         expect(method).toBe('eth_sendTransaction');
@@ -1626,11 +1645,7 @@ describe('contract', () => {
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
         expect(method).toBe('eth_getTransactionReceipt');
         expect(params).toEqual(['0x5550000000000000000000000000000000000000000000000000000000000032']);
-        return {
-          from: addressLowercase,
-          contractAddress: address2Lowercase,
-          blockHash: '0xffdd',
-        };
+        return txReceipt;
       });
 
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
@@ -1667,11 +1682,7 @@ describe('contract', () => {
       );
 
       // eth_getTransactionReceipt
-      mockEthereumProvider.send.mockResolvedValueOnce({
-        from: addressLowercase,
-        contractAddress: address2Lowercase,
-        blockHash: '0xffdd',
-      });
+      mockEthereumProvider.send.mockResolvedValueOnce(txReceipt);
 
       // eth_getCode
       mockEthereumProvider.send.mockResolvedValueOnce('0x');
@@ -1697,10 +1708,7 @@ describe('contract', () => {
       );
 
       // eth_getTransactionReceipt
-      mockEthereumProvider.send.mockResolvedValueOnce({
-        from: addressLowercase,
-        blockHash: '0xffdd',
-      });
+      mockEthereumProvider.send.mockResolvedValueOnce({ ...txReceipt, contractAddress: undefined });
 
       // eth_unsubscribe
       mockEthereumProvider.send.mockResolvedValueOnce('0x1');
@@ -1733,11 +1741,7 @@ describe('contract', () => {
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {
         expect(method).toBe('eth_getTransactionReceipt');
         expect(params).toEqual(['0x5550000000000000000000000000000000000000000000000000000000000032']);
-        return {
-          from: addressLowercase,
-          contractAddress: address2Lowercase,
-          blockHash: '0xffdd',
-        };
+        return txReceipt;
       });
 
       mockEthereumProvider.send.mockImplementationOnce(async (method, params) => {

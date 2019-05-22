@@ -34,7 +34,7 @@ export class WorldState {
   }
 
   private async installPrecompiledContracts() {
-    for (const account of createPrecompilesFromDb(this.accounts.db)) {
+    for (const account of createPrecompilesFromDb(this.accounts.db!)) {
       await this.storeAccount(account);
     }
     await this.saveStateRoot();

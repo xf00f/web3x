@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.11] - 2019-05-22
+
+- `EvmProvider` uses `BroadcastChannel` in browser to send newly mined blocks between tabs.
+- `hexToNumber` can no longer take a `null`. Calling code must discern. This shouldn't break code obeying type signature.
+- `Eth` has better implied type safety internally.
+- `ropsten` added as Etherscan source.
+
 ## [3.0.10] - 2019-04-28
 
 - Fix revert message undefined bug.
@@ -145,6 +152,7 @@ All notable changes to this project will be documented in this file.
 
 - Initial release of Typescript port from web3.js.
 
+[3.0.11]: https://github.com/xf00f/web3x/compare/v3.0.10...v3.0.11
 [3.0.10]: https://github.com/xf00f/web3x/compare/v3.0.9...v3.0.10
 [3.0.9]: https://github.com/xf00f/web3x/compare/v3.0.8...v3.0.9
 [3.0.8]: https://github.com/xf00f/web3x/compare/v3.0.7...v3.0.8

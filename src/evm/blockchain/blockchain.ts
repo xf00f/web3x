@@ -28,20 +28,21 @@ export type GetLogsResult = {
   log: Log;
 }[];
 
+const getChainTip = async (db: LevelUp) => {
+  try {
+    return (await db.get(Buffer.from('chainTip'))) as Buffer;
+  } catch (err) {
+    return null;
+  }
+};
+
 export class Blockchain extends EventEmitter {
   constructor(public db: LevelUp, private blockHeaders: BlockHeader[], private blockHashes: Buffer[]) {
     super();
   }
 
   public static async fromDb(db: LevelUp) {
-    const getChainTip = async () => {
-      try {
-        return await db.get(Buffer.from('chainTip'));
-      } catch (err) {
-        return null;
-      }
-    };
-    let blockHash = await getChainTip();
+    let blockHash = await getChainTip(db);
     const blocks: BlockHeader[] = [];
     const blockHashes: Buffer[] = [];
     if (blockHash) {
@@ -107,8 +108,8 @@ export class Blockchain extends EventEmitter {
     const { blockHash, serializedHeader } = blockState;
 
     // If we are using the same underlying db, the block will already have been added. Check first.
-    const chainTip = await this.db.get(Buffer.from('chainTip'));
-    if (chainTip.equals(blockHash)) {
+    const chainTip = await getChainTip(this.db);
+    if (chainTip && chainTip.equals(blockHash)) {
       return;
     }
 

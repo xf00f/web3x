@@ -116,10 +116,10 @@ export function fromRawBlockHeaderResponse(block: RawBlockHeaderResponse): Block
     receiptsRoot: hexToBuffer(block.receiptsRoot),
     logsBloom: block.logsBloom ? hexToBuffer(block.logsBloom) : null,
     difficulty: hexToNumberString(block.difficulty),
-    number: block.number ? hexToNumber(block.number)! : null,
-    gasLimit: hexToNumber(block.gasLimit)!,
-    gasUsed: hexToNumber(block.gasUsed)!,
-    timestamp: hexToNumber(block.timestamp)!,
+    number: block.number ? hexToNumber(block.number) : null,
+    gasLimit: hexToNumber(block.gasLimit),
+    gasUsed: hexToNumber(block.gasUsed),
+    timestamp: hexToNumber(block.timestamp),
     extraData: hexToBuffer(block.extraData),
     nonce: block.nonce ? hexToBuffer(block.nonce) : null,
   };
@@ -129,7 +129,7 @@ export function fromRawBlockResponse(block: RawBlockResponse): BlockResponse {
   return {
     ...fromRawBlockHeaderResponse(block),
     totalDifficulty: hexToNumberString(block.totalDifficulty),
-    size: hexToNumber(block.size)!,
+    size: hexToNumber(block.size),
     transactions: block.transactions.map(tx => (isString(tx) ? hexToBuffer(tx) : fromRawTransactionResponse(tx))),
     uncles: block.uncles,
   };

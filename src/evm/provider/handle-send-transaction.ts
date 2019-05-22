@@ -14,7 +14,7 @@ export async function handleSendTransaction(
   blockchain: Blockchain,
   txRequest: TransactionRequest,
   wallet: Wallet,
-  broadcastChannel: BroadcastChannel,
+  broadcastChannel?: BroadcastChannel,
   blockDelay: number = 0,
 ): Promise<TransactionHash> {
   const { from: sender, to, gas = 200000, gasPrice, value = 0, data } = txRequest;
@@ -54,7 +54,9 @@ export async function handleSendTransaction(
 
   const mine = async () => {
     const { evaluatedTxs, blockState } = await mineTxs(worldState, blockchain, [tx], sender);
-    broadcastChannel.postMessage(serializeBlockState(blockState));
+    if (broadcastChannel) {
+      broadcastChannel.postMessage(serializeBlockState(blockState));
+    }
     return evaluatedTxs;
   };
 

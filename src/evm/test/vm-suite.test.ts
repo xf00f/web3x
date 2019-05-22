@@ -93,9 +93,9 @@ function runTest([testName, testSpec]: [string, Test]) {
       difficulty: hexToBigInt(env.currentDifficulty),
       coinbase: Address.fromString(env.currentCoinbase),
       last256BlockHashes: [],
-      blockNumber: hexToNumber(env.currentNumber)!,
+      blockNumber: hexToNumber(env.currentNumber),
       blockGasLimit: hexToBigInt(env.currentGasLimit),
-      timestamp: hexToNumber(env.currentTimestamp)!,
+      timestamp: hexToNumber(env.currentTimestamp),
     };
 
     const { error, status, returned, txSubstrate } = await messageCall(

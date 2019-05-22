@@ -34,7 +34,7 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
   public wallet?: Wallet;
   private subscriptions: { [id: string]: any } = {};
   private nextSubscriptionId = 0;
-  private newBlockChannel = new BroadcastChannel('newBlock');
+  private newBlockChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('newBlock') : undefined;
 
   constructor(
     public readonly worldState: WorldState,
@@ -43,7 +43,10 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
   ) {
     super();
     this.wallet = options.wallet;
-    this.newBlockChannel.onmessage = e => this.handleBlock(new Buffer(e.data));
+
+    if (this.newBlockChannel) {
+      this.newBlockChannel.onmessage = e => this.handleBlock(new Buffer(e.data));
+    }
   }
 
   public static fromEvmProvider(provider: EvmProvider, options?: EvmProviderOptions) {
@@ -204,6 +207,8 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
   }
 
   public shutdown() {
-    this.newBlockChannel.close();
+    if (this.newBlockChannel) {
+      this.newBlockChannel.close();
+    }
   }
 }
