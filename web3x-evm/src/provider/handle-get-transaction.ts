@@ -1,3 +1,10 @@
+/*
+  Copyright (c) 2019 xf00f
+
+  This file is part of web3x and is released under the MIT License.
+  https://opensource.org/licenses/MIT
+*/
+
 import { RawTransactionResponse, toRawTransactionResponse, TransactionResponse } from 'web3x/formatters';
 import { TransactionHash } from 'web3x/types';
 import { bufferToHex, hexToBuffer } from 'web3x/utils';

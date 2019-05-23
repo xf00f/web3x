@@ -1,3 +1,10 @@
+/*
+  Copyright (c) 2019 xf00f
+
+  This file is part of web3x and is released under the MIT License.
+  https://opensource.org/licenses/MIT
+*/
+
 import { Address } from 'web3x/address';
 import { sha3Buffer } from 'web3x/utils';
 import { recoverTransactionSender, serializeTx, serializeTxReceipt, Tx, TxReceipt } from '../tx';
