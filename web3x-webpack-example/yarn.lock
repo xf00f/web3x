@@ -595,6 +595,11 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
+"@types/abstract-leveldown@*":
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/@types/abstract-leveldown/-/abstract-leveldown-5.0.1.tgz#3c7750d0186b954c7f2d2f6acc8c3c7ba0c3412e"
+  integrity sha512-wYxU3kp5zItbxKmeRYCEplS2MW7DzyBnxPGj+GJVHZEUZiK/nn5Ei1sUFgURDh+X051+zsGe28iud3oHjrYWQQ==
+
 "@types/accepts@*":
   version "1.3.5"
   resolved "https://registry.npmjs.org/@types/accepts/-/accepts-1.3.5.tgz#c34bec115cfc746e04fe5a059df4ce7e7b391575"
@@ -703,6 +708,15 @@
     "@types/http-assert" "*"
     "@types/keygrip" "*"
     "@types/koa-compose" "*"
+    "@types/node" "*"
+
+"@types/levelup@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@types/levelup/-/levelup-3.1.0.tgz#e04f6a8eaf707f88d7c6e043a9067dda431f4538"
+  integrity sha512-Y2SC5PskYsE8+dELuWLCMG+UcUrkhhIz5wV55yX73AAVqr3kDXLYlj6k/vuchXUt1L1b/P1Frt4Dcc3WmWcbLA==
+  dependencies:
+    "@types/abstract-leveldown" "*"
+    "@types/events" "*"
     "@types/node" "*"
 
 "@types/mime@*":
@@ -8000,12 +8014,13 @@ wbuf@^1.1.0, wbuf@^1.7.2:
   dependencies:
     minimalistic-assert "^1.0.0"
 
-web3x-es@^3.0.1:
-  version "3.0.10"
-  resolved "https://registry.yarnpkg.com/web3x-es/-/web3x-es-3.0.10.tgz#07795b33c446c88a05febdbe27aabc9ed5b8bccd"
-  integrity sha512-h4+xKK8lKuRQQd4O0cx1SwLzf4IS5TDjW/dDsZgKgeW521cebLO0urtkK4u6rruIxHo8o0lRIb2IdPJtYx+GlA==
+web3x-es@^3.0.11:
+  version "3.0.11"
+  resolved "https://registry.yarnpkg.com/web3x-es/-/web3x-es-3.0.11.tgz#00ec6eab4c84e48292315108c994292da6a4cf9a"
+  integrity sha512-d0KZdNh9hiw3BjV9pV5PhQ7qP+ECgg0BbTWUbueQ2FGkjw1yJLoAH1nos5OVkE5F6IBbjoDaBmY7wyYTTntmeg==
   dependencies:
     "@types/bn.js" "^4.11.2"
+    "@types/levelup" "^3.1.0"
     "@types/node" "^10.12.18"
     "@types/ws" "^6.0.1"
     bigint-buffer "^1.1.2"

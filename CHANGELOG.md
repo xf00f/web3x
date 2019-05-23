@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.0] - 2019-05-22
+
+- Major project restructure.
+- `web3x-codegen` is its own package.
+- `web3x-evm` is its own package.
+- All code not derived from `web3.js` is now MIT licensed.
+
 ## [3.0.11] - 2019-05-22
 
 - `EvmProvider` uses `BroadcastChannel` in browser to send newly mined blocks between tabs.
