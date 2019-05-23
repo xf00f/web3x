@@ -7,10 +7,20 @@
 [![GitHub Issues](https://img.shields.io/github/issues/xf00f/web3x.svg)](https://github.com/xf00f/web3x/issues)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/xf00f/web3x/blob/master/web3x-codegen/LICENSE)
 
-A TypeScript implemenation of the EVM which can be used for simplifying development workflows.
+A TypeScript implementation of the EVM which can be used for simplifying development workflows.
 
 Assuming you are building a browser based app the `EvmProvider` will execute contract code directly in the browser without any dependency on third party processes such as ganache.
 This can speed up prototyping of apps and their associated contract code. This is an early-stage feature, not all opcodes have been implmented so YMMV.
+
+## Missing opcodes
+
+To be implemented soon.
+
+- `EXTCODECOPY`
+- `BLOCKHASH`
+- `CREATE`
+- `CALLCODE`
+- `SELFDESTRUCT`
 
 ## Usage
 
@@ -93,3 +103,7 @@ async function main() {
 
 main().catch(console.error);
 ```
+
+## Packages
+
+- [web3x-evm](https://www.npmjs.com/package/web3x-evm)

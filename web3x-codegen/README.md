@@ -55,7 +55,7 @@ The generator will create 3 contracts:
 - For the second it specifies a truffle build output and generates its interface at `./src/contracts/MyTruffleContract.ts`.
 - For the third it reads a raw ABI file and compiled initialisation code from local files, and generates its interface at `./src/contracts/MyRawAbiContract.ts`. The `initDataFile` property is optional but you won't be able to easily deploy the contract without it.
 
-For an example of the code generated, take a look at this [example](example-projects/node/src/contracts/DaiContract.ts).
+For an example of the code generated, take a look at this [example](../web3x-node-example/src/contracts/DaiContract.ts).
 
 ### Using generated contracts
 
@@ -121,3 +121,7 @@ async function main() {
 
 main().catch(console.error);
 ```
+
+## Packages
+
+- [web3x-codegen](https://www.npmjs.com/package/web3x-codegen)
