@@ -27,10 +27,8 @@
   "sideEffects": false,
   "scripts": {
     "build": "yarn clean && tsc -p tsconfig.cjs.json && node ./package.js",
-    "lint": "tslint --project tsconfig.json 'src/**/*.ts' --fix",
     "test": "jest",
-    "clean": "rm -rf ./dest",
-    "deploy": "yarn jest --clearCache && yarn build && npm publish dest"
+    "clean": "rm -rf ./dest"
   },
   "jest": {
     "transform": {

@@ -19,14 +19,35 @@ jobs:
             - yarn-packages
 
       - run:
-          name: Build
+          name: Build web3x
+          working_directory: web3x
           command: |
             yarn install
             yarn build
 
       - run:
-          name: Test
+          name: Test web3x
+          working_directory: web3x
           command: yarn test --maxWorkers=2 --coverage --coverageReporters=text-lcov | ./node_modules/.bin/coveralls
+
+      - run:
+          name: Build web3x-evm
+          working_directory: web3x-evm
+          command: |
+            yarn install
+            yarn build
+
+      - run:
+          name: Test web3x-evm
+          working_directory: web3x-evm
+          command: yarn test
+
+      - run:
+          name: Build web3x-codegen
+          working_directory: web3x-codegen
+          command: |
+            yarn install
+            yarn build
 
       - save_cache:
           name: Save Yarn Package Cache
@@ -36,7 +57,7 @@ jobs:
 
       - persist_to_workspace:
           root: ~/project
-          paths: dest*
+          paths: "*/dest*"
 
   deploy:
     docker:
@@ -44,11 +65,25 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project
+
       - run:
-          name: Publish Packages
-          command: |
-            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/project/.npmrc
-            npm publish dest && npm publish dest-es
+          name: Configure registry
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/project/.npmrc
+
+      - run:
+          name: Publish web3x
+          working_directory: web3x
+          command: npm publish dest && npm publish dest-es
+
+      - run:
+          name: Publish web3x-evm
+          working_directory: web3x-evm
+          command: npm publish dest
+
+      - run:
+          name: Publish web3x-codegen
+          working_directory: web3x-codegen
+          command: npm publish dest
 
 workflows:
   version: 2
