@@ -1,4 +1,4 @@
-import { Address } from '../../address';
+import { Address } from 'web3x/address';
 import { Tx, TxReceipt } from '../tx';
 import { ExTxResult } from '../vm';
 import { WorldState } from '../world';

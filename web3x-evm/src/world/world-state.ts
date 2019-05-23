@@ -1,7 +1,7 @@
 import { toBufferBE } from 'bigint-buffer';
 import { LevelUp } from 'levelup';
-import { Address } from '../../address';
-import { sha3Buffer } from '../../utils';
+import { Address } from 'web3x/address';
+import { sha3Buffer } from 'web3x/utils';
 import { Trie } from '../trie';
 import { AccountState } from './account-state';
 import { EvmAccount } from './evm-account';

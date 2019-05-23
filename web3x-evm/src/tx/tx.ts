@@ -1,9 +1,9 @@
 import { toBigIntBE, toBufferBE } from 'bigint-buffer';
 import * as rlp from 'rlp';
-import { Address } from '../../address';
-import Account from '../../eth-lib/account';
-import Bytes from '../../eth-lib/bytes';
-import { bufferToHex, hexToBuffer, sha3 } from '../../utils';
+import { Address } from 'web3x/address';
+import Account from 'web3x/eth-lib/account';
+import Bytes from 'web3x/eth-lib/bytes';
+import { bufferToHex, hexToBuffer, sha3 } from 'web3x/utils';
 
 export interface Tx {
   nonce: bigint;

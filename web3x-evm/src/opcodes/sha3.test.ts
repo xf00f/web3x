@@ -1,8 +1,8 @@
 import { toBigIntBE } from 'bigint-buffer';
 import levelup from 'levelup';
 import memdown from 'memdown';
-import { Address } from '../../address';
-import { sha3 } from '../../utils';
+import { Address } from 'web3x/address';
+import { sha3 } from 'web3x/utils';
 import { BlockchainContext } from '../blockchain';
 import { EvmContext } from '../vm/evm-context';
 import { WorldState } from '../world/world-state';

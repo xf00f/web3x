@@ -1,9 +1,9 @@
 import { toBufferBE } from 'bigint-buffer';
 import * as rlp from 'rlp';
-import { Address } from '../../address';
-import { RawTransactionReceipt, toRawTransactionReceipt } from '../../formatters';
-import { TransactionHash } from '../../types';
-import { bufferToHex, hexToBuffer, sha3Buffer } from '../../utils';
+import { Address } from 'web3x/address';
+import { RawTransactionReceipt, toRawTransactionReceipt } from 'web3x/formatters';
+import { TransactionHash } from 'web3x/types';
+import { bufferToHex, hexToBuffer, sha3Buffer } from 'web3x/utils';
 import { Blockchain } from '../blockchain';
 import { recoverTransactionSender } from '../tx';
 

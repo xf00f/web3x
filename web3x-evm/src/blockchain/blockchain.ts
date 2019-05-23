@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events';
 import { LevelUp } from 'levelup';
 import * as rlp from 'rlp';
-import { Address } from '../../address';
-import { bufferToHex, sha3Buffer } from '../../utils';
+import { Address } from 'web3x/address';
+import { bufferToHex, sha3Buffer } from 'web3x/utils';
 import { Trie } from '../trie';
 import { Log } from '../tx';
 import { deserializeTx } from '../tx/tx';

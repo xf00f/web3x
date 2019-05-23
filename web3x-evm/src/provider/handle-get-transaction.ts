@@ -1,6 +1,6 @@
-import { RawTransactionResponse, toRawTransactionResponse, TransactionResponse } from '../../formatters';
-import { TransactionHash } from '../../types';
-import { bufferToHex, hexToBuffer } from '../../utils';
+import { RawTransactionResponse, toRawTransactionResponse, TransactionResponse } from 'web3x/formatters';
+import { TransactionHash } from 'web3x/types';
+import { bufferToHex, hexToBuffer } from 'web3x/utils';
 import { Blockchain } from '../blockchain';
 
 export async function handleGetTransactionByHash(

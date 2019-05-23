@@ -1,4 +1,4 @@
-import { Address } from '../../address';
+import { Address } from 'web3x/address';
 import { Tx } from '../tx';
 import { WorldState } from '../world';
 import { createBlockState } from './block-state';

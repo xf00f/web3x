@@ -1,6 +1,6 @@
 import { toBufferBE } from 'bigint-buffer';
+import { Address } from 'web3x/address';
 import { OpCode } from '.';
-import { Address } from '../../address';
 import { EvmContext } from '../vm/evm-context';
 import { messageCall } from '../vm/message-call';
 

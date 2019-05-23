@@ -1,6 +1,6 @@
 import { LevelUp } from 'levelup';
 import bn128 from 'rustbn.js';
-import { Address } from '../../../address';
+import { Address } from 'web3x/address';
 import { Trie } from '../../trie';
 import { EvmContext } from '../../vm';
 import { EvmAccount } from '../evm-account';

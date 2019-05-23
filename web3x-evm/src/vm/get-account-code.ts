@@ -1,4 +1,4 @@
-import { Address } from '../../address';
+import { Address } from 'web3x/address';
 import { WorldState } from '../world/world-state';
 
 export async function getAccountCode(worldState: WorldState, address: Address) {

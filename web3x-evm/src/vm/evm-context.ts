@@ -1,4 +1,4 @@
-import { Address } from '../../address';
+import { Address } from 'web3x/address';
 import { BlockchainContext } from '../blockchain';
 import { EvmMemory } from '../memory';
 import { Stack } from '../stack';

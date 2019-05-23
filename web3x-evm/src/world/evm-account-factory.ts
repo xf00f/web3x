@@ -1,5 +1,5 @@
 import { LevelUp } from 'levelup';
-import { Address } from '../../address';
+import { Address } from 'web3x/address';
 import { Trie } from '../trie';
 import { EvmAccount } from './evm-account';
 import { EcAddAccount, EcdsaRecoveryAccount, EcMulAccount, EcPairingAccount } from './precompiled';

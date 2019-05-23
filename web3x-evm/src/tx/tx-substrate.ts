@@ -1,4 +1,4 @@
-import { Address } from '../../address';
+import { Address } from 'web3x/address';
 import { EvmAccount } from '../world/evm-account';
 
 export interface Log {

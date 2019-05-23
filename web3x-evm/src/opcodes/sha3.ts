@@ -1,6 +1,6 @@
 import { toBigIntBE } from 'bigint-buffer';
+import { sha3 } from 'web3x/utils';
 import { OpCode } from '.';
-import { sha3 } from '../../utils';
 import { EvmContext } from '../vm/evm-context';
 
 class Sha3Op implements OpCode {

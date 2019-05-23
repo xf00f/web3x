@@ -1,9 +1,9 @@
-import { sign } from '../../account/sign-transaction';
-import { abiCoder } from '../../contract/abi-coder';
-import { TransactionRequest } from '../../formatters';
-import { TransactionHash } from '../../types';
-import { sha3 } from '../../utils';
-import { Wallet } from '../../wallet';
+import { sign } from 'web3x/account/sign-transaction';
+import { abiCoder } from 'web3x/contract/abi-coder';
+import { TransactionRequest } from 'web3x/formatters';
+import { TransactionHash } from 'web3x/types';
+import { sha3 } from 'web3x/utils';
+import { Wallet } from 'web3x/wallet';
 import { Blockchain, serializeBlockState } from '../blockchain';
 import { mineTxs } from '../blockchain/mine-txs';
 import { serializeTx, Tx } from '../tx';

@@ -1,7 +1,7 @@
 import { isArray } from 'util';
-import { BlockType } from '../../eth';
-import { LogRequest, LogResponse, toRawLogResponse } from '../../formatters';
-import { bufferToHex, hexToBuffer } from '../../utils';
+import { BlockType } from 'web3x/eth';
+import { LogRequest, LogResponse } from 'web3x/formatters';
+import { bufferToHex, hexToBuffer } from 'web3x/utils';
 import { Blockchain, BlockHeader } from '../blockchain';
 
 export async function getLogs(blockchain: Blockchain, logRequest: LogRequest) {

@@ -1,5 +1,5 @@
-import { Address } from '../../address';
-import { sha3Buffer } from '../../utils';
+import { Address } from 'web3x/address';
+import { sha3Buffer } from 'web3x/utils';
 import { recoverTransactionSender, serializeTx, serializeTxReceipt, Tx, TxReceipt } from '../tx';
 import { executeTransaction, ExTxContext, ExTxResult } from '../vm';
 import { WorldState } from '../world';

@@ -1,6 +1,6 @@
-import { Account } from '../../account';
-import { sign, SignTransactionRequest } from '../../account/sign-transaction';
-import { Address } from '../../address';
+import { Account } from 'web3x/account';
+import { sign, SignTransactionRequest } from 'web3x/account/sign-transaction';
+import { Address } from 'web3x/address';
 import { recoverTransactionSender, Tx } from './tx';
 
 describe('tx', () => {

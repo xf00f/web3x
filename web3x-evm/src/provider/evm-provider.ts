@@ -1,7 +1,7 @@
 import { toBufferBE } from 'bigint-buffer';
 import { EventEmitter } from 'events';
 import levelup, { LevelUp } from 'levelup';
-import { Address } from '../../address';
+import { Address } from 'web3x/address';
 import {
   BlockHeaderResponse,
   fromRawCallRequest,
@@ -10,10 +10,10 @@ import {
   LogResponse,
   toRawBlockHeaderResponse,
   toRawLogResponse,
-} from '../../formatters';
-import { EthereumProvider, EthereumProviderNotifications } from '../../providers';
-import { bufferToHex, numberToHex } from '../../utils';
-import { Wallet } from '../../wallet';
+} from 'web3x/formatters';
+import { EthereumProvider, EthereumProviderNotifications } from 'web3x/providers';
+import { bufferToHex, numberToHex } from 'web3x/utils';
+import { Wallet } from 'web3x/wallet';
 import { Blockchain, BlockHeader, deserializeBlockState } from '../blockchain';
 import { validateBlock } from '../blockchain/validate-block';
 import { getAccountCode } from '../vm';

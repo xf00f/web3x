@@ -1,6 +1,6 @@
 import BN from 'bn.js';
 import * as rlp from 'rlp';
-import { Address } from '../../address';
+import { Address } from 'web3x/address';
 
 export interface BlockHeader {
   parentHash: Buffer;

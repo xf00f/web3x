@@ -1,6 +1,6 @@
 import { LevelUp } from 'levelup';
-import { Address } from '../../../address';
-import { bufferToHex, recover } from '../../../utils';
+import { Address } from 'web3x/address';
+import { bufferToHex, recover } from 'web3x/utils';
 import { Trie } from '../../trie';
 import { EvmContext } from '../../vm';
 import { EvmAccount } from '../evm-account';

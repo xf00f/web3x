@@ -1,6 +1,6 @@
 import levelup from 'levelup';
 import memdown from 'memdown';
-import { Address } from '../../address';
+import { Address } from 'web3x/address';
 import { WorldState } from './world-state';
 
 describe('world-state', () => {

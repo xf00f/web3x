@@ -1,8 +1,8 @@
 import levelup from 'levelup';
 import memdown from 'memdown';
-import { Eth } from '../../eth';
-import { toWei, utf8ToHex } from '../../utils';
-import { Wallet } from '../../wallet';
+import { Eth } from 'web3x/eth';
+import { toWei, utf8ToHex } from 'web3x/utils';
+import { Wallet } from 'web3x/wallet';
 import { EvmProvider } from './evm-provider';
 import { DaiContract } from './fixtures/DaiContract';
 

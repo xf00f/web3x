@@ -1,5 +1,5 @@
-import { Address } from '../../address';
-import { CallRequest } from '../../formatters';
+import { Address } from 'web3x/address';
+import { CallRequest } from 'web3x/formatters';
 import { Blockchain } from '../blockchain';
 import { staticMessageCall } from '../vm';
 import { WorldState } from '../world/world-state';

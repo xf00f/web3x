@@ -1,6 +1,6 @@
 import * as rlp from 'rlp';
-import { Address } from '../../address';
-import { sha3Buffer } from '../../utils';
+import { Address } from 'web3x/address';
+import { sha3Buffer } from 'web3x/utils';
 import { Trie } from '../trie';
 import { deserializeTx, serializeTx, Tx } from '../tx';
 import { BlockHeader, deserializeBlockHeader, serializeBlockHeader } from './block-header';

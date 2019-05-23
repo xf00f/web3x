@@ -1,7 +1,7 @@
 import { toBigIntBE, toBufferBE } from 'bigint-buffer';
 import BN from 'bn.js';
 import * as rlp from 'rlp';
-import { Address } from '../../address';
+import { Address } from 'web3x/address';
 import { Log } from './tx-substrate';
 
 export interface TxReceipt {
