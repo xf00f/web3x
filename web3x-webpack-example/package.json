@@ -1,5 +1,5 @@
 {
-  "name": "web3.ts-webpack-example",
+  "name": "web3x-webpack-example",
   "version": "1.0.0",
   "main": "src/index.ts",
   "license": "MIT",
@@ -23,6 +23,9 @@
       "jsx",
       "json",
       "node"
+    ],
+    "transformIgnorePatterns": [
+      "/node_modules/(?!web3x-es).+\\.js$"
     ]
   },
   "dependencies": {
