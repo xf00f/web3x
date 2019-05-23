@@ -96,7 +96,7 @@ Read more at [web3x-codegen](../web3x-codegen).
 
 ## The EVM provider
 
-There is an implmentation of the EVM which can be used for simplifying development workflows.
+There is an implementation of the EVM which can be used for simplifying development workflows.
 
 Read more at [web3x-evm](../web3x-evm).
 
