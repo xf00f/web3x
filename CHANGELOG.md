@@ -159,6 +159,7 @@ All notable changes to this project will be documented in this file.
 
 - Initial release of Typescript port from web3.js.
 
+[4.0.0]: https://github.com/xf00f/web3x/compare/v3.0.11...v4.0.0
 [3.0.11]: https://github.com/xf00f/web3x/compare/v3.0.10...v3.0.11
 [3.0.10]: https://github.com/xf00f/web3x/compare/v3.0.9...v3.0.10
 [3.0.9]: https://github.com/xf00f/web3x/compare/v3.0.8...v3.0.9
