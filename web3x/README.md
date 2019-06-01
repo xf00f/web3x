@@ -9,7 +9,7 @@
 [![Coverage](https://img.shields.io/coveralls/github/xf00f/web3x/master.svg)](https://coveralls.io/github/xf00f/web3x)
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://github.com/xf00f/web3x/blob/master/LICENSE)
 
-TypeScript port of web3.js - for perfect types and tiny builds.
+Ethereum TypeScript Client Library - for perfect types and tiny builds.
 
 ![Demo](https://user-images.githubusercontent.com/44038056/48001064-5d377d00-e0ff-11e8-994f-36d165f9124e.gif)
 
