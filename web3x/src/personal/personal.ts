@@ -16,71 +16,60 @@
 */
 
 import { Address } from '../address';
-import { TransactionRequest } from '../formatters';
 import { EthereumProvider } from '../providers/ethereum-provider';
-import { Data, Quantity, TransactionHash } from '../types';
-import { PersonalRequestPayloads } from './personal-request-payloads';
-
-export interface Transaction extends TransactionRequest {
-  condition?: { block: number } | { time: number } | null;
-}
-
-export interface SignedTransaction {
-  raw: Data;
-  tx: Transaction;
-}
+import { PersonalRequestPayloads, Transaction } from './personal-request-payloads';
 
 export class Personal {
   public readonly request = new PersonalRequestPayloads();
 
   constructor(private provider: EthereumProvider) {}
 
-  private async send({ method, params, format }: { method: string; params?: any[]; format: any }) {
+  private async send<T>({ method, params, format }: { method: string; params?: any[]; format: (x: any) => T }) {
     return format(await this.provider.send(method, params));
   }
 
-  public async getAccounts(): Promise<Address[]> {
+  public async getAccounts() {
     const payload = this.request.getAccounts();
-    return payload.format(await this.send(payload));
+    return await this.send(payload);
   }
 
-  public async newAccount(password: string): Promise<Address> {
+  public async newAccount(password: string) {
     const payload = this.request.newAccount(password);
-    return payload.format(await this.send(payload));
+    return await this.send(payload);
   }
 
-  public async unlockAccount(address: Address, password: string, duration: Quantity): Promise<boolean> {
+  public async unlockAccount(address: Address, password: string, duration: number) {
     const payload = this.request.unlockAccount(address, password, duration);
-    return payload.format(await this.send(payload));
+    return await this.send(payload);
   }
 
   public async lockAccount(address: Address) {
     const payload = this.request.lockAccount(address);
-    return payload.format(await this.send(payload));
+    return await this.send(payload);
   }
 
-  public async importRawKey(privateKey: Data, password: string): Promise<Address> {
+  public async importRawKey(privateKey: Buffer, password: string) {
     const payload = this.request.importRawKey(privateKey, password);
-    return payload.format(await this.send(payload));
+    return await this.send(payload);
   }
 
-  public async sendTransaction(tx: Transaction, password: string): Promise<TransactionHash> {
+  public async sendTransaction(tx: Transaction, password: string) {
     const payload = this.request.sendTransaction(tx, password);
-    return payload.format(await this.send(payload));
+    return await this.send(payload);
   }
 
-  public async signTransaction(tx: Transaction, password: string): Promise<SignedTransaction> {
+  public async signTransaction(tx: Transaction, password: string) {
     const payload = this.request.signTransaction(tx, password);
-    return payload.format(await this.send(payload));
+    return await this.send(payload);
   }
 
-  public async sign(data: Data, address: Address, password: string): Promise<Data> {
-    const payload = this.request.sign(data, address, password);
-    return payload.format(await this.send(payload));
+  public async sign(message: string, address: Address, password: string) {
+    const payload = this.request.sign(message, address, password);
+    return await this.send(payload);
   }
 
-  public async ecRecover(data: Data, signedData: Data): Promise<Address> {
-    const payload = this.request.ecRecover(data, signedData);
-    return payload.format(await this.send(payload));
+  public async ecRecover(message: string, signedData: string) {
+    const payload = this.request.ecRecover(message, signedData);
+    return await this.send(payload);
   }
 }

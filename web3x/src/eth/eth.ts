@@ -31,7 +31,6 @@ import { LegacyProvider, LegacyProviderAdapter } from '../providers';
 import { EthereumProvider } from '../providers/ethereum-provider';
 import { Subscription } from '../subscriptions';
 import { TransactionHash } from '../types';
-import { Data, Quantity } from '../types';
 import { Wallet } from '../wallet';
 import { BlockHash, BlockType } from './block';
 import { EthRequestPayloads } from './eth-request-payloads';
@@ -176,7 +175,7 @@ export class Eth {
     return await this.send(this.request.signTransaction(tx));
   }
 
-  public sendSignedTransaction(data: Data): SendTx {
+  public sendSignedTransaction(data: string): SendTx {
     const { method, params } = this.request.sendSignedTransaction(data);
     const txHashPromise = this.provider.send(method, params);
     return new SentTransaction(this, txHashPromise);
@@ -217,7 +216,7 @@ export class Eth {
     }
   }
 
-  public async sign(address: Address, dataToSign: Data) {
+  public async sign(address: Address, dataToSign: string) {
     const account = this.getAccount(address);
 
     if (!account) {

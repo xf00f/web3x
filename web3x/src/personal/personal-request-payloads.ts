@@ -16,49 +16,57 @@
 */
 
 import { Address } from '../address';
-import { inputSignFormatter, toRawTransactionRequest } from '../formatters';
-import { Data, Quantity } from '../types';
-import { Transaction } from './personal';
+import { inputSignFormatter, toRawTransactionRequest, TransactionRequest } from '../formatters';
+import { bufferToHex } from '../utils';
 
-const identity = result => result;
+export interface Transaction extends TransactionRequest {
+  condition?: { block: number } | { time: number } | null;
+}
+
+export interface SignedTransaction {
+  raw: string;
+  tx: Transaction;
+}
+
+const identity = <T>() => (result: T) => result;
 
 export class PersonalRequestPayloads {
   public getAccounts() {
     return {
-      method: 'personalListAccounts',
-      format: result => result.map(Address.fromString),
+      method: 'personal_listAccounts',
+      format: (result: string[]) => result.map(Address.fromString),
     };
   }
 
   public newAccount(password: string) {
     return {
-      method: 'personalListAccounts',
+      method: 'personal_newAccount',
       params: [password],
       format: Address.fromString,
     };
   }
 
-  public unlockAccount(address: Address, password: string, duration: Quantity) {
+  public unlockAccount(address: Address, password: string, duration: number) {
     return {
       method: 'personal_unlockAccount',
-      params: [address, password, duration],
-      format: identity,
+      params: [address.toString().toLowerCase(), password, duration],
+      format: identity<boolean>(),
     };
   }
 
   public lockAccount(address: Address) {
     return {
       method: 'personal_lockAccount',
-      params: [address],
-      format: identity,
+      params: [address.toString().toLowerCase()],
+      format: identity<void>(),
     };
   }
 
-  public importRawKey(privateKey: Data, password: string) {
+  public importRawKey(privateKey: Buffer, password: string) {
     return {
       method: 'personal_importRawKey',
-      params: [privateKey, password],
-      format: identity,
+      params: [bufferToHex(privateKey), password],
+      format: Address.fromString,
     };
   }
 
@@ -66,7 +74,7 @@ export class PersonalRequestPayloads {
     return {
       method: 'personal_sendTransaction',
       params: [{ ...toRawTransactionRequest(tx), condition: tx.condition }, password],
-      format: identity,
+      format: identity<string>(),
     };
   }
 
@@ -74,23 +82,23 @@ export class PersonalRequestPayloads {
     return {
       method: 'personal_signTransaction',
       params: [{ ...toRawTransactionRequest(tx), condition: tx.condition }, password],
-      format: identity,
+      format: identity<SignedTransaction>(),
     };
   }
 
-  public sign(data: Data, address: Address, password: string) {
+  public sign(message: string, address: Address, password: string) {
     return {
       method: 'personal_sign',
-      params: [inputSignFormatter(data), address, password],
-      format: identity,
+      params: [inputSignFormatter(message), address.toString().toLowerCase(), password],
+      format: identity<string>(),
     };
   }
 
-  public ecRecover(data: Data, signedData: Data) {
+  public ecRecover(message: string, signedData: string) {
     return {
       method: 'personal_ecRecover',
-      params: [inputSignFormatter(data), signedData],
-      format: identity,
+      params: [inputSignFormatter(message), signedData],
+      format: Address.fromString,
     };
   }
 }

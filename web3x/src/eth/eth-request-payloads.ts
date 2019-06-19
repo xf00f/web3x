@@ -37,11 +37,11 @@ import {
   toRawTransactionRequest,
   TransactionRequest,
 } from '../formatters';
-import { SignedTransaction } from '../personal';
 import { TransactionHash } from '../types';
 import { Data } from '../types';
 import { hexToNumber, isHexStrict, numberToHex } from '../utils';
 import { BlockHash, BlockType } from './block';
+import { SignedTransaction } from './signed-transaction';
 
 const identity = <T>() => (result: T) => result;
 
