@@ -72,18 +72,23 @@ jobs:
 
       - run:
           name: Publish web3x
-          working_directory: web3x
-          command: npm publish dest && npm publish dest-es
+          working_directory: web3x/dest
+          command: "[ $(node -e \"console.log(require('./package.json').version)\") == $(npm view web3x dist-tags.latest) ] || npm publish"
+
+      - run:
+          name: Publish web3x-es
+          working_directory: web3x/dest-es
+          command: "[ $(node -e \"console.log(require('./package.json').version)\") == $(npm view web3x-es dist-tags.latest) ] || npm publish"
 
       - run:
           name: Publish web3x-evm
-          working_directory: web3x-evm
-          command: npm publish dest
+          working_directory: web3x-evm/dest
+          command: "[ $(node -e \"console.log(require('./package.json').version)\") == $(npm view web3x-evm dist-tags.latest) ] || npm publish"
 
       - run:
           name: Publish web3x-codegen
-          working_directory: web3x-codegen
-          command: npm publish dest
+          working_directory: web3x-codegen/dest
+          command: "[ $(node -e \"console.log(require('./package.json').version)\") == $(npm view web3x-codegen dist-tags.latest) ] || npm publish"
 
 workflows:
   version: 2
