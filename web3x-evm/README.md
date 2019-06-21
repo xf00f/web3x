@@ -1,8 +1,7 @@
 # web3x-evm
 
-[![Version](https://img.shields.io/npm/v/web3x.svg)](https://www.npmjs.com/package/web3x-evm)
-[![Downloads](https://img.shields.io/npm/dw/web3x.svg)](https://www.npmjs.com/package/web3x-evm)
-[![GitHub Code Size](https://img.shields.io/github/languages/code-size/xf00f/web3x.svg)](https://github.com/xf00f/web3x)
+[![Version](https://img.shields.io/npm/v/web3x-evm.svg)](https://www.npmjs.com/package/web3x-evm)
+[![Downloads](https://img.shields.io/npm/dw/web3x-evm.svg)](https://www.npmjs.com/package/web3x-evm)
 [![GitHub Stars](https://img.shields.io/github/stars/xf00f/web3x.svg)](https://github.com/xf00f/web3x/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/xf00f/web3x.svg)](https://github.com/xf00f/web3x/issues)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/xf00f/web3x/blob/master/web3x-codegen/LICENSE)
