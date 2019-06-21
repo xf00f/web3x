@@ -14,7 +14,6 @@ jobs:
             git submodule update
 
       - restore_cache:
-          name: Restore Yarn Package Cache
           keys:
             - yarn-packages
 
@@ -50,14 +49,14 @@ jobs:
             yarn build
 
       - save_cache:
-          name: Save Yarn Package Cache
           key: yarn-packages
           paths:
             - ~/.cache/yarn
 
       - persist_to_workspace:
           root: ~/project
-          paths: "*/dest*"
+          paths:
+            - "*/dest*"
 
   deploy:
     docker:

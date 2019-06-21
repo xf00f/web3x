@@ -29,7 +29,7 @@
     "clean": "rm -rf ./dest"
   },
   "bin": {
-    "web3x-codegen": "./dest/index.js"
+    "web3x-codegen": "./index.js"
   },
   "dependencies": {
     "fs-extra": "^7.0.1",

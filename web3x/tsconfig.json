@@ -1,16 +1,17 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "commonjs",
     "moduleResolution": "node",
     "lib": ["dom", "esnext", "es2017.object"],
-    "noEmit": true,
     "strict": true,
+    "declaration": true,
     "noImplicitAny": false,
     "noImplicitThis": false,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "inlineSourceMap": true,
+    "importHelpers": true
   },
   "include": ["src"]
 }

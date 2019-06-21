@@ -9,11 +9,7 @@
     "declaration": true,
     "noImplicitAny": false,
     "noImplicitThis": false,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "downlevelIteration": true,
-    "inlineSourceMap": true,
-    "importHelpers": true
+    "esModuleInterop": true
   },
   "include": ["src"]
 }
