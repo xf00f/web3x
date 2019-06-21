@@ -57,7 +57,7 @@
     "merkle-patricia-tree": "^3.0.0",
     "rustbn.js": "^0.2.0",
     "tslib": "^1.9.3",
-    "web3x": "^4.0.0"
+    "web3x": "file:../web3x/dest"
   },
   "devDependencies": {
     "@types/jest": "^24.0.11",
