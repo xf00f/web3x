@@ -9,25 +9,18 @@ import { Address } from 'web3x-es/address';
 import { ENS } from 'web3x-es/ens';
 import { Eth } from 'web3x-es/eth';
 import { Net } from 'web3x-es/net';
-import { LegacyProvider, LegacyProviderAdapter } from 'web3x-es/providers';
 import { fromWei, toWei } from 'web3x-es/utils';
 import { Wallet } from 'web3x-es/wallet';
 import { DaiContract } from './contracts/DaiContract';
 
-declare const web3: {
-  currentProvider: LegacyProvider;
-};
-
-/*
-  Demonstrates how to create a minimally sized build. If you only need to provide access to Ethereum calls over a
-  websocket connection, with no local accounts (e.g. interfacing with Metamask or a remote node with accounts),
-  then it makes no sense to bundle all the crypto/provider/accounts code with your app. Construct only
-  the components you need and keep things lean.
-
-  Demonstrates use of a code generated contract with full type safety.
-*/
 async function main() {
-  const eth = new Eth(new LegacyProviderAdapter(web3.currentProvider));
+  const eth = Eth.fromCurrentProvider();
+
+  if (!eth) {
+    addMessage(`No web3 found. Do you have MetaMask installed?`);
+    return;
+  }
+
   const net = new Net(eth);
   const network = await net.getNetworkType();
 
@@ -81,6 +74,7 @@ async function addSendingExamples(eth: Eth) {
 
   eth.defaultFromAddress = providerAddress;
   const providerBalance = await eth.getBalance(providerAddress);
+  addMessage(`Provider account: ${providerAddress}`);
   addMessage(`Balance of provider account: ${fromWei(providerBalance, 'ether')} ETH`);
   addBr();
 
@@ -95,16 +89,18 @@ async function addSendingExamples(eth: Eth) {
   // Alternatively you can use sendTransaction directly on Account object.
   eth.wallet = wallet;
 
-  const walletAccount = wallet.get(0)!;
-  const localBalance = await eth.getBalance(wallet.get(0)!.address);
+  const walletAddress = wallet.get(0)!.address;
+  const localBalance = await eth.getBalance(walletAddress);
+  addMessage(`Local account: ${walletAddress}`);
   addMessage(`Balance of local account: ${fromWei(localBalance, 'ether')} ETH`);
+  addBr();
 
   addMessage('The following button will send ETH from provider account to local account.');
-  addSendTo(eth, providerAddress, walletAccount.address);
+  addSendTo(eth, providerAddress, walletAddress);
   addBr();
 
   addMessage('The following button will send ETH from local account to provider account.');
-  addSendTo(eth, walletAccount.address, providerAddress);
+  addSendTo(eth, walletAddress, providerAddress);
   addBr();
 }
 
