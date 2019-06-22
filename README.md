@@ -10,6 +10,15 @@ Ethereum TypeScript Client Library - for perfect types and tiny builds.
 
 ![Demo](https://user-images.githubusercontent.com/44038056/48001064-5d377d00-e0ff-11e8-994f-36d165f9124e.gif)
 
+## Overview
+
+`web3x` was created originally as a pure TypeScript port of `web3.js`. Although its API has diverged slightly from `web3.js`,
+it still maintains a strong degree of alignment and porting from one to the other should be fairly trivial.
+
+`web3x` provides full type safety when interacting with contracts by building type definitions from contract ABIs.
+
+It has its own EVM implementation for testing contract behaviour fully in process using standard testing tools (e.g. Jest).
+
 ## Packages
 
 This monorepo is split into several sub-packages.
@@ -22,9 +31,10 @@ This monorepo is split into several sub-packages.
 
 ## Versioning
 
-Versioning works as in Lerna fixed mode:
+Versioning is managed manually, and follows the same pattern as Lerna fixed mode.
+Lerna is not used due to a [trilemma](https://github.com/lerna/lerna/issues/901) that the Lerna maintainer refuses to resolve:
 
-- A PR should contain the correctly modified `version.json` and package version numbers.
+- A PR should correctly modify `version.json` and package version numbers.
 - For minor or patch changes, the packages that changed need their version set to the new version in `version.json`.
 - For major version changes, all packages should have their version numbers set to the new version in `version.json`.
 - All changes across all packages are tracked in the [CHANGELOG](CHANGELOG.md).
