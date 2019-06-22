@@ -1,6 +1,6 @@
 {
   "name": "web3x-webpack-example",
-  "version": "1.0.0",
+  "version": "4.0.0",
   "main": "src/index.ts",
   "license": "MIT",
   "sideEffects": false,

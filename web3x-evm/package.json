@@ -1,6 +1,6 @@
 {
   "name": "web3x-evm",
-  "version": "1.0.0",
+  "version": "4.0.0",
   "license": "MIT",
   "description": "EVM implementation and provider for web3x.",
   "repository": {

@@ -10,7 +10,7 @@ const { writeFileSync, copyFileSync, chmodSync } = require('fs');
 const web3xPackage = require('web3x/package.json');
 
 const { jest, scripts, devDependencies, ...pkg } = package;
-pkg.dependencies.web3x = '^' + web3xPackage.version;
+pkg.dependencies.web3x = `^${web3xPackage.version}`;
 writeFileSync('./dest/package.json', JSON.stringify(pkg, null, '  '));
 copyFileSync('README.md', './dest/README.md');
 chmodSync('./dest/index.js', '755');
