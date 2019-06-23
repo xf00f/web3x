@@ -7730,10 +7730,10 @@ wbuf@^1.1.0, wbuf@^1.7.2:
   dependencies:
     minimalistic-assert "^1.0.0"
 
-web3x-codegen@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/web3x-codegen/-/web3x-codegen-4.0.0.tgz#670e6c128df9802294d16587c8f0af0a4c488b46"
-  integrity sha512-Gn/GAahH/xs/oaHRIhCfKyKyP6Jd0zPJD+zDt13SOh1jodmUZzJa97flfXoGbCAuFW3FKYW90AUKhdVi5ULkxw==
+web3x-codegen@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/web3x-codegen/-/web3x-codegen-4.0.1.tgz#505dc979e48286fa840cada52c98f57054f53878"
+  integrity sha512-DE2wQ1VQc+VyROTTnwt7FSZsyQ/ItFKUj0Ov3x7a85QNLBTUKmZ73vS9FL4j2QuELYyfHjcvyZ6Y/ZOCB5c/5Q==
   dependencies:
     fs-extra "^7.0.1"
     got "^9.3.0"
