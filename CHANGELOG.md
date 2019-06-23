@@ -2,7 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.0.0] - 2019-05-22
+## [4.0.1] - 2019-06-23
+
+- Fix `web3x-codegen` path resolution bug.
+
+## [4.0.0] - 2019-06-23
 
 - Major project restructure.
 - `web3x-codegen` is its own package.
@@ -159,6 +163,7 @@ All notable changes to this project will be documented in this file.
 
 - Initial release of Typescript port from web3.js.
 
+[4.0.1]: https://github.com/xf00f/web3x/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/xf00f/web3x/compare/v3.0.11...v4.0.0
 [3.0.11]: https://github.com/xf00f/web3x/compare/v3.0.10...v3.0.11
 [3.0.10]: https://github.com/xf00f/web3x/compare/v3.0.9...v3.0.10

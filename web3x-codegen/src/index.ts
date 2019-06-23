@@ -500,8 +500,8 @@ export async function makeAndWriteFiles(
 }
 
 export function getWeb3xPath() {
-  const pkg = JSON.parse(fs.readFileSync(__dirname + '/../package.json').toString());
-  return pkg.name;
+  const pkg = JSON.parse(fs.readFileSync('package.json').toString());
+  return { ...pkg.dependencies, ...pkg.devDependencies }['web3x-es'] ? 'web3x-es' : 'web3x';
 }
 
 async function main() {
