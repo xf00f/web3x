@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "lib": ["dom", "esnext", "es2017.object"],
+    "outDir": "dest",
+    "strict": true,
+    "declaration": true,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "esModuleInterop": true
+  },
+  "include": ["src"]
+}

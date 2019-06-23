@@ -1,0 +1,45 @@
+{
+  "name": "web3x-codegen",
+  "version": "4.0.0",
+  "license": "MIT",
+  "description": "Contract interface code generator for web3x.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xf00f/web3x.git"
+  },
+  "homepage": "https://github.com/xf00f/web3x",
+  "bugs": {
+    "url": "https://github.com/xf00f/web3x/issues"
+  },
+  "keywords": [
+    "ethereum",
+    "typescript",
+    "web3",
+    "codegen"
+  ],
+  "contributors": [
+    {
+      "name": "xf00f",
+      "email": "xf00f@protonmail.com",
+      "url": "https://github.com/xf00f"
+    }
+  ],
+  "scripts": {
+    "build": "yarn clean && tsc && node ./package.js",
+    "clean": "rm -rf ./dest"
+  },
+  "bin": {
+    "web3x-codegen": "./index.js"
+  },
+  "dependencies": {
+    "fs-extra": "^7.0.1",
+    "got": "^9.3.0",
+    "typescript": "^3.2.2",
+    "web3x": "file:../web3x/dest"
+  },
+  "devDependencies": {
+    "@types/node": "^11.11.6",
+    "tslint": "^5.12.1",
+    "tslint-config-prettier": "^1.17.0"
+  }
+}

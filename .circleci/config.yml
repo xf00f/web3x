@@ -14,29 +14,49 @@ jobs:
             git submodule update
 
       - restore_cache:
-          name: Restore Yarn Package Cache
           keys:
             - yarn-packages
 
       - run:
-          name: Build
+          name: Build web3x
+          working_directory: web3x
           command: |
             yarn install
             yarn build
 
       - run:
-          name: Test
+          name: Test web3x
+          working_directory: web3x
           command: yarn test --maxWorkers=2 --coverage --coverageReporters=text-lcov | ./node_modules/.bin/coveralls
 
+      - run:
+          name: Build web3x-evm
+          working_directory: web3x-evm
+          command: |
+            yarn install
+            yarn build
+
+      - run:
+          name: Test web3x-evm
+          working_directory: web3x-evm
+          command: yarn test
+
+      - run:
+          name: Build web3x-codegen
+          working_directory: web3x-codegen
+          command: |
+            yarn install
+            yarn build
+
       - save_cache:
-          name: Save Yarn Package Cache
           key: yarn-packages
           paths:
             - ~/.cache/yarn
 
       - persist_to_workspace:
           root: ~/project
-          paths: dest*
+          paths:
+            - "*/dest*"
 
   deploy:
     docker:
@@ -44,11 +64,30 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project
+
       - run:
-          name: Publish Packages
-          command: |
-            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/project/.npmrc
-            npm publish dest && npm publish dest-es
+          name: Configure registry
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/project/.npmrc
+
+      - run:
+          name: Publish web3x
+          working_directory: web3x/dest
+          command: "[ $(node -e \"console.log(require('./package.json').version)\") == $(npm view web3x dist-tags.latest) ] || npm publish"
+
+      - run:
+          name: Publish web3x-es
+          working_directory: web3x/dest-es
+          command: "[ $(node -e \"console.log(require('./package.json').version)\") == $(npm view web3x-es dist-tags.latest) ] || npm publish"
+
+      - run:
+          name: Publish web3x-evm
+          working_directory: web3x-evm/dest
+          command: "[ $(node -e \"console.log(require('./package.json').version)\") == $(npm view web3x-evm dist-tags.latest) ] || npm publish"
+
+      - run:
+          name: Publish web3x-codegen
+          working_directory: web3x-codegen/dest
+          command: "[ $(node -e \"console.log(require('./package.json').version)\") == $(npm view web3x-codegen dist-tags.latest) ] || npm publish"
 
 workflows:
   version: 2
