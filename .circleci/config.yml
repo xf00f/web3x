@@ -67,7 +67,7 @@ jobs:
 
       - run:
           name: Configure registry
-          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/project/.npmrc
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
 
       - run:
           name: Publish web3x
