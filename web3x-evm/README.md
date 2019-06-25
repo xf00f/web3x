@@ -28,7 +28,7 @@ An example of how you might use this to deploy a contract and fund an account fo
 IndexedDB. If you want to use an in-memory implementation you can use `levelup(memdown())` as per the test case [here](src/provider/evm-provider.e2e.test.ts).
 
 ```typescript
-import { EvmProvider } from 'web3x-es/evm/provider';
+import { EvmProvider } from 'web3x-evm-es/provider';
 import { Eth } from 'web3x-es/eth';
 import { toWei } from 'web3x-es/utils';
 import { Wallet } from 'web3x-es/wallet';
