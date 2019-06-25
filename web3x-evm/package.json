@@ -1,6 +1,6 @@
 {
   "name": "web3x-evm",
-  "version": "4.0.0",
+  "version": "4.0.2",
   "license": "MIT",
   "description": "EVM implementation and provider for web3x.",
   "repository": {
@@ -26,9 +26,9 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "yarn clean && tsc -p tsconfig.build.json && node ./package.js",
+    "build": "yarn clean && tsc -p tsconfig.cjs.json && tsc -p tsconfig.es.json && node ./package.js",
     "test": "jest",
-    "clean": "rm -rf ./dest"
+    "clean": "rm -rf ./dest ./dest-es"
   },
   "jest": {
     "transform": {
@@ -66,6 +66,7 @@
     "jest": "^24.5.0",
     "jest-dot-reporter": "^1.0.7",
     "memdown": "^3.0.0",
+    "replace-in-files": "^1.1.4",
     "ts-jest": "^24.0.0",
     "tslint": "^5.12.1",
     "tslint-config-prettier": "^1.17.0",
