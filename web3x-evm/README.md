@@ -2,6 +2,7 @@
 
 [![Version](https://img.shields.io/npm/v/web3x-evm.svg)](https://www.npmjs.com/package/web3x-evm)
 [![Downloads](https://img.shields.io/npm/dw/web3x-evm.svg)](https://www.npmjs.com/package/web3x-evm)
+[![Downloads](https://img.shields.io/npm/dw/web3x-evm-es.svg)](https://www.npmjs.com/package/web3x-evm-es)
 [![GitHub Stars](https://img.shields.io/github/stars/xf00f/web3x.svg)](https://github.com/xf00f/web3x/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/xf00f/web3x.svg)](https://github.com/xf00f/web3x/issues)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/xf00f/web3x/blob/master/web3x-codegen/LICENSE)
@@ -106,3 +107,4 @@ main().catch(console.error);
 ## Packages
 
 - [web3x-evm](https://www.npmjs.com/package/web3x-evm)
+- [web3x-evm-es](https://www.npmjs.com/package/web3x-evm-es)
