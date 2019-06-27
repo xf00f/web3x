@@ -53,7 +53,7 @@ export class Eth {
   }
 
   public static fromCurrentProvider() {
-    if (!web3) {
+    if (typeof web3 === 'undefined') {
       return;
     }
     const provider = web3.currentProvider || web3.ethereumProvider;

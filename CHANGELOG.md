@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.3] - 2019-06-27
+
+- Fix `web3` undefined error in `eth.fromCurrentProvider()`.
+- `BroadcastChannel` now shared between multiple `EvmProvider`'s in a single tab.
+
 ## [4.0.2] - 2019-06-24
 
 - Create `web3x-evm-es` package for `web3x-es` compatiable version of EVM.
@@ -167,6 +172,7 @@ All notable changes to this project will be documented in this file.
 
 - Initial release of Typescript port from web3.js.
 
+[4.0.3]: https://github.com/xf00f/web3x/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/xf00f/web3x/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/xf00f/web3x/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/xf00f/web3x/compare/v3.0.11...v4.0.0

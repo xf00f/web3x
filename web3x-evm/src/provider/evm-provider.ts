@@ -32,16 +32,19 @@ import { handleGetTransactionByHash } from './handle-get-transaction';
 import { handleGetTransactionReceipt } from './handle-get-transaction-receipt';
 import { handleSendTransaction } from './handle-send-transaction';
 
+const newBlockChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('newBlock') : undefined;
+
 export interface EvmProviderOptions {
   blockDelay?: number;
   wallet?: Wallet;
+  listenForBlocks?: boolean;
 }
 
 export class EvmProvider extends EventEmitter implements EthereumProvider {
   public wallet?: Wallet;
   private subscriptions: { [id: string]: any } = {};
   private nextSubscriptionId = 0;
-  private newBlockChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('newBlock') : undefined;
+  private blockHandler = e => this.handleBlock(new Buffer(e.data));
 
   constructor(
     public readonly worldState: WorldState,
@@ -51,8 +54,8 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
     super();
     this.wallet = options.wallet;
 
-    if (this.newBlockChannel) {
-      this.newBlockChannel.onmessage = e => this.handleBlock(new Buffer(e.data));
+    if (options.listenForBlocks && newBlockChannel) {
+      newBlockChannel.onmessage = this.blockHandler;
     }
   }
 
@@ -91,6 +94,10 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
     this.wallet = wallet;
   }
 
+  public setBlockDelay(blockDelay: number) {
+    this.options.blockDelay = blockDelay;
+  }
+
   public async send(method: string, params?: any[] | undefined): Promise<any> {
     // console.log(method);
     // console.log(params);
@@ -118,7 +125,7 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
           this.blockchain,
           fromRawTransactionRequest(params[0]),
           this.wallet,
-          this.newBlockChannel,
+          newBlockChannel,
           this.options.blockDelay,
         );
       case 'eth_call':
@@ -213,9 +220,9 @@ export class EvmProvider extends EventEmitter implements EthereumProvider {
     return super.removeAllListeners(notification);
   }
 
-  public shutdown() {
-    if (this.newBlockChannel) {
-      this.newBlockChannel.close();
+  public close() {
+    if (newBlockChannel) {
+      newBlockChannel.removeEventListener('message', this.blockHandler);
     }
   }
 }

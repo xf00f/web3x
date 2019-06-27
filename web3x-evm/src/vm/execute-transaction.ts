@@ -82,7 +82,7 @@ async function validateTx(worldState: WorldState, sender: Address, tx: Tx) {
   }
 
   if (senderAccount.nonce !== nonce) {
-    throw new Error('Sender account nonce does not match transaction nonce.');
+    throw new Error(`Sender account nonce does not match transaction nonce: ${senderAccount.nonce} != ${nonce}`);
   }
 
   const intrinsicGas =
