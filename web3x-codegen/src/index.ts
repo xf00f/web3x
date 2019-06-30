@@ -22,8 +22,8 @@ function makeImports(name: string, web3xPath: string) {
     ts.createImportDeclaration(
       undefined,
       undefined,
-      ts.createImportClause(ts.createIdentifier('BN'), undefined),
-      ts.createLiteral('bn.js'),
+      ts.createImportClause(ts.createIdentifier('JSBI'), undefined),
+      ts.createLiteral('jsbi'),
     ),
     ts.createImportDeclaration(
       undefined,
@@ -213,7 +213,7 @@ function getBaseType(type: string, returnValue: boolean) {
           ts.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
           ts.createTypeReferenceNode(ts.createIdentifier('BN'), undefined),
         ])
-      : ts.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
+      : ts.createTypeReferenceNode(ts.createIdentifier('JSBI'), undefined);
   }
 
   if (type === 'bool') {

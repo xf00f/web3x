@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import BN from 'bn.js';
+import JSBI from 'jsbi';
 import { abiCoder } from '.';
 import { Address } from '../../address';
 
@@ -44,8 +44,8 @@ describe('encodeParameter', () => {
 });
 
 describe('encodeParameter', () => {
-  it('should correctly encode a BN', () => {
-    expect(abiCoder.encodeParameter('uint256', new BN('1000'))).toBe(
+  it('should correctly encode a JSBI', () => {
+    expect(abiCoder.encodeParameter('uint256', JSBI.BigInt('1000'))).toBe(
       '0x00000000000000000000000000000000000000000000000000000000000003e8',
     );
   });

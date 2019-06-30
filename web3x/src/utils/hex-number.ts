@@ -15,8 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import BN from 'bn.js';
-import { toBN } from './bn';
+import JSBI from 'jsbi';
 
 /**
  * Converts value to it's number representation
@@ -25,8 +24,8 @@ import { toBN } from './bn';
  * @param {String|Number|BN} value
  * @return {String}
  */
-export function hexToNumber(value: string | number): number {
-  return toBN(value).toNumber();
+export function hexToNumber(value: string): number {
+  return Number(JSBI.BigInt(value).toString());
 }
 
 /**
@@ -37,7 +36,7 @@ export function hexToNumber(value: string | number): number {
  * @return {String}
  */
 export function hexToNumberString(value: string): string {
-  return toBN(value).toString(10);
+  return JSBI.BigInt(value).toString();
 }
 
 /**
@@ -47,9 +46,9 @@ export function hexToNumberString(value: string): string {
  * @param {String|Number|BN} value
  * @return {String}
  */
-export function numberToHex(value: string | number | BN): string {
-  const num = toBN(value);
+export function numberToHex(value: number | string | JSBI): string {
+  const num = JSBI.BigInt(value);
   const result = num.toString(16);
 
-  return num.lt(new BN(0)) ? '-0x' + result.substr(1) : '0x' + result;
+  return JSBI.lessThan(num, JSBI.BigInt(0)) ? '-0x' + result.substr(1) : '0x' + result;
 }

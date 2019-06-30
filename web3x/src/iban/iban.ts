@@ -15,8 +15,9 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import BigNumber from 'bn.js';
+import JSBI from 'jsbi';
 import { Address } from '../address';
+import { convertBase } from '../utils/convert-base';
 
 const leftPad = (str, bytes) => {
   let result = str;
@@ -121,14 +122,14 @@ export class Iban {
    * @return {Iban} the IBAN object
    */
   public static fromAddress(address: Address) {
-    const asBn = new BigNumber(address.toBuffer(), 16);
+    const asBn = JSBI.BigInt(address.toString());
     const base36 = asBn.toString(36);
     const padded = leftPad(base36, 15);
     return Iban.fromBban(padded.toUpperCase());
   }
 
   public static fromString(address: string) {
-    const asBn = new BigNumber(Address.fromString(address).toBuffer(), 16);
+    const asBn = JSBI.BigInt(Address.fromString(address).toString());
     const base36 = asBn.toString(36);
     const padded = leftPad(base36, 15);
     return Iban.fromBban(padded.toUpperCase());
@@ -247,8 +248,7 @@ export class Iban {
   public toAddress(): Address {
     if (this.isDirect()) {
       const base36 = this.iban.substr(4);
-      const asBn = new BigNumber(base36, 36);
-      return Address.fromString(asBn.toString(16, 20));
+      return Address.fromString('0x' + leftPad(convertBase(base36, 36, 16), 20));
     }
 
     throw new Error('Address is not direct');

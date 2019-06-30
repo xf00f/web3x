@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import BN from 'bn.js';
+import JSBI from 'jsbi';
 import { isArray } from 'util';
 import { soliditySha3 } from './solidity-sha3';
 
@@ -54,9 +54,9 @@ const tests = [
     values: [
       2345676856,
       '2345676856',
-      new BN('2345676856'),
+      JSBI.BigInt('2345676856'),
       { v: '2345676856', t: 'uint256' },
-      { v: new BN('2345676856'), t: 'uint256' },
+      { v: JSBI.BigInt('2345676856'), t: 'uint256' },
       { v: '2345676856', t: 'uint' },
     ],
     expected: '0xc0a8dac986ad882fff6b05a7792e1259f2fd8fa72d632fb48f54affea59af6fc',
@@ -64,7 +64,7 @@ const tests = [
   {
     values: [
       '2342342342342342342345676856',
-      new BN('2342342342342342342345676856'),
+      JSBI.BigInt('2342342342342342342345676856'),
       { v: '2342342342342342342345676856', t: 'uint256' },
       { v: '2342342342342342342345676856', t: 'uint' },
     ],
@@ -111,8 +111,8 @@ const tests = [
   {
     values: [
       -3435454256,
-      new BN(-3435454256),
-      new BN('-3435454256'),
+      JSBI.BigInt(-3435454256),
+      JSBI.BigInt('-3435454256'),
       '-3435454256',
       { v: '-3435454256', t: 'int' },
       { v: '-3435454256', t: 'int256' },
@@ -164,7 +164,7 @@ const tests = [
       { v: [-12, 243], t: 'int[]' },
       { v: [-12, 243], t: 'int256[]' },
       { v: ['-12', '243'], t: 'int256[]' },
-      { v: [new BN('-12'), new BN('243')], t: 'int256[]' },
+      { v: [JSBI.BigInt('-12'), JSBI.BigInt('243')], t: 'int256[]' },
       { v: ['-12', '243'], t: 'int256[2]' },
     ],
     expected: '0xa9805b78a6ec1d71c3722498d521fde9d3913c92360e3aed06a9403db25f0351',
@@ -174,7 +174,7 @@ const tests = [
       { v: [12, 243], t: 'uint[]' },
       { v: [12, 243], t: 'uint256[]' },
       { v: ['12', '243'], t: 'uint256[]' },
-      { v: [new BN('12'), new BN('243')], t: 'uint256[]' },
+      { v: [JSBI.BigInt('12'), JSBI.BigInt('243')], t: 'uint256[]' },
       { v: ['12', '243'], t: 'uint256[2]' },
       { error: true, v: ['12', '243'], t: 'uint256[1]' },
     ],
@@ -222,12 +222,6 @@ const tests = [
     values: [{ v: 0, t: 'uint' }],
     expected: '0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563',
   },
-  {
-    values: [
-      ['someValue'], // should error
-    ],
-    expected: '',
-  },
 ];
 
 describe('utils', () => {
@@ -235,7 +229,7 @@ describe('utils', () => {
     tests.forEach((test: any) => {
       test.values.forEach((value: any) => {
         it('should hash "' + JSON.stringify(value) + '" into "' + test.expected + '"', () => {
-          if (value.error || isArray(value)) {
+          if (value.error) {
             expect(() => soliditySha3(value)).toThrow();
           } else {
             expect(soliditySha3(value)).toBe(test.expected);

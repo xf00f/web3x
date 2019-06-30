@@ -1,7 +1,3 @@
-'use strict';
-
-import { HashZero } from './constants';
-
 import { arrayify, concat, hexlify } from './bytes';
 
 ///////////////////////////////
@@ -18,6 +14,8 @@ export enum UnicodeNormalizationForm {
   NFKC = 'NFKC',
   NFKD = 'NFKD',
 }
+
+const HashZero = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 // http://stackoverflow.com/questions/18729405/how-to-convert-utf8-string-to-byte-array
 export function toUtf8Bytes(

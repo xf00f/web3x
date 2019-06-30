@@ -2,13 +2,11 @@
 
 // See: https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI
 
-import { NegativeOne, Zero, One, MaxUint256 } from './constants';
+import { Zero, One, MaxUint256 } from '../utils';
 
 import * as errors from './errors';
 
-import { getAddress } from './address';
-import { BigNumber, bigNumberify } from './bignumber';
-import { arrayify, concat, hexlify, padZeros } from './bytes';
+import { arrayify, concat, hexlify } from './bytes';
 import { toUtf8Bytes, toUtf8String } from './utf8';
 import { deepCopy, defineReadOnly, shallowCopy } from './properties';
 
@@ -16,9 +14,11 @@ import { deepCopy, defineReadOnly, shallowCopy } from './properties';
 // Imported Types
 
 import { Arrayish } from './bytes';
-import { BigNumberish } from './bignumber';
 import { Address } from '../address';
 import { isString } from 'util';
+import JSBI from 'jsbi';
+import { hexToBytes, leftPad } from '../utils';
+import { toTwos, fromTwos, maskn, jsbiToArray, jsbiFromArray } from '../utils/jsbi';
 
 ///////////////////////////////
 // Exported Types
@@ -55,7 +55,7 @@ export type FunctionFragment = {
   payable: boolean;
   stateMutability: string | null;
 
-  gas: BigNumber | null;
+  gas: JSBI | null;
 };
 
 ///////////////////////////////
@@ -65,10 +65,12 @@ const paramTypeNumber = new RegExp(/^(u?int)([0-9]*)$/);
 const paramTypeArray = new RegExp(/^(.*)\[([0-9]*)\]$/);
 
 export const defaultCoerceFunc: CoerceFunc = function(type: string, value: any): any {
+  /*
   var match = type.match(paramTypeNumber);
   if (match && parseInt(match[2]) <= 48) {
-    return value.toNumber();
+    return Number(value.toString());
   }
+  */
   return value;
 };
 
@@ -303,7 +305,7 @@ function parseSignatureFunction(fragment: string): FunctionFragment {
     if (!comps[1].match(/^[0-9]+$/)) {
       throw new Error('invalid signature gas');
     }
-    abi.gas = bigNumberify(comps[1]);
+    abi.gas = JSBI.BigInt(comps[1]);
     fragment = comps[0];
   }
 
@@ -478,28 +480,27 @@ class CoderNumber extends Coder {
     this.signed = signed;
   }
 
-  encode(value: BigNumberish): Uint8Array {
+  encode(value: JSBI | string | number): Uint8Array {
+    value = JSBI.BigInt(value);
     try {
-      let v = bigNumberify(value);
       if (this.signed) {
-        let bounds = MaxUint256.maskn(this.size * 8 - 1);
-        if (v.gt(bounds)) {
+        let bounds = maskn(MaxUint256, this.size * 8 - 1);
+        if (JSBI.GT(value, bounds)) {
           throw new Error('out-of-bounds');
         }
-        bounds = bounds.add(One).mul(NegativeOne);
-        if (v.lt(bounds)) {
+        bounds = JSBI.unaryMinus(JSBI.add(bounds, One));
+        if (JSBI.LT(value, bounds)) {
           throw new Error('out-of-bounds');
         }
-      } else if (v.lt(Zero) || v.gt(MaxUint256.maskn(this.size * 8))) {
+      } else if (JSBI.LT(value, Zero) || JSBI.GT(value, maskn(MaxUint256, this.size * 8))) {
         throw new Error('out-of-bounds');
       }
 
-      v = v.toTwos(this.size * 8).maskn(this.size * 8);
       if (this.signed) {
-        v = v.fromTwos(this.size * 8).toTwos(256);
+        value = toTwos(value, this.size * 8);
       }
 
-      return padZeros(arrayify(v), 32);
+      return jsbiToArray(value, 32);
     } catch (error) {
       return errors.throwError('invalid number value', errors.INVALID_ARGUMENT, {
         arg: this.localName,
@@ -518,11 +519,12 @@ class CoderNumber extends Coder {
       });
     }
     var junkLength = 32 - this.size;
-    var value = bigNumberify(data.slice(offset + junkLength, offset + 32));
+    var value = jsbiFromArray(data.slice(offset + junkLength, offset + 32));
+
     if (this.signed) {
-      value = value.fromTwos(this.size * 8);
+      value = fromTwos(value, this.size * 8);
     } else {
-      value = value.maskn(this.size * 8);
+      value = maskn(value, this.size * 8);
     }
 
     return {
@@ -546,7 +548,7 @@ class CoderBoolean extends Coder {
   }
 
   encode(value: boolean): Uint8Array {
-    return uint256Coder.encode(!!value ? 1 : 0);
+    return uint256Coder.encode(!!value ? One : Zero);
   }
 
   decode(data: Uint8Array, offset: number): DecodedResult {
@@ -564,7 +566,7 @@ class CoderBoolean extends Coder {
     }
     return {
       consumed: result.consumed,
-      value: this.coerceFunc('bool', !result.value.isZero()),
+      value: this.coerceFunc('bool', JSBI.equal(result.value, Zero) ? false : true),
     };
   }
 }
@@ -644,7 +646,7 @@ class CoderAddress extends Coder {
     }
     return {
       consumed: 32,
-      value: this.coerceFunc('address', getAddress(hexlify(data.slice(offset + 12, offset + 32)))),
+      value: this.coerceFunc('address', Address.fromString(hexlify(data.slice(offset + 12, offset + 32)))),
     };
   }
 }
@@ -653,7 +655,7 @@ function _encodeDynamicBytes(value: Uint8Array): Uint8Array {
   var dataLength = 32 * Math.ceil(value.length / 32);
   var padding = new Uint8Array(dataLength - value.length);
 
-  return concat([uint256Coder.encode(value.length), value, padding]);
+  return concat([uint256Coder.encode(JSBI.BigInt(value.length)), value, padding]);
 }
 
 function _decodeDynamicBytes(data: Uint8Array, offset: number, localName: string): DecodedResult {
@@ -667,7 +669,7 @@ function _decodeDynamicBytes(data: Uint8Array, offset: number, localName: string
 
   var length = uint256Coder.decode(data, offset).value;
   try {
-    length = length.toNumber();
+    length = Number(length.toString());
   } catch (error) {
     errors.throwError('dynamic bytes count too large', errors.INVALID_ARGUMENT, {
       arg: localName,
@@ -787,7 +789,7 @@ function pack(coders: Array<Coder>, values: Array<any>): Uint8Array {
   parts.forEach(function(part) {
     if (part.dynamic) {
       //uint256Coder.encode(dynamicOffset).copy(data, offset);
-      data.set(uint256Coder.encode(dynamicOffset), offset);
+      data.set(uint256Coder.encode(JSBI.BigInt(dynamicOffset)), offset);
       offset += 32;
 
       //part.value.copy(data, dynamicOffset);  @TODO
@@ -810,7 +812,7 @@ function unpack(coders: Array<Coder>, data: Uint8Array, offset: number): Decoded
   coders.forEach(function(coder) {
     if (coder.dynamic) {
       var dynamicOffset = uint256Coder.decode(data, offset);
-      var result = coder.decode(data, baseOffset + dynamicOffset.value.toNumber());
+      var result = coder.decode(data, baseOffset + Number(dynamicOffset.value.toString()));
       // The dynamic part is leap-frogged somewhere else; doesn't count towards size
       result.consumed = dynamicOffset.consumed;
     } else {
@@ -874,7 +876,7 @@ class CoderArray extends Coder {
     var result = new Uint8Array(0);
     if (count === -1) {
       count = value.length;
-      result = uint256Coder.encode(count);
+      result = uint256Coder.encode(JSBI.BigInt(count));
     }
 
     errors.checkArgumentCount(count, value.length, 'in coder array' + (this.localName ? ' ' + this.localName : ''));
@@ -906,7 +908,7 @@ class CoderArray extends Coder {
         });
       }
       try {
-        count = decodedLength.value.toNumber();
+        count = Number(decodedLength.value.toString());
       } catch (error) {
         errors.throwError('array count too large', errors.INVALID_ARGUMENT, {
           arg: this.localName,

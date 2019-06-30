@@ -15,13 +15,11 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import BN from 'bn.js';
+import JSBI from 'jsbi';
 import { isString } from 'util';
-import { isBN } from './bn';
-import { numberToBN } from './number-to-bn';
 
-const zero = new BN(0);
-const negative1 = new BN(-1);
+const zero = JSBI.BigInt(0);
+const negative1 = JSBI.BigInt(-1);
 
 export const unitMap = {
   noether: '0',
@@ -96,15 +94,11 @@ function getUnitValue(unit) {
  * @return {String|Object} When given a BN object it returns one as well, otherwise a number
  */
 export function fromWei(num: string, unit: keyof typeof unitMap): string;
-export function fromWei(num: BN, unit: keyof typeof unitMap): BN;
-export function fromWei(num: string | BN, unit: keyof typeof unitMap) {
+export function fromWei(num: JSBI, unit: keyof typeof unitMap): JSBI;
+export function fromWei(num: string | JSBI, unit: keyof typeof unitMap) {
   unit = getUnitValue(unit);
 
-  if (!isBN(num) && !isString(num)) {
-    throw new Error('Please pass numbers as strings or BigNumber objects to avoid precision errors.');
-  }
-
-  return isBN(num) ? new BN(ethjsFromWei(num, unit)) : ethjsFromWei(num, unit);
+  return isString(num) ? ethjsFromWei(num, unit) : JSBI.BigInt(ethjsFromWei(num, unit));
 }
 
 /**
@@ -129,16 +123,12 @@ export function fromWei(num: string | BN, unit: keyof typeof unitMap) {
  * @param {String} unit the unit to convert from, default ether
  * @return {String|Object} When given a BN object it returns one as well, otherwise a number
  */
-export function toWei(num: BN, unit: keyof typeof unitMap): BN;
+export function toWei(num: JSBI, unit: keyof typeof unitMap): JSBI;
 export function toWei(num: string, unit: keyof typeof unitMap): string;
-export function toWei(num: string | BN, unit: keyof typeof unitMap) {
+export function toWei(num: string | JSBI, unit: keyof typeof unitMap) {
   unit = getUnitValue(unit);
 
-  if (!isBN(num) && !isString(num)) {
-    throw new Error('Please pass numbers as strings or BigNumber objects to avoid precision errors.');
-  }
-
-  return isBN(num) ? ethjsToWei(num, unit) : ethjsToWei(num, unit).toString(10);
+  return isString(num) ? ethjsToWei(num, unit).toString(10) : ethjsToWei(num, unit);
 }
 
 /**
@@ -163,7 +153,7 @@ function getValueOfUnit(unitInput) {
     );
   }
 
-  return new BN(unitValue, 10);
+  return JSBI.BigInt(unitValue);
 }
 
 function numberToString(arg) {
@@ -188,17 +178,17 @@ function numberToString(arg) {
 }
 
 function ethjsFromWei(weiInput, unit, optionsInput?) {
-  let wei = numberToBN(weiInput); // eslint-disable-line
-  const negative = wei.lt(zero); // eslint-disable-line
+  let wei = JSBI.BigInt(weiInput);
+  const negative = JSBI.lessThan(wei, zero);
   const base = getValueOfUnit(unit);
   const baseLength = unitMap[unit].length - 1 || 1;
   const options = optionsInput || {};
 
   if (negative) {
-    wei = wei.mul(negative1);
+    wei = JSBI.unaryMinus(wei);
   }
 
-  let fraction = wei.mod(base).toString(10); // eslint-disable-line
+  let fraction = JSBI.remainder(wei, base).toString(10);
 
   while (fraction.length < baseLength) {
     fraction = `0${fraction}`;
@@ -208,13 +198,13 @@ function ethjsFromWei(weiInput, unit, optionsInput?) {
     fraction = fraction.match(/^([0-9]*[1-9]|0)(0*)/)![1];
   }
 
-  let whole = wei.div(base).toString(10); // eslint-disable-line
+  let whole = JSBI.divide(wei, base).toString(10);
 
   if (options.commify) {
     whole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
 
-  let value = `${whole}${fraction === '0' ? '' : `.${fraction}`}`; // eslint-disable-line
+  let value = `${whole}${fraction === '0' ? '' : `.${fraction}`}`;
 
   if (negative) {
     value = `-${value}`;
@@ -261,13 +251,13 @@ function ethjsToWei(etherInput, unit) {
     fraction += '0';
   }
 
-  whole = new BN(whole);
-  fraction = new BN(fraction);
-  let wei = whole.mul(base).add(fraction); // eslint-disable-line
+  whole = JSBI.BigInt(whole);
+  fraction = JSBI.BigInt(fraction);
+  let wei = JSBI.add(JSBI.multiply(whole, base), fraction);
 
   if (negative) {
-    wei = wei.mul(negative1);
+    wei = JSBI.unaryMinus(wei);
   }
 
-  return new BN(wei.toString(10), 10);
+  return JSBI.BigInt(wei.toString(10));
 }

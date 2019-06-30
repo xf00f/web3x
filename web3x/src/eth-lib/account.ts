@@ -16,7 +16,6 @@
 */
 
 import Bytes from './bytes';
-import Nat from './nat';
 import elliptic from 'elliptic';
 import { keccak256, keccak256s } from './hash';
 
@@ -59,8 +58,9 @@ export const decodeSignature = (hex: string) => [
 
 export const makeSigner = addToV => (hash, privateKey: Buffer) => {
   const signature = secp256k1.keyFromPrivate(privateKey).sign(Buffer.from(hash.slice(2), 'hex'), { canonical: true });
+  const first = addToV + signature.recoveryParam;
   return encodeSignature([
-    Nat.fromString(Bytes.fromNumber(addToV + signature.recoveryParam)),
+    first === 0 ? '0x' : '0x' + first.toString(16),
     Bytes.pad(32, Bytes.fromNat('0x' + signature.r.toString(16))),
     Bytes.pad(32, Bytes.fromNat('0x' + signature.s.toString(16))),
   ]);

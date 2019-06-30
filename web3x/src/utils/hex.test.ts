@@ -15,7 +15,7 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import BN from 'bn.js';
+import JSBI from 'jsbi';
 import { toHex } from './hex';
 
 describe('utils', () => {
@@ -55,7 +55,7 @@ describe('utils', () => {
       { value: '{"test": "test"}', expected: '0x7b2274657374223a202274657374227d' },
       { value: 'myString', expected: '0x6d79537472696e67' },
       { value: 'myString 34534!', expected: '0x6d79537472696e6720333435333421' },
-      { value: new BN(15), expected: '0xf' },
+      { value: JSBI.BigInt(15), expected: '0xf' },
       {
         value: 'Heeäööä👅D34ɝɣ24Єͽ-.,äü+#/',
         expected: '0x486565c3a4c3b6c3b6c3a4f09f9185443334c99dc9a33234d084cdbd2d2e2cc3a4c3bc2b232f',

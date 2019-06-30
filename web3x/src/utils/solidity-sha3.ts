@@ -15,18 +15,16 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import BN from 'bn.js';
-import { isArray, isObject } from 'util';
+import JSBI from 'jsbi';
+import { isArray, isObject, isString } from 'util';
 import { Address } from '../address';
-import { isBN } from './bn';
-import { isHexStrict, toHex } from './hex';
+import { toHex } from './hex';
 import { utf8ToHex } from './hex-utf8';
+import { fromTwos, toTwos, Zero } from './jsbi';
 import { leftPad, rightPad } from './padding';
 import { sha3 } from './sha3';
 
 const elementaryName = name => {
-  /*jshint maxcomplexity:false */
-
   if (name.startsWith('int[')) {
     return 'int256' + name.slice(3);
   } else if (name === 'int') {
@@ -60,27 +58,15 @@ const parseTypeNArray = type => {
 };
 
 const parseNumber = arg => {
-  const type = typeof arg;
-  if (type === 'string') {
-    if (isHexStrict(arg)) {
-      return new BN(arg.replace(/0x/i, ''), 16);
-    } else {
-      return new BN(arg, 10);
-    }
-  } else if (type === 'number') {
-    return new BN(arg);
-  } else if (isBN(arg)) {
-    return arg;
-  } else {
-    throw new Error(arg + ' is not a number');
+  if (isString(arg) && arg.toLowerCase().startsWith('-0x')) {
+    return JSBI.unaryMinus(JSBI.BigInt(arg.slice(1)));
   }
+  return JSBI.BigInt(arg);
 };
 
 const solidityPack = (type, value, arraySize) => {
-  /*jshint maxcomplexity:false */
-
   let size;
-  let num;
+  let num: JSBI;
   type = elementaryName(type);
 
   if (type === 'bytes') {
@@ -128,31 +114,30 @@ const solidityPack = (type, value, arraySize) => {
     if (size % 8 || size < 8 || size > 256) {
       throw new Error('Invalid uint' + size + ' size');
     }
-
     num = parseNumber(value);
-    if (num.bitLength() > size) {
-      throw new Error('Supplied uint exceeds width: ' + size + ' vs ' + num.bitLength());
+    if (num.toString(2).length > size) {
+      throw new Error('Supplied uint exceeds width: ' + size);
     }
 
-    if (num.lt(new BN(0))) {
+    if (JSBI.lessThan(num, Zero)) {
       throw new Error('Supplied uint ' + num.toString() + ' is negative');
     }
 
-    return size ? leftPad(num.toString('hex'), (size / 8) * 2) : num;
+    return size ? leftPad(num.toString(16), (size / 8) * 2) : num;
   } else if (type.startsWith('int')) {
     if (size % 8 || size < 8 || size > 256) {
       throw new Error('Invalid int' + size + ' size');
     }
 
     num = parseNumber(value);
-    if (num.bitLength() > size) {
-      throw new Error('Supplied int exceeds width: ' + size + ' vs ' + num.bitLength());
+    if (num.toString(2).length > size) {
+      throw new Error('Supplied int exceeds width: ' + size);
     }
 
-    if (num.lt(new BN(0))) {
-      return num.toTwos(size).toString('hex');
+    if (JSBI.lessThan(num, Zero)) {
+      return toTwos(num, size).toString(16);
     } else {
-      return size ? leftPad(num.toString('hex'), (size / 8) * 2) : num;
+      return size ? leftPad(num.toString(16), (size / 8) * 2) : num;
     }
   } else {
     // FIXME: support all other types
@@ -161,9 +146,7 @@ const solidityPack = (type, value, arraySize) => {
 };
 
 const processSoliditySha3Args = arg => {
-  /*jshint maxcomplexity:false */
-
-  if (isArray(arg)) {
+  if (isArray(arg) && !(arg instanceof JSBI)) {
     throw new Error('Autodetection of array types is not supported.');
   }
 
@@ -190,8 +173,15 @@ const processSoliditySha3Args = arg => {
     }
   }
 
+  if (value instanceof JSBI) {
+    hexArg = solidityPack(type, value, arraySize);
+    return hexArg.toString('hex').replace('0x', '');
+  }
+
   if ((type.startsWith('int') || type.startsWith('uint')) && typeof value === 'string' && !/^(-)?0x/i.test(value)) {
-    value = new BN(value);
+    value = JSBI.BigInt(value);
+    hexArg = solidityPack(type, value, arraySize);
+    return hexArg.toString('hex').replace('0x', '');
   }
 
   // get the array size
@@ -224,12 +214,6 @@ const processSoliditySha3Args = arg => {
  * @return {Object} the sha3
  */
 export let soliditySha3 = (...args: any[]) => {
-  /*jshint maxcomplexity:false */
-
   const hexArgs = args.map(processSoliditySha3Args);
-
-  // console.log(args, hexArgs);
-  // console.log('0x'+ hexArgs.join(''));
-
   return sha3('0x' + hexArgs.join(''));
 };

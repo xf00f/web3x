@@ -27,12 +27,7 @@ export class ABICoder {
   private ethersAbiCoder: EthersAbi;
 
   constructor() {
-    this.ethersAbiCoder = new EthersAbi((type, value) => {
-      if (type.match(/^u?int/) && !isArray(value) && (!isObject(value) || value.constructor.name !== 'BN')) {
-        return value.toString();
-      }
-      return value;
-    });
+    this.ethersAbiCoder = new EthersAbi();
   }
 
   /**

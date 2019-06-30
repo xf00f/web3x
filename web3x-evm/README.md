@@ -87,7 +87,7 @@ async function bootstrap() {
 }
 
 async function main() {
-  const { provider, eth, daiContract, wallet } = getComponents();
+  const { provider, eth, daiContract, wallet } = await getComponents();
 
   const from = wallet.get(0)!.address;
   const to = wallet.get(1)!.address;

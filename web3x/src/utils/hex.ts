@@ -15,13 +15,13 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import BN from 'bn.js';
+import JSBI from 'jsbi';
 import randomBytes from 'randombytes';
-import { isBoolean, isObject, isString } from 'util';
+import { isBoolean, isNumber, isObject, isString } from 'util';
 import { Address } from '../address';
-import { isBN } from './bn';
 import { numberToHex } from './hex-number';
 import { utf8ToHex } from './hex-utf8';
+import { Zero } from './jsbi';
 
 /**
  * Check if string is HEX, requires a 0x in front
@@ -40,33 +40,38 @@ export function isHex(hex: string) {
 /**
  * Auto converts any given value into it's hex representation.
  */
-export function toHex(value: string | number | BN | boolean | object, returnType?: any) {
-  /*jshint maxcomplexity: false */
-
+export function toHex(value: string | number | JSBI | boolean | object, returnType?: any) {
   if (isString(value) && Address.isAddress(value)) {
-    return returnType ? 'address' : '0x' + (value as string).toLowerCase().replace(/^0x/i, '');
+    return returnType ? 'address' : '0x' + value.replace(/^0x/i, '');
   }
 
   if (isBoolean(value)) {
     return returnType ? 'bool' : value ? '0x01' : '0x00';
   }
 
-  if (isObject(value) && !isBN(value)) {
+  if (value instanceof JSBI) {
+    return returnType ? (JSBI.lessThan(value, Zero) ? 'int256' : 'uint256') : numberToHex(value);
+  }
+
+  if (typeof value === 'object') {
     return returnType ? 'string' : utf8ToHex(JSON.stringify(value));
   }
 
-  // if its a negative number, pass it through numberToHex
   if (isString(value)) {
-    if (value.indexOf('-0x') === 0 || value.indexOf('-0X') === 0) {
-      return returnType ? 'int256' : numberToHex(value);
-    } else if (value.indexOf('0x') === 0 || value.indexOf('0X') === 0) {
+    if (value.toLowerCase().indexOf('-0x') === 0) {
+      return returnType ? 'int256' : value === '-0x0' ? '0x0' : value;
+    }
+
+    if (value.toLowerCase().indexOf('0x') === 0) {
       return returnType ? 'bytes' : value;
-    } else if (!isFinite(+value)) {
+    }
+
+    if (!isFinite(+value)) {
       return returnType ? 'string' : utf8ToHex(value);
     }
   }
 
-  return returnType ? (value < 0 ? 'int256' : 'uint256') : numberToHex(value as number);
+  return returnType ? (value < 0 ? 'int256' : 'uint256') : numberToHex(value);
 }
 
 export function randomHex(size): string {

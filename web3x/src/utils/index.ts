@@ -16,7 +16,7 @@
 */
 
 export * from './bloom';
-export * from './bn';
+export * from './convert-base';
 export * from './encryption';
 export * from './hash-message';
 export * from './hex-ascii';
@@ -25,6 +25,7 @@ export * from './hex-bytes';
 export * from './hex-number';
 export * from './hex-utf8';
 export * from './hex';
+export * from './jsbi';
 export * from './padding';
 export * from './pbkdf2';
 export * from './scrypt';
