@@ -29,6 +29,7 @@ export interface ContractEntryDefinition {
   type: 'function' | 'constructor' | 'event' | 'fallback';
   stateMutability?: 'pure' | 'view' | 'payable' | 'nonpayable';
   signature?: string;
+  gas?: number;
 }
 
 export type ContractAbiDefinition = ContractEntryDefinition[];
