@@ -8,7 +8,12 @@
 
 import fs from 'fs';
 import { ensureDirSync } from 'fs-extra';
-import ts, { ClassElement } from 'typescript';
+import ts, {
+  ClassElement,
+  PropertySignature,
+  SyntaxKind,
+  TypeNode
+} from 'typescript';
 import { AbiInput, AbiOutput, ContractAbiDefinition, ContractEntryDefinition } from 'web3x/contract';
 import { ContractBuildData, loadDataFromConfig } from './sources';
 import { Config } from './sources/config';
@@ -264,31 +269,81 @@ function makeParameter(input: AbiInput, index: number) {
   );
 }
 
-function getCallReturnType(outputs: AbiOutput[]) {
-  if (outputs.length === 1) {
-    return ts.createTypeReferenceNode('TxCall', [getTsTypeFromSolidityType(outputs[0], true)]);
+function generateReturnTypes(outputs: AbiOutput[]): ReadonlyArray<TypeNode> {
+  if (outputs.length === 0){
+    return []
+  } else if (outputs.length === 1) {
+    // original return value.
+    return [getTsTypeFromSolidityType(outputs[0], true)]
   } else {
-    const returnType = ts.createTupleTypeNode(outputs.map(i => getTsTypeFromSolidityType(i, true)));
-    return ts.createTypeReferenceNode('TxCall', [returnType]);
+    // multiple return values: return an object.
+    const propSigs: PropertySignature[] = [];
+    for (let index = 0; index < outputs.length; index++){
+      const output = outputs[index];
+      const type = getTsTypeFromSolidityType(output as AbiInput, true);
+      if (output.name) {
+        // name exists for the output: create a key for that
+        const nameSig = ts.createPropertySignature(
+          undefined,
+          ts.createStringLiteral(output.name),
+          undefined,
+          type,
+          undefined
+        );
+        propSigs.push(nameSig);
+      }
+      // always create a key for the index.
+      const indexSig = ts.createPropertySignature(
+        undefined,
+        ts.createNumericLiteral(index.toString()),
+        undefined,
+        type,
+        undefined
+      );
+      propSigs.push(indexSig);
+    }
+    return [ts.createTypeLiteralNode(propSigs)]
   }
 }
 
 function getOutputType(name: string, definition: ContractEntryDefinition) {
   if (!definition.stateMutability) {
     if (definition.outputs && definition.outputs.length) {
-      return getCallReturnType(definition.outputs);
+      return ts.createTypeReferenceNode(
+        'TxCall', generateReturnTypes(definition.outputs)
+      );
     } else {
-      return ts.createTypeReferenceNode('TxSend', [ts.createTypeReferenceNode(`${name}TransactionReceipt`, undefined)]);
+      return ts.createTypeReferenceNode(
+        'TxSend',
+        [
+          ts.createTypeReferenceNode(
+            `${name}TransactionReceipt`, undefined
+          )
+        ]
+      );
     }
   }
   if (definition.stateMutability === 'view' || definition.stateMutability === 'pure') {
     if (definition.outputs && definition.outputs.length) {
-      return getCallReturnType(definition.outputs);
+      return ts.createTypeReferenceNode(
+        'TxCall', generateReturnTypes(definition.outputs)
+      );
     } else {
-      return undefined;
+      return ts.createTypeReferenceNode(
+        'TxCall',
+        [ts.createKeywordTypeNode(SyntaxKind.VoidKeyword)]
+      );
     }
   } else {
-    return ts.createTypeReferenceNode('TxSend', [ts.createTypeReferenceNode(`${name}TransactionReceipt`, undefined)]);
+    return ts.createTypeReferenceNode(
+      'TxSend',
+      [
+        ts.createTypeReferenceNode(
+          `${name}TransactionReceipt`,
+          undefined
+        )
+      ]
+    );
   }
 }
 
