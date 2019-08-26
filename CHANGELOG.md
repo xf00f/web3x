@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.4] - 2019-08-26
+
+- Add optional `gas` property to ABI interface as Vyper includes an estimate.
+- Better typing on contract functions with multiple return types.
+
 ## [4.0.3] - 2019-06-27
 
 - Fix `web3` undefined error in `eth.fromCurrentProvider()`.
@@ -172,6 +177,7 @@ All notable changes to this project will be documented in this file.
 
 - Initial release of Typescript port from web3.js.
 
+[4.0.4]: https://github.com/xf00f/web3x/compare/v4.0.3...v4.0.4
 [4.0.3]: https://github.com/xf00f/web3x/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/xf00f/web3x/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/xf00f/web3x/compare/v4.0.0...v4.0.1
