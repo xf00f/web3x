@@ -15,86 +15,43 @@
   along with web3x.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import XMLHttpRequest from 'node-http-xhr';
+import http from 'http';
+import https from 'https';
+import fetch from 'isomorphic-fetch';
 import { LegacyProvider } from './legacy-provider';
 import { LegacyProviderAdapter } from './legacy-provider-adapter';
 
 export class HttpProvider extends LegacyProviderAdapter {
-  constructor(host: string, options?: any) {
+  constructor(host: string, options: any = {}) {
     super(new LegacyHttpProvider(host, options));
   }
 }
 
-/**
- * HttpProvider should be used to send rpc calls over http
- */
 class LegacyHttpProvider implements LegacyProvider {
-  private timeout: number;
-  private headers: any;
-  private connected: boolean;
-
-  constructor(private host: string, options?: any) {
-    options = options || {};
+  constructor(private host: string, private options: any = {}) {
     this.host = host || 'http://localhost:8545';
-    this.timeout = options.timeout || 0;
-    this.headers = options.headers;
-    this.connected = false;
-  }
 
-  private _prepareRequest() {
-    const request = new XMLHttpRequest();
-
-    request.open('POST', this.host, true);
-    request.setRequestHeader('Content-Type', 'application/json');
-    request.timeout = this.timeout && this.timeout !== 1 ? this.timeout : 0;
-    request.withCredentials = true;
-
-    if (this.headers) {
-      this.headers.forEach(header => {
-        request.setRequestHeader(header.name, header.value);
-      });
+    if (options.keepAlive) {
+      this.options.agent = /^https/.test(this.host)
+        ? new https.Agent({ keepAlive: true })
+        : new http.Agent({ keepAlive: true });
     }
-
-    return request;
   }
 
-  /**
-   * Should be used to make async request
-   *
-   * @method send
-   * @param {Object} payload
-   * @param {Function} callback triggered on end with (err, result)
-   */
   public send(payload, callback) {
-    const request = this._prepareRequest();
-
-    request.onreadystatechange = () => {
-      if (request.readyState === 4 && request.timeout !== 1) {
-        let result = request.responseText;
-        let error: any = null;
-
-        try {
-          result = JSON.parse(result);
-        } catch (e) {
-          error = new Error(`Invalid response: ${request.responseText}`);
-        }
-
-        this.connected = true;
-        callback(error, result);
-      }
-    };
-
-    request.ontimeout = () => {
-      this.connected = false;
-      callback(new Error(`CONNECTION TIMEOUT: Timeout of ${this.timeout} ms.`));
-    };
-
-    try {
-      request.send(JSON.stringify(payload));
-    } catch (error) {
-      this.connected = false;
-      callback(new Error(`CONNECTION ERROR: Couldn't connect to node ${this.host}.`));
-    }
+    fetch(this.host, {
+      ...this.options,
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        ...this.options.headers,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+      .then(response => response.json())
+      .then(json => callback(undefined, json))
+      .catch(callback);
   }
 
   public disconnect() {}
