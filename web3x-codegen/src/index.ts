@@ -310,7 +310,7 @@ function getOutputType(name: string, definition: ContractEntryDefinition) {
   if (!definition.stateMutability) {
     if (definition.constant && definition.constant === true) {
       return ts.createTypeReferenceNode(
-        'TxCall', generateReturnTypes(definition.outputs)
+        'TxCall', generateReturnTypes(definition.outputs || [])
       );
     } else {
       return ts.createTypeReferenceNode(
