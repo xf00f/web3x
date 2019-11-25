@@ -1,6 +1,6 @@
 {
   "name": "web3x-codegen",
-  "version": "4.0.4",
+  "version": "4.0.6",
   "license": "MIT",
   "description": "Contract interface code generator for web3x.",
   "repository": {

@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.6] - 2019-11-25
+
+- Fix TypeScript 3.7 import issue.
+- Use `abi.constant` to determing `TxCall` or `TxSend`.
+
 ## [4.0.5] - 2019-10-26
 
 - Add `internalType` to ABI data types.
