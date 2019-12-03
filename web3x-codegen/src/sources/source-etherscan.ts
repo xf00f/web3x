@@ -16,6 +16,10 @@ function getHost(net: string) {
       return 'kovan.etherscan.io';
     case 'ropsten':
       return 'ropsten.etherscan.io';
+    case 'rinkeby':
+      return 'rinkeby.etherscan.io';
+    case 'goerli':
+      return 'goerli.etherscan.io';
     default:
       throw new Error(`Unknown network ${net}`);
   }
@@ -29,6 +33,10 @@ function getApiHost(net: string) {
       return 'api-kovan.etherscan.io';
     case 'ropsten':
       return 'api-ropsten.etherscan.io';
+    case 'rinkeby':
+      return 'api-rinkeby.etherscan.io';
+    case 'goerli':
+      return 'api-goerli.etherscan.io';
     default:
       throw new Error(`Unknown network ${net}`);
   }
