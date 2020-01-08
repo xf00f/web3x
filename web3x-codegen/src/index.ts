@@ -562,7 +562,7 @@ export function getWeb3xPath() {
 async function main() {
   const configFile = process.argv[2] || 'contracts.json';
   const config = JSON.parse(fs.readFileSync(configFile).toString()) as Config;
-  const { outputPath = './contracts', web3xPath = getWeb3xPath() } = config;
+  const { outputPath = process.argv[3] || './contracts', web3xPath = getWeb3xPath() } = config;
 
   ensureDirSync(outputPath);
 
