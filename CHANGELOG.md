@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.7] - 2020-04-05
+
+- Options used to construct Contract exposed.
+
 ## [4.0.6] - 2019-11-25
 
 - Fix TypeScript 3.7 import issue.
