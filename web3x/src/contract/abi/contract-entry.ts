@@ -19,17 +19,21 @@ import { abiCoder } from '../abi-coder';
 import { ContractEntryDefinition } from './contract-abi-definition';
 
 export class ContractEntry {
-  constructor(protected entry: ContractEntryDefinition) {}
+  constructor(protected _entry: ContractEntryDefinition) {}
 
   public get name() {
-    return this.entry.name;
+    return this._entry.name;
   }
 
   public get anonymous() {
-    return this.entry.anonymous || false;
+    return this._entry.anonymous || false;
+  }
+
+  public get entry() {
+    return this._entry
   }
 
   public asString() {
-    return abiCoder.abiMethodToString(this.entry);
+    return abiCoder.abiMethodToString(this._entry);
   }
 }
