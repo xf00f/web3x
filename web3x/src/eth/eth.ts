@@ -72,7 +72,11 @@ export class Eth {
   }
 
   private async send<T>({ method, params, format }: { method: string; params?: any[]; format: (x: any) => T }) {
-    return format(await this.provider.send(method, params));
+    let ret = await this.provider.send(method, params);
+    if (typeof ret === 'object') {
+      ret = ret.result;
+    }
+    return format(ret);
   }
 
   public async getId() {
