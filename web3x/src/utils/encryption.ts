@@ -18,7 +18,7 @@
 import aes from 'browserify-aes';
 import randomBytes from 'randombytes';
 import { isString } from 'util';
-import uuid from 'uuid';
+import * as uuid from 'uuid';
 import { pbkdf2, scrypt, sha3 } from '.';
 import { Address } from '../address';
 
